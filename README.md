@@ -1,0 +1,1 @@
+This repository contains some basic utility scripts for use in Python and other environments.
