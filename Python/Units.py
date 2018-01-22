@@ -2,9 +2,17 @@
 This file defines a minimal set of units for use in engineering calculations.
 
 It relies on the Pint units package
+
+Also imports math & sets up pi
 """
 
 import pint
+from math import pi
+
+# define a unicode pi value for pretty printing.
+π = pi
+
+# set up a unit registry
 units = pint.UnitRegistry()
 
 # units of length
