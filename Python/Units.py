@@ -67,4 +67,4 @@ rad = units.radian
 g_acc = 9.80665 * m / s**2
 
 # set default printing
-units.default_format = '.3e~P'
+units.default_format = '.3f~P'
