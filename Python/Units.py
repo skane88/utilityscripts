@@ -25,6 +25,7 @@ mi = units.mile
 # derived units of length
 mm = units.mm
 km = units.km
+knot = units.knot
 
 # units of time
 s = units.second
@@ -35,11 +36,15 @@ yr = units.year
 # units of mass
 g = units.gram
 t = units.tonne
+t_us = units.ton
 lb = units.pound
 t_us = units.ton
 
 # derived units of mass
 kg = units.kg
+
+# units of energy
+J = units.J
 
 # units of force
 N = units.newton
@@ -63,7 +68,7 @@ GPa = units.GPa
 deg = units.degree
 rad = units.radian
 
-# define gravity for use later
+# constants
 g_acc = 9.80665 * m / s**2
 
 # set default printing
