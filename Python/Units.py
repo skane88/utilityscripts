@@ -46,6 +46,9 @@ kg = units.kg
 # units of energy
 J = units.J
 
+# derived units of energy
+kJ = units.kJ
+
 # units of force
 N = units.newton
 lb_f = units.pound_force
