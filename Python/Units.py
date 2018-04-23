@@ -74,7 +74,9 @@ rad = units.radian
 # units of temperature
 degC = units.degC
 degK = units.degK
+degF = units.degF
 ΔC = units.delta_degC
+ΔF = units.delta_degF
 
 # constants
 g_acc = 9.80665 * m / s**2
