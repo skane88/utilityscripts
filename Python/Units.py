@@ -68,8 +68,11 @@ MPa = units.MPa
 GPa = units.GPa
 
 # units of angle
-deg = units.degree
+° = units.degree
 rad = units.radian
+
+# units of temperature
+°C = units.degC
 
 # constants
 g_acc = 9.80665 * m / s**2
