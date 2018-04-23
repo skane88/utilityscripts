@@ -75,7 +75,6 @@ rad = units.radian
 degC = units.degC
 degK = units.degK
 ΔC = units.delta_degC
-ΔK = units.delta_degK
 
 # constants
 g_acc = 9.80665 * m / s**2
