@@ -61,6 +61,7 @@ MN = units.MN
 # units of pressure
 Pa = units.pascal
 psi = units.psi
+bar = units.bar
 
 # derived units of pressure
 kPa = units.kPa
