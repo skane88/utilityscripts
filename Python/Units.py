@@ -48,6 +48,7 @@ J = units.J
 
 # derived units of energy
 kJ = units.kJ
+MJ = units.MJ
 
 # units of force
 N = units.newton
