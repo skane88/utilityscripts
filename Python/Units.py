@@ -1,7 +1,7 @@
 """
 This file defines a minimal set of units for use in engineering calculations.
 
-It relies on the Pint units package
+It relies on the Pint units package.
 
 Also imports math & sets up pi
 """
@@ -81,7 +81,8 @@ degF = units.degF
 ΔF = units.delta_degF
 
 # constants
-g_acc = 9.80665 * m / s**2
+g_acc = 9.80665 * m / s ** 2
 
 # set default printing
-units.default_format = '.3f~P'
+units.default_format = ".3f~P"
+
