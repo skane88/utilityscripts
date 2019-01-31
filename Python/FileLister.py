@@ -19,9 +19,7 @@ def lister():
             recursive_path = true_dict.get(r.lower(), None)
 
         while file_path_bool is None:
-            fp = input(
-                "Do you want to include the full file path (Y or N)? "
-            )
+            fp = input("Do you want to include the full file path (Y or N)? ")
 
             file_path_bool = true_dict.get(fp.lower(), None)
 
@@ -42,7 +40,7 @@ def lister():
         print()
 
         for f in f_iterator:
-            
+
             f: Path()
 
             text = str(f)
@@ -51,10 +49,10 @@ def lister():
                 text = f.name
 
             if not incl_extension:
-                text = text.replace(f.suffix, '')
+                text = text.replace(f.suffix, "")
 
             print(text)
-            
+
     else:
         print("The provided path is not a directory.")
 
