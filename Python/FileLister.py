@@ -13,6 +13,8 @@ def lister():
         report_folders: bool = None
         incl_full_path: bool = None
         incl_extension: bool = None
+        filter_type: bool = None
+        filter_val = "*"
 
         while recursive is None:
             r = input("Do you want to search subfolders (Y or N)? ")
@@ -34,14 +36,24 @@ def lister():
 
             incl_extension = true_dict.get(ie.lower(), None)
 
+        while filter_type is None:
+            ft = input("Do you want to filter by file type (Y or N)? ")
+
+            filter_type = true_dict.get(ft.lower(), None)
+
+        if filter_type:
+            filter_val = input(
+                "Input a valid 'glob' type filter (i.e. '*', '*.' or '*.pdf'): "
+            )
+
         # now we've got input, now do the actual finding of files
 
         if recursive:
             # if subfolders are required, use rglob
-            f_iterator = base_path.rglob("*")
+            f_iterator = base_path.rglob(filter_val)
         else:
             # if only the local folder, just use iterdir
-            f_iterator = base_path.glob("*")
+            f_iterator = base_path.glob(filter_val)
 
         print()
 
