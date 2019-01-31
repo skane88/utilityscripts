@@ -2,26 +2,32 @@ from pathlib import Path
 
 
 def lister():
-    base_path = input("Provide the base path: ")
+    base_path = Path(input("Provide the base path: "))
 
-    base_path = Path(base_path)
+    print()
 
     if base_path.is_dir():
 
         true_dict = {"n": False, "no": False, "y": True, "yes": True}
-        file_path_bool: bool = None
-        recursive_path: bool = None
+        recursive: bool = None
+        report_folders: bool = None
+        incl_full_path: bool = None
         incl_extension: bool = None
 
-        while recursive_path is None:
-            r = input("Do you want to include subfolders (Y or N)? ")
+        while recursive is None:
+            r = input("Do you want to search subfolders (Y or N)? ")
 
-            recursive_path = true_dict.get(r.lower(), None)
+            recursive = true_dict.get(r.lower(), None)
 
-        while file_path_bool is None:
+        while report_folders is None:
+            r = input("Do you want to report folders (Y or N)? ")
+
+            report_folders = true_dict.get(r.lower(), None)
+
+        while incl_full_path is None:
             fp = input("Do you want to include the full file path (Y or N)? ")
 
-            file_path_bool = true_dict.get(fp.lower(), None)
+            incl_full_path = true_dict.get(fp.lower(), None)
 
         while incl_extension is None:
             ie = input("Do you want to include the extension (Y or N)? ")
@@ -30,12 +36,12 @@ def lister():
 
         # now we've got input, now do the actual finding of files
 
-        if recursive_path:
+        if recursive:
             # if subfolders are required, use rglob
             f_iterator = base_path.rglob("*")
         else:
             # if only the local folder, just use iterdir
-            f_iterator = base_path.iterdir()
+            f_iterator = base_path.glob("*")
 
         print()
 
@@ -43,9 +49,13 @@ def lister():
 
             f: Path()
 
+            if not report_folders:
+                if f.is_dir():
+                    continue
+
             text = str(f)
 
-            if not file_path_bool:
+            if not incl_full_path:
                 text = f.name
 
             if not incl_extension:
