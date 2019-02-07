@@ -37,7 +37,8 @@ def bisection(
     x_low: float = float_info.min,
     x_high: float = float_info.max,
     tol: float = 1e-10,
-    max_its=None,
+    max_its: int=None,
+    fail_on_max_its: bool=True,
     *args,
     **kwargs,
 ):
@@ -57,6 +58,7 @@ def bisection(
         If ``None``, the solver will continue until convergence is reached (potentially
         infinitely, although it is likely that your computer's numerical precision will
         result in convergence before an infinite number of iterations is reached)
+    :param fail_on_max_its: Raise an error or simply return on maximum iterations?
     :param args: Any positional arguments for func.
     :param kwargs: Any keyword arguments for func.
     :returns: Returns a tuple: (root, no. of iterations)
@@ -90,11 +92,14 @@ def bisection(
             x_high = x_mid
 
         if max_its is not None:
-            if i > max_its:
-                raise ValueError(
-                    f"Exceeded maximum number of iterations. "
-                    + f"Current root approximation is {x_mid}."
-                )
+            if i >= max_its:
+                if fail_on_max_its:
+                    raise ValueError(
+                        f"Exceeded maximum number of iterations. "
+                        + f"Current root approximation is {x_mid}."
+                    )
+                else:
+                    break
 
     return (x_low + x_high) / 2, i
 
@@ -162,7 +167,7 @@ def secant(
         x_2 = x_3
 
         if max_its is not None:
-            if i > max_its:
+            if i >= max_its:
 
                 if fallback:
                     x, i = bisection(
@@ -183,6 +188,9 @@ if __name__ == "__main__":
     print("Testing function 1:")
 
     x, i = bisection(test_func)
+    print(f"Solution by method of bisection is: {x}, in {i} iterations")
+
+    x, i = bisection(test_func, max_its=1030, fail_on_max_its=False)
     print(f"Solution by method of bisection is: {x}, in {i} iterations")
 
     x, i, b = secant(test_func, x_low=float_info.min / 10, x_high=float_info.max / 10)
