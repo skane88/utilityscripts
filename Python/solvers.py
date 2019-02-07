@@ -101,8 +101,8 @@ def bisection(
 
 def secant(
     func,
-    x_low: float = float_info.min / 2,
-    x_high: float = float_info.max / 2,
+    x_low: float,
+    x_high: float,
     tol: float = 1e-10,
     max_its: int = None,
     fallback: bool = True,
@@ -165,7 +165,9 @@ def secant(
             if i > max_its:
 
                 if fallback:
-                    x, i = bisection(func=func, x_low=x_low, x_high=x_high, tol=tol, *args, **kwargs)
+                    x, i = bisection(
+                        func=func, x_low=x_low, x_high=x_high, tol=tol, *args, **kwargs
+                    )
                     return x, i, True
 
                 raise ValueError(
@@ -183,7 +185,7 @@ if __name__ == "__main__":
     x, i = bisection(test_func)
     print(f"Solution by method of bisection is: {x}, in {i} iterations")
 
-    x, i, b = secant(test_func)
+    x, i, b = secant(test_func, x_low=float_info.min / 10, x_high=float_info.max / 10)
     print(
         f"Solution by secant method is: {x}, in {i} iterations. "
         + f"Fallback to bisection? {b}"
