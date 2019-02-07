@@ -58,6 +58,8 @@ def bisection(
 
     while abs(x_high - x_low) > tol and x_high != x_low:
 
+        i += 1
+
         y_low = func(x_low)
         y_high = func(x_high)
 
@@ -72,8 +74,6 @@ def bisection(
         else:
             x_high = x_mid
 
-        i += 1
-
         if max_its is not None:
             if i > max_its:
                 raise ValueError(
@@ -84,10 +84,47 @@ def bisection(
     return (x_low + x_high) / 2, i
 
 
-if __name__ == "__main__":
+def secant(
+    func,
+    x_1: float = float_info.min / 2,
+    x_2: float = float_info.max / 2,
+    tol: float = 1e-10,
+    max_its=None,
+):
+    """
+    """
 
+    i = 0
+
+    while abs(x_2 - x_1) > tol and x_1 != x_2:
+        
+        i += 1
+
+        x_3 = (x_1 * func(x_2) - x_2 * func(x_1)) / (func(x_2) - func(x_1))
+
+        x_1 = x_2
+        x_2 = x_3
+
+        if max_its is not None:
+            if i > max_its:
+                raise ValueError(
+                        f"Exceeded maximum number of iterations. "
+                        + f"Current root approximation is {x_3}."
+                    )
+
+
+    return x_3, i
+
+
+if __name__ == "__main__":
+    
     print("Test")
+    
+    x, i = bisection(test_func)
     print(
-        f"Solution is: {bisection(test_func)[0]} in {bisection(test_func)[1]} iterations"
+        f"Solution by method of bisection is: {x}, in {i} iterations"
     )
+
+    x, i = secant(test_func)
+    print(f'Solution by secant method is: {x}, in {i} iterations.')
     input("Press any key to exit")
