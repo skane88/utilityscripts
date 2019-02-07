@@ -3,6 +3,7 @@ Implements the bisection method.
 """
 
 from sys import float_info
+from math import sin
 
 
 def test_func(x):
@@ -14,6 +15,10 @@ def test_func2(x):
 
     return x ** 4 - x - 10
 
+
+def test_func3(x):
+
+    return x-sin(x)-(1/2)
 
 def sign(num):
     """
@@ -171,12 +176,31 @@ if __name__ == "__main__":
     print(f"Solution by secant method is: {x}, in {i} iterations.")
     
     print()
+    print("Testing function 1 with different guesses:")
+
+
+    x, i = bisection(test_func, x_low=-10, x_high=10)
+    print(f"Solution by method of bisection is: {x}, in {i} iterations")
+
+    x, i = secant(test_func, x_low=-10, x_high=10)
+    print(f"Solution by secant method is: {x}, in {i} iterations.")
+
+    print()
     print("Testing function 2:")
     
     x, i = bisection(test_func2, x_low=1, x_high=2)
     print(f"Solution by method of bisection is: {x}, in {i} iterations")
 
     x, i = secant(test_func2, x_low=1, x_high=2)
+    print(f"Solution by secant method is: {x}, in {i} iterations.")
+
+    print()
+    print("Testing function 3:")
+    
+    x, i = bisection(test_func3, x_low=1, x_high=2)
+    print(f"Solution by method of bisection is: {x}, in {i} iterations")
+
+    x, i = secant(test_func3, x_low=1, x_high=2)
     print(f"Solution by secant method is: {x}, in {i} iterations.")
 
     input("Press any key to exit")
