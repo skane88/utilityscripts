@@ -23,20 +23,27 @@ def sign(num):
 
 def bisection(
     func,
-    guess_low: float = float_info.min,
-    guess_high: float = float_info.max,
+    x_low: float = float_info.min,
+    x_high: float = float_info.max,
     tol: float = 1e-10,
 ):
     """
     Implements the bi-section method.
+
+    Guaranteed to find a root if one exists between the guesses. If more than one root
+    exists though there is no guarantee about which one will be returned.
+
+    :param func: A function with a single input parameter ('x') to be solved for 0.
+    :param x_low: The lower bounds of the range to check.
+    :param x_high: The upper bounds of the range to check.
+    :param tol: The solution tolerance.
+    :returns: Returns a tuple: (root, no. of iterations)
     """
 
-    if guess_high == guess_low:
+    if x_high == x_low:
         raise ValueError("Expected guesses to be different.")
 
-    x_low = guess_low
-    x_high = guess_high
-    i=0
+    i = 0
 
     while abs(x_high - x_low) > tol and x_high != x_low:
 
@@ -62,5 +69,7 @@ def bisection(
 if __name__ == "__main__":
 
     print("Test")
-    print(f"Solution is: {bisection(test_func)[0]} in {bisection(test_func)[1]} iterations")
+    print(
+        f"Solution is: {bisection(test_func)[0]} in {bisection(test_func)[1]} iterations"
+    )
     input("Press any key to exit")
