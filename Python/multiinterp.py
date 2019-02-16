@@ -59,4 +59,4 @@ if __name__ == "__main__":
 
     yp = [[1, 2, 3], [11, 12, 13]]
 
-    print(multi_interp(x, xp, yp))
+    print(multi_interp(x=x, xp=xp, yp=yp))
