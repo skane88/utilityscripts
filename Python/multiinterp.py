@@ -57,6 +57,6 @@ if __name__ == "__main__":
 
     xp = [0, 1, 2]
 
-    yp = [[1, 2, 3], [11, 12, 13]]
+    fp = [[1, 2, 3], [11, 12, 13]]
 
-    print(multi_interp(x=x, xp=xp, yp=yp))
+    print(multi_interp(x=x, xp=xp, fp=fp))
