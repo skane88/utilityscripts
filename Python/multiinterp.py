@@ -2,6 +2,7 @@
 This file contains some interpolation functions.
 """
 
+import timeit
 from typing import Union, List
 
 import numpy as np
@@ -62,3 +63,22 @@ if __name__ == "__main__":
     fp = [[1, 2, 3], [11, 12, 13]]
 
     print(multi_interp(x=x, xp=xp, fp=fp))
+
+    def wrapper(func, *args, **kwargs):
+        def wrapped():
+            return func(*args, **kwargs)
+
+        return wrapped
+
+    wrapped = wrapper(multi_interp, x=x, xp=xp, fp=fp)
+
+    number = 10000
+    ti = timeit.Timer(wrapped)
+
+    time_info = ti.repeat(repeat=10, number=number)
+
+    print()
+    print(f"Average time to run multi_interp: {1e6 * min(time_info) / number} us")
+    print()
+    print("Done")
+    print("=" * 88)
