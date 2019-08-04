@@ -80,6 +80,13 @@ degF = units.degF
 ΔC = units.delta_degC
 ΔF = units.delta_degF
 
+# units of area
+ha = units.ha
+
+# units of volume
+l = units.liter
+ml = units.ml
+
 # constants
 g_acc = 9.80665 * m / s ** 2
 
