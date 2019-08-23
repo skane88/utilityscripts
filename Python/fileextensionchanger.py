@@ -9,11 +9,11 @@ from pathlib import Path
 
 def re_extension():
 
-    true_dict = {"n": False, "no": False, "y": True, "yes": True}   
+    true_dict = {"n": False, "no": False, "y": True, "yes": True}
 
     print()
     print("This will rename the extension on files, and cannot be reversed.")
-    
+
     while True:
         keep_going = input("Do you wish to continue (y or n)? ")
 
@@ -31,7 +31,7 @@ def re_extension():
 
     print()
 
-    warnings =[]
+    warnings = []
 
     if base_path.is_dir():
 
@@ -80,7 +80,7 @@ def re_extension():
                 warning_string += f"But new path already exists\n"
                 warning_string += "-" * 40
                 warning_string += "\n"
-                
+
                 warnings += [warning_string]
 
                 continue
