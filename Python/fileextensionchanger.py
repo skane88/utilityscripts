@@ -29,8 +29,6 @@ def re_extension():
     print()
     base_path = Path(input("Provide the base path: "))
 
-    print()
-
     warnings = []
 
     if base_path.is_dir():
@@ -45,10 +43,10 @@ def re_extension():
             recursive = true_dict.get(r.lower(), None)
 
         print()
-        old_ext = input("Input the starting extension type (e.g. '.jpeg'): ")
+        old_ext = input("Input the starting extension type (e.g. '.jpeg'): ").lower()
 
         print()
-        new_ext = input("Input the extension to change it to (e.g. '.jpg'): ")
+        new_ext = input("Input the extension to change it to (e.g. '.jpg'): ").lower()
 
         # now we've got input, now do the actual finding of files
 
@@ -60,6 +58,8 @@ def re_extension():
             f_iterator = base_path.glob(filter_val)
 
         print()
+        
+        changed = 0
 
         for f in tqdm(f_iterator, desc="Renaming Extensions", unit="Files"):
 
@@ -68,7 +68,7 @@ def re_extension():
             if f.is_dir():
                 continue
 
-            if f.suffix != old_ext:
+            if f.suffix.lower() != old_ext:
                 continue
 
             new_path = f.with_suffix(new_ext)
@@ -86,8 +86,10 @@ def re_extension():
                 continue
 
             f.rename(new_path)
+            changed += 1
 
         print()
+        print(f"Updated {changed} files from {old_ext} to {new_ext}")
 
     else:
         print("The provided path is not a directory.")
