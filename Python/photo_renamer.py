@@ -1,5 +1,5 @@
 """
-This file changes files of one extension type to another extension type.
+This file renumbers photos in a folder to integer numbers starting at 0001.
 """
 
 import sys
