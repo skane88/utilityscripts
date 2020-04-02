@@ -1,3 +1,7 @@
+"""
+Lists all the folders / files in a given directory, 
+"""
+
 import sys
 from pathlib import Path
 
@@ -13,9 +17,11 @@ def lister():
         recursive: bool = None
         report_folders: bool = None
         incl_full_path: bool = None
+        incl_relative_path: bool = None
         incl_extension: bool = None
         filter_type: bool = None
         filter_val = "*"
+        save_to_file: bool = None
 
         while recursive is None:
             r = input("Do you want to search subfolders (Y or N)? ")
@@ -32,6 +38,14 @@ def lister():
 
             incl_full_path = true_dict.get(fp.lower(), None)
 
+        if not incl_full_path:
+            while incl_relative_path is None:
+                rp = input("Do you want to include the relative path (Y or N)?")
+
+                incl_relative_path = true_dict.get(rp.lower(), None)
+        else:
+            incl_relative_path = False
+
         while incl_extension is None:
             ie = input("Do you want to include the extension (Y or N)? ")
 
@@ -47,6 +61,11 @@ def lister():
                 "Input a valid 'glob' type filter (i.e. '*', '*.' or '*.pdf'): "
             )
 
+        while save_to_file is None:
+            stf = input("Do you want to save to a file (Y or N)?")
+
+            save_to_file = true_dict.get(stf.lower(), None)
+
         # now we've got input, now do the actual finding of files
 
         if recursive:
@@ -58,6 +77,8 @@ def lister():
 
         print()
 
+        text_to_save = []
+
         for f in f_iterator:
 
             f: Path()
@@ -66,15 +87,48 @@ def lister():
                 if f.is_dir():
                     continue
 
-            text = str(f)
+            text = ""
 
-            if not incl_full_path:
-                text = f.name
-
+            if incl_full_path:
+                text = str(f)
+            else:
+                if incl_relative_path:
+                    text = str(f.relative_to(base_path))
+                else:
+                    text = f.name
             if not incl_extension:
                 text = text.replace(f.suffix, "")
 
-            print(text)
+            if save_to_file:
+                text_to_save += [text]
+            else:
+                print(text)
+
+        # now save to file if necessary
+        if save_to_file:
+
+            # first get a file name
+            start_int = 1
+
+            file_ext = ".txt"
+            file_name = "FileLister "
+            file_exists = True
+
+            output_file: Path
+
+            while file_exists:
+
+                output_file = base_path / Path(
+                    f"{file_name}{start_int:02d}"
+                ).with_suffix(file_ext)
+
+                file_exists = output_file.exists()
+                start_int += 1
+
+            with open(output_file, "w") as f:
+
+                for l in text_to_save:
+                    f.write(f"{l}\n")
 
     else:
         print("The provided path is not a directory.")
