@@ -1,5 +1,6 @@
 """
-Lists all the folders / files in a given directory, 
+Lists all the folders / files in a given directory, and also has the ability to save
+the list to a text file.
 """
 
 import sys
