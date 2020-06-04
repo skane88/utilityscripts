@@ -3,7 +3,8 @@ Calculates basic section properties
 """
 
 import math
-from typing import List, Tuple, Union
+from typing import List, Tuple
+import abc
 
 
 class Node:
@@ -35,7 +36,7 @@ class Node:
         return f"{type(self).__name__}({self.x}, {self.y})"
 
 
-class Section:
+class Section(abc.ABCMeta):
     """
     Parent section class
     """
@@ -45,47 +46,85 @@ class Section:
         self.sect_name = sect_name
 
     @property
+    @abc.abstractmethod
     def area(self):
+        """
+        The cross sectional area of the section.
+        """
 
         raise NotImplementedError
 
     @property
+    @abc.abstractmethod
     def I_xx(self):
+        """
+        The second moment of inertia about the GEOMETRIC x-x axis.
+        """
 
         raise NotImplementedError
 
     @property
+    @abc.abstractmethod
     def I_yy(self):
+        """
+        The second moment of inertia about the GEOMETRIC y-y axis.
+        """
 
         raise NotImplementedError
 
     @property
+    @abc.abstractmethod
     def principal_angle(self):
+        """
+        The principal axis angle.
+        """
 
         raise NotImplementedError
 
     @property
+    @abc.abstractmethod
     def J(self):
+        """
+        The St-Venant's torsional constant of the section.
+        """
 
         raise NotImplementedError
 
     @property
+    @abc.abstractmethod
     def centroid(self):
+        """
+        The location of the centroid of the section.
+        """
 
         raise NotImplementedError
 
     @property
+    @abc.abstractmethod
     def depth(self):
+        """
+        The depth of the section (max(y) - min(y)).
+        """
 
         raise NotImplementedError
 
     @property
+    @abc.abstractmethod
     def width(self):
+        """
+        The width of the section (max(x) - min(x)).
+        """
 
         raise NotImplementedError
 
     @property
-    def bounding_box(self):
+    @abc.abstractmethod
+    def bounding_box(self) -> List[Node]:
+        """
+        The bounding box of the section. Consists of 2x Node objects in a list:
+
+            [Node(x=min(x), y=min(y)), Node(x=max(x), y=max(y))]
+        """
 
         raise NotImplementedError
 
@@ -126,8 +165,7 @@ class Rectangle(Section):
         t = min(self.length, self.height)
         b = max(self.length, self.height)
 
-        return (b*t**3) / 3
-
+        return (b * t ** 3) / 3
 
     @property
     def centroid(self):
@@ -224,7 +262,7 @@ class CombinedSection(Section):
             I_yy += s.I_yy + s.area * (n.x - centroid.x) ** 2
 
         return I_yy
-    
+
     @property
     def principal_angle(self):
 
