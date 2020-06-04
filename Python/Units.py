@@ -30,6 +30,8 @@ knot = units.knot
 # units of time
 s = units.second
 minutes = units.minute
+days = units.day
+weeks = units.week
 hr = units.hour
 yr = units.year
 
