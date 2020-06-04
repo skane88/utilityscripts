@@ -65,6 +65,11 @@ class Section:
         raise NotImplementedError
 
     @property
+    def J(self):
+
+        raise NotImplementedError
+
+    @property
     def centroid(self):
 
         raise NotImplementedError
@@ -114,6 +119,15 @@ class Rectangle(Section):
             return math.radians(90)
 
         return 0
+
+    @property
+    def J(self):
+
+        t = min(self.length, self.height)
+        b = max(self.length, self.height)
+
+        return (b*t**3) / 3
+
 
     @property
     def centroid(self):
@@ -208,9 +222,18 @@ class CombinedSection(Section):
         for s, n in self.sections:
 
             I_yy += s.I_yy + s.area * (n.x - centroid.x) ** 2
-        
-        return I_yy
 
+        return I_yy
+    
+    @property
+    def principal_angle(self):
+
+        raise NotImplementedError
+
+    @property
+    def J(self):
+
+        return sum([s.J for s, n in self.sections])
 
     @property
     def depth(self):
@@ -250,7 +273,7 @@ class CombinedSection(Section):
                 min_y = min(sect_min.y, combined_min.y)
 
                 test_bounding_box = [Node(x=min_x, y=min_y), Node(x=max_x, y=max_y)]
-        
+
         return test_bounding_box
 
     def add_element(self, section, centroid):
