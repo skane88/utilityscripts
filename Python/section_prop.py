@@ -43,6 +43,15 @@ class Section(abc.ABC):
 
     @property
     @abc.abstractmethod
+    def I_xy(self):
+        """
+        The second product of inertia about the GEOMETRIC x, y axes.
+        """
+
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
     def principal_angle(self):
         """
         The principal axis angle.
@@ -140,7 +149,40 @@ class GenericSection(Section):
     @property
     def I_yy(self):
 
-        raise NotImplementedError
+        coords = self.polygon.exterior.coords
+        I_yy = 0.0
+
+        for i, j in zip(coords[:-1], coords[1:]):
+
+            xi = i[0]
+            yi = i[1]
+
+            xj = j[0]
+            yj = j[1]
+
+            I_yy += (yj ** 2 + yj * yi + yi ** 2) * (xi * yj - xj * yi)
+
+        return I_yy / 12
+
+    @property
+    def I_xy(self):
+
+        coords = self.polygon.exterior.coords
+
+        I_xy = 0.0
+
+        for i, j in zip(coords[:-1], coords[1:]):
+            xi = i[0]
+            yi = i[1]
+
+            xj = j[0]
+            yj = j[1]
+
+            I_xy += (2 * xj * yj + xj * yi + xi * yj + 2 * xi * yi) * (
+                xi * yj - xj * yi
+            )
+
+        return I_xy / 24
 
     @property
     def principal_angle(self):
