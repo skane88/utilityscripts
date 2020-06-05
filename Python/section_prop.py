@@ -122,7 +122,20 @@ class GenericSection(Section):
     @property
     def I_xx(self):
 
-        raise NotImplementedError
+        # here we calculate the second moment of inertia via Green's theorem.
+        coords = self.polygon.exterior.coords
+        I_xx = 0.0
+
+        for i, j in zip(coords[:-1], coords[1:]):
+
+            xi = i[0]
+            yi = i[1]
+            xj = j[0]
+            yj = j[0]
+
+            I_xx += (xj ** 2 + xj * xi + xi ** 2) * (xi * yj - xj * yi)
+
+        return I_xx / 12
 
     @property
     def I_yy(self):
