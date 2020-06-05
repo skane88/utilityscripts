@@ -45,7 +45,37 @@ class Section(abc.ABC):
     @abc.abstractmethod
     def I_xy(self):
         """
-        The second product of inertia about the GEOMETRIC x, y axes.
+        The product of inertia about the GEOMETRIC x, y axes.
+        """
+
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def Iuu(self):
+        """
+        The moment of inertia about an axis parallel with the GEOMETRIC x-x axis, but
+        through the centroid of the section.
+        """
+
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def Ivv(self):
+        """
+        The moment of inertia about an axis parallel with the GEOMETRIC y-y axis, but
+        through the centroid of the section.
+        """
+
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def Iuv(self):
+        """
+        The product of inertia about the axes parallel with the GEOMETRIC x-x and y-y
+        axes, but through the centroid of the section.
         """
 
         raise NotImplementedError
