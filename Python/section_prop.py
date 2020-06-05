@@ -131,7 +131,7 @@ class GenericSection(Section):
             xi = i[0]
             yi = i[1]
             xj = j[0]
-            yj = j[0]
+            yj = j[1]
 
             I_xx += (xj ** 2 + xj * xi + xi ** 2) * (xi * yj - xj * yi)
 
