@@ -427,3 +427,34 @@ def make_I(cls, b_f, d, t_f, t_w):
     return cls(
         sections=[(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
     ).move_to_centre()
+
+
+def calculate_principal_moments(Iuu, Ivv, Iuv):
+    """
+    Calculates the principal moments of inertia and their axis given the moments of
+    inertia about 2x other axes and the product of inertia.
+
+    Note that Iuu, Ivv and Iuv must be orthogonal, and through the centroid of the
+    section.
+
+    u-u and v-v are the orthogonal axes.
+
+    Based on the equation at the following location, also see Roark's Stress & Strain
+
+    https://leancrew.com/all-this/2018/01/transforming-section-properties-and-principal-directions/
+
+    :param Iuu: The moment of inertia about axis uu.
+    :param Ivv: The moment of inertia about axis vv.
+    :param Iuv: The product of inertia.
+    :return: A tuple containing the principal axes and the angle between uu and I11:
+
+        (I11, I22, alpha)
+    """
+
+    avg = (Iuu + Ivv) / 2
+    diff = (Iuu - Ivv) / 2  # Note that this is signed
+    I11 = avg + math.sqrt(diff ** 2 + Iuv ** 2)
+    I22 = avg - math.sqrt(diff ** 2 + Iuv ** 2)
+    alpha = math.atan2(-Iuv, diff) / 2
+
+    return (I11, I22, alpha)
