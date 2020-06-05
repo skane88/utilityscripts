@@ -6,44 +6,13 @@ import math
 from typing import List, Tuple
 import abc
 
-
-class Node:
-    """
-    Node class in 2D
-    """
-
-    def __init__(self, x, y):
-
-        self.x = x
-        self.y = y
-
-    def __add__(self, other):
-
-        if not isinstance(other, Node):
-            raise NotImplementedError
-
-        return Node(x=self.x + other.x, y=self.y + other.y)
-
-    def __sub__(self, other):
-
-        if not isinstance(other, Node):
-            raise NotImplementedError
-
-        return Node(x=self.x - other.x, y=self.y - other.y)
-
-    def __repr__(self):
-
-        return f"{type(self).__name__}({self.x}, {self.y})"
+from shapely.geometry import Point, Polygon
 
 
-class Section(abc.ABCMeta):
+class Section(abc.ABC):
     """
     Parent section class
     """
-
-    def __init__(self, sect_name=None):
-
-        self.sect_name = sect_name
 
     @property
     @abc.abstractmethod
@@ -109,7 +78,6 @@ class Section(abc.ABCMeta):
         raise NotImplementedError
 
     @property
-    @abc.abstractmethod
     def width(self):
         """
         The width of the section (max(x) - min(x)).
@@ -118,21 +86,75 @@ class Section(abc.ABCMeta):
         raise NotImplementedError
 
     @property
-    @abc.abstractmethod
-    def bounding_box(self) -> List[Node]:
+    def bounding_box(self) -> List[float]:
         """
-        The bounding box of the section. Consists of 2x Node objects in a list:
+        The bounding box of the section:
 
-            [Node(x=min(x), y=min(y)), Node(x=max(x), y=max(y))]
+            [min_x, min_y, max_x, max_y]
         """
 
         raise NotImplementedError
 
 
-class Rectangle(Section):
-    def __init__(self, length, height, sect_name=None):
+class GenericSection(Section):
+    """
+    A generic section that can contain any shape formed from polygons.
 
-        super().__init__(sect_name=sect_name)
+    Intended to be used as the base class of any shape formed from a single ring of
+    points. Currently not allowed to have holes, holes may be added in the future.
+    """
+
+    def __init__(self, points: List[Point]):
+
+        self.poly = Polygon(points)
+
+    @property
+    def area(self):
+        return self.poly.area
+
+    @property
+    def I_xx(self):
+
+        raise NotImplementedError
+
+    @property
+    def I_yy(self):
+
+        raise NotImplementedError
+
+    @property
+    def principal_angle(self):
+
+        raise NotImplementedError
+
+    @property
+    def J(self):
+
+        raise NotImplementedError
+
+    @property
+    def centroid(self):
+
+        return self.poly.centroid
+
+    @property
+    def depth(self):
+
+        raise NotImplementedError
+
+    @property
+    def width(self):
+
+        raise NotImplementedError
+
+    @property
+    def bounding_box(self) -> List[float]:
+
+        return self.poly.bounds
+
+
+class Rectangle(Section):
+    def __init__(self, length, height):
 
         self.length = length
         self.height = height
@@ -170,7 +192,7 @@ class Rectangle(Section):
     @property
     def centroid(self):
 
-        return Node(x=self.length / 2, y=self.height / 2)
+        return Point(self.length / 2, self.height / 2)
 
     @property
     def depth(self):
@@ -183,36 +205,33 @@ class Rectangle(Section):
         return self.length
 
     @property
-    def bounding_box(self) -> List[Node]:
+    def bounding_box(self) -> List[Point]:
 
         return [
-            Node(-self.length / 2, -self.height / 2),
-            Node(self.length / 2, self.height / 2),
+            Point(-self.length / 2, -self.height / 2),
+            Point(self.length / 2, self.height / 2),
         ]
-
-    @classmethod
-    def create_square(cls, side, sect_name=None):
-
-        return cls(length=side, height=side, sect_name=sect_name)
 
 
 class CombinedSection(Section):
-    def __init__(self, sections: List[Tuple[Section, Node]], sect_name=None):
+    def __init__(self, sections: List[Tuple[Section, Point]]):
         """
 
         :param sections: A list of sections & centroids
         """
-
-        super().__init__(sect_name=sect_name)
 
         all_sections = []
         for s, n in sections:
 
             if isinstance(s, CombinedSection):
 
+                s: CombinedSection
                 for t, o in s.sections:
 
-                    all_sections.append(t, n + o)
+                    x = n.x + o.x
+                    y = n.y + o.y
+
+                    all_sections.append((t, Point(x, y)))
 
             else:
                 all_sections.append((s, n))
@@ -235,7 +254,7 @@ class CombinedSection(Section):
             mx += s.area * n.x
             my += s.area * n.y
 
-        return Node(x=mx / self.area, y=my / self.area)
+        return Point(mx / self.area, my / self.area)
 
     @property
     def I_xx(self):
@@ -286,31 +305,28 @@ class CombinedSection(Section):
         return bbx[1].x - bbx[0].x
 
     @property
-    def bounding_box(self) -> List[Node]:
+    def bounding_box(self) -> List[float]:
 
         test_bounding_box = None
 
         for s, n in self.sections:
 
+            bbox = s.bounding_box
+            bbox[0] += n.x
+            bbox[1] += n.y
+            bbox[2] += n.x
+            bbox[3] += n.y
+
             if test_bounding_box is None:
 
-                test_bounding_box = [s.bounding_box[0] + n, s.bounding_box[1] + n]
+                test_bounding_box = bbox
 
             else:
 
-                sect_min = s.bounding_box[0] + n
-                sect_max = s.bounding_box[1] + n
-
-                combined_min = test_bounding_box[0]
-                combined_max = test_bounding_box[1]
-
-                max_x = max(sect_max.x, combined_max.x)
-                max_y = max(sect_max.y, combined_max.y)
-
-                min_x = min(sect_min.x, combined_min.x)
-                min_y = min(sect_min.y, combined_min.y)
-
-                test_bounding_box = [Node(x=min_x, y=min_y), Node(x=max_x, y=max_y)]
+                test_bounding_box[0] = min(test_bounding_box[0], bbox[0])
+                test_bounding_box[1] = min(test_bounding_box[1], bbox[1])
+                test_bounding_box[2] = max(test_bounding_box[2], bbox[2])
+                test_bounding_box[3] = max(test_bounding_box[3], bbox[3])
 
         return test_bounding_box
 
@@ -327,24 +343,28 @@ class CombinedSection(Section):
 
             sections.append((s, n - centroid))
 
-        return CombinedSection(sections=sections, sect_name=self.sect_name)
+        return CombinedSection(sections=sections)
 
-    @classmethod
-    def make_I(cls, b_f, d, t_f, t_w, sect_name=None):
 
-        d_w = d - 2 * t_f
+def make_square(side):
 
-        top_flange = Rectangle(length=b_f, height=t_f)
-        bottom_flange = Rectangle(length=b_f, height=t_f)
-        web = Rectangle(length=t_w, height=d_w)
+    return Rectangle(length=side, height=side)
 
-        depth = t_f * 2 + d_w
 
-        n_tf = Node(x=b_f / 2, y=depth - t_f / 2)
-        n_w = Node(x=b_f / 2, y=t_f + d_w / 2)
-        n_bf = Node(x=b_f / 2, y=t_f / 2)
+def make_I(cls, b_f, d, t_f, t_w):
 
-        return cls(
-            sections=[(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)],
-            sect_name=sect_name,
-        ).move_to_centre()
+    d_w = d - 2 * t_f
+
+    top_flange = Rectangle(length=b_f, height=t_f)
+    bottom_flange = Rectangle(length=b_f, height=t_f)
+    web = Rectangle(length=t_w, height=d_w)
+
+    depth = t_f * 2 + d_w
+
+    n_tf = Point(b_f / 2, depth - t_f / 2)
+    n_w = Point(b_f / 2, t_f + d_w / 2)
+    n_bf = Point(b_f / 2, t_f / 2)
+
+    return cls(
+        sections=[(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
+    ).move_to_centre()
