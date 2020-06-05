@@ -106,7 +106,11 @@ class GenericSection(Section):
 
     def __init__(self, points: List[Point]):
 
-        self.poly = Polygon(points)
+        self._polygon = Polygon(points)
+
+    @property
+    def polygon(self):
+        return self._polygon
 
     @property
     def area(self):
