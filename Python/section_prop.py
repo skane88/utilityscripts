@@ -3,7 +3,7 @@ Calculates basic section properties
 """
 
 import math
-from typing import List, Tuple
+from typing import List, Tuple, Union
 import abc
 
 from shapely.geometry import Point, Polygon
@@ -104,17 +104,20 @@ class GenericSection(Section):
     points. Currently not allowed to have holes, holes may be added in the future.
     """
 
-    def __init__(self, points: List[Point]):
+    def __init__(self, points: Union[List[Point], Tuple[float, float]]):
 
         self._polygon = Polygon(points)
 
     @property
-    def polygon(self):
+    def polygon(self) -> Polygon:
+        """
+        Return the underlying polygon which stores the shape.
+        """
         return self._polygon
 
     @property
     def area(self):
-        return self.poly.area
+        return self.polygon.area
 
     @property
     def I_xx(self):
@@ -139,7 +142,7 @@ class GenericSection(Section):
     @property
     def centroid(self):
 
-        return self.poly.centroid
+        return self.polygon.centroid
 
     @property
     def depth(self):
@@ -154,7 +157,7 @@ class GenericSection(Section):
     @property
     def bounding_box(self) -> List[float]:
 
-        return self.poly.bounds
+        return self.polygon.bounds
 
 
 class Rectangle(Section):
@@ -211,10 +214,7 @@ class Rectangle(Section):
     @property
     def bounding_box(self) -> List[Point]:
 
-        return [
-            Point(-self.length / 2, -self.height / 2),
-            Point(self.length / 2, self.height / 2),
-        ]
+        return [-self.length / 2, -self.height / 2, self.length / 2, self.height / 2]
 
 
 class CombinedSection(Section):
