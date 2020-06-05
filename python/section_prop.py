@@ -25,7 +25,7 @@ class Section(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def I_xx(self):
+    def Ixx(self):
         """
         The second moment of inertia about the GEOMETRIC x-x axis.
         """
@@ -34,7 +34,7 @@ class Section(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def I_yy(self):
+    def Iyy(self):
         """
         The second moment of inertia about the GEOMETRIC y-y axis.
         """
@@ -43,7 +43,7 @@ class Section(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def I_xy(self):
+    def Ixy(self):
         """
         The product of inertia about the GEOMETRIC x, y axes.
         """
@@ -159,7 +159,7 @@ class GenericSection(Section):
         return self.polygon.area
 
     @property
-    def I_xx(self):
+    def Ixx(self):
 
         # here we calculate the second moment of inertia via Green's theorem.
         coords = self.polygon.exterior.coords
@@ -177,7 +177,7 @@ class GenericSection(Section):
         return I_xx / 12
 
     @property
-    def I_yy(self):
+    def Iyy(self):
 
         coords = self.polygon.exterior.coords
         I_yy = 0.0
@@ -195,7 +195,7 @@ class GenericSection(Section):
         return I_yy / 12
 
     @property
-    def I_xy(self):
+    def Ixy(self):
 
         coords = self.polygon.exterior.coords
 
@@ -256,12 +256,12 @@ class Rectangle(Section):
         return self.length * self.height
 
     @property
-    def I_xx(self):
+    def Ixx(self):
 
         return self.length * self.height ** 3 / 12
 
     @property
-    def I_yy(self):
+    def Iyy(self):
 
         return self.height * self.length ** 3 / 12
 
@@ -346,7 +346,7 @@ class CombinedSection(Section):
         return Point(mx / self.area, my / self.area)
 
     @property
-    def I_xx(self):
+    def Ixx(self):
 
         I_xx = 0
 
@@ -354,12 +354,12 @@ class CombinedSection(Section):
 
         for s, n in self.sections:
 
-            I_xx += s.I_xx + s.area * (n.y - centroid.y) ** 2
+            I_xx += s.Ixx + s.area * (n.y - centroid.y) ** 2
 
         return I_xx
 
     @property
-    def I_yy(self):
+    def Iyy(self):
 
         I_yy = 0
 
@@ -367,7 +367,7 @@ class CombinedSection(Section):
 
         for s, n in self.sections:
 
-            I_yy += s.I_yy + s.area * (n.x - centroid.x) ** 2
+            I_yy += s.Iyy + s.area * (n.x - centroid.x) ** 2
 
         return I_yy
 
