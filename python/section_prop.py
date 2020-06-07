@@ -7,7 +7,11 @@ from typing import List, Tuple, Union
 import abc
 
 from shapely.geometry import Point, Polygon, polygon
+from shapely.coords import CoordinateSequence
 import shapely.affinity as aff
+
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Section(abc.ABC):
@@ -137,6 +141,34 @@ class Section(abc.ABC):
 
         raise NotImplementedError
 
+    @property
+    @abc.abstractmethod
+    def x_and_ys(self) -> List[Tuple[List[float], List[float]]]:
+        """
+        Return the x and y points that define the section. If the shape or parts of it
+        are circular, returns an approximation in straight line segments.
+
+        Given points p_0, ..., p_n defining the section, the method will return:
+
+        [([x_0, ..., x_n, x_0], [y_0, ..., y_n, y_0])]
+
+        The surrounding list is added to allow objects containing multiple sections, or
+        sections with holes to return multiple lists of xs and ys.
+        """
+
+        raise NotImplementedError
+
+    def plot(self):
+        """
+        Plot the section using matplotlib.
+        """
+
+        for i in self.x_and_ys:
+            x, y = i
+            plt.plot(x, y)
+
+        plt.show()
+
 
 class GenericSection(Section):
     """
@@ -148,7 +180,7 @@ class GenericSection(Section):
 
     def __init__(
         self,
-        points: Union[List[Point], List[Tuple[float, float]]],
+        poly: Polygon,
         rotation: float = None,
         rotation_centre: Union[Point, Tuple[float, float]] = None,
         translation: Union[Point, Tuple[float, float]] = None,
@@ -161,9 +193,7 @@ class GenericSection(Section):
         If both translation and rotation are specified, rotation is carried out first,
         followed by translation.
 
-        :param points: The points that make up the polygon. The points do not have to
-            be closed. i.e. for points 0, ..., n, if p_0 != p_n the final segment of
-            the polygon is assumed to be from point p_n -> p_0.
+        :param poly: a shapely polygon object.
         :param rotation: An angle value to rotate the polygon about. Angle is in degrees.
         :param rotation_centre: An optional point to complete the rotation about. If
             not given, rotation is about the centroid.
@@ -171,7 +201,7 @@ class GenericSection(Section):
             translation is carried out AFTER rotation.
         """
 
-        poly = polygon.orient(Polygon(points))
+        poly = polygon.orient(poly)
 
         self._input_poly = poly
         self._rotation = rotation
@@ -210,38 +240,33 @@ class GenericSection(Section):
     @property
     def Ixx(self):
 
-        # here we calculate the second moment of inertia via Green's theorem.
-        coords = self.polygon.exterior.coords
-        I_xx = 0.0
+        Ixx = 0
 
-        for i, j in zip(coords[:-1], coords[1:]):
+        rings = [self.polygon.exterior.coords]
 
-            xi = i[0]
-            yi = i[1]
-            xj = j[0]
-            yj = j[1]
+        for r in self.polygon.interiors:
 
-            I_xx += (xj ** 2 + xj * xi + xi ** 2) * (xi * yj - xj * yi)
+            rings.append(r.coords)
 
-        return I_xx / 12
+        for r in rings:
+            Ixx += Ixx_from_coords(r)
+
+        return Ixx
 
     @property
     def Iyy(self):
 
-        coords = self.polygon.exterior.coords
-        I_yy = 0.0
+        Iyy = 0
 
-        for i, j in zip(coords[:-1], coords[1:]):
+        rings = [self.polygon.exterior.coords]
 
-            xi = i[0]
-            yi = i[1]
+        for r in self.polygon.interiors:
+            rings.append(r.coords)
 
-            xj = j[0]
-            yj = j[1]
+        for r in rings:
+            Iyy += Iyy_from_coords(r)
 
-            I_yy += (yj ** 2 + yj * yi + yi ** 2) * (xi * yj - xj * yi)
-
-        return I_yy / 12
+        return Iyy
 
     @property
     def Ixy(self):
@@ -292,6 +317,32 @@ class GenericSection(Section):
     def bounding_box(self) -> List[float]:
 
         return self.polygon.bounds
+
+    @property
+    def x_and_ys(self):
+
+        retval = []
+
+        rings = [self.polygon.exterior]
+
+        for i in self.polygon.interiors:
+            rings.append(i)
+
+        for r in rings:
+            x = []
+            y = []
+
+            for p in r:
+                x.append(p[0])
+                y.append(p[1])
+
+            retval.append((x, y))
+
+        return retval
+
+    def move_to_centre(self):
+
+        return
 
 
 class Rectangle(Section):
@@ -506,6 +557,65 @@ def make_I(cls, b_f, d, t_f, t_w):
     return cls(
         sections=[(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
     ).move_to_centre()
+
+
+def Ixx_from_coords(
+    coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray]
+) -> float:
+    """
+    Calculate the moment of inertia about the global x axis by Green's theorem.
+
+    :param coords: The coordinates of the object as a Shapely CoordinateSequence or
+        an equivalent 2D array of coordinates (x, y vertically orientated).
+    :return: The moment of inertia
+    """
+
+    coords = np.array(coords)
+
+    # in case we get a numpy array that is orientated with x & y as rows, not columns,
+    # transpose it to match the expected output from a Coordinate sequence or a list of
+    # point tuples
+    if coords.shape[0] < coords.shape[1]:
+        coords = coords.transpose()
+
+    # get 1D arrays of the x and y coordinates
+    xi = coords[:-1, :1]
+    yi = coords[:-1, 1:]
+
+    xj = coords[1:, :1]
+    yj = coords[1:, 1:]
+
+    # carry out Green's integration and return
+    return np.sum((yj ** 2 + yj * yi + yi ** 2) * (xi * yj - xj * yi)) / 12
+
+
+def Iyy_from_coords(
+    coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray]
+) -> float:
+    """
+    Calculate the moment of inertia about the global y axis by Green's theorem
+
+    :param coords: The coordinates of the object,
+    :return: The moment of inertia
+    """
+
+    coords = np.array(coords)
+
+    # in case we get a numpy array that is orientated with x & y as rows, not columns,
+    # transpose it to match the expected output from a Coordinate sequence or a list of
+    # point tuples
+    if coords.shape[0] < coords.shape[1]:
+        coords = coords.transpose()
+
+    # get 1D arrays of the x and y coordinates
+    xi = coords[:-1, :1]
+    yi = coords[:-1, 1:]
+
+    xj = coords[1:, :1]
+    yj = coords[1:, 1:]
+
+    # carry out Green's integration and return
+    return np.sum((xj ** 2 + xj * xi + xi ** 2) * (xi * yj - xj * yi)) / 12
 
 
 def calculate_principal_moments(Iuu, Ivv, Iuv):
