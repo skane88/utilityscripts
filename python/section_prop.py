@@ -118,6 +118,7 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
+    @abc.abstractmethod
     def width(self):
         """
         The width of the section (max(x) - min(x)).
@@ -126,6 +127,7 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
+    @abc.abstractmethod
     def bounding_box(self) -> List[float]:
         """
         The bounding box of the section:
