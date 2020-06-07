@@ -6,7 +6,8 @@ import math
 from typing import List, Tuple, Union
 import abc
 
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point, Polygon, polygon
+import shapely.affinity as aff
 
 
 class Section(abc.ABC):
@@ -143,9 +144,55 @@ class GenericSection(Section):
     points. Currently not allowed to have holes, holes may be added in the future.
     """
 
-    def __init__(self, points: Union[List[Point], Tuple[float, float]]):
+    def __init__(
+        self,
+        points: Union[List[Point], List[Tuple[float, float]]],
+        rotation: float = None,
+        rotation_centre: Union[Point, Tuple[float, float]] = None,
+        translation: Union[Point, Tuple[float, float]] = None,
+    ):
+        """
+        Initialise a generic section based on an input polygon.
 
-        self._polygon = Polygon(points)
+        The polygon can be translated and rotated as part of the initialisation.
+
+        If both translation and rotation are specified, rotation is carried out first,
+        followed by translation.
+
+        :param points: The points that make up the polygon. The points do not have to
+            be closed. i.e. for points 0, ..., n, if p_0 != p_n the final segment of
+            the polygon is assumed to be from point p_n -> p_0.
+        :param rotation: An angle value to rotate the polygon about. Angle is in degrees.
+        :param rotation_centre: An optional point to complete the rotation about. If
+            not given, rotation is about the centroid.
+        :param translation: An optional translation to apply to the shape. Note that any
+            translation is carried out AFTER rotation.
+        """
+
+        poly = polygon.orient(Polygon(points))
+
+        self._input_poly = poly
+        self._rotation = rotation
+        self._rotation_centre = rotation_centre
+        self._translation = translation
+
+        if not rotation is None:
+
+            if rotation_centre is None:
+                rotation_centre = "centroid"
+
+            poly = aff.rotate(
+                poly, angle=rotation, origin=rotation_centre, use_radians=False
+            )
+
+        if not translation is None:
+
+            if isinstance(translation, Point):
+                translation = (translation.x, translation.y)
+
+            poly = aff.translate(poly, xoff=translation[0], yoff=translation[1])
+
+        self._polygon = poly
 
     @property
     def polygon(self) -> Polygon:
