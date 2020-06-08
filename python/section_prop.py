@@ -268,6 +268,21 @@ class GenericSection(Section):
         return sum([Ixy_from_coords(r) for r in self.ring_coords])
 
     @property
+    def Iuu(self):
+
+        raise NotImplementedError
+
+    @property
+    def Ivv(self):
+
+        raise NotImplementedError
+
+    @property
+    def Iuv(self):
+
+        raise NotImplementedError
+
+    @property
     def principal_angle(self):
 
         raise NotImplementedError
