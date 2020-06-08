@@ -559,18 +559,24 @@ def make_I(cls, b_f, d, t_f, t_w):
     ).move_to_centre()
 
 
-def Ixx_from_coords(
+def _prepare_coords_for_green(
     coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray]
-) -> float:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
-    Calculate the moment of inertia about the global x axis by Green's theorem.
-
+    Prepares a set of co-ordinates for use in Green's integration algorithms.
     :param coords: The coordinates of the object as a Shapely CoordinateSequence or
         an equivalent 2D array of coordinates (x, y vertically orientated).
-    :return: The moment of inertia
+
+        The co-ordinates should be closed - that is, given a sequence of points
+        p_0, ..., p_n making up a shape, the co-ordinates for the object provided to
+        this method should end with p_0: p_0, ..., p_n, p_0.
+
+        Points should be ordered counterclockwise for positive quantities. Holes should
+        be ordered clockwise.
     """
 
-    coords = np.array(coords)
+    if not isinstance(coords, np.ndarray):
+        coords = np.array(coords)
 
     # in case we get a numpy array that is orientated with x & y as rows, not columns,
     # transpose it to match the expected output from a Coordinate sequence or a list of
@@ -581,9 +587,31 @@ def Ixx_from_coords(
     # get 1D arrays of the x and y coordinates
     xi = coords[:-1, :1]
     yi = coords[:-1, 1:]
-
     xj = coords[1:, :1]
     yj = coords[1:, 1:]
+
+    return xi, xj, yi, yj
+
+
+def Ixx_from_coords(
+    coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray]
+) -> float:
+    """
+    Calculate the moment of inertia about the global x axis by Green's theorem.
+
+    :param coords: The coordinates of the object as a Shapely CoordinateSequence or
+        an equivalent 2D array of coordinates (x, y vertically orientated).
+
+        The co-ordinates should be closed - that is, given a sequence of points
+        p_0, ..., p_n making up a shape, the co-ordinates for the object provided to
+        this method should end with p_0: p_0, ..., p_n, p_0.
+
+        Points should be ordered counterclockwise for positive quantities. Holes should
+        be ordered clockwise.
+    :return: The moment of inertia
+    """
+
+    xi, xj, yi, yj = _prepare_coords_for_green(coords)
 
     # carry out Green's integration and return
     return np.sum((yj ** 2 + yj * yi + yi ** 2) * (xi * yj - xj * yi)) / 12
@@ -595,24 +623,18 @@ def Iyy_from_coords(
     """
     Calculate the moment of inertia about the global y axis by Green's theorem
 
-    :param coords: The coordinates of the object,
-    :return: The moment of inertia
+    :param coords: The coordinates of the object as a Shapely CoordinateSequence or
+        an equivalent 2D array of coordinates (x, y vertically orientated).
+
+        The co-ordinates should be closed - that is, given a sequence of points
+        p_0, ..., p_n making up a shape, the co-ordinates for the object provided to
+        this method should end with p_0: p_0, ..., p_n, p_0.
+
+        Points should be ordered counterclockwise for positive quantities. Holes should
+        be ordered clockwise.
     """
 
-    coords = np.array(coords)
-
-    # in case we get a numpy array that is orientated with x & y as rows, not columns,
-    # transpose it to match the expected output from a Coordinate sequence or a list of
-    # point tuples
-    if coords.shape[0] < coords.shape[1]:
-        coords = coords.transpose()
-
-    # get 1D arrays of the x and y coordinates
-    xi = coords[:-1, :1]
-    yi = coords[:-1, 1:]
-
-    xj = coords[1:, :1]
-    yj = coords[1:, 1:]
+    xi, xj, yi, yj = _prepare_coords_for_green(coords)
 
     # carry out Green's integration and return
     return np.sum((xj ** 2 + xj * xi + xi ** 2) * (xi * yj - xj * yi)) / 12
