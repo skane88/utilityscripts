@@ -255,53 +255,17 @@ class GenericSection(Section):
     @property
     def Ixx(self):
 
-        Ixx = 0
-
-        rings = [self.polygon.exterior.coords]
-
-        for r in self.polygon.interiors:
-
-            rings.append(r.coords)
-
-        for r in rings:
-            Ixx += Ixx_from_coords(r)
-
-        return Ixx
+        return sum([Ixx_from_coords(r) for r in self.ring_coords])
 
     @property
     def Iyy(self):
 
-        Iyy = 0
-
-        rings = [self.polygon.exterior.coords]
-
-        for r in self.polygon.interiors:
-            rings.append(r.coords)
-
-        for r in rings:
-            Iyy += Iyy_from_coords(r)
-
-        return Iyy
+        return sum([Iyy_from_coords(r) for r in self.ring_coords])
 
     @property
     def Ixy(self):
 
-        coords = self.polygon.exterior.coords
-
-        I_xy = 0.0
-
-        for i, j in zip(coords[:-1], coords[1:]):
-            xi = i[0]
-            yi = i[1]
-
-            xj = j[0]
-            yj = j[1]
-
-            I_xy += (2 * xj * yj + xj * yi + xi * yj + 2 * xi * yi) * (
-                xi * yj - xj * yi
-            )
-
-        return I_xy / 24
+        return sum([Ixy_from_coords(r) for r in self.ring_coords])
 
     @property
     def principal_angle(self):
