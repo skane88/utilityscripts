@@ -21,6 +21,15 @@ class Section(abc.ABC):
 
     @property
     @abc.abstractmethod
+    def polygon(self) -> Polygon:
+        """
+        A shapely Polygon that represents the section.
+        """
+
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
     def area(self):
         """
         The cross sectional area of the section.
@@ -228,9 +237,7 @@ class GenericSection(Section):
 
     @property
     def polygon(self) -> Polygon:
-        """
-        Return the underlying polygon which stores the shape.
-        """
+
         return self._polygon
 
     @property
