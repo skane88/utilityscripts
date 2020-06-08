@@ -234,19 +234,21 @@ class GenericSection(Section):
         return self._polygon
 
     @property
-    def ring_coords(self):
+    def coords(self):
         """
-        Return the rings that make up the polygon. Returned as a list of rings.
+        Return the coordinates that make up the polygon. Returned as a list of
+        coordinate sequences. The first is the exterior polygon, with any additional
+        sequences representing interior holes / voids.
 
         The exterior is ordered CCW, and any holes are ordered CW.
         """
 
-        rings = [self.polygon.exterior.coords]
+        coords = [self.polygon.exterior.coords]
 
         for r in self.polygon.interiors:
-            rings.append(r.coords)
+            coords.append(r.coords)
 
-        return rings
+        return coords
 
     @property
     def area(self):
@@ -255,17 +257,17 @@ class GenericSection(Section):
     @property
     def Ixx(self):
 
-        return sum([Ixx_from_coords(r) for r in self.ring_coords])
+        return sum([Ixx_from_coords(r) for r in self.coords])
 
     @property
     def Iyy(self):
 
-        return sum([Iyy_from_coords(r) for r in self.ring_coords])
+        return sum([Iyy_from_coords(r) for r in self.coords])
 
     @property
     def Ixy(self):
 
-        return sum([Ixy_from_coords(r) for r in self.ring_coords])
+        return sum([Ixy_from_coords(r) for r in self.coords])
 
     @property
     def Iuu(self):
