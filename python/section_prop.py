@@ -640,6 +640,30 @@ def Iyy_from_coords(
     return np.sum((xj ** 2 + xj * xi + xi ** 2) * (xi * yj - xj * yi)) / 12
 
 
+def Ixy_from_coords(coords):
+    """
+    Calculate the product of inertia about the global x-x and y-y axes by
+    Green's theorem
+
+    :param coords: The coordinates of the object as a Shapely CoordinateSequence or
+        an equivalent 2D array of coordinates (x, y vertically orientated).
+
+        The co-ordinates should be closed - that is, given a sequence of points
+        p_0, ..., p_n making up a shape, the co-ordinates for the object provided to
+        this method should end with p_0: p_0, ..., p_n, p_0.
+
+        Points should be ordered counterclockwise for positive quantities. Holes should
+        be ordered clockwise.
+    """
+
+    xi, xj, yi, yj = _prepare_coords_for_green(coords)
+
+    return (
+        np.sum((2 * xj * yj + xj * yi + xi * yj + 2 * xi * yi) * (xi * yj - xj * yi))
+        / 24
+    )
+
+
 def calculate_principal_moments(Iuu, Ivv, Iuv):
     """
     Calculates the principal moments of inertia and their axis given the moments of
