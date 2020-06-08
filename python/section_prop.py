@@ -234,6 +234,21 @@ class GenericSection(Section):
         return self._polygon
 
     @property
+    def ring_coords(self):
+        """
+        Return the rings that make up the polygon. Returned as a list of rings.
+
+        The exterior is ordered CCW, and any holes are ordered CW.
+        """
+
+        rings = [self.polygon.exterior.coords]
+
+        for r in self.polygon.interiors:
+            rings.append(r.coords)
+
+        return rings
+
+    @property
     def area(self):
         return self.polygon.area
 
