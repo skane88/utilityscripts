@@ -6,12 +6,14 @@ import math
 from typing import List, Tuple, Union
 import abc
 
-from shapely.geometry import Point, Polygon, polygon
+from shapely.geometry import Point, Polygon, polygon, MultiPoint
 from shapely.coords import CoordinateSequence
 import shapely.affinity as aff
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import PathPatch
+from matplotlib.path import Path
 
 
 class Section(abc.ABC):
@@ -723,3 +725,63 @@ def calculate_principal_moments(Iuu, Ivv, Iuv):
     alpha = math.atan2(-Iuv, diff) / 2
 
     return (I11, I22, alpha)
+
+
+def build_path(poly: Polygon) -> Path:
+    """
+    Builds a matplotlib Path that describes a shapely Polygon.
+
+    Method inspired by the descartes library, but implemented independently here to
+    minimise dependencies. Also see:
+
+    https://sgillies.net/2010/04/06/painting-punctured-polygons-with-matplotlib.html
+    https://bitbucket.org/sgillies/descartes/src/default/descartes/patch.py
+
+    :param poly: A shapely Polygon object, with or without holes. Note that the object
+        must be orientated with exterior rings CCW and interior rings CW.
+    :return: A matplotlib Path object.
+    """
+
+    def get_codes(ring) -> np.ndarray:
+        """
+        Get the path codes for a coordinate ring.
+
+        These codes will all be "LINETO" except for a "MOVETO" at the start.
+
+        :param ring: A coordinate ring.
+        :return: A numpy array containing the path codes.
+        """
+
+        codes = np.ones(len(ring.coords), dtype=Path.code_type) * Path.LINETO
+        codes[0] = Path.MOVETO
+        return codes
+
+    # build a numpy array of the vertices
+    vertices = np.concatenate(
+        [np.asarray(poly.exterior)] + [np.asarray(c) for c in poly.interiors]
+    )
+    codes = np.concatenate(
+        [get_codes(poly.exterior)] + [get_codes(c) for c in poly.interiors]
+    )
+
+    return Path(vertices, codes)
+
+
+def build_patch(poly: Polygon, **kwargs):
+    """
+    Constructs a matplotlib patch from a shapely Polygon.
+
+
+    Method inspired by the descartes library, but implemented independently here to
+    minimise dependencies. Also see:
+
+    https://sgillies.net/2010/04/06/painting-punctured-polygons-with-matplotlib.html
+    https://bitbucket.org/sgillies/descartes/src/default/descartes/patch.py
+
+    :param poly: A shapely Polygon object, with or without holes. Note that the object
+        must be orientated with exterior rings CCW and interior rings CW.
+    :param kwargs: Any acceptable kwargs for the matplotlib.patches.Polygon class.
+    :return: A matplotlib PathPatch describing the polygon
+    """
+
+    return PathPatch(build_path(poly), **kwargs)
