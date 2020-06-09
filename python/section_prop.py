@@ -198,16 +198,39 @@ class Section(abc.ABC):
 
         raise NotImplementedError
 
-    def plot(self):
+    def plot(self, face_color: str = "#cccccc", edge_color: str = "black", **kwargs):
         """
         Plot the section using matplotlib.
+
+        Relies on the section returning a shapely polygon and the build_patch method.
+
+        Method is intended to be over-ridden by Section classes that contain multiple
+        polygons etc.
+        :param face_color: The face color of the section.
+        :param edge_color: The edge color of the section.
+        :param kwargs: Any valid parameters for the matplotlib.patches.Polygon object.
         """
 
-        for i in self.x_and_ys:
-            x, y = i
-            plt.plot(x, y)
+        patch = build_patch(self.polygon, fc=face_color, ec=edge_color, **kwargs)
 
-        plt.show()
+        fig, ax = plt.subplots()
+        ax.add_patch(patch)
+
+        bbx = self.bounding_box
+
+        x = bbx[2] - bbx[0]
+        y = bbx[3] - bbx[1]
+
+        min_x = bbx[0] - x / 4
+        max_x = bbx[2] + x / 4
+        min_y = bbx[1] - y / 4
+        max_y = bbx[3] + y / 4
+
+        ax.set_xlim(min_x, max_x)
+        ax.set_ylim(min_y, max_y)
+        ax.set_aspect(1.0)
+
+        fig.show()
 
 
 class GenericSection(Section):
