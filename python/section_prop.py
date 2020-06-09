@@ -331,17 +331,20 @@ class GenericSection(Section):
     @property
     def Iuu(self):
 
-        raise NotImplementedError
+        # note: could be sped up by caching a copy of the move_to_centre polygon
+        return self.move_to_centre().Ixx
 
     @property
     def Ivv(self):
 
-        raise NotImplementedError
+        # note: could be sped up by caching a copy of the move_to_centre polygon
+        return self.move_to_centre().Iyy
 
     @property
     def Iuv(self):
 
-        raise NotImplementedError
+        # note: could be sped up by caching a copy of the move_to_centre polygon
+        return self.move_to_centre().Ixy
 
     @property
     def principal_angle(self):
@@ -397,7 +400,8 @@ class GenericSection(Section):
 
     def move_to_centre(self):
 
-        return
+        c = self.centroid
+        return GenericSection(poly=aff.translate(self.polygon, xoff=-c.x, yoff=-c.y))
 
 
 class Rectangle(Section):
