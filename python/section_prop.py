@@ -257,7 +257,8 @@ class GenericSection(Section):
         followed by translation.
 
         :param poly: a shapely polygon object.
-        :param rotation: An angle value to rotate the polygon about. Angle is in degrees.
+        :param rotation: An angle value to rotate the polygon about.
+            Angle is in radians.
         :param rotation_centre: An optional point to complete the rotation about. If
             not given, rotation is about the centroid.
         :param translation: An optional translation to apply to the shape. Note that any
@@ -277,7 +278,7 @@ class GenericSection(Section):
                 rotation_centre = "centroid"
 
             poly = aff.rotate(
-                poly, angle=rotation, origin=rotation_centre, use_radians=False
+                poly, angle=rotation, origin=rotation_centre, use_radians=True
             )
 
         if not translation is None:
