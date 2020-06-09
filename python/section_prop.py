@@ -127,6 +127,33 @@ class Section(abc.ABC):
 
     @property
     @abc.abstractmethod
+    def I11(self):
+        """
+        The major principal moment of inertia.
+        """
+
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def I22(self):
+        """
+        The minor principal moment of inertia.
+        """
+
+        raise NotImplementedError
+
+    @property
+    def I12(self):
+        """
+        The product moment of inertia about the principal axes. By definition this is
+        always 0.
+        """
+
+        return 0.0
+
+    @property
+    @abc.abstractmethod
     def principal_angle(self):
         """
         The principal axis angle.
@@ -348,9 +375,19 @@ class GenericSection(Section):
         return self.move_to_centre().Ixy
 
     @property
+    def I11(self):
+
+        return calculate_principal_moments(self.Ixx, self.Iyy, self.Ixy)[0]
+
+    @property
+    def I22(self):
+
+        return calculate_principal_moments(self.Ixx, self.Iyy, self.Ixy)[1]
+
+    @property
     def principal_angle(self):
 
-        raise NotImplementedError
+        return calculate_principal_moments(self.Ixx, self.Iyy, self.Ixy)[2]
 
     @property
     def J(self):
@@ -724,7 +761,9 @@ def Ixy_from_coords(coords):
     )
 
 
-def calculate_principal_moments(Iuu, Ivv, Iuv):
+def calculate_principal_moments(
+    Iuu: float, Ivv: float, Iuv: float
+) -> Tuple[float, float, float]:
     """
     Calculates the principal moments of inertia and their axis given the moments of
     inertia about 2x other axes and the product of inertia.
