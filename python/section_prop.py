@@ -359,19 +359,22 @@ class GenericSection(Section):
     @property
     def Iuu(self):
 
-        # note: could be sped up by caching a copy of the move_to_centre polygon
+        # note: could be sped up by using the relationship Iuu = Ixx + A*y**2
+        # but this loses some accuracy due to floating point operations.
         return self.move_to_centre().Ixx
 
     @property
     def Ivv(self):
 
-        # note: could be sped up by caching a copy of the move_to_centre polygon
+        # note: could be sped up by using the relationship Ivv = Iyy + A*x**2
+        # but this loses some accuracy due to floating point operations.
         return self.move_to_centre().Iyy
 
     @property
     def Iuv(self):
 
-        # note: could be sped up by caching a copy of the move_to_centre polygon
+        # note: could be sped up by using the relationship Iuv = Ixy + A*x*y
+        # but this loses some accuracy due to floating point operations.
         return self.move_to_centre().Ixy
 
     @property
