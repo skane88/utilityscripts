@@ -353,8 +353,7 @@ class GenericSection(Section):
     """
     A generic section that can contain any shape formed from polygons.
 
-    Intended to be used as the base class of any shape formed from a single ring of
-    points. Currently not allowed to have holes, holes may be added in the future.
+    Intended to be used as the base class of any shape formed from a polygon.
     """
 
     def __init__(
@@ -426,9 +425,29 @@ class GenericSection(Section):
         return sum([Iyy_from_coords(r) for r in self.coords])
 
     @property
+    def Izz(self):
+
+        return super().Izz
+
+    @property
     def Ixy(self):
 
         return sum([Ixy_from_coords(r) for r in self.coords])
+
+    @property
+    def rxx(self):
+
+        return super().rxx
+
+    @property
+    def ryy(self):
+
+        return super().ryy
+
+    @property
+    def rzz(self):
+
+        return super().rzz
 
     @property
     def Iuu(self):
@@ -445,11 +464,31 @@ class GenericSection(Section):
         return self.move_to_centre().Iyy
 
     @property
+    def Iww(self):
+
+        return super().Iww
+
+    @property
     def Iuv(self):
 
         # note: could be sped up by using the relationship Iuv = Ixy + A*x*y
         # but this loses some accuracy due to floating point operations.
         return self.move_to_centre().Ixy
+
+    @property
+    def ruu(self):
+
+        return super().ruu
+
+    @property
+    def rvv(self):
+
+        return super().rvv
+
+    @property
+    def rww(self):
+
+        return super().rww
 
     @property
     def I11(self):
@@ -462,12 +501,42 @@ class GenericSection(Section):
         return calculate_principal_moments(self.Ixx, self.Iyy, self.Ixy)[1]
 
     @property
+    def I33(self):
+
+        return super().I33
+
+    @property
+    def I12(self):
+
+        return super().I12
+
+    @property
+    def r11(self):
+
+        return super().r11
+
+    @property
+    def r22(self):
+
+        return super().r22
+
+    @property
+    def r33(self):
+
+        return super().r33
+
+    @property
     def principal_angle(self):
 
         return calculate_principal_moments(self.Ixx, self.Iyy, self.Ixy)[2]
 
     @property
     def J(self):
+
+        raise NotImplementedError
+
+    @property
+    def Iw(self):
 
         raise NotImplementedError
 
