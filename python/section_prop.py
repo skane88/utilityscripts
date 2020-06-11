@@ -87,6 +87,14 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
+    def Izz(self):
+        """
+        The polar second moment of inertia about the x-x and y-y axes.
+        """
+
+        return self.Ixx + self.Iyy
+
+    @property
     @abc.abstractmethod
     def Ixy(self):
         """
@@ -96,10 +104,34 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
+    def rxx(self):
+        """
+        The radius of gyration about the x-x axis.
+        """
+
+        return (self.Ixx / self.area) ** 0.5
+
+    @property
+    def ryy(self):
+        """
+        The radius of gyration about the y-y axis.
+        """
+
+        return (self.Iyy / self.area) ** 0.5
+
+    @property
+    def rzz(self):
+        """
+        The polar radius of gyration about the x-x & y-y axes.
+        """
+
+        return (self.Izz / self.area) ** 0.5
+
+    @property
     @abc.abstractmethod
     def Iuu(self):
         """
-        The moment of inertia about an axis parallel with the GEOMETRIC x-x axis, but
+        The moment of inertia about an axis parallel with the global x-x axis, but
         through the centroid of the section.
         """
 
@@ -109,11 +141,20 @@ class Section(abc.ABC):
     @abc.abstractmethod
     def Ivv(self):
         """
-        The moment of inertia about an axis parallel with the GEOMETRIC y-y axis, but
+        The moment of inertia about an axis parallel with the global y-y axis, but
         through the centroid of the section.
         """
 
         raise NotImplementedError
+
+    @property
+    def Iww(self):
+        """
+        The polar second moment of inertia about the x-x and y-y axes but through the
+        centroid of the section.
+        """
+
+        return self.Iuu + self.Ivv
 
     @property
     @abc.abstractmethod
@@ -124,6 +165,33 @@ class Section(abc.ABC):
         """
 
         raise NotImplementedError
+
+    @property
+    def ruu(self):
+        """
+        The radius of gyration about the global x-x axis but through the centroid of the
+        section.
+        """
+
+        return (self.Iuu / self.area) ** 0.5
+
+    @property
+    def rvv(self):
+        """
+        The radius of gyration about the global y-y axis but through the centroid of the
+        section.
+        """
+
+        return (self.Ivv / self.area) ** 0.5
+
+    @property
+    def rww(self):
+        """
+        The polar radius of gyration about the global x-x and y-y axes but through the
+        centroid of the section.
+        """
+
+        return (self.Iww / self.area) ** 0.5
 
     @property
     @abc.abstractmethod
@@ -144,6 +212,14 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
+    def I33(self):
+        """
+        The polar moment of inertia about the principal axes.
+        """
+
+        return self.I11 + self.I22
+
+    @property
     def I12(self):
         """
         The product moment of inertia about the principal axes. By definition this is
@@ -153,10 +229,34 @@ class Section(abc.ABC):
         return 0.0
 
     @property
+    def r11(self):
+        """
+        The radius of gyration about the 1-1 principal axis.
+        """
+
+        return (self.I11 / self.area) ** 0.5
+
+    @property
+    def r22(self):
+        """
+        The radius of gyration about the 2-2 principal axis.
+        """
+
+        return (self.I22 / self.area) ** 0.5
+
+    @property
+    def r33(self):
+        """
+        The polar radius of gyration about the major principal axes.
+        """
+
+        return (self.I33 / self.area) ** 0.5
+
+    @property
     @abc.abstractmethod
     def principal_angle(self):
         """
-        The principal axis angle.
+        The principal axis angle in radians.
         """
 
         raise NotImplementedError
