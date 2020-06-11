@@ -542,12 +542,12 @@ class GenericSection(Section):
     @property
     def I11(self):
 
-        return calculate_principal_moments(self.Ixx, self.Iyy, self.Ixy)[0]
+        return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[0]
 
     @property
     def I22(self):
 
-        return calculate_principal_moments(self.Ixx, self.Iyy, self.Ixy)[1]
+        return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[1]
 
     @property
     def I33(self):
@@ -577,7 +577,7 @@ class GenericSection(Section):
     @property
     def principal_angle(self):
 
-        return calculate_principal_moments(self.Ixx, self.Iyy, self.Ixy)[2]
+        return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[2]
 
     @property
     def J(self):
