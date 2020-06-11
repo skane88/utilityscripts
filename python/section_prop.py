@@ -388,21 +388,6 @@ class GenericSection(Section):
         return self._polygon
 
     @property
-    def coords(self):
-
-        coords = [self.polygon.exterior.coords]
-
-        for r in self.polygon.interiors:
-            coords.append(r.coords)
-
-        return coords
-
-    @property
-    def no_exteriors(self) -> int:
-
-        return 1
-
-    @property
     def area(self):
         return self.polygon.area
 
