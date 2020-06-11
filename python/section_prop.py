@@ -308,23 +308,7 @@ class Section(abc.ABC):
 
         raise NotImplementedError
 
-    @property
     @abc.abstractmethod
-    def x_and_ys(self) -> List[Tuple[List[float], List[float]]]:
-        """
-        Return the x and y points that define the section. If the shape or parts of it
-        are circular, returns an approximation in straight line segments.
-
-        Given points p_0, ..., p_n defining the section, the method will return:
-
-        [([x_0, ..., x_n, x_0], [y_0, ..., y_n, y_0])]
-
-        The surrounding list is added to allow objects containing multiple sections, or
-        sections with holes to return multiple lists of xs and ys.
-        """
-
-        raise NotImplementedError
-
     def plot(self, face_color: str = "#cccccc", edge_color: str = "black", **kwargs):
         """
         Plot the section using matplotlib.
@@ -358,6 +342,15 @@ class Section(abc.ABC):
         ax.set_aspect(1.0)
 
         fig.show()
+
+    @abc.abstractmethod
+    def move_to_centre(self):
+        """
+        Returns a copy of the object moved so that it's centroid is at the global origin
+        (0,0)
+        """
+
+        raise NotImplementedError
 
 
 class GenericSection(Section):
@@ -507,27 +500,9 @@ class GenericSection(Section):
 
         return self.polygon.bounds
 
-    @property
-    def x_and_ys(self):
+    def plot(self, face_color: str = "#cccccc", edge_color: str = "black", **kwargs):
 
-        retval = []
-
-        rings = [self.polygon.exterior]
-
-        for i in self.polygon.interiors:
-            rings.append(i)
-
-        for r in rings:
-            x = []
-            y = []
-
-            for p in r:
-                x.append(p[0])
-                y.append(p[1])
-
-            retval.append((x, y))
-
-        return retval
+        super().plot(face_color=face_color, edge_color=edge_color, **kwargs)
 
     def move_to_centre(self):
 
