@@ -32,35 +32,6 @@ class Section(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def coords(self):
-        """
-        Return the coordinates of the shape that makes up the section.
-
-        Returned as a list of coordinate sequences. The first is the exterior polygon or
-        its approximation. For sections with multiple exteriors there may be multiple
-        exterior sequences.
-
-        Any additional sequences representing interior holes / voids.
-
-        The returned list does not contain any explicit information about which are
-        exterior or interior sequences. Use the no_exteriors property if required.
-
-        The exterior/s is ordered CCW, and any holes / voids are ordered CW.
-        """
-
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
-    def no_exteriors(self) -> int:
-        """
-        The no. of exterior shapes that make up the section.
-        """
-
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
     def area(self):
         """
         The cross sectional area of the section.
