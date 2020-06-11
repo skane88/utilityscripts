@@ -280,22 +280,22 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
-    @abc.abstractmethod
     def depth(self):
         """
         The depth of the section (max(y) - min(y)).
         """
 
-        raise NotImplementedError
+        bbx = self.bounding_box
+        return bbx[3] - bbx[1]
 
     @property
-    @abc.abstractmethod
     def width(self):
         """
         The width of the section (max(x) - min(x)).
         """
 
-        raise NotImplementedError
+        bbx = self.bounding_box
+        return bbx[2] - bbx[0]
 
     @property
     @abc.abstractmethod
@@ -501,16 +501,6 @@ class GenericSection(Section):
     def centroid(self):
 
         return self.polygon.centroid
-
-    @property
-    def depth(self):
-
-        raise NotImplementedError
-
-    @property
-    def width(self):
-
-        raise NotImplementedError
 
     @property
     def bounding_box(self) -> List[float]:
