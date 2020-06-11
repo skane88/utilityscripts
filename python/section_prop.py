@@ -603,10 +603,31 @@ class GenericSection(Section):
 
         super().plot(face_color=face_color, edge_color=edge_color, **kwargs)
 
+    def move(self, x: float, y: float):
+
+        raise NotImplementedError
+
     def move_to_centre(self):
 
         c = self.centroid
         return GenericSection(poly=aff.translate(self.polygon, xoff=-c.x, yoff=-c.y))
+
+    def move_to_point(
+        self,
+        origin: Union[str, Point, Tuple[float, float]],
+        end_point: Union[Point, Tuple[float, float]],
+    ):
+
+        raise NotImplementedError
+
+    def rotate(
+        self,
+        angle: float,
+        origin: Union[str, Point, Tuple[float, float]] = "origin",
+        use_radians: bool = True,
+    ):
+
+        raise NotImplementedError
 
 
 class Rectangle(Section):
