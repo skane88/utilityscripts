@@ -256,6 +256,15 @@ class Section(abc.ABC):
 
     @property
     @abc.abstractmethod
+    def Iw(self):
+        """
+        The warping constant of the section.
+        """
+
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
     def centroid(self):
         """
         The location of the centroid of the section.
