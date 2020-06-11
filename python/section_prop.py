@@ -25,7 +25,10 @@ class Section(abc.ABC):
     @abc.abstractmethod
     def polygon(self) -> Polygon:
         """
-        A shapely Polygon that represents the section.
+        A shapely Polygon that represents the section. For some Sections this may be the
+        actual object on which calculations are done (e.g. GenericSection objects) but
+        for others it may be merely by a convenient representation for plotting purposes
+        etc.
         """
 
         raise NotImplementedError
