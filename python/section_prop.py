@@ -323,10 +323,66 @@ class Section(abc.ABC):
         fig.show()
 
     @abc.abstractmethod
+    def move(self, x: float, y: float):
+        """
+        Returns a copy of the object moved by the provided offsets.
+
+        :param x: The x-offset
+        :param y: The y offset
+        """
+
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def move_to_centre(self):
         """
-        Returns a copy of the object moved so that it's centroid is at the global origin
+        Returns a copy of the object moved so that its centroid is at the global origin
         (0,0)
+        """
+
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def move_to_point(
+        self,
+        origin: Union[str, Point, Tuple[float, float]],
+        end_point: Union[Point, Tuple[float, float]],
+    ):
+        """
+        Returns a copy of the object translated from the point ``origin`` to the point
+        ``end_point``.
+
+        :param origin: The starting point of the movement. Can either be:
+            A string: use 'centroid' for the object's geometric centroid,
+            'center' for the bounding box center, or 'origin' for the global (0, 0)
+            origin.
+            A shapely Point object.
+            A co-ordinate Tuple (x, y).
+        :param end_point: The end point of the move.
+        """
+
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def rotate(
+        self,
+        angle: float,
+        origin: Union[str, Point, Tuple[float, float]] = "origin",
+        use_radians: bool = True,
+    ):
+        """
+        Returns a copy of the object rotated about a given point.
+
+        :param angle: The angle to rotate. Positive CCW, Negative CW.
+        :param origin: The centroid of the rotation. Either provide:
+
+            A string: use 'centroid' for the object's geometric centroid,
+            'center' for the bounding box center, or 'origin' for the global (0, 0)
+            origin.
+            A Shapely Point object.
+            A coordinate Tuple (x, y).
+
+        :param use_radians: Is the angle specified in radians or not?
         """
 
         raise NotImplementedError
