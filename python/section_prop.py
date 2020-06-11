@@ -395,6 +395,16 @@ class GenericSection(Section):
         return self.polygon.area
 
     @property
+    def coords(self):
+        """
+        Return the coordinates that make up the shape.
+        """
+
+        return [self.polygon.exterior.coords] + [
+            r.coords for r in self.polygon.interiors
+        ]
+
+    @property
     def Ixx(self):
 
         return sum([Ixx_from_coords(r) for r in self.coords])
