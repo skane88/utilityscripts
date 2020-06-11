@@ -274,26 +274,6 @@ class Section(abc.ABC):
 
     @property
     @abc.abstractmethod
-    def depth(self):
-        """
-        The depth of the section (max(y) - min(y)).
-        """
-
-        bbx = self.bounding_box
-        return bbx[3] - bbx[1]
-
-    @property
-    @abc.abstractmethod
-    def width(self):
-        """
-        The width of the section (max(x) - min(x)).
-        """
-
-        bbx = self.bounding_box
-        return bbx[2] - bbx[0]
-
-    @property
-    @abc.abstractmethod
     def bounding_box(self) -> List[float]:
         """
         The bounding box of the section:
