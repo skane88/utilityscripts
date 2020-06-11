@@ -317,6 +317,7 @@ class Section(abc.ABC):
 
         Method is intended to be over-ridden by Section classes that contain multiple
         polygons etc.
+
         :param face_color: The face color of the section.
         :param edge_color: The edge color of the section.
         :param kwargs: Any valid parameters for the matplotlib.patches.Polygon object.
