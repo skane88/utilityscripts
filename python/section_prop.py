@@ -287,21 +287,37 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def plot(self, face_color: str = "#cccccc", edge_color: str = "black", **kwargs):
+    def matplotlib_patch(self, **kwargs):
+        """
+        Constructs a matplotlib patch of the shape for use in plotting. Relies on the
+        section returning a shapely Polygon and the build_patch function.
+
+        :param kwargs: Any valid parameters for the matplotlib.patches.Polygon object.
+        """
+
+        return build_patch(self.polygon, **kwargs)
+
+    @abc.abstractmethod
+    def plot(self, **kwargs):
         """
         Plot the section using matplotlib.
 
-        Relies on the section returning a shapely polygon and the build_patch method.
+        Relies on the section returning a shapely polygon and the build_patch function.
 
         Method is intended to be over-ridden by Section classes that contain multiple
         polygons etc.
 
-        :param face_color: The face color of the section.
-        :param edge_color: The edge color of the section.
         :param kwargs: Any valid parameters for the matplotlib.patches.Polygon object.
         """
 
-        patch = build_patch(self.polygon, fc=face_color, ec=edge_color, **kwargs)
+        # set a default format that looks good for cross sections.
+        if "fc" not in kwargs and "face_color" not in kwargs:
+            kwargs["fc"] = "#cccccc"
+
+        if "ec" not in kwargs and "edge_color" not in kwargs:
+            kwargs["ec"] = "black"
+
+        patch = self.matplotlib_patch(**kwargs)
 
         fig, ax = plt.subplots()
         ax.add_patch(patch)
@@ -647,9 +663,13 @@ class GenericSection(Section):
 
         return self.polygon.bounds
 
-    def plot(self, face_color: str = "#cccccc", edge_color: str = "black", **kwargs):
+    def matplotlib_patch(self, **kwargs):
 
-        super().plot(face_color=face_color, edge_color=edge_color, **kwargs)
+        return super().matplotlib_patch(**kwargs)
+
+    def plot(self, **kwargs):
+
+        super().plot(**kwargs)
 
     def move(self, x: float, y: float):
 
