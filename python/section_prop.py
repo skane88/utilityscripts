@@ -330,13 +330,16 @@ class Section(abc.ABC):
         x = bbx[2] - bbx[0]
         y = bbx[3] - bbx[1]
 
-        min_x = bbx[0] - x / 4
-        max_x = bbx[2] + x / 4
-        min_y = bbx[1] - y / 4
-        max_y = bbx[3] + y / 4
+        min_x = bbx[0] - x / 8
+        max_x = bbx[2] + x / 8
+        min_y = bbx[1] - y / 8
+        max_y = bbx[3] + y / 8
 
-        ax.set_xlim(min_x, max_x)
-        ax.set_ylim(min_y, max_y)
+        min_val = min(min_x, min_y)
+        max_val = max(max_x, max_y)
+
+        ax.set_xlim(min_val, max_val)
+        ax.set_ylim(min_val, max_val)
         ax.set_aspect(1.0)
 
         fig.show()
