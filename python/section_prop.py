@@ -387,6 +387,54 @@ class Section(abc.ABC):
 
         raise NotImplementedError
 
+    def _make_origin_tuple(self, origin):
+        """
+        Make a Tuple of x, y co-ordinates given an input string or shapely Point
+
+        :param origin: The centroid of the rotation. Either provide:
+
+            A string: use 'centroid' for the object's geometric centroid,
+            'center' for the bounding box center, or 'origin' for the global (0, 0)
+            origin.
+            A Shapely Point object.
+        """
+
+        if isinstance(origin, str):
+            origin = self._origin_from_string(origin)
+        elif isinstance(origin, Point):
+            # convert things to tuple for use later
+            origin = (origin.x, origin.y)
+
+        return origin
+
+    def _origin_from_string(self, origin):
+        """
+        Make a Tuple of x, y co-ordinates given an input string or shapely Point
+
+        :param origin: The centroid of the rotation. Either provide:
+
+            A string: use 'centroid' for the object's geometric centroid,
+            'center' for the bounding box center, or 'origin' for the global (0, 0)
+            origin.
+            """
+
+        ctr = self.centroid
+
+        if origin == "center":
+            bbx = self.bounding_box
+            origin = ((bbx[0] + bbx[2]) / 2, (bbx[3] + bbx[1]) / 2)
+        elif origin == "centroid":
+            origin = (ctr.x, ctr.y)
+        elif origin == "origin":
+            origin = (0, 0)
+
+        else:
+            raise ValueError(
+                f"Expected origin to be either "
+                + f"'center', 'centroid' or 'origin', got {origin}"
+            )
+        return origin
+
 
 class GenericSection(Section):
     """
@@ -605,7 +653,7 @@ class GenericSection(Section):
 
     def move(self, x: float, y: float):
 
-        raise NotImplementedError
+        return GenericSection(poly=aff.translate(geom=self.polygon, xoff=x, yoff=y))
 
     def move_to_centre(self):
 
@@ -618,7 +666,15 @@ class GenericSection(Section):
         end_point: Union[Point, Tuple[float, float]],
     ):
 
-        raise NotImplementedError
+        origin = self._make_origin_tuple(origin)
+
+        if isinstance(end_point, Point):
+            end_point = (end_point.x, end_point.y)
+
+        xoff = end_point[0] - origin[0]
+        yoff = end_point[1] - origin[1]
+
+        return GenericSection(poly=aff.translate(self.polygon, xoff=xoff, yoff=yoff))
 
     def rotate(
         self,
@@ -627,7 +683,13 @@ class GenericSection(Section):
         use_radians: bool = True,
     ):
 
-        raise NotImplementedError
+        origin = self._make_origin_tuple(origin)
+
+        return GenericSection(
+            poly=aff.rotate(
+                self.polygon, angle=angle, origin=origin, use_radians=use_radians
+            )
+        )
 
 
 class Rectangle(Section):
