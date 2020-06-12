@@ -15,6 +15,9 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import PathPatch
 from matplotlib.path import Path
 
+DEFAULT_FACE_COLOR = "#CCCCCC"
+DEFAULT_EDGE_COLOR = "#999999"
+
 
 class Section(abc.ABC):
     """
@@ -312,10 +315,10 @@ class Section(abc.ABC):
 
         # set a default format that looks good for cross sections.
         if "fc" not in kwargs and "face_color" not in kwargs:
-            kwargs["fc"] = "#cccccc"
+            kwargs["fc"] = DEFAULT_FACE_COLOR
 
         if "ec" not in kwargs and "edge_color" not in kwargs:
-            kwargs["ec"] = "black"
+            kwargs["ec"] = DEFAULT_EDGE_COLOR
 
         patch = self.matplotlib_patch(**kwargs)
 
