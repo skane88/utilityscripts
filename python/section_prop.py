@@ -457,6 +457,16 @@ class Section(abc.ABC):
             )
         return origin
 
+    def __repr__(self):
+        return (
+            f"{type(self).__name__}: centroid="
+            + f"{self.centroid} "
+            + ", bounding box="
+            + f"{self.bounding_box}"
+            + ", area="
+            + f"{self.area}"
+        )
+
 
 class GenericSection(Section):
     """
