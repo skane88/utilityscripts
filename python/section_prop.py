@@ -457,6 +457,31 @@ class Section(abc.ABC):
             )
         return origin
 
+    @abc.abstractmethod
+    def split(self, angle: float = 0, offset: float = 0, use_radians=True):
+        """
+        Split the section into two about a given axis. This method is intended to allow
+        the following operations to be implemented:
+
+            * Calculation of first moments of area of a portion of the section.
+            * Finding the equal area axis for calculation of plastic section properties.
+            * Splitting the
+
+        Returns a List containing at least one Section. If the line does not cut the
+        section, a copy of the original section is returned. If the line cuts the
+        section at least 2x Sections will be returned. If the section on one side of the
+        line is non-continuous, it will be returned as multiple sections, so there is
+        the potential that there will be more than 2x sections returned.
+
+        :param angle: An angle to orientate the split line. The origin is the centroid
+            of the body, CCW from the u-u axis is +ve, CW is -ve
+        :param offset: An offset to move the split line. +ve moves the line in the +ve
+            y direction, or its equivalent after rotation.
+        :param use_radians: If True, use Radians as the angle measure.
+        """
+
+        raise NotImplementedError
+
     def __repr__(self):
         return (
             f"{type(self).__name__}: centroid="
