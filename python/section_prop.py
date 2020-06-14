@@ -16,7 +16,7 @@ from matplotlib.patches import PathPatch
 from matplotlib.path import Path
 
 DEFAULT_FACE_COLOR = "#CCCCCC"
-DEFAULT_EDGE_COLOR = "#999999"
+DEFAULT_EDGE_COLOR = "#666666"
 
 
 class Section(abc.ABC):
