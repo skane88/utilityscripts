@@ -752,6 +752,10 @@ class GenericSection(Section):
             )
         )
 
+    def split(self, angle: float = 0, offset: float = 0, use_radians=True):
+
+        raise NotImplementedError
+
 
 class Rectangle(Section):
     def __init__(self, length, height):
