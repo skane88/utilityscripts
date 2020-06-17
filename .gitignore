@@ -102,3 +102,6 @@ ENV/
 
 # vs code settings
 .vscode
+
+# PyCharm files
+.idea/
