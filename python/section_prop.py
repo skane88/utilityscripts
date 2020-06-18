@@ -304,6 +304,34 @@ class Section(abc.ABC):
 
         return build_patch(self.polygon, **kwargs)
 
+    def _find_bounds(self, free_edge: float = 0.25):
+        """
+        A helper method to find the bounds of the section for plotting purposes.
+        Uses the bounding box and expands it to allow for some free space.
+
+        Note that the returned values form a square, not just the original bounding box,
+        hence the use of a separate method.
+
+        :param free_edge: how much free space around the edge should be displayed, as a
+            fraction of the biggest side of the bounding box.
+        """
+
+        bbx = self.bounding_box
+
+        x_range = bbx[2] - bbx[0]
+        y_range = bbx[3] - bbx[1]
+        max_range = max(x_range, y_range) * (1 + free_edge)
+
+        x_centre = (bbx[2] + bbx[0]) * 0.5
+        y_centre = (bbx[3] + bbx[1]) * 0.5
+
+        return (
+            (x_centre - max_range / 2),
+            (y_centre - max_range / 2),
+            (x_centre + max_range / 2),
+            (y_centre + max_range / 2),
+        )
+
     @abc.abstractmethod
     def plot(self, **kwargs):
         """
@@ -329,19 +357,7 @@ class Section(abc.ABC):
         fig, ax = plt.subplots()
         ax.add_patch(patch)
 
-        bbx = self.bounding_box
-
-        x_range = bbx[2] - bbx[0]
-        y_range = bbx[3] - bbx[1]
-        max_range = max(x_range, y_range) * 1.25
-
-        x_av = (bbx[2] + bbx[0]) * 0.5
-        y_av = (bbx[3] + bbx[1]) * 0.5
-
-        min_x = x_av - max_range / 2
-        max_x = x_av + max_range / 2
-        min_y = y_av - max_range / 2
-        max_y = y_av + max_range / 2
+        min_x, min_y, max_x, max_y = self._find_bounds()
 
         ax.set_xlim(min_x, max_x)
         ax.set_ylim(min_y, max_y)
