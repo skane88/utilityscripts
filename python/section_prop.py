@@ -331,19 +331,20 @@ class Section(abc.ABC):
 
         bbx = self.bounding_box
 
-        x = bbx[2] - bbx[0]
-        y = bbx[3] - bbx[1]
+        x_range = bbx[2] - bbx[0]
+        y_range = bbx[3] - bbx[1]
+        max_range = max(x_range, y_range) * 1.25
 
-        min_x = bbx[0] - x / 8
-        max_x = bbx[2] + x / 8
-        min_y = bbx[1] - y / 8
-        max_y = bbx[3] + y / 8
+        x_av = (bbx[2] + bbx[0]) * 0.5
+        y_av = (bbx[3] + bbx[1]) * 0.5
 
-        min_val = min(min_x, min_y)
-        max_val = max(max_x, max_y)
+        min_x = x_av - max_range / 2
+        max_x = x_av + max_range / 2
+        min_y = y_av - max_range / 2
+        max_y = y_av + max_range / 2
 
-        ax.set_xlim(min_val, max_val)
-        ax.set_ylim(min_val, max_val)
+        ax.set_xlim(min_x, max_x)
+        ax.set_ylim(min_y, max_y)
         ax.set_aspect(1.0)
 
         fig.show()
