@@ -120,7 +120,9 @@ class Section(abc.ABC):
         through the centroid of the section.
         """
 
-        raise NotImplementedError
+        # note: could be sped up by using the relationship Iuu = Ixx + A*y**2
+        # but this loses some accuracy due to floating point operations.
+        return self.move_to_centre().Ixx
 
     @property
     @abc.abstractmethod
@@ -130,7 +132,9 @@ class Section(abc.ABC):
         through the centroid of the section.
         """
 
-        raise NotImplementedError
+        # note: could be sped up by using the relationship Iuu = Ixx + A*y**2
+        # but this loses some accuracy due to floating point operations.
+        return self.move_to_centre().Iyy
 
     @property
     @abc.abstractmethod
@@ -150,7 +154,9 @@ class Section(abc.ABC):
         axes, but through the centroid of the section.
         """
 
-        raise NotImplementedError
+        # note: could be sped up by using the relationship Iuv = Ixy + A*x*y
+        # but this loses some accuracy due to floating point operations.
+        return self.move_to_centre().Ixy
 
     @property
     @abc.abstractmethod
@@ -189,7 +195,7 @@ class Section(abc.ABC):
         The major principal moment of inertia.
         """
 
-        raise NotImplementedError
+        return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[0]
 
     @property
     @abc.abstractmethod
@@ -198,7 +204,7 @@ class Section(abc.ABC):
         The minor principal moment of inertia.
         """
 
-        raise NotImplementedError
+        return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[1]
 
     @property
     @abc.abstractmethod
@@ -253,7 +259,7 @@ class Section(abc.ABC):
         The principal axis angle in radians.
         """
 
-        raise NotImplementedError
+        return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[2]
 
     @property
     @abc.abstractmethod
@@ -494,6 +500,9 @@ class Section(abc.ABC):
         multiple sections, so there is the potential that there will be more than 2x
         sections returned.
 
+        No attempt is made to sort the returned sections by their position relative to the
+        split line.
+
         :param line: The line to split the section on.
         """
 
@@ -585,16 +594,12 @@ class GenericSection(Section):
     @property
     def Iuu(self):
 
-        # note: could be sped up by using the relationship Iuu = Ixx + A*y**2
-        # but this loses some accuracy due to floating point operations.
-        return self.move_to_centre().Ixx
+        return super().Iuu
 
     @property
     def Ivv(self):
 
-        # note: could be sped up by using the relationship Ivv = Iyy + A*x**2
-        # but this loses some accuracy due to floating point operations.
-        return self.move_to_centre().Iyy
+        return super().Ivv
 
     @property
     def Iww(self):
@@ -604,9 +609,7 @@ class GenericSection(Section):
     @property
     def Iuv(self):
 
-        # note: could be sped up by using the relationship Iuv = Ixy + A*x*y
-        # but this loses some accuracy due to floating point operations.
-        return self.move_to_centre().Ixy
+        return super().Iuv
 
     @property
     def ruu(self):
@@ -626,12 +629,12 @@ class GenericSection(Section):
     @property
     def I11(self):
 
-        return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[0]
+        return super().I11
 
     @property
     def I22(self):
 
-        return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[1]
+        return super().I22
 
     @property
     def I33(self):
@@ -661,7 +664,7 @@ class GenericSection(Section):
     @property
     def principal_angle(self):
 
-        return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[2]
+        return super().principal_angle
 
     @property
     def J(self):
