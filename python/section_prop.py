@@ -3,12 +3,13 @@ Calculates basic section properties
 """
 
 import math
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, TypeVar, Type
 import abc
 
-from shapely.geometry import Point, Polygon, polygon, MultiPoint
+from shapely.geometry import Point, Polygon, polygon, MultiPoint, LineString
 from shapely.coords import CoordinateSequence
 import shapely.affinity as aff
+import shapely.ops as ops
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,6 +18,9 @@ from matplotlib.path import Path
 
 DEFAULT_FACE_COLOR = "#CCCCCC"
 DEFAULT_EDGE_COLOR = "#666666"
+
+
+S = TypeVar("S", bound="Section")
 
 
 class Section(abc.ABC):
@@ -458,26 +462,22 @@ class Section(abc.ABC):
         return origin
 
     @abc.abstractmethod
-    def split(self, angle: float = 0, offset: float = 0, use_radians=True):
+    def split(self, line: LineString) -> List[S]:
         """
-        Split the section into two about a given axis. This method is intended to allow
+        Split the section into two by a line. This method is intended to allow
         the following operations to be implemented:
 
             * Calculation of first moments of area of a portion of the section.
             * Finding the equal area axis for calculation of plastic section properties.
-            * Splitting the
+            * Splitting the section into multiple sections.
 
-        Returns a List containing at least one Section. If the line does not cut the
-        section, a copy of the original section is returned. If the line cuts the
-        section at least 2x Sections will be returned. If the section on one side of the
-        line is non-continuous, it will be returned as multiple sections, so there is
-        the potential that there will be more than 2x sections returned.
+        If the line does not cut the section, the original section will be returned.
+        If the line cuts the section at least 2x Sections will be returned.
+        If the section on one side of the line is non-continuous, it will be returned as
+        multiple sections, so there is the potential that there will be more than 2x
+        sections returned.
 
-        :param angle: An angle to orientate the split line. The origin is the centroid
-            of the body, CCW from the u-u axis is +ve, CW is -ve
-        :param offset: An offset to move the split line. +ve moves the line in the +ve
-            y direction, or its equivalent after rotation.
-        :param use_radians: If True, use Radians as the angle measure.
+        :param line: The line to split the section on.
         """
 
         raise NotImplementedError
@@ -752,9 +752,11 @@ class GenericSection(Section):
             )
         )
 
-    def split(self, angle: float = 0, offset: float = 0, use_radians=True):
+    def split(self, line: LineString) -> List[S]:
 
-        raise NotImplementedError
+        polys = ops.split(self.polygon, line)
+
+        return [GenericSection(p) for p in polys]
 
 
 class Rectangle(Section):
