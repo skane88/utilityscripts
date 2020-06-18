@@ -501,53 +501,15 @@ class GenericSection(Section):
     """
 
     def __init__(
-        self,
-        poly: Polygon,
-        rotation: float = None,
-        rotation_centre: Union[Point, Tuple[float, float]] = None,
-        translation: Union[Point, Tuple[float, float]] = None,
+        self, poly: Polygon,
     ):
         """
         Initialise a generic section based on an input polygon.
 
-        The polygon can be translated and rotated as part of the initialisation.
-
-        If both translation and rotation are specified, rotation is carried out first,
-        followed by translation.
-
         :param poly: a shapely polygon object.
-        :param rotation: An angle value to rotate the polygon about.
-            Angle is in radians.
-        :param rotation_centre: An optional point to complete the rotation about. If
-            not given, rotation is about the centroid.
-        :param translation: An optional translation to apply to the shape. Note that any
-            translation is carried out AFTER rotation.
         """
 
-        poly = polygon.orient(poly)
-
-        self._input_poly = poly
-        self._rotation = rotation
-        self._rotation_centre = rotation_centre
-        self._translation = translation
-
-        if not rotation is None:
-
-            if rotation_centre is None:
-                rotation_centre = "centroid"
-
-            poly = aff.rotate(
-                poly, angle=rotation, origin=rotation_centre, use_radians=True
-            )
-
-        if not translation is None:
-
-            if isinstance(translation, Point):
-                translation = (translation.x, translation.y)
-
-            poly = aff.translate(poly, xoff=translation[0], yoff=translation[1])
-
-        self._polygon = poly
+        self._polygon = polygon.orient(poly)
 
     @property
     def polygon(self) -> Polygon:
