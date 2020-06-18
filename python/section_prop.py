@@ -721,61 +721,62 @@ class GenericSection(Section):
         return [GenericSection(p) for p in polys]
 
 
-class Rectangle(Section):
-    def __init__(self, length, height):
+class Rectangle(GenericSection):
+    def __init__(
+        self,
+        length,
+        height,
+        rotation_angle: float = 0,
+        use_radians: bool = True,
+        translation: Tuple[float, float] = None,
+    ):
+        """
+        A rectangular section. Implemented as a subclass of GenericSection to allow the
+        recording of additional properties length & height.
+
+        Unless otherwise specified, any methods inherited from the parent GenericSection
+        will NOT preserve the length & height information.
+
+        If no translation or rotation specified, the section centroid is aligned with the
+        global origin.
+
+        :param length: The length of the section. By convention aligned with the x-axis
+            pre-rotation.
+        :param height: The height of the section. By convention, aligned with the y-axis.
+        :param rotation_angle: A rotation to apply to the shape.
+        :param use_radians: Use radians when rotating or not.
+        :param translation: A Tuple containing an (x, y) translation to move the section.
+            Any translation carried out after rotation.
+        """
 
         self.length = length
         self.height = height
 
-    @property
-    def area(self):
-        return self.length * self.height
+        x = [-length / 2, length / 2, length / 2, -length / 2]
+        y = [-height / 2, -height / 2, height / 2, height / 2]
+
+        p = Polygon(zip(x, y))
+
+        if rotation_angle != 0:
+            p = aff.rotate(
+                geom=p, angle=rotation_angle, origin="centroid", use_radians=use_radians
+            )
+
+        if translation is not None:
+            p = aff.translate(p, xoff=translation[0], yoff=translation[1])
+
+        super().__init__(p)
 
     @property
-    def Ixx(self):
-
-        return self.length * self.height ** 3 / 12
-
-    @property
-    def Iyy(self):
-
-        return self.height * self.length ** 3 / 12
-
-    @property
-    def principal_angle(self):
-
-        if self.length > self.height:
-            return math.radians(90)
-
-        return 0
-
-    @property
-    def J(self):
+    def J_approx(self):
+        """
+        St Venant's torsional constant calculated using an approximate method.
+        """
 
         t = min(self.length, self.height)
         b = max(self.length, self.height)
 
         return (b * t ** 3) / 3
-
-    @property
-    def centroid(self):
-
-        return Point(self.length / 2, self.height / 2)
-
-    @property
-    def depth(self):
-
-        return self.height
-
-    @property
-    def width(self):
-
-        return self.length
-
-    @property
-    def bounding_box(self) -> List[Point]:
-
-        return [-self.length / 2, -self.height / 2, self.length / 2, self.height / 2]
 
 
 class CombinedSection(Section):
