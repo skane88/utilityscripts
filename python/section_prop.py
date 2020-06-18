@@ -263,6 +263,15 @@ class Section(abc.ABC):
 
     @property
     @abc.abstractmethod
+    def principal_angle_degrees(self):
+        """
+        The principal axis angle in degrees.
+        """
+
+        return math.degrees(self.principal_angle)
+
+    @property
+    @abc.abstractmethod
     def J(self):
         """
         The St-Venant's torsional constant of the section.
@@ -665,6 +674,11 @@ class GenericSection(Section):
     def principal_angle(self):
 
         return super().principal_angle
+
+    @property
+    def principal_angle_degrees(self):
+
+        return super().principal_angle_degrees
 
     @property
     def J(self):
