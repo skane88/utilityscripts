@@ -748,11 +748,24 @@ class GenericSection(Section):
             )
         )
 
+    def _split_poly(self, line: LineString) -> List[Polygon]:
+        """
+        A helper function for the split method. This splits the shape up into a number of
+        Polygons based on a given split line.
+
+        NOTE: the reason that this one-liner is not included in the actual split method
+        is that some other functions require splitting the shape but do not need the
+        additional overhead of a Section object.
+        (e.g. the plastic section modulus calculators which only need area and centroids)
+
+        :param line: The line to split the section on.
+        """
+
+        return ops.split(self.polygon, line)
+
     def split(self, line: LineString) -> List[S]:
 
-        polys = ops.split(self.polygon, line)
-
-        return [GenericSection(p) for p in polys]
+        return [GenericSection(p) for p in self._split_poly(line=line)]
 
 
 class Rectangle(GenericSection):
