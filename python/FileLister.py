@@ -3,7 +3,6 @@ Lists all the folders / files in a given directory, and also has the ability to 
 the list to a text file.
 """
 
-import sys
 from pathlib import Path
 
 
