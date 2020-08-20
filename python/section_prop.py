@@ -3,10 +3,10 @@ Calculates basic section properties
 """
 
 import math
-from typing import List, Tuple, Union, TypeVar, Type
+from typing import List, Tuple, Union, TypeVar
 import abc
 
-from shapely.geometry import Point, Polygon, polygon, MultiPoint, LineString
+from shapely.geometry import Point, Polygon, polygon, LineString
 from shapely.coords import CoordinateSequence
 import shapely.affinity as aff
 import shapely.ops as ops
