@@ -6,92 +6,89 @@ It relies on the Pint units package.
 Also imports math & sets up pi
 """
 
-import pint
+import unyt
 from math import pi
 
 # define a unicode pi value for pretty printing.
 π = pi
 
-# set up a unit registry
-units = pint.UnitRegistry()
-
 # units of length
-m = units.metre
-inch = units.inch
-ft = units.foot
-yd = units.yard
-mi = units.mile
+m = unyt.metre
+inch = unyt.inch
+ft = unyt.foot
+yd = unyt.yard
+mi = unyt.mile
 
 # derived units of length
-mm = units.mm
-km = units.km
-knot = units.knot
+mm = unyt.mm
+km = unyt.km
+naut_mi = 1852 * m
 
 # units of time
-s = units.second
-minutes = units.minute
-days = units.day
-weeks = units.week
-hr = units.hour
-yr = units.year
+s = unyt.second
+minutes = unyt.minute
+days = unyt.day
+weeks = 7 * days
+hr = unyt.hour
+yr = unyt.year
 
 # units of mass
-g = units.gram
-t = units.tonne
-t_us = units.ton
-lb = units.pound
-t_us = units.ton
+g = unyt.gram
+kg = unyt.kg
+t = 1000 * kg
+t_us = unyt.ton
+lb = unyt.pound
 
 # derived units of mass
-kg = units.kg
+kg = unyt.kg
 
 # units of energy
-J = units.J
+J = unyt.J
 
 # derived units of energy
-kJ = units.kJ
-MJ = units.MJ
+kJ = unyt.kJ
+MJ = unyt.MJ
 
 # units of force
-N = units.newton
-lb_f = units.pound_force
-kip = units.kip
+N = unyt.newton
+lb_f = unyt.pound_force
+kip = 1000 * lb_f
 
 # derived units of force
-kN = units.kN
-MN = units.MN
+kN = unyt.kN
+MN = unyt.MN
 
 # units of pressure
-Pa = units.pascal
-psi = units.psi
-bar = units.bar
+Pa = unyt.pascal
+psi = unyt.psi
+bar = unyt.bar
 
 # derived units of pressure
-kPa = units.kPa
-MPa = units.MPa
-GPa = units.GPa
+kPa = unyt.kPa
+MPa = unyt.MPa
+GPa = unyt.GPa
 
 # units of angle
-deg = units.degree
-rad = units.radian
+deg = unyt.degree
+rad = unyt.radian
 
 # units of temperature
-degC = units.degC
-degK = units.degK
-degF = units.degF
-ΔC = units.delta_degC
-ΔF = units.delta_degF
+degC = unyt.degC
+degK = unyt.K
+degF = unyt.degF
 
 # units of area
-ha = units.ha
+ha = (100 * m) ** 2
 
 # units of volume
-l = units.liter
-ml = units.ml
+l = 0.001 * m ** 3
+ml = l / 1000
+
+# units of velocity
+knot = 1852 * m / hr
 
 # constants
-g_acc = 9.80665 * m / s ** 2
+g_acc = unyt.standard_gravity
 
 # set default printing
-units.default_format = ".3f~P"
-
+unyt.default_format = ".3f~P"
