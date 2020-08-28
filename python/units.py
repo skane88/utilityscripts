@@ -22,20 +22,25 @@ mi = unyt.mile
 # derived units of length
 mm = unyt.mm
 km = unyt.km
-naut_mi = 1852 * m
+unyt.define_unit("naut_mi", 1852 * m)
+naut_mi = unyt.naut_mi
 
 # units of time
 s = unyt.second
 minutes = unyt.minute
 days = unyt.day
-weeks = 7 * days
+
+unyt.define_unit("week", 7 * days)
+week = unyt.week
 hr = unyt.hour
 yr = unyt.year
 
 # units of mass
 g = unyt.gram
 kg = unyt.kg
-t = 1000 * kg
+
+unyt.define_unit("t", 1000 * kg, prefixable=True)
+t = unyt.t
 t_us = unyt.ton
 lb = unyt.pound
 
@@ -52,7 +57,9 @@ MJ = unyt.MJ
 # units of force
 N = unyt.newton
 lb_f = unyt.pound_force
-kip = 1000 * lb_f
+
+unyt.define_unit("kip", 1000 * lb_f)
+kip = unyt.kip
 
 # derived units of force
 kN = unyt.kN
@@ -78,14 +85,16 @@ degK = unyt.K
 degF = unyt.degF
 
 # units of area
-ha = (100 * m) ** 2
+unyt.define_unit("ha", (100 * m) ** 2)
+ha = unyt.ha
 
 # units of volume
-l = 0.001 * m ** 3
-ml = l / 1000
+unyt.define_unit(symbol="l", value=0.001 * (m ** 3), prefixable=True)
+l = unyt.l
 
 # units of velocity
-knot = 1852 * m / hr
+unyt.define_unit(symbol="knot", value=1852 * m / hr)
+knot = unyt.knot
 
 # constants
 g_acc = unyt.standard_gravity
