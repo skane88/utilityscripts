@@ -7,10 +7,10 @@ Also imports math & sets up pi
 """
 
 import unyt
-from math import pi
+import math
 
 # define a unicode pi value for pretty printing.
-π = pi
+π = math.pi
 
 # units of length
 m = unyt.metre
