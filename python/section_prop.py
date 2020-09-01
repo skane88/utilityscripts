@@ -616,6 +616,7 @@ class GenericSection(Section):
 class Rectangle(GenericSection):
     def __init__(
         self,
+        *,
         length,
         height,
         rotation_angle: float = 0,
