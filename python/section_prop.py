@@ -4,7 +4,6 @@ Calculates basic section properties
 
 import math
 from typing import List, Tuple, Union, TypeVar
-import abc
 
 from shapely.geometry import Point, Polygon, polygon, LineString
 from shapely.coords import CoordinateSequence
@@ -23,13 +22,12 @@ DEFAULT_EDGE_COLOR = "#666666"
 S = TypeVar("S", bound="Section")
 
 
-class Section(abc.ABC):
+class Section:
     """
     Parent section class
     """
 
     @property
-    @abc.abstractmethod
     def polygon(self) -> Polygon:
         """
         A shapely Polygon that represents the section. For some Sections this may be the
@@ -41,7 +39,6 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
-    @abc.abstractmethod
     def area(self):
         """
         The cross sectional area of the section.
@@ -50,7 +47,6 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
-    @abc.abstractmethod
     def Ixx(self):
         """
         The second moment of inertia about the GEOMETRIC x-x axis.
@@ -59,7 +55,6 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
-    @abc.abstractmethod
     def Iyy(self):
         """
         The second moment of inertia about the GEOMETRIC y-y axis.
@@ -68,7 +63,6 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
-    @abc.abstractmethod
     def Izz(self):
         """
         The polar second moment of inertia about the x-x and y-y axes.
@@ -77,7 +71,6 @@ class Section(abc.ABC):
         return self.Ixx + self.Iyy
 
     @property
-    @abc.abstractmethod
     def Ixy(self):
         """
         The product of inertia about the GEOMETRIC x, y axes.
@@ -86,7 +79,6 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
-    @abc.abstractmethod
     def rxx(self):
         """
         The radius of gyration about the x-x axis.
@@ -95,7 +87,6 @@ class Section(abc.ABC):
         return (self.Ixx / self.area) ** 0.5
 
     @property
-    @abc.abstractmethod
     def ryy(self):
         """
         The radius of gyration about the y-y axis.
@@ -104,7 +95,6 @@ class Section(abc.ABC):
         return (self.Iyy / self.area) ** 0.5
 
     @property
-    @abc.abstractmethod
     def rzz(self):
         """
         The polar radius of gyration about the x-x & y-y axes.
@@ -113,7 +103,6 @@ class Section(abc.ABC):
         return (self.Izz / self.area) ** 0.5
 
     @property
-    @abc.abstractmethod
     def Iuu(self):
         """
         The moment of inertia about an axis parallel with the global x-x axis, but
@@ -125,7 +114,6 @@ class Section(abc.ABC):
         return self.move_to_centre().Ixx
 
     @property
-    @abc.abstractmethod
     def Ivv(self):
         """
         The moment of inertia about an axis parallel with the global y-y axis, but
@@ -137,7 +125,6 @@ class Section(abc.ABC):
         return self.move_to_centre().Iyy
 
     @property
-    @abc.abstractmethod
     def Iww(self):
         """
         The polar second moment of inertia about the x-x and y-y axes but through the
@@ -147,7 +134,6 @@ class Section(abc.ABC):
         return self.Iuu + self.Ivv
 
     @property
-    @abc.abstractmethod
     def Iuv(self):
         """
         The product of inertia about the axes parallel with the GEOMETRIC x-x and y-y
@@ -159,7 +145,6 @@ class Section(abc.ABC):
         return self.move_to_centre().Ixy
 
     @property
-    @abc.abstractmethod
     def ruu(self):
         """
         The radius of gyration about the global x-x axis but through the centroid of the
@@ -169,7 +154,6 @@ class Section(abc.ABC):
         return (self.Iuu / self.area) ** 0.5
 
     @property
-    @abc.abstractmethod
     def rvv(self):
         """
         The radius of gyration about the global y-y axis but through the centroid of the
@@ -179,7 +163,6 @@ class Section(abc.ABC):
         return (self.Ivv / self.area) ** 0.5
 
     @property
-    @abc.abstractmethod
     def rww(self):
         """
         The polar radius of gyration about the global x-x and y-y axes but through the
@@ -189,7 +172,6 @@ class Section(abc.ABC):
         return (self.Iww / self.area) ** 0.5
 
     @property
-    @abc.abstractmethod
     def I11(self):
         """
         The major principal moment of inertia.
@@ -198,7 +180,6 @@ class Section(abc.ABC):
         return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[0]
 
     @property
-    @abc.abstractmethod
     def I22(self):
         """
         The minor principal moment of inertia.
@@ -207,7 +188,6 @@ class Section(abc.ABC):
         return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[1]
 
     @property
-    @abc.abstractmethod
     def I33(self):
         """
         The polar moment of inertia about the principal axes.
@@ -216,7 +196,6 @@ class Section(abc.ABC):
         return self.I11 + self.I22
 
     @property
-    @abc.abstractmethod
     def I12(self):
         """
         The product moment of inertia about the principal axes. By definition this is
@@ -226,7 +205,6 @@ class Section(abc.ABC):
         return 0.0
 
     @property
-    @abc.abstractmethod
     def r11(self):
         """
         The radius of gyration about the 1-1 principal axis.
@@ -235,7 +213,6 @@ class Section(abc.ABC):
         return (self.I11 / self.area) ** 0.5
 
     @property
-    @abc.abstractmethod
     def r22(self):
         """
         The radius of gyration about the 2-2 principal axis.
@@ -244,7 +221,6 @@ class Section(abc.ABC):
         return (self.I22 / self.area) ** 0.5
 
     @property
-    @abc.abstractmethod
     def r33(self):
         """
         The polar radius of gyration about the major principal axes.
@@ -253,7 +229,6 @@ class Section(abc.ABC):
         return (self.I33 / self.area) ** 0.5
 
     @property
-    @abc.abstractmethod
     def principal_angle(self):
         """
         The principal axis angle in radians.
@@ -262,7 +237,6 @@ class Section(abc.ABC):
         return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[2]
 
     @property
-    @abc.abstractmethod
     def principal_angle_degrees(self):
         """
         The principal axis angle in degrees.
@@ -271,7 +245,6 @@ class Section(abc.ABC):
         return math.degrees(self.principal_angle)
 
     @property
-    @abc.abstractmethod
     def J(self):
         """
         The St-Venant's torsional constant of the section.
@@ -280,7 +253,6 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
-    @abc.abstractmethod
     def Iw(self):
         """
         The warping constant of the section.
@@ -289,7 +261,6 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
-    @abc.abstractmethod
     def centroid(self):
         """
         The location of the centroid of the section.
@@ -298,7 +269,6 @@ class Section(abc.ABC):
         raise NotImplementedError
 
     @property
-    @abc.abstractmethod
     def bounding_box(self) -> List[float]:
         """
         The bounding box of the section:
@@ -308,7 +278,6 @@ class Section(abc.ABC):
 
         raise NotImplementedError
 
-    @abc.abstractmethod
     def matplotlib_patch(self, **kwargs):
         """
         Constructs a matplotlib patch of the shape for use in plotting. Relies on the
@@ -347,7 +316,6 @@ class Section(abc.ABC):
             (y_centre + max_range / 2),
         )
 
-    @abc.abstractmethod
     def plot(self, **kwargs):
         """
         Plot the section using matplotlib.
@@ -380,7 +348,6 @@ class Section(abc.ABC):
 
         fig.show()
 
-    @abc.abstractmethod
     def move(self, x: float, y: float):
         """
         Returns a copy of the object moved by the provided offsets.
@@ -391,7 +358,6 @@ class Section(abc.ABC):
 
         raise NotImplementedError
 
-    @abc.abstractmethod
     def move_to_centre(self):
         """
         Returns a copy of the object moved so that its centroid is at the global origin
@@ -400,7 +366,6 @@ class Section(abc.ABC):
 
         raise NotImplementedError
 
-    @abc.abstractmethod
     def move_to_point(
         self,
         origin: Union[str, Point, Tuple[float, float]],
@@ -421,7 +386,6 @@ class Section(abc.ABC):
 
         raise NotImplementedError
 
-    @abc.abstractmethod
     def rotate(
         self,
         angle: float,
@@ -493,7 +457,6 @@ class Section(abc.ABC):
             )
         return origin
 
-    @abc.abstractmethod
     def split(self, line: LineString) -> List[S]:
         """
         Split the section into two by a line. This method is intended to allow
@@ -576,119 +539,9 @@ class GenericSection(Section):
         return sum([Iyy_from_coords(r) for r in self.coords])
 
     @property
-    def Izz(self):
-
-        return super().Izz
-
-    @property
     def Ixy(self):
 
         return sum([Ixy_from_coords(r) for r in self.coords])
-
-    @property
-    def rxx(self):
-
-        return super().rxx
-
-    @property
-    def ryy(self):
-
-        return super().ryy
-
-    @property
-    def rzz(self):
-
-        return super().rzz
-
-    @property
-    def Iuu(self):
-
-        return super().Iuu
-
-    @property
-    def Ivv(self):
-
-        return super().Ivv
-
-    @property
-    def Iww(self):
-
-        return super().Iww
-
-    @property
-    def Iuv(self):
-
-        return super().Iuv
-
-    @property
-    def ruu(self):
-
-        return super().ruu
-
-    @property
-    def rvv(self):
-
-        return super().rvv
-
-    @property
-    def rww(self):
-
-        return super().rww
-
-    @property
-    def I11(self):
-
-        return super().I11
-
-    @property
-    def I22(self):
-
-        return super().I22
-
-    @property
-    def I33(self):
-
-        return super().I33
-
-    @property
-    def I12(self):
-
-        return super().I12
-
-    @property
-    def r11(self):
-
-        return super().r11
-
-    @property
-    def r22(self):
-
-        return super().r22
-
-    @property
-    def r33(self):
-
-        return super().r33
-
-    @property
-    def principal_angle(self):
-
-        return super().principal_angle
-
-    @property
-    def principal_angle_degrees(self):
-
-        return super().principal_angle_degrees
-
-    @property
-    def J(self):
-
-        raise NotImplementedError
-
-    @property
-    def Iw(self):
-
-        raise NotImplementedError
 
     @property
     def centroid(self):
@@ -699,14 +552,6 @@ class GenericSection(Section):
     def bounding_box(self) -> List[float]:
 
         return self.polygon.bounds
-
-    def matplotlib_patch(self, **kwargs):
-
-        return super().matplotlib_patch(**kwargs)
-
-    def plot(self, **kwargs):
-
-        super().plot(**kwargs)
 
     def move(self, x: float, y: float):
 
