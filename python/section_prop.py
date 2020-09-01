@@ -334,6 +334,42 @@ class Section:
 
         raise NotImplementedError
 
+    @property
+    def elastic_modulus_xx_plus(self):
+        """
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        the x-x axis. Calculated at the most positive extreme y point.
+        """
+
+        raise NotImplementedError
+
+    @property
+    def elastic_modulus_xx_minus(self):
+        """
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        the x-x axis. Calculated at the most negative extreme y point.
+        """
+
+        raise NotImplementedError
+
+    @property
+    def elastic_modulus_yy_plus(self):
+        """
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        the y-y axis. Calculated at the most positive extreme x point.
+        """
+
+        raise NotImplementedError
+
+    @property
+    def elastic_modulus_yy_minus(self):
+        """
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        the y-y axis. Calculated at the most negative extreme x point.
+        """
+
+        raise NotImplementedError
+
     def matplotlib_patch(self, **kwargs):
         """
         Constructs a matplotlib patch of the shape for use in plotting. Relies on the
@@ -638,6 +674,26 @@ class GenericSection(Section):
     def y_minus(self) -> float:
 
         return self.y_c - self.bounding_box[1]
+
+    @property
+    def elastic_modulus_xx_plus(self):
+
+        return self.Ixx / self.y_plus
+
+    @property
+    def elastic_modulus_xx_minus(self):
+
+        return self.Ixx / self.y_minus
+
+    @property
+    def elastic_modulus_yy_plus(self):
+
+        return self.Iyy / self.x_plus
+
+    @property
+    def elastic_modulus_yy_minus(self):
+
+        return self.Iyy / self.x_minus
 
     def move(self, x: float, y: float):
 
