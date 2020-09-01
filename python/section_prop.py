@@ -269,11 +269,67 @@ class Section:
         raise NotImplementedError
 
     @property
+    def x_c(self) -> float:
+        """
+        The x co-ordinate of the centroid
+        """
+
+        raise NotImplementedError
+
+    @property
+    def y_c(self) -> float:
+        """
+        The y co-ordinate of the centroid.
+        """
+
+        raise NotImplementedError
+
+    @property
     def bounding_box(self) -> List[float]:
         """
         The bounding box of the section:
 
             [min_x, min_y, max_x, max_y]
+        """
+
+        raise NotImplementedError
+
+    @property
+    def x_plus(self) -> float:
+        """
+        The distance from the centroid of the shape to the most positive extreme x point.
+        Note that this should always be a positive quantity - if you need it to be
+        negative to correctly determine stresses etc. then account for it appropriately.
+        """
+
+        raise NotImplementedError
+
+    @property
+    def x_minus(self) -> float:
+        """
+        The distance from the centroid of the shape to the most negative extreme x point.
+        Note that this should always be a positive quantity - if you need it to be
+        negative to correctly determine stresses etc. then account for it appropriately.
+        """
+
+        raise NotImplementedError
+
+    @property
+    def y_plus(self) -> float:
+        """
+        The distance from the centroid of the shape to the most positive extreme y point.
+        Note that this should always be a positive quantity - if you need it to be
+        negative to correctly determine stresses etc. then account for it appropriately.
+        """
+
+        raise NotImplementedError
+
+    @property
+    def y_minus(self) -> float:
+        """
+        The distance from the centroid of the shape to the most negative extreme y point.
+        Note that this should always be a positive quantity - if you need it to be
+        negative to correctly determine stresses etc. then account for it appropriately.
         """
 
         raise NotImplementedError
@@ -549,9 +605,39 @@ class GenericSection(Section):
         return self.polygon.centroid
 
     @property
+    def x_c(self):
+
+        return self.polygon.centroid.x
+
+    @property
+    def y_c(self):
+
+        return self.polygon.centroid.y
+
+    @property
     def bounding_box(self) -> List[float]:
 
         return self.polygon.bounds
+
+    @property
+    def x_plus(self) -> float:
+
+        return self.bounding_box[2] - self.x_c
+
+    @property
+    def x_minus(self) -> float:
+
+        return self.x_c - self.bounding_box[0]
+
+    @property
+    def y_plus(self) -> float:
+
+        return self.bounding_box[3] - self.y_c
+
+    @property
+    def y_minus(self) -> float:
+
+        return self.y_c - self.bounding_box[1]
 
     def move(self, x: float, y: float):
 
