@@ -35,6 +35,9 @@ week = unyt.week
 hr = unyt.hour
 yr = unyt.year
 
+# units of frequency
+Hz = unyt.Hz
+
 # units of mass
 g = unyt.gram
 kg = unyt.kg
