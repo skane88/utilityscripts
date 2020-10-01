@@ -21,6 +21,7 @@ mi = unyt.mile
 
 # derived units of length
 mm = unyt.mm
+cm = unyt.cm
 km = unyt.km
 unyt.define_unit("naut_mi", 1852 * m)
 naut_mi = unyt.naut_mi
