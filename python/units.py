@@ -29,11 +29,11 @@ naut_mi = unyt.naut_mi
 s = unyt.second
 minutes = unyt.minute
 days = unyt.day
+hr = unyt.hour
+yr = unyt.year
 
 unyt.define_unit("week", 7 * days)
 week = unyt.week
-hr = unyt.hour
-yr = unyt.year
 
 # units of frequency
 Hz = unyt.Hz
@@ -41,19 +41,15 @@ Hz = unyt.Hz
 # units of mass
 g = unyt.gram
 kg = unyt.kg
-
-unyt.define_unit("t", 1000 * kg, prefixable=True)
-t = unyt.t
 t_us = unyt.ton
 lb = unyt.pound
 
-# derived units of mass
-kg = unyt.kg
+unyt.define_unit("t", 1000 * kg, prefixable=True)
+t = unyt.t
 
 # units of energy
 J = unyt.J
 
-# derived units of energy
 kJ = unyt.kJ
 MJ = unyt.MJ
 
@@ -61,22 +57,23 @@ MJ = unyt.MJ
 N = unyt.newton
 lb_f = unyt.pound_force
 
-unyt.define_unit("kip", 1000 * lb_f)
-kip = unyt.kip
-
-# derived units of force
 kN = unyt.kN
 MN = unyt.MN
+
+unyt.define_unit("kip", 1000 * lb_f)
+kip = unyt.kip
 
 # units of pressure
 Pa = unyt.pascal
 psi = unyt.psi
 bar = unyt.bar
 
-# derived units of pressure
 kPa = unyt.kPa
 MPa = unyt.MPa
 GPa = unyt.GPa
+
+unyt.define_unit("ksi", 1000 * psi)
+ksi = unyt.ksi
 
 # units of angle
 deg = unyt.degree
