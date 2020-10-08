@@ -76,6 +76,9 @@ GPa = unyt.GPa
 unyt.define_unit("ksi", 1000 * psi)
 ksi = unyt.ksi
 
+unyt.define_unit("psf", 1 * lb_f / (ft ** 2))
+psf = unyt.psf
+
 # units of angle
 deg = unyt.degree
 rad = unyt.radian
