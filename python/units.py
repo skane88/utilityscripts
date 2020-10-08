@@ -93,8 +93,8 @@ unyt.define_unit("ha", (100 * m) ** 2)
 ha = unyt.ha
 
 # units of volume
-unyt.define_unit(symbol="l", value=0.001 * (m ** 3), prefixable=True)
-l = unyt.l
+unyt.define_unit(symbol="L", value=0.001 * (m ** 3), prefixable=True)
+L = unyt.L
 
 # units of velocity
 unyt.define_unit(symbol="knot", value=1852 * m / hr)
