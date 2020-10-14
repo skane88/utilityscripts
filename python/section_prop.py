@@ -653,7 +653,7 @@ class GenericSection(Section):
     @property
     def bounding_box(self) -> List[float]:
 
-        return self.polygon.bounds
+        return list(self.polygon.bounds)
 
     @property
     def x_plus(self) -> float:
