@@ -884,6 +884,19 @@ class CombinedSection(Section):
         return I_yy
 
     @property
+    def Ixy(self):
+
+        I_xy = 0
+
+        centroid = self.centroid
+
+        for s, n in self.sections:
+
+            I_xy += s.Ixy + s.area * (n.x - centroid.x) * (n.y - centroid.y)
+
+        return I_xy
+
+    @property
     def principal_angle(self):
 
         raise NotImplementedError
@@ -942,7 +955,9 @@ class CombinedSection(Section):
 
         for s, n in self.sections:
 
-            sections.append((s, n - centroid))
+            offset = Point(n.x - centroid.x, n.y - centroid.y)
+
+            sections.append((s, offset))
 
         return CombinedSection(sections=sections)
 
