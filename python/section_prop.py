@@ -302,7 +302,7 @@ class Section:
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        raise NotImplementedError
+        return self.bounding_box[2] - self.x_c
 
     @property
     def x_minus(self) -> float:
@@ -312,7 +312,7 @@ class Section:
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        raise NotImplementedError
+        return self.x_c - self.bounding_box[0]
 
     @property
     def y_plus(self) -> float:
@@ -322,7 +322,7 @@ class Section:
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        raise NotImplementedError
+        return self.bounding_box[3] - self.y_c
 
     @property
     def y_minus(self) -> float:
@@ -332,7 +332,7 @@ class Section:
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        raise NotImplementedError
+        return self.y_c - self.bounding_box[1]
 
     @property
     def elastic_modulus_xx_plus(self):
@@ -644,26 +644,6 @@ class GenericSection(Section):
     def bounding_box(self) -> List[float]:
 
         return list(self.polygon.bounds)
-
-    @property
-    def x_plus(self) -> float:
-
-        return self.bounding_box[2] - self.x_c
-
-    @property
-    def x_minus(self) -> float:
-
-        return self.x_c - self.bounding_box[0]
-
-    @property
-    def y_plus(self) -> float:
-
-        return self.bounding_box[3] - self.y_c
-
-    @property
-    def y_minus(self) -> float:
-
-        return self.y_c - self.bounding_box[1]
 
     @property
     def elastic_modulus_xx_plus(self):
