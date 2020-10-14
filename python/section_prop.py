@@ -886,7 +886,7 @@ class CombinedSection(Section):
         return I_xy
 
     @property
-    def J(self):
+    def J_approx(self):
 
         return sum([s.J for s, n in self.sections])
 
