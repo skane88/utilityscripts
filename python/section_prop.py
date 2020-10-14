@@ -335,6 +335,25 @@ class Section:
         return self.y_c - self.bounding_box[1]
 
     @property
+    def depth(self):
+        """
+        The overall depth of the section between most extreme y points
+        """
+
+        bbx = self.bounding_box
+        return bbx[3] - bbx[1]
+
+    @property
+    def width(self):
+        """
+        The overall width of the section between most extreme x points
+        :return:
+        """
+
+        bbx = self.bounding_box
+        return bbx[2] - bbx[0]
+
+    @property
     def elastic_modulus_xx_plus(self):
         """
         The elastic section modulus assuming a linear-elastic material behaviour about
@@ -875,18 +894,6 @@ class CombinedSection(Section):
     def J(self):
 
         return sum([s.J for s, n in self.sections])
-
-    @property
-    def depth(self):
-
-        bbx = self.bounding_box
-        return bbx[1].y - bbx[0].y
-
-    @property
-    def width(self):
-
-        bbx = self.bounding_box
-        return bbx[1].x - bbx[0].x
 
     @property
     def bounding_box(self) -> List[float]:
