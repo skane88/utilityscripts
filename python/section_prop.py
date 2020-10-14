@@ -274,7 +274,7 @@ class Section:
         The x co-ordinate of the centroid
         """
 
-        raise NotImplementedError
+        return self.centroid.x
 
     @property
     def y_c(self) -> float:
@@ -282,7 +282,7 @@ class Section:
         The y co-ordinate of the centroid.
         """
 
-        raise NotImplementedError
+        return self.centroid.y
 
     @property
     def bounding_box(self) -> List[float]:
@@ -639,16 +639,6 @@ class GenericSection(Section):
     def centroid(self):
 
         return self.polygon.centroid
-
-    @property
-    def x_c(self):
-
-        return self.polygon.centroid.x
-
-    @property
-    def y_c(self):
-
-        return self.polygon.centroid.y
 
     @property
     def bounding_box(self) -> List[float]:
