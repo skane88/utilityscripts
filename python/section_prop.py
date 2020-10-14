@@ -916,6 +916,26 @@ class CombinedSection(Section):
 
         return test_bounding_box
 
+    @property
+    def elastic_modulus_xx_plus(self):
+
+        return self.Ixx / self.y_plus
+
+    @property
+    def elastic_modulus_xx_minus(self):
+
+        return self.Ixx / self.y_minus
+
+    @property
+    def elastic_modulus_yy_plus(self):
+
+        return self.Iyy / self.x_plus
+
+    @property
+    def elastic_modulus_yy_minus(self):
+
+        return self.Iyy / self.x_minus
+
     def add_element(self, section, centroid):
 
         self.sections.append((section, centroid))
