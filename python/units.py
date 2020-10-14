@@ -54,6 +54,12 @@ J = unyt.J
 kJ = unyt.kJ
 MJ = unyt.MJ
 
+# units of power
+W = unyt.W
+
+kW = unyt.kW
+MW = unyt.MW
+
 # units of force
 N = unyt.newton
 lb_f = unyt.pound_force
