@@ -959,7 +959,7 @@ def make_square(side):
     return Rectangle(length=side, height=side)
 
 
-def make_I(cls, b_f, d, t_f, t_w):
+def make_I(b_f, d, t_f, t_w) -> CombinedSection:
 
     d_w = d - 2 * t_f
 
@@ -973,7 +973,7 @@ def make_I(cls, b_f, d, t_f, t_w):
     n_w = Point(b_f / 2, t_f + d_w / 2)
     n_bf = Point(b_f / 2, t_f / 2)
 
-    return cls(
+    return CombinedSection(
         sections=[(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
     ).move_to_centre()
 
