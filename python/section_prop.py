@@ -886,11 +886,6 @@ class CombinedSection(Section):
         return I_xy
 
     @property
-    def principal_angle(self):
-
-        raise NotImplementedError
-
-    @property
     def J(self):
 
         return sum([s.J for s, n in self.sections])
