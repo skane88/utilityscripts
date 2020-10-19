@@ -748,7 +748,7 @@ class Rectangle(GenericSection):
     def __init__(
         self,
         *,
-        width,
+        length,
         thickness,
         rotation_angle: float = 0,
         use_radians: bool = True,
@@ -766,17 +766,18 @@ class Rectangle(GenericSection):
 
         :param length: The length of the section. By convention aligned with the x-axis
             pre-rotation.
-        :param height: The height of the section. By convention, aligned with the y-axis.
+        :param thickness: The thickness of the section. By convention,
+            aligned with the y-axis.
         :param rotation_angle: A rotation to apply to the shape.
         :param use_radians: Use radians when rotating or not.
         :param translation: A Tuple containing an (x, y) translation to move the section.
             Any translation carried out after rotation.
         """
 
-        self.width = width
+        self.length = length
         self.thickness = thickness
 
-        x = [-width / 2, width / 2, width / 2, -width / 2]
+        x = [-length / 2, length / 2, length / 2, -length / 2]
         y = [-thickness / 2, -thickness / 2, thickness / 2, thickness / 2]
 
         p = Polygon(zip(x, y))
@@ -797,8 +798,8 @@ class Rectangle(GenericSection):
         St Venant's torsional constant calculated using an approximate method.
         """
 
-        t = min(self.width, self.thickness)
-        b = max(self.width, self.thickness)
+        t = min(self.length, self.thickness)
+        b = max(self.length, self.thickness)
 
         return (b * t ** 3) / 3
 
