@@ -748,8 +748,8 @@ class Rectangle(GenericSection):
     def __init__(
         self,
         *,
-        length,
-        height,
+        width,
+        thickness,
         rotation_angle: float = 0,
         use_radians: bool = True,
         translation: Tuple[float, float] = None,
@@ -773,11 +773,11 @@ class Rectangle(GenericSection):
             Any translation carried out after rotation.
         """
 
-        self.length = length
-        self.height = height
+        self.width = width
+        self.thickness = thickness
 
-        x = [-length / 2, length / 2, length / 2, -length / 2]
-        y = [-height / 2, -height / 2, height / 2, height / 2]
+        x = [-width / 2, width / 2, width / 2, -width / 2]
+        y = [-thickness / 2, -thickness / 2, thickness / 2, thickness / 2]
 
         p = Polygon(zip(x, y))
 
@@ -797,8 +797,8 @@ class Rectangle(GenericSection):
         St Venant's torsional constant calculated using an approximate method.
         """
 
-        t = min(self.length, self.height)
-        b = max(self.length, self.height)
+        t = min(self.width, self.thickness)
+        b = max(self.width, self.thickness)
 
         return (b * t ** 3) / 3
 
