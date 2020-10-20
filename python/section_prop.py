@@ -964,9 +964,9 @@ def make_I(b_f, d, t_f, t_w) -> CombinedSection:
 
     d_w = d - 2 * t_f
 
-    top_flange = Rectangle(length=b_f, height=t_f)
-    bottom_flange = Rectangle(length=b_f, height=t_f)
-    web = Rectangle(length=t_w, height=d_w)
+    top_flange = Rectangle(length=b_f, thickness=t_f)
+    bottom_flange = Rectangle(length=b_f, thickness=t_f)
+    web = Rectangle(length=t_w, thickness=d_w)
 
     depth = t_f * 2 + d_w
 
