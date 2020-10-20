@@ -3,6 +3,7 @@ Calculates basic section properties
 """
 
 import math
+import itertools
 from typing import List, Tuple, Union, TypeVar
 
 from shapely.geometry import Point, Polygon, polygon, LineString
@@ -807,7 +808,6 @@ class Rectangle(GenericSection):
 class CombinedSection(Section):
     def __init__(self, sections: List[Tuple[Section, Point]]):
         """
-
         :param sections: A list of sections & centroids
         """
 
@@ -826,6 +826,18 @@ class CombinedSection(Section):
 
             else:
                 all_sections.append((s, n))
+
+        resolved_sections = []
+
+        for s, n in all_sections:
+            resolved_sections.append(s.move_to_point(origin="origin", end_point=n))
+
+        for a, b in itertools.compress(resolved_sections, 2):
+
+            if a.overlaps(b):
+                raise ValueError(
+                    f"Provided sections overlap each other. Sections are {a} and {b}"
+                )
 
         self.sections = all_sections
 
