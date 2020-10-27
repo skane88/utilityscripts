@@ -832,9 +832,9 @@ class CombinedSection(Section):
         for s, n in all_sections:
             resolved_sections.append(s.move_to_point(origin="origin", end_point=n))
 
-        for a, b in itertools.compress(resolved_sections, 2):
+        for a, b in itertools.combinations(resolved_sections, 2):
 
-            if a.overlaps(b):
+            if a.polygon.overlaps(b.polygon):
                 raise ValueError(
                     f"Provided sections overlap each other. Sections are {a} and {b}"
                 )
