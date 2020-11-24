@@ -1,5 +1,7 @@
 """
-This file changes files of one extension type to another extension type.
+I believe that this sorts out photos etc. with an Action No. in their name into
+appropriate folders...but it's been a while and I didn't comment this properly at the
+time, so who knows?
 """
 
 import sys
@@ -39,7 +41,7 @@ def re_name():
         f_iterator = base_path.rglob(filter_val)
 
         print()
-        
+
         changed = 0
 
         for f in tqdm(f_iterator, desc="Renaming Folders", unit="Folders"):
@@ -48,7 +50,7 @@ def re_name():
 
             if f.is_dir():
                 continue
-            
+
             folder_name = f.parent.name
             folder_parent = f.parent.parent
             file_name = f.name
@@ -68,7 +70,7 @@ def re_name():
                 warnings += [warning_string]
 
                 continue
-            
+
             if not new_path.parent.exists():
                 new_path.parent.mkdir(parents=True)
 
