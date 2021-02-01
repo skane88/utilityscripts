@@ -1027,12 +1027,12 @@ def make_T(b_f, d, t_f, t_w, stem_up: True) -> CombinedSection:
     """
     A helper method to make a T section.
 
-    :param b_f:
-    :param d:
-    :param t_f:
-    :param t_w:
-    :param stem_up:
-    :return:
+    :param b_f: The flange width.
+    :param d: The total depth of the section.
+    :param t_f: The flange thickness.
+    :param t_w: The web thickness.
+    :param stem_up: Is the T-stem up or down?
+    :return: A CombinedSection object.
     """
 
     d_w = d - t_f
