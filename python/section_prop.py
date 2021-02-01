@@ -16,6 +16,10 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import PathPatch
 from matplotlib.path import Path
 
+# an allowance for one section overlapping another in a CombinedSection, as a fraction
+# of the smaller section. Set at 0.1% currently.
+OVERLAP_TOLERANCE = 0.001
+
 DEFAULT_FACE_COLOR = "#CCCCCC"
 DEFAULT_EDGE_COLOR = "#666666"
 
@@ -835,6 +839,13 @@ class CombinedSection(Section):
         for a, b in itertools.combinations(resolved_sections, 2):
 
             if a.polygon.overlaps(b.polygon):
+                # if the intersection is small, we can perhaps ignore it.
+
+                c = a.polygon.intersection(b.polygon)
+
+                if c.area < min(a.area * 0.001, b.area * 0.001):
+                    continue
+
                 raise ValueError(
                     f"Provided sections overlap each other. Sections are {a} and {b}"
                 )
