@@ -973,6 +973,17 @@ def make_square(side):
 
 
 def make_I(b_f, d, t_f, t_w) -> CombinedSection:
+    """
+    Make an I section.
+
+    :param b_f: The flange width. May be a single number, or a list of 2x widths
+        [top, bottom].
+    :param d:
+    :param t_f: The flange thickness. May be a single number, or a list of 2x thicknesses,
+        [top, bottom].
+    :param t_w:
+    :return:
+    """
 
     if isinstance(b_f, list):
         b_f_top = b_f[0]
