@@ -974,17 +974,29 @@ def make_square(side):
 
 def make_I(b_f, d, t_f, t_w) -> CombinedSection:
 
-    d_w = d - 2 * t_f
+    if isinstance(b_f, list):
+        b_f_top = b_f[0]
+        b_f_bottom = b_f[1]
+    else:
+        b_f_top = b_f
+        b_f_bottom = b_f
 
-    top_flange = Rectangle(length=b_f, thickness=t_f)
-    bottom_flange = Rectangle(length=b_f, thickness=t_f)
+    if isinstance(t_f, list):
+        t_f_top = t_f[0]
+        t_f_bottom = t_f[1]
+    else:
+        t_f_top = t_f
+        t_f_bottom = t_f
+
+    d_w = d - (t_f_top + t_f_bottom)
+
+    top_flange = Rectangle(length=b_f_top, thickness=t_f_top)
+    bottom_flange = Rectangle(length=b_f_bottom, thickness=t_f_bottom)
     web = Rectangle(length=d_w, thickness=t_w, rotation_angle=90, use_radians=False)
 
-    depth = t_f * 2 + d_w
-
-    n_tf = Point(b_f / 2, depth - t_f / 2)
-    n_w = Point(b_f / 2, t_f + d_w / 2)
-    n_bf = Point(b_f / 2, t_f / 2)
+    n_tf = Point(0, d - t_f_top / 2)
+    n_w = Point(0, t_f_bottom + d_w / 2)
+    n_bf = Point(0, t_f_bottom / 2)
 
     return CombinedSection(
         sections=[(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
