@@ -1023,6 +1023,34 @@ def make_I(b_f, d, t_f, t_w) -> CombinedSection:
     ).move_to_centre()
 
 
+def make_T(b_f, d, t_f, t_w, stem_up: True) -> CombinedSection:
+    """
+    A helper method to make a T section.
+
+    :param b_f:
+    :param d:
+    :param t_f:
+    :param t_w:
+    :param stem_up:
+    :return:
+    """
+
+    d_w = d - t_f
+
+    flange = Rectangle(length=b_f, thickness=t_f)
+    web = Rectangle(length=d_w, thickness=t_w, rotation_angle=90, use_radians=False)
+
+    n_f = Point(0, t_f / 2)
+    n_w = Point(0, t_f + d_w / 2)
+
+    T = CombinedSection(sections=[(flange, n_f), (web, n_w)]).move_to_centre()
+
+    if not stem_up:
+        T = T.rotate(angle=180, origin="origin", use_radians=False)
+
+    return T
+
+
 def _prepare_coords_for_green(
     coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray]
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
