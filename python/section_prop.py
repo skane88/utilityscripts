@@ -808,6 +808,9 @@ class Rectangle(GenericSection):
 
 
 class CombinedSection(Section):
+
+    sections: List[Tuple[Section, Point]]
+
     def __init__(self, sections: List[Tuple[Section, Point]]):
         """
         :param sections: A list of sections & centroids
@@ -979,6 +982,42 @@ class CombinedSection(Section):
             sections.append((s, offset))
 
         return CombinedSection(sections=sections)
+
+    def rotate(
+        self,
+        angle: float,
+        origin: Union[str, Point, Tuple[float, float]] = "origin",
+        use_radians: bool = True,
+    ):
+
+        sections = []
+
+        origin = self._make_origin_tuple(origin)
+
+        for s, n in self.sections:
+
+            s: Section
+            n: Point
+
+            # first move the section so that it's centroid accounts for n, so that we can rotate it more easily.
+            s = s.move_to_point(origin="origin", end_point=n)
+
+            # now rotate it
+            s = s.rotate(angle=angle, origin=origin, use_radians=use_radians)
+
+            # now move it back to it's original co-ordinates
+            new_centroid = s.centroid
+            s = s.move_to_centre()
+
+            sections.append((s, new_centroid))
+
+        return CombinedSection(sections=sections)
+
+    def __repr__(self):
+
+        super_repr = super().__repr__()
+
+        return super_repr + f", no. sections={self.no_sections}"
 
 
 def make_square(side):
