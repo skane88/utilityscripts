@@ -1067,7 +1067,7 @@ def make_I(b_f, d, t_f, t_w) -> CombinedSection:
     ).move_to_centre()
 
 
-def make_T(b_f, d, t_f, t_w, stem_up: True) -> CombinedSection:
+def make_T(b_f, d, t_f, t_w, stem_up: bool = True) -> CombinedSection:
     """
     A helper method to make a T section.
 
