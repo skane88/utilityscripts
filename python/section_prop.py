@@ -513,13 +513,11 @@ class Section:
 
         :param angle: The angle to rotate. Positive CCW, Negative CW.
         :param origin: The centroid of the rotation. Either provide:
-
-            A string: use 'centroid' for the object's geometric centroid,
+            * A string: use 'centroid' for the object's geometric centroid,
             'center' for the bounding box center, or 'origin' for the global (0, 0)
             origin.
-            A Shapely Point object.
-            A coordinate Tuple (x, y).
-
+            * A Shapely Point object.
+            * A coordinate Tuple (x, y).
         :param use_radians: Is the angle specified in radians or not?
         """
 
