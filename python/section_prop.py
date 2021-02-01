@@ -851,6 +851,11 @@ class CombinedSection(Section):
         self.sections = all_sections
 
     @property
+    def no_sections(self):
+
+        return len(self.sections)
+
+    @property
     def area(self):
 
         return sum([s.area for s, n in self.sections])
