@@ -394,7 +394,7 @@ class Section:
 
         raise NotImplementedError
 
-    def matplotlib_patch(self, **kwargs):
+    def matplotlib_patches(self, **kwargs):
         """
         Constructs a matplotlib patch of the shape for use in plotting. Relies on the
         section returning a shapely Polygon and the build_patch function.
@@ -451,7 +451,7 @@ class Section:
         if "ec" not in kwargs and "edge_color" not in kwargs:
             kwargs["ec"] = DEFAULT_EDGE_COLOR
 
-        patches = self.matplotlib_patch(**kwargs)
+        patches = self.matplotlib_patches(**kwargs)
 
         fig, ax = plt.subplots()
 
