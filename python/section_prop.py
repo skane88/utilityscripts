@@ -488,7 +488,7 @@ class Section:
         self,
         end_point: Union[Point, Tuple[float, float]],
         origin: Union[str, Point, Tuple[float, float]] = "origin",
-    ):
+    ) -> "Section":
         """
         Returns a copy of the object translated from the point ``origin`` to the point
         ``end_point``.
@@ -682,7 +682,7 @@ class GenericSection(Section):
         self,
         end_point: Union[Point, Tuple[float, float]],
         origin: Union[str, Point, Tuple[float, float]] = "origin",
-    ):
+    ) -> "GenericSection":
 
         origin = self._make_origin_tuple(origin)
 
@@ -997,7 +997,7 @@ class CombinedSection(Section):
         self,
         origin: Union[str, Point, Tuple[float, float]],
         end_point: Union[Point, Tuple[float, float]],
-    ):
+    ) -> "CombinedSection":
 
         origin = self._make_origin_tuple(origin)
 
