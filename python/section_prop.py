@@ -1005,6 +1005,42 @@ class CombinedSection(Section):
 
         return CombinedSection(sections=sections)
 
+    def move_to_point(
+        self,
+        origin: Union[str, Point, Tuple[float, float]],
+        end_point: Union[Point, Tuple[float, float]],
+    ):
+        """
+        Returns a copy of the object translated from the point ``origin`` to the point
+        ``end_point``.
+
+        :param origin: The starting point of the movement. Can either be:
+            A string: use 'centroid' for the object's geometric centroid,
+            'center' for the bounding box center, or 'origin' for the global (0, 0)
+            origin.
+            A shapely Point object.
+            A co-ordinate Tuple (x, y).
+        :param end_point: The end point of the move.
+        """
+
+        origin = self._make_origin_tuple(origin)
+
+        if isinstance(end_point, Point):
+            end_point = (end_point.x, end_point.y)
+
+        xoff = end_point[0] - origin[0]
+        yoff = end_point[1] - origin[1]
+
+        sections = []
+
+        for s, n in self.sections:
+
+            n_point = Point(n.x + xoff, n.y + yoff)
+
+            sections.append((s, n_point))
+
+        return CombinedSection(sections)
+
     def rotate(
         self,
         angle: float,
