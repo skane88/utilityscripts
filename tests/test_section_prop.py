@@ -96,7 +96,7 @@ def make_sections_for_combined_same_as_generic():
     sections.append((I1, I2))
 
     combined = make_I(b_f=311, d=327.2, t_f=25, t_w=15.7)
-    from_p = GenericSection(poly=c.polygon)
+    from_p = GenericSection(poly=combined.polygon)
 
     sections.append((combined, from_p))
 
@@ -106,7 +106,7 @@ def make_sections_for_combined_same_as_generic():
 @pytest.mark.parametrize(
     "property", ALL_PROPERTIES,
 )
-@pytest.mark.parametrize("sections", make_sections())
+@pytest.mark.parametrize("sections", make_sections_for_combined_same_as_generic())
 def test_combined_section_gives_same_as_generic(property, sections):
     """
     Test a test shape of a CombinedSection
