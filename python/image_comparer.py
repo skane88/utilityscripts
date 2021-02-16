@@ -205,7 +205,8 @@ def main():
     image_1 = get_file_to_open(
         type_prompt="Image",
         filetypes=[
-            ("JPGs", "*.jpg"),
+            ("Common Image Types", "*.jpg *.jpeg *.png *.bmp"),
+            ("JPGs", "*.jpg *.jpeg"),
             ("PNGs", "*.png"),
             ("BMPs", "*.bmp"),
             ("All Files", "*"),
