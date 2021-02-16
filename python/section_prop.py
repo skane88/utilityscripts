@@ -398,6 +398,24 @@ class Section:
 
         return self.Iyy / self.x_minus
 
+    @property
+    def plastic_modulus_uu(self):
+        """
+        The plastic section modulus assuming a perfectly plastic material behaviour about
+        an axis parallel to the global x-x axis but through the shape's centroid.
+        """
+
+        raise NotImplementedError()
+
+    @property
+    def plastic_modulus_vv(self):
+        """
+        The plastic section modulus assuming a perfectly plastic material behaviour about
+        an axis parallel to the global y-y axis but through the shape's centroid.
+        """
+
+        raise NotImplementedError()
+
     def matplotlib_patches(self, **kwargs):
         """
         Constructs a matplotlib patch of the shape for use in plotting. Relies on the
