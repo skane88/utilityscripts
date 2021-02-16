@@ -908,7 +908,7 @@ class CombinedSection(Section):
     @property
     def J_approx(self):
 
-        return sum([s.J for s, n in self.sections])
+        return sum([s.J_approx for s, n in self.sections])
 
     @property
     def bounding_box(self) -> List[float]:
