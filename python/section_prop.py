@@ -867,7 +867,7 @@ class CombinedSection(Section):
 
         for s, n in self.sections:
 
-            I_xx += s.Ixx + s.area * (n.y - centroid.y) ** 2
+            I_xx += s.Iuu + s.area * n.y ** 2
 
         return I_xx
 
@@ -880,7 +880,7 @@ class CombinedSection(Section):
 
         for s, n in self.sections:
 
-            I_yy += s.Iyy + s.area * (n.x - centroid.x) ** 2
+            I_yy += s.Iyy + s.area * n.x ** 2
 
         return I_yy
 
@@ -893,7 +893,7 @@ class CombinedSection(Section):
 
         for s, n in self.sections:
 
-            I_xy += s.Ixy + s.area * (n.x - centroid.x) * (n.y - centroid.y)
+            I_xy += s.Ixy + s.area * n.x * n.y
 
         return I_xy
 
