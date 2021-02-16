@@ -54,7 +54,7 @@ ALL_PROPERTIES = [
 ]
 
 
-def make_sections():
+def make_sections_for_combined_same_as_generic():
 
     sections = []
 
@@ -94,6 +94,11 @@ def make_sections():
     I2 = I2.rotate(angle=45, origin="origin", use_radians=False)
 
     sections.append((I1, I2))
+
+    combined = make_I(b_f=311, d=327.2, t_f=25, t_w=15.7)
+    from_p = GenericSection(poly=c.polygon)
+
+    sections.append((combined, from_p))
 
     return sections
 
