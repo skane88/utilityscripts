@@ -1037,7 +1037,9 @@ def make_I(b_f, d, t_f, t_w) -> CombinedSection:
     :param t_f: The flange thickness. May be a single number, or a list of 2x thicknesses,
         [top, bottom].
     :param t_w:
-    :return:
+    :return: A CombinedSection representing the I section. Depending on the parameters
+        entered this may be a collection of rectangular plates or perhaps only a single
+        GenericSection
     """
 
     if isinstance(b_f, list):
@@ -1078,7 +1080,9 @@ def make_T(b_f, d, t_f, t_w, stem_up: bool = True) -> CombinedSection:
     :param t_f: The flange thickness.
     :param t_w: The web thickness.
     :param stem_up: Is the T-stem up or down?
-    :return: A CombinedSection object.
+    :return: A CombinedSection representing the T section. Depending on the parameters
+        entered this may be a collection of rectangular plates or perhaps only a single
+        GenericSection
     """
 
     d_w = d - t_f
