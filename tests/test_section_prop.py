@@ -15,6 +15,45 @@ from section_prop import (
 )
 
 
+ALL_PROPERTIES = [
+    "area",
+    "Ixx",
+    "Iyy",
+    "Ixy",
+    "Izz",
+    "I11",
+    "I22",
+    "I33",
+    "I12",
+    "Iuu",
+    "Ivv",
+    "Iww",
+    "Iuv",
+    "rxx",
+    "ryy",
+    "rzz",
+    "r11",
+    "r22",
+    "r33",
+    "ruu",
+    "rvv",
+    "rww",
+    "principal_angle",
+    "x_c",
+    "y_c",
+    "x_plus",
+    "x_minus",
+    "y_plus",
+    "y_minus",
+    "depth",
+    "width",
+    "elastic_modulus_xx_plus",
+    "elastic_modulus_xx_minus",
+    "elastic_modulus_yy_plus",
+    "elastic_modulus_yy_minus",
+]
+
+
 def make_sections():
 
     sections = []
@@ -60,47 +99,10 @@ def make_sections():
 
 
 @pytest.mark.parametrize(
-    "property",
-    [
-        "area",
-        "Ixx",
-        "Iyy",
-        "Ixy",
-        "Izz",
-        "I11",
-        "I22",
-        "I33",
-        "I12",
-        "Iuu",
-        "Ivv",
-        "Iww",
-        "Iuv",
-        "rxx",
-        "ryy",
-        "rzz",
-        "r11",
-        "r22",
-        "r33",
-        "ruu",
-        "rvv",
-        "rww",
-        "principal_angle",
-        "x_c",
-        "y_c",
-        "x_plus",
-        "x_minus",
-        "y_plus",
-        "y_minus",
-        "depth",
-        "width",
-        "elastic_modulus_xx_plus",
-        "elastic_modulus_xx_minus",
-        "elastic_modulus_yy_plus",
-        "elastic_modulus_yy_minus",
-    ],
+    "property", ALL_PROPERTIES,
 )
 @pytest.mark.parametrize("sections", make_sections())
-def test_combined_section_1(property, sections):
+def test_combined_section_gives_same_as_generic(property, sections):
     """
     Test a test shape of a CombinedSection
     """
