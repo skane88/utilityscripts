@@ -365,7 +365,7 @@ class Section:
         the x-x axis. Calculated at the most positive extreme y point.
         """
 
-        raise NotImplementedError
+        return self.Ixx / self.y_plus
 
     @property
     def elastic_modulus_xx_minus(self):
@@ -374,7 +374,7 @@ class Section:
         the x-x axis. Calculated at the most negative extreme y point.
         """
 
-        raise NotImplementedError
+        return self.Ixx / self.y_minus
 
     @property
     def elastic_modulus_yy_plus(self):
@@ -383,7 +383,7 @@ class Section:
         the y-y axis. Calculated at the most positive extreme x point.
         """
 
-        raise NotImplementedError
+        return self.Iyy / self.x_plus
 
     @property
     def elastic_modulus_yy_minus(self):
@@ -392,7 +392,7 @@ class Section:
         the y-y axis. Calculated at the most negative extreme x point.
         """
 
-        raise NotImplementedError
+        return self.Iyy / self.x_minus
 
     def matplotlib_patches(self, **kwargs):
         """
@@ -668,26 +668,6 @@ class GenericSection(Section):
     def bounding_box(self) -> List[float]:
 
         return list(self.polygon.bounds)
-
-    @property
-    def elastic_modulus_xx_plus(self):
-
-        return self.Ixx / self.y_plus
-
-    @property
-    def elastic_modulus_xx_minus(self):
-
-        return self.Ixx / self.y_minus
-
-    @property
-    def elastic_modulus_yy_plus(self):
-
-        return self.Iyy / self.x_plus
-
-    @property
-    def elastic_modulus_yy_minus(self):
-
-        return self.Iyy / self.x_minus
 
     def move(self, x: float, y: float):
 
