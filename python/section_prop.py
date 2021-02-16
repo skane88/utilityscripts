@@ -359,37 +359,41 @@ class Section:
         return bbx[2] - bbx[0]
 
     @property
-    def elastic_modulus_xx_plus(self):
+    def elastic_modulus_uu_plus(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about
-        the x-x axis. Calculated at the most positive extreme y point.
+        The elastic section modulus assuming a linear-elastic material behaviour about an
+        axis parallel to the global x-x axis but through the shape's centroid.
+        Calculated at the most positive extreme y point.
         """
 
         return self.Ixx / self.y_plus
 
     @property
-    def elastic_modulus_xx_minus(self):
+    def elastic_modulus_uu_minus(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about
-        the x-x axis. Calculated at the most negative extreme y point.
+        The elastic section modulus assuming a linear-elastic material behaviour about an
+        axis parallel to the global x-x axis but through the shape's centroid.
+        Calculated at the most negative extreme y point.
         """
 
         return self.Ixx / self.y_minus
 
     @property
-    def elastic_modulus_yy_plus(self):
+    def elastic_modulus_vv_plus(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about
-        the y-y axis. Calculated at the most positive extreme x point.
+        The elastic section modulus assuming a linear-elastic material behaviour about an
+        axis parallel to the global y-y axis but through the shape's centroid.
+        Calculated at the most positive extreme x point.
         """
 
         return self.Iyy / self.x_plus
 
     @property
-    def elastic_modulus_yy_minus(self):
+    def elastic_modulus_vv_minus(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about
-        the y-y axis. Calculated at the most negative extreme x point.
+        The elastic section modulus assuming a linear-elastic material behaviour about an
+        axis parallel to the global y-y axis but through the shape's centroid.
+        Calculated at the most negative extreme x point.
         """
 
         return self.Iyy / self.x_minus
@@ -949,22 +953,22 @@ class CombinedSection(Section):
         return test_bounding_box
 
     @property
-    def elastic_modulus_xx_plus(self):
+    def elastic_modulus_uu_plus(self):
 
         return self.Ixx / self.y_plus
 
     @property
-    def elastic_modulus_xx_minus(self):
+    def elastic_modulus_uu_minus(self):
 
         return self.Ixx / self.y_minus
 
     @property
-    def elastic_modulus_yy_plus(self):
+    def elastic_modulus_vv_plus(self):
 
         return self.Iyy / self.x_plus
 
     @property
-    def elastic_modulus_yy_minus(self):
+    def elastic_modulus_vv_minus(self):
 
         return self.Iyy / self.x_minus
 
