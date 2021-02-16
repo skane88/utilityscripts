@@ -30,7 +30,10 @@ def build_V_R_pairs():
 
 
 @pytest.mark.parametrize("input, expected", build_V_R_pairs())
-def test_V_R(input, expected):
+def test_V_R_no_F_x(input, expected):
+    """
+    Basic test of the V_R method. Ignores F_x because that's how the data I have is formatted.
+    """
 
     region = input[0]
     R = int(input[1])
