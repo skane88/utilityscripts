@@ -780,13 +780,21 @@ class Rectangle(GenericSection):
     @property
     def J_approx(self):
         """
-        St Venant's torsional constant calculated using an approximate method.
+        St Venant's torsional constant calculated using an approximate method based on
+        Roark's stress and Strain, Table 10.7 Section 4.
         """
 
-        t = min(self.length, self.thickness)
-        b = max(self.length, self.thickness)
+        thickness = min(self.length, self.thickness)
+        length = max(self.length, self.thickness)
 
-        return (b * t ** 3) / 3
+        a = length / 2
+        b = thickness / 2
+
+        p1 = a * b ** 3
+        p2 = 16 / 3
+        p3 = 3.36 * (b / a) * (1 - (b ** 4 / (12 * (a ** 4))))
+
+        return p1 * (p2 - p3)
 
 
 class CombinedSection(Section):
