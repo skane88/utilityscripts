@@ -486,20 +486,20 @@ class Section:
 
     def move_to_point(
         self,
-        origin: Union[str, Point, Tuple[float, float]],
         end_point: Union[Point, Tuple[float, float]],
+        origin: Union[str, Point, Tuple[float, float]] = "origin",
     ):
         """
         Returns a copy of the object translated from the point ``origin`` to the point
         ``end_point``.
 
+        :param end_point: The end point of the move.
         :param origin: The starting point of the movement. Can either be:
             A string: use 'centroid' for the object's geometric centroid,
             'center' for the bounding box center, or 'origin' for the global (0, 0)
             origin.
             A shapely Point object.
             A co-ordinate Tuple (x, y).
-        :param end_point: The end point of the move.
         """
 
         raise NotImplementedError
@@ -680,8 +680,8 @@ class GenericSection(Section):
 
     def move_to_point(
         self,
-        origin: Union[str, Point, Tuple[float, float]],
         end_point: Union[Point, Tuple[float, float]],
+        origin: Union[str, Point, Tuple[float, float]] = "origin",
     ):
 
         origin = self._make_origin_tuple(origin)
@@ -998,18 +998,6 @@ class CombinedSection(Section):
         origin: Union[str, Point, Tuple[float, float]],
         end_point: Union[Point, Tuple[float, float]],
     ):
-        """
-        Returns a copy of the object translated from the point ``origin`` to the point
-        ``end_point``.
-
-        :param origin: The starting point of the movement. Can either be:
-            A string: use 'centroid' for the object's geometric centroid,
-            'center' for the bounding box center, or 'origin' for the global (0, 0)
-            origin.
-            A shapely Point object.
-            A co-ordinate Tuple (x, y).
-        :param end_point: The end point of the move.
-        """
 
         origin = self._make_origin_tuple(origin)
 
