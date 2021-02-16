@@ -402,7 +402,7 @@ class Section:
         :param kwargs: Any valid parameters for the matplotlib.patches.Polygon object.
         """
 
-        return build_patch(self.polygon, **kwargs)
+        return [build_patch(self.polygon, **kwargs)]
 
     def _find_bounds(self, free_edge: float = 0.25):
         """
@@ -451,10 +451,12 @@ class Section:
         if "ec" not in kwargs and "edge_color" not in kwargs:
             kwargs["ec"] = DEFAULT_EDGE_COLOR
 
-        patch = self.matplotlib_patch(**kwargs)
+        patches = self.matplotlib_patch(**kwargs)
 
         fig, ax = plt.subplots()
-        ax.add_patch(patch)
+
+        for p in patches:
+            ax.add_patch(p)
 
         min_x, min_y, max_x, max_y = self._find_bounds()
 
