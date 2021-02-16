@@ -968,6 +968,26 @@ class CombinedSection(Section):
 
         return self.Iyy / self.x_minus
 
+    def matplotlib_patches(self, **kwargs):
+
+        """
+        Constructs a collection of matplotlib patches of the shape for use in plotting.
+        Relies on each underlying section returning a shapely Polygon and the
+        build_patch function.
+
+        :param kwargs: Any valid parameters for the matplotlib.patches.Polygon object.
+        """
+
+        patches = []
+
+        for s, n in self.sections:
+
+            plot_section = s.move_to_point(origin="origin", end_point=n)
+
+            patches.append(build_patch(plot_section.polygon, **kwargs))
+
+        return patches
+
     def add_element(self, section, centroid):
 
         self.sections.append((section, centroid))
