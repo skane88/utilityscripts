@@ -54,6 +54,25 @@ ALL_PROPERTIES = [
 ]
 
 
+def I_poly(b_f, d, t_f, t_w):
+    return Polygon(
+        [
+            (-b_f / 2, -d / 2),
+            (-b_f / 2, -d / 2 + t_f),
+            (-t_w / 2, -d / 2 + t_f),
+            (-t_w / 2, d / 2 - t_f),
+            (-b_f / 2, d / 2 - t_f),
+            (-b_f / 2, d / 2),
+            (b_f / 2, d / 2),
+            (b_f / 2, d / 2 - t_f),
+            (t_w / 2, d / 2 - t_f),
+            (t_w / 2, -d / 2 + t_f),
+            (b_f / 2, -d / 2 + t_f),
+            (b_f / 2, -d / 2),
+        ]
+    )
+
+
 def make_sections_for_combined_same_as_generic():
 
     sections = []
@@ -71,22 +90,7 @@ def make_sections_for_combined_same_as_generic():
 
     # next make an I section and rotate it by 45deg
 
-    p = Polygon(
-        [
-            (-50, -100),
-            (-50, -80),
-            (-3, -80),
-            (-3, 80),
-            (-50, 80),
-            (-50, 100),
-            (50, 100),
-            (50, 80),
-            (3, 80),
-            (3, -80),
-            (50, -80),
-            (50, -100),
-        ]
-    )
+    p = I_poly(b_f=100, d=200, t_f=20, t_w=6)
     I1 = GenericSection(poly=p)
     I2 = make_I(b_f=100, d=200, t_f=20, t_w=6)
 
@@ -115,3 +119,57 @@ def test_combined_section_gives_same_as_generic(property, sections):
     assert round(getattr(sections[0], property)) == round(
         getattr(sections[1], property)
     )
+
+
+def make_sections_for_combined_to_poly_is_correct():
+
+    sections = []
+
+    # first section will be a T offset so its bottom flange is at the 0,0 origin
+    p = Polygon(
+        [(-50, 0), (-50, 20), (-3, 20), (-3, 200), (3, 200), (3, 20), (50, 20), (50, 0)]
+    )
+    from_poly = GenericSection(poly=p)
+
+    combined = make_T(b_f=100, d=200, t_f=20, t_w=6)
+    combined = combined.move_to_point(origin="origin", end_point=(0, combined.y_minus))
+
+    combined = GenericSection(poly=combined.polygon)
+
+    sections.append((from_poly, combined))
+
+    # next make an I section and rotate it by 45deg
+
+    p = I_poly(b_f=100, d=200, t_f=20, t_w=6)
+    from_poly = GenericSection(poly=p)
+    combined = make_I(b_f=100, d=200, t_f=20, t_w=6)
+
+    from_poly = from_poly.rotate(angle=45, origin="origin", use_radians=False)
+    combined = combined.rotate(angle=45, origin="origin", use_radians=False)
+    combined = GenericSection(poly=combined.polygon)
+
+    sections.append((from_poly, combined))
+
+    p = I_poly(b_f=311, d=327.2, t_f=25, t_w=15.7)
+    from_poly = GenericSection(poly=p)
+    combined = make_I(b_f=311, d=327.2, t_f=25, t_w=15.7)
+    combined = GenericSection(poly=combined.polygon)
+
+    sections.append((combined, from_poly))
+
+    return sections
+
+
+@pytest.mark.parametrize(
+    "property", ALL_PROPERTIES,
+)
+@pytest.mark.parametrize("sections", make_sections_for_combined_to_poly_is_correct())
+def test_combined_section_to_poly_is_correct(property, sections):
+    """
+    Test that creating a polygon from a combined section gives the same properties.
+    """
+
+    c = make_I(b_f=311, d=327.2, t_f=25, t_w=15.7)
+    from_p = GenericSection(poly=c.polygon)
+
+    assert round(getattr(c, property)) == round(getattr(from_p, property))
