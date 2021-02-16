@@ -55,6 +55,16 @@ ALL_PROPERTIES = [
 
 
 def I_poly(b_f, d, t_f, t_w):
+    """
+    Make a polygon I section. Currently has equal flange thicknesses and widths.
+
+    :param b_f: Flange width.
+    :param d: Total depth.
+    :param t_f: Thickness of flange.
+    :param t_w: Thickness of web.
+    :return: A Shapely Polygon
+    """
+
     return Polygon(
         [
             (-b_f / 2, -d / 2),
