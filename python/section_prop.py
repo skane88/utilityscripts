@@ -849,6 +849,18 @@ class CombinedSection(Section):
         return len(self.sections)
 
     @property
+    def polygon(self) -> Polygon:
+
+        all_polys = []
+
+        for s, n in self.sections:
+
+            moved_sect = s.move_to_point(end_point=n)
+            all_polys.append(moved_sect.polygon)
+
+        return ops.cascaded_union(all_polys)
+
+    @property
     def area(self):
 
         return sum([s.area for s, n in self.sections])
