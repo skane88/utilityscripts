@@ -808,27 +808,6 @@ class GenericSection(Section):
 
         return GenericSection(poly=aff.translate(geom=self.polygon, xoff=x, yoff=y))
 
-    def move_to_centre(self):
-
-        c = self.centroid
-        return GenericSection(poly=aff.translate(self.polygon, xoff=-c.x, yoff=-c.y))
-
-    def move_to_point(
-        self,
-        end_point: Union[Point, Tuple[float, float]],
-        origin: Union[str, Point, Tuple[float, float]] = "origin",
-    ) -> "GenericSection":
-
-        origin = self._make_origin_tuple(origin)
-
-        if isinstance(end_point, Point):
-            end_point = (end_point.x, end_point.y)
-
-        xoff = end_point[0] - origin[0]
-        yoff = end_point[1] - origin[1]
-
-        return GenericSection(poly=aff.translate(self.polygon, xoff=xoff, yoff=yoff))
-
     def rotate(
         self,
         angle: float,
