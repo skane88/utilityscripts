@@ -970,26 +970,6 @@ class CombinedSection(Section):
 
         return test_bounding_box
 
-    @property
-    def elastic_modulus_uu_plus(self):
-
-        return self.Ixx / self.y_plus
-
-    @property
-    def elastic_modulus_uu_minus(self):
-
-        return self.Ixx / self.y_minus
-
-    @property
-    def elastic_modulus_vv_plus(self):
-
-        return self.Iyy / self.x_plus
-
-    @property
-    def elastic_modulus_vv_minus(self):
-
-        return self.Iyy / self.x_minus
-
     def matplotlib_patches(self, **kwargs):
 
         """
