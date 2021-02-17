@@ -300,7 +300,7 @@ class Section:
         raise NotImplementedError
 
     @property
-    def x_plus(self) -> float:
+    def extreme_x_plus(self) -> float:
         """
         The distance from the centroid of the shape to the most positive extreme x point.
         Note that this should always be a positive quantity - if you need it to be
@@ -310,7 +310,7 @@ class Section:
         return self.bounding_box[2] - self.x_c
 
     @property
-    def x_minus(self) -> float:
+    def extreme_x_minus(self) -> float:
         """
         The distance from the centroid of the shape to the most negative extreme x point.
         Note that this should always be a positive quantity - if you need it to be
@@ -320,7 +320,7 @@ class Section:
         return self.x_c - self.bounding_box[0]
 
     @property
-    def y_plus(self) -> float:
+    def extreme_y_plus(self) -> float:
         """
         The distance from the centroid of the shape to the most positive extreme y point.
         Note that this should always be a positive quantity - if you need it to be
@@ -330,7 +330,7 @@ class Section:
         return self.bounding_box[3] - self.y_c
 
     @property
-    def y_minus(self) -> float:
+    def extreme_y_minus(self) -> float:
         """
         The distance from the centroid of the shape to the most negative extreme y point.
         Note that this should always be a positive quantity - if you need it to be
@@ -359,44 +359,44 @@ class Section:
         return bbx[2] - bbx[0]
 
     @property
-    def _11_plus(self):
+    def extreme_11_plus(self):
         """
         The distance from the centroid of the shape to the most negative extreme 11 point.
         Note that this should always be a positive quantity - if you need it to be
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        return self.align_to_principal().x_plus
+        return self.align_to_principal().extreme_x_plus
 
     @property
-    def _11_minus(self):
+    def extreme_11_minus(self):
         """
         The distance from the centroid of the shape to the most negative extreme 11 point.
         Note that this should always be a positive quantity - if you need it to be
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        return self.align_to_principal().x_minus
+        return self.align_to_principal().extreme_x_minus
 
     @property
-    def _22_plus(self):
+    def extreme_22_plus(self):
         """
         The distance from the centroid of the shape to the most negative extreme 22 point.
         Note that this should always be a positive quantity - if you need it to be
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        return self.align_to_principal().y_plus
+        return self.align_to_principal().extreme_y_plus
 
     @property
-    def _22_minus(self):
+    def extreme_22_minus(self):
         """
         The distance from the centroid of the shape to the most negative extreme 22 point.
         Note that this should always be a positive quantity - if you need it to be
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        return self.align_to_principal().y_plus
+        return self.align_to_principal().extreme_y_plus
 
     @property
     def elastic_modulus_uu_plus(self):
@@ -406,7 +406,7 @@ class Section:
         Calculated at the most positive extreme y point.
         """
 
-        return self.Iuu / self.y_plus
+        return self.Iuu / self.extreme_y_plus
 
     @property
     def elastic_modulus_uu_minus(self):
@@ -416,7 +416,7 @@ class Section:
         Calculated at the most negative extreme y point.
         """
 
-        return self.Iuu / self.y_minus
+        return self.Iuu / self.extreme_y_minus
 
     @property
     def elastic_modulus_vv_plus(self):
@@ -426,7 +426,7 @@ class Section:
         Calculated at the most positive extreme x point.
         """
 
-        return self.Ivv / self.x_plus
+        return self.Ivv / self.extreme_x_plus
 
     @property
     def elastic_modulus_vv_minus(self):
@@ -436,7 +436,7 @@ class Section:
         Calculated at the most negative extreme x point.
         """
 
-        return self.Ivv / self.x_minus
+        return self.Ivv / self.extreme_x_minus
 
     @property
     def plastic_modulus_uu(self):
@@ -464,7 +464,7 @@ class Section:
         Calculated at the most positive extreme point.
         """
 
-        return self.I11 / self._22_plus
+        return self.I11 / self.extreme_22_plus
 
     @property
     def elastic_modulus_11_minus(self):
@@ -474,7 +474,7 @@ class Section:
         Calculated at the most negative extreme point.
         """
 
-        return self.I11 / self._22_minus
+        return self.I11 / self.extreme_22_minus
 
     @property
     def elastic_modulus_22_plus(self):
@@ -484,7 +484,7 @@ class Section:
         Calculated at the most positive extreme point.
         """
 
-        return self.I22 / self._11_plus
+        return self.I22 / self.extreme_11_plus
 
     @property
     def elastic_modulus_22_minus(self):
@@ -494,7 +494,7 @@ class Section:
         Calculated at the most negative extreme point.
         """
 
-        return self.I22 / self._11_minus
+        return self.I22 / self.extreme_11_minus
 
     @property
     def plastic_modulus_11(self):

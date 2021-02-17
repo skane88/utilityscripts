@@ -94,7 +94,7 @@ def make_sections_for_combined_same_as_generic():
     g = GenericSection(poly=p)
 
     T = make_T(b_f=100, d=200, t_f=20, t_w=6)
-    T = T.move_to_point(origin="origin", end_point=(0, T.y_minus))
+    T = T.move_to_point(origin="origin", end_point=(0, T.extreme_y_minus))
 
     sections.append((g, T))
 
@@ -142,7 +142,9 @@ def make_sections_for_combined_to_poly_is_correct():
     from_poly = GenericSection(poly=p)
 
     combined = make_T(b_f=100, d=200, t_f=20, t_w=6)
-    combined = combined.move_to_point(origin="origin", end_point=(0, combined.y_minus))
+    combined = combined.move_to_point(
+        origin="origin", end_point=(0, combined.extreme_y_minus)
+    )
 
     combined = GenericSection(poly=combined.polygon)
 
