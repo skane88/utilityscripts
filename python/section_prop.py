@@ -1009,8 +1009,8 @@ class CombinedSection(Section):
 
     def move_to_point(
         self,
-        origin: Union[str, Point, Tuple[float, float]],
         end_point: Union[Point, Tuple[float, float]],
+        origin: Union[str, Point, Tuple[float, float]] = "origin",
     ) -> "CombinedSection":
 
         origin = self._make_origin_tuple(origin)
