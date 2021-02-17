@@ -416,6 +416,64 @@ class Section:
 
         raise NotImplementedError()
 
+    @property
+    def elastic_modulus_11_plus(self):
+        """
+        The elastic section modulus assuming a linear-elastic material behaviour about the
+        1-1 axis.
+        Calculated at the most positive extreme point.
+        """
+
+        raise NotImplementedError()
+
+    @property
+    def elastic_modulus_11_minus(self):
+        """
+        The elastic section modulus assuming a linear-elastic material behaviour about the
+        1-1 axis.
+        Calculated at the most negative extreme point.
+        """
+
+        raise NotImplementedError()
+
+    @property
+    def elastic_modulus_22_plus(self):
+        """
+        The elastic section modulus assuming a linear-elastic material behaviour about the
+        2-2 axis.
+        Calculated at the most positive extreme point.
+        """
+
+        raise NotImplementedError()
+
+    @property
+    def elastic_modulus_22_minus(self):
+        """
+        The elastic section modulus assuming a linear-elastic material behaviour about the
+        2-2 axis.
+        Calculated at the most negative extreme point.
+        """
+
+        raise NotImplementedError()
+
+    @property
+    def plastic_modulus_11(self):
+        """
+        The plastic section modulus assuming a perfectly plastic material behaviour about
+        the 1-1 axis.
+        """
+
+        raise NotImplementedError()
+
+    @property
+    def plastic_modulus_22(self):
+        """
+        The plastic section modulus assuming a perfectly plastic material behaviour about
+        the 2-2 axis.
+        """
+
+        raise NotImplementedError()
+
     def matplotlib_patches(self, **kwargs):
         """
         Constructs a matplotlib patch of the shape for use in plotting. Relies on the
@@ -969,6 +1027,13 @@ class CombinedSection(Section):
                 test_bounding_box[3] = max(test_bounding_box[3], bbox[3])
 
         return test_bounding_box
+
+    def generic(self) -> GenericSection:
+        """
+        Return a generic section of the CombinedSection
+        """
+
+        returSection(poly=self.polygon)
 
     def matplotlib_patches(self, **kwargs):
 
