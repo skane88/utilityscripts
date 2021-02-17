@@ -653,6 +653,15 @@ class Section:
 
         raise NotImplementedError
 
+    def align_to_principal(self) -> S:
+        """
+        Return a copy of the shape aligned to the principal axes.
+        """
+
+        moved = self.move_to_centre()
+
+        return moved.rotate(angle=-moved.principal_angle)
+
     def _make_origin_tuple(self, origin):
         """
         Make a Tuple of x, y co-ordinates given an input string or shapely Point
