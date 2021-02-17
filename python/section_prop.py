@@ -464,7 +464,7 @@ class Section:
         Calculated at the most positive extreme point.
         """
 
-        raise NotImplementedError()
+        return self.I11 / self._22_plus
 
     @property
     def elastic_modulus_11_minus(self):
@@ -474,7 +474,7 @@ class Section:
         Calculated at the most negative extreme point.
         """
 
-        raise NotImplementedError()
+        return self.I11 / self._22_minus
 
     @property
     def elastic_modulus_22_plus(self):
@@ -484,7 +484,7 @@ class Section:
         Calculated at the most positive extreme point.
         """
 
-        raise NotImplementedError()
+        return self.I22 / self._11_plus
 
     @property
     def elastic_modulus_22_minus(self):
@@ -494,7 +494,7 @@ class Section:
         Calculated at the most negative extreme point.
         """
 
-        raise NotImplementedError()
+        return self.I22 / self._11_minus
 
     @property
     def plastic_modulus_11(self):
