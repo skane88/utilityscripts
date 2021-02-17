@@ -1093,7 +1093,7 @@ def make_square(side):
     return Rectangle(length=side, height=side)
 
 
-def make_I(b_f, d, t_f, t_w) -> CombinedSection:
+def make_I(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSection:
     """
     Make an I section.
 
@@ -1102,7 +1102,9 @@ def make_I(b_f, d, t_f, t_w) -> CombinedSection:
     :param d:
     :param t_f: The flange thickness. May be a single number, or a list of 2x thicknesses,
         [top, bottom].
-    :param t_w:
+    :param t_w: The web thickness.
+    :param box_in: Box the section in?
+    :param t_box: The thickness of any boxing.
     :return: A CombinedSection representing the I section. Depending on the parameters
         entered this may be a collection of rectangular plates or perhaps only a single
         GenericSection
@@ -1132,9 +1134,21 @@ def make_I(b_f, d, t_f, t_w) -> CombinedSection:
     n_w = Point(0, t_f_bottom + d_w / 2)
     n_bf = Point(0, t_f_bottom / 2)
 
-    return CombinedSection(
-        sections=[(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
-    ).move_to_centre()
+    I_sections = [(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
+
+    if box_in:
+
+        box_plate = Rectangle(
+            length=d_w, thickness=t_box, rotation_angle=90, use_radians=False
+        )
+
+        n_box_1 = Point(-b_f / 2 + t_box / 2, t_f_bottom + d_w / 2)
+        n_box_2 = Point(b_f / 2 - t_box / 2, t_f_bottom + d_w / 2)
+
+        I_sections.append((box_plate, n_box_1))
+        I_sections.append((box_plate, n_box_2))
+
+    return CombinedSection(sections=I_sections).move_to_centre()
 
 
 def make_T(b_f, d, t_f, t_w, stem_up: bool = True) -> CombinedSection:
