@@ -602,7 +602,7 @@ class Section:
         (0,0)
         """
 
-        raise NotImplementedError
+        return self.move(x=-self.x_c, y=-self.y_c)
 
     def move_to_point(
         self,
