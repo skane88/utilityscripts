@@ -914,7 +914,7 @@ class CombinedSection(Section):
 
                 c = a.polygon.intersection(b.polygon)
 
-                if c.area < min(a.area * 0.001, b.area * 0.001):
+                if c.area < min(a.area * OVERLAP_TOLERANCE, b.area * OVERLAP_TOLERANCE):
                     continue
 
                 raise ValueError(
