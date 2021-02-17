@@ -568,7 +568,7 @@ class Section:
         self,
         end_point: Union[Point, Tuple[float, float]],
         origin: Union[str, Point, Tuple[float, float]] = "origin",
-    ) -> "Section":
+    ) -> S:
         """
         Returns a copy of the object translated from the point ``origin`` to the point
         ``end_point``.
