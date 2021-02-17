@@ -366,7 +366,7 @@ class Section:
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        raise NotImplementedError
+        return self.align_to_principal().x_plus
 
     @property
     def _11_minus(self):
@@ -376,7 +376,7 @@ class Section:
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        raise NotImplementedError
+        return self.align_to_principal().x_minus
 
     @property
     def _22_plus(self):
@@ -386,17 +386,17 @@ class Section:
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        raise NotImplementedError
+        return self.align_to_principal().y_plus
 
     @property
-    def _22_plus(self):
+    def _22_minus(self):
         """
         The distance from the centroid of the shape to the most negative extreme 22 point.
         Note that this should always be a positive quantity - if you need it to be
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        raise NotImplementedError
+        return self.align_to_principal().y_plus
 
     @property
     def elastic_modulus_uu_plus(self):
