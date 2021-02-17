@@ -622,7 +622,15 @@ class Section:
             A co-ordinate Tuple (x, y).
         """
 
-        raise NotImplementedError
+        origin = self._make_origin_tuple(origin)
+
+        if isinstance(end_point, Point):
+            end_point = (end_point.x, end_point.y)
+
+        xoff = end_point[0] - origin[0]
+        yoff = end_point[1] - origin[1]
+
+        return self.move(x=xoff, y=yoff)
 
     def rotate(
         self,
