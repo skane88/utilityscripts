@@ -1102,42 +1102,23 @@ class CombinedSection(Section):
 
         self.sections.append((section, centroid))
 
-    def move_to_centre(self):
+    def move(self, x: float, y: float) -> S:
+        """
+        Returns a copy of the object moved by the provided offsets.
+
+        :param x: The x-offset
+        :param y: The y offset
+        """
 
         sections = []
-        centroid = self.centroid
 
         for s, n in self.sections:
 
-            offset = Point(n.x - centroid.x, n.y - centroid.y)
+            offset = Point(n.x + x, n.y + y)
 
             sections.append((s, offset))
 
         return CombinedSection(sections=sections)
-
-    def move_to_point(
-        self,
-        end_point: Union[Point, Tuple[float, float]],
-        origin: Union[str, Point, Tuple[float, float]] = "origin",
-    ) -> "CombinedSection":
-
-        origin = self._make_origin_tuple(origin)
-
-        if isinstance(end_point, Point):
-            end_point = (end_point.x, end_point.y)
-
-        xoff = end_point[0] - origin[0]
-        yoff = end_point[1] - origin[1]
-
-        sections = []
-
-        for s, n in self.sections:
-
-            n_point = Point(n.x + xoff, n.y + yoff)
-
-            sections.append((s, n_point))
-
-        return CombinedSection(sections)
 
     def rotate(
         self,
