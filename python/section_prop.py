@@ -674,7 +674,14 @@ class Section:
         :param line: The line to split the section on.
         """
 
-        raise NotImplementedError
+        poly = self.polygon
+
+        if not line.intersects(poly):
+            return self
+
+        results = ops.split(poly, line)
+
+        return [GenericSection(p) for p in results]
 
     def __repr__(self):
         return (
