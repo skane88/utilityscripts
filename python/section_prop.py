@@ -586,7 +586,7 @@ class Section:
 
         fig.show()
 
-    def move(self, x: float, y: float):
+    def move(self, x: float, y: float) -> S:
         """
         Returns a copy of the object moved by the provided offsets.
 
@@ -596,7 +596,7 @@ class Section:
 
         raise NotImplementedError
 
-    def move_to_centre(self):
+    def move_to_centre(self) -> S:
         """
         Returns a copy of the object moved so that its centroid is at the global origin
         (0,0)
@@ -629,7 +629,7 @@ class Section:
         angle: float,
         origin: Union[str, Point, Tuple[float, float]] = "origin",
         use_radians: bool = True,
-    ):
+    ) -> S:
         """
         Returns a copy of the object rotated about a given point.
 
