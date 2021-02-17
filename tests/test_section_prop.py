@@ -47,10 +47,10 @@ ALL_PROPERTIES = [
     "y_minus",
     "depth",
     "width",
-    "elastic_modulus_xx_plus",
-    "elastic_modulus_xx_minus",
-    "elastic_modulus_yy_plus",
-    "elastic_modulus_yy_minus",
+    "elastic_modulus_uu_plus",
+    "elastic_modulus_uu_minus",
+    "elastic_modulus_vv_plus",
+    "elastic_modulus_vv_minus",
 ]
 
 
