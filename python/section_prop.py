@@ -366,7 +366,7 @@ class Section:
         Calculated at the most positive extreme y point.
         """
 
-        return self.Ixx / self.y_plus
+        return self.Iuu / self.y_plus
 
     @property
     def elastic_modulus_uu_minus(self):
@@ -376,7 +376,7 @@ class Section:
         Calculated at the most negative extreme y point.
         """
 
-        return self.Ixx / self.y_minus
+        return self.Iuu / self.y_minus
 
     @property
     def elastic_modulus_vv_plus(self):
@@ -386,7 +386,7 @@ class Section:
         Calculated at the most positive extreme x point.
         """
 
-        return self.Iyy / self.x_plus
+        return self.Ivv / self.x_plus
 
     @property
     def elastic_modulus_vv_minus(self):
@@ -396,7 +396,7 @@ class Section:
         Calculated at the most negative extreme x point.
         """
 
-        return self.Iyy / self.x_minus
+        return self.Ivv / self.x_minus
 
     @property
     def plastic_modulus_uu(self):
