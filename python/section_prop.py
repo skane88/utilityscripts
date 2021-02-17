@@ -359,6 +359,46 @@ class Section:
         return bbx[2] - bbx[0]
 
     @property
+    def _11_plus(self):
+        """
+        The distance from the centroid of the shape to the most negative extreme 11 point.
+        Note that this should always be a positive quantity - if you need it to be
+        negative to correctly determine stresses etc. then account for it appropriately.
+        """
+
+        raise NotImplementedError
+
+    @property
+    def _11_minus(self):
+        """
+        The distance from the centroid of the shape to the most negative extreme 11 point.
+        Note that this should always be a positive quantity - if you need it to be
+        negative to correctly determine stresses etc. then account for it appropriately.
+        """
+
+        raise NotImplementedError
+
+    @property
+    def _22_plus(self):
+        """
+        The distance from the centroid of the shape to the most negative extreme 22 point.
+        Note that this should always be a positive quantity - if you need it to be
+        negative to correctly determine stresses etc. then account for it appropriately.
+        """
+
+        raise NotImplementedError
+
+    @property
+    def _22_plus(self):
+        """
+        The distance from the centroid of the shape to the most negative extreme 22 point.
+        Note that this should always be a positive quantity - if you need it to be
+        negative to correctly determine stresses etc. then account for it appropriately.
+        """
+
+        raise NotImplementedError
+
+    @property
     def elastic_modulus_uu_plus(self):
         """
         The elastic section modulus assuming a linear-elastic material behaviour about an
