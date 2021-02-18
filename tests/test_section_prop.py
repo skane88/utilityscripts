@@ -14,53 +14,68 @@ from section_prop import (
     make_T,
 )
 
-
-ALL_PROPERTIES = [
+AXIS_INDEPENDENT_PROPERTIES = [
     "area",
+    "principal_angle",
+    "principal_angle_degrees",
+]
+
+GLOBAL_AXIS_PROPERTIES = [
     "Ixx",
     "Iyy",
     "Ixy",
     "Izz",
-    "I11",
-    "I22",
-    "I33",
-    "I12",
+    "rxx",
+    "ryy",
+    "rzz",
+    "x_c",
+    "y_c",
+]
+
+LOCAL_AXIS_PROPERTIES = [
     "Iuu",
     "Ivv",
     "Iww",
     "Iuv",
-    "rxx",
-    "ryy",
-    "rzz",
-    "r11",
-    "r22",
-    "r33",
     "ruu",
     "rvv",
     "rww",
-    "principal_angle",
-    "principal_angle_degrees",
-    "x_c",
-    "y_c",
     "extreme_x_plus",
     "extreme_x_minus",
     "extreme_y_plus",
     "extreme_y_minus",
     "depth",
     "width",
-    "extreme_11_plus",
-    "extreme_11_minus",
-    "extreme_22_plus",
-    "extreme_22_minus",
     "elastic_modulus_uu_plus",
     "elastic_modulus_uu_minus",
     "elastic_modulus_vv_plus",
     "elastic_modulus_vv_minus",
+]
+
+PRINCIPAL_AXIS_PROPERTIES = [
+    "I11",
+    "I22",
+    "I33",
+    "I12",
+    "r11",
+    "r22",
+    "r33",
+    "extreme_11_plus",
+    "extreme_11_minus",
+    "extreme_22_plus",
+    "extreme_22_minus",
     "elastic_modulus_11_plus",
     "elastic_modulus_11_minus",
     "elastic_modulus_22_plus",
     "elastic_modulus_22_minus",
 ]
+
+ALL_PROPERTIES = (
+    AXIS_INDEPENDENT_PROPERTIES
+    + GLOBAL_AXIS_PROPERTIES
+    + LOCAL_AXIS_PROPERTIES
+    + PRINCIPAL_AXIS_PROPERTIES
+)
 
 
 def I_poly(b_f, d, t_f, t_w):
