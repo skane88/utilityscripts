@@ -1198,7 +1198,7 @@ def make_I(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSectio
 
     :param b_f: The flange width. May be a single number, or a list of 2x widths
         [top, bottom].
-    :param d:
+    :param d: The total depth of the section.
     :param t_f: The flange thickness. May be a single number, or a list of 2x thicknesses,
         [top, bottom].
     :param t_w: The web thickness.
@@ -1278,6 +1278,62 @@ def make_T(b_f, d, t_f, t_w, stem_up: bool = True) -> CombinedSection:
         T = T.rotate(angle=180, origin="origin", use_radians=False)
 
     return T
+
+
+def make_C(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSection:
+    """
+    Make a C section. By default it is orientated with its toes to the right.
+
+    :param b_f: The flange width. May be a single number, or a list of 2x widths
+        [top, bottom].
+    :param d: The total depth of the section.
+    :param t_f: The flange thickness. May be a single number, or a list of 2x thicknesses,
+        [top, bottom].
+    :param t_w: The web thickness.
+    :param box_in: Box the section in?
+    :param t_box: The thickness of any boxing.
+    :return: A CombinedSection representing the C section. Depending on the parameters
+        entered this may be a collection of rectangular plates or perhaps only a single
+        GenericSection
+    """
+
+    if isinstance(b_f, list):
+        b_f_top = b_f[0]
+        b_f_bottom = b_f[1]
+    else:
+        b_f_top = b_f
+        b_f_bottom = b_f
+
+    if isinstance(t_f, list):
+        t_f_top = t_f[0]
+        t_f_bottom = t_f[1]
+    else:
+        t_f_top = t_f
+        t_f_bottom = t_f
+
+    d_w = d - (t_f_top + t_f_bottom)
+
+    top_flange = Rectangle(length=b_f_top, thickness=t_f_top)
+    bottom_flange = Rectangle(length=b_f_bottom, thickness=t_f_bottom)
+    web = Rectangle(length=d_w, thickness=t_w, rotation_angle=90, use_radians=False)
+
+    n_tf = Point(b_f / 2, d - t_f_top / 2)
+    n_w = Point(t_w / 2, t_f_bottom + d_w / 2)
+    n_bf = Point(b_f / 2, t_f_bottom / 2)
+
+    C_sections = [(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
+
+    if box_in:
+
+        box_plate = Rectangle(
+            length=d_w, thickness=t_box, rotation_angle=90, use_radians=False
+        )
+
+        n_box = Point(b_f - t_box / 2, t_f_bottom + d_w / 2)
+
+        C_sections.append((box_plate, n_box))
+
+    return CombinedSection(sections=C_sections).move_to_centre()
 
 
 def _prepare_coords_for_green(
