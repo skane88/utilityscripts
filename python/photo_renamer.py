@@ -13,7 +13,7 @@ def first_num(filename: Path):
 
     filename = filename.split(" ")
 
-    if len(filename) ==1:
+    if len(filename) == 1:
         return 0
 
     if not filename[0].isdigit():

@@ -57,5 +57,5 @@ def color_list(N, cmap):
 
     return ret_list
 
-BLOG_CMAP = make_cmap([(65, 131, 196), (206, 25, 13)], bit=True)
 
+BLOG_CMAP = make_cmap([(65, 131, 196), (206, 25, 13)], bit=True)

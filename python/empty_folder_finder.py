@@ -22,9 +22,9 @@ if base_path.is_dir():
 
         print()
         print(f"Counting files in {f}")
-        
+
         for file in f.glob(filter_val):
-            count_files+= 1
+            count_files += 1
 
         print(f"    No. files is {count_files}")
         if count_files == 0:
@@ -42,4 +42,4 @@ else:
     print("Not a directory.")
 
 print("Finished")
-print("="*40)
+print("=" * 40)

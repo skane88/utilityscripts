@@ -58,7 +58,7 @@ def re_extension():
             f_iterator = base_path.glob(filter_val)
 
         print()
-        
+
         changed = 0
 
         for f in tqdm(f_iterator, desc="Renaming Extensions", unit="Files"):
