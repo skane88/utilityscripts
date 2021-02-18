@@ -919,6 +919,36 @@ class Rectangle(GenericSection):
 
         return p1 * (p2 - p3)
 
+    def move(self, x: float, y: float):
+
+        # to maintain the length & thickness properties through the move some
+        # monkey patching needs to go on.
+
+        # TODO Consider if we should delete the Rectangle class altogether and just
+        # replace it with a constructor method, similar to make_I and make_T
+
+        moved = super().move(x=x, y=y)
+        rect = Rectangle(length=self.length, thickness=self.thickness)
+        rect._polygon = moved.polygon
+
+        return rect
+
+    def rotate(
+        self,
+        angle: float,
+        origin: Union[str, Point, Tuple[float, float]] = "origin",
+        use_radians: bool = True,
+    ):
+
+        # to maintain the length & thickness properties through the rotation some
+        # monkey patching needs to go on.
+
+        rotated = super().rotate(angle=angle, origin=origin, use_radians=use_radians)
+        rect = Rectangle(length=self.length, thickness=self.thickness)
+        rect._polygon = rotated.polygon
+
+        return rect
+
 
 class CombinedSection(Section):
 
