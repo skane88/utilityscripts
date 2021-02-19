@@ -3,6 +3,7 @@ Some tests for the section properties file
 """
 
 import pytest
+import pandas as pd
 
 from section_prop import (
     Section,
@@ -76,6 +77,14 @@ ALL_PROPERTIES = (
     + LOCAL_AXIS_PROPERTIES
     + PRINCIPAL_AXIS_PROPERTIES
 )
+
+
+def get_I_sections():
+
+    df = pd.read_excel("steel_sections.xlsx")
+    df = df[df["Section Type"] == "I"]  # filter for I sections
+
+    return df.to_dict("records")  # use to_dict() to get each row as a dict.
 
 
 def I_poly(b_f, d, t_f, t_w):
@@ -209,3 +218,14 @@ def test_combined_section_to_poly_is_correct(property, sections):
     from_p = GenericSection(poly=c.polygon)
 
     assert round(getattr(c, property)) == round(getattr(from_p, property))
+
+
+@pytest.mark.parametrize("data", get_I_sections(), ids=lambda x: x["Section"])
+def test_against_standard_sects(data):
+    """
+    Compare the results of section_prop vs tabulated data for standard AS sections.
+    """
+
+    I = make_I(b_f=data["bf"], d=data["d"], t_f=data["tf"], t_w=data["tw"])
+
+    assert False
