@@ -4,6 +4,7 @@ Some tests for the section properties file
 
 import pytest
 import pandas as pd
+import math
 
 from section_prop import (
     Section,
@@ -69,6 +70,9 @@ PRINCIPAL_AXIS_PROPERTIES = [
     "elastic_modulus_11_minus",
     "elastic_modulus_22_plus",
     "elastic_modulus_22_minus",
+    "J",
+    "J_approx",
+    "Iw",
 ]
 
 ALL_PROPERTIES = (
@@ -220,12 +224,47 @@ def test_combined_section_to_poly_is_correct(property, sections):
     assert round(getattr(c, property)) == round(getattr(from_p, property))
 
 
+@pytest.mark.parametrize(
+    "property", ["d", "bf", "Ag", "Ix", "Zx", "rx", "Iy", "Zy", "ry", "J"]
+)
 @pytest.mark.parametrize("data", get_I_sections(), ids=lambda x: x["Section"])
-def test_against_standard_sects(data):
+def test_against_standard_sects(data, property):
     """
     Compare the results of section_prop vs tabulated data for standard AS sections.
     """
 
+    MAP_SSHEET_TO_SECTION_PROP = {
+        "d": ["depth"],
+        "bf": ["width"],
+        "Ag": ["area"],
+        "Ix": ["Ixx", "Iuu", "I11"],
+        "Zx": [
+            "elastic_modulus_uu_plus",
+            "elastic_modulus_uu_minus",
+            "elastic_modulus_11_plus",
+            "elastic_modulus_11_minus",
+        ],
+        "Sx": ["plastic_modulus_11"],
+        "rx": ["rxx", "ruu", "r11"],
+        "Iy": ["Iyy", "Ivv", "I22"],
+        "Zy": [
+            "elastic_modulus_vv_plus",
+            "elastic_modulus_vv_minus",
+            "elastic_modulus_22_plus",
+            "elastic_modulus_22_minus",
+        ],
+        "Sy": ["plastic_modulus_22"],
+        "ry": ["ryy", "rvv", "r22"],
+        "J": ["J_approx"],
+    }
+
     I = make_I(b_f=data["bf"], d=data["d"], t_f=data["tf"], t_w=data["tw"])
 
-    assert False
+    attribute = MAP_SSHEET_TO_SECTION_PROP[property]
+
+    for a in attribute:
+
+        calculated = getattr(I, a)
+        test = data[property]
+
+        assert math.isclose(calculated, test, rel_tol=0.03)
