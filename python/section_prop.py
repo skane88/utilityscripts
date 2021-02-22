@@ -1231,9 +1231,18 @@ def make_square(side):
     return Rectangle(length=side, height=side)
 
 
-def make_I(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSection:
+def make_I(
+    b_f,
+    d,
+    t_f,
+    t_w,
+    radius_or_weld: str = None,
+    radius_or_weld_size=None,
+    box_in: bool = False,
+    t_box=None,
+) -> CombinedSection:
     """
-    Make an I section.
+    Make an I section. if a radius
 
     :param b_f: The flange width. May be a single number, or a list of 2x widths
         [top, bottom].
@@ -1241,6 +1250,8 @@ def make_I(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSectio
     :param t_f: The flange thickness. May be a single number, or a list of 2x thicknesses,
         [top, bottom].
     :param t_w: The web thickness.
+    :param radius_or_weld: Use 'r' or 'w' as appropriate, or None if ignoring.
+    :param radius_or_weld_size:
     :param box_in: Box the section in?
     :param t_box: The thickness of any boxing.
     :return: A CombinedSection representing the I section. Depending on the parameters
@@ -1264,15 +1275,109 @@ def make_I(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSectio
 
     d_w = d - (t_f_top + t_f_bottom)
 
-    top_flange = Rectangle(length=b_f_top, thickness=t_f_top)
-    bottom_flange = Rectangle(length=b_f_bottom, thickness=t_f_bottom)
-    web = Rectangle(length=d_w, thickness=t_w, rotation_angle=90, use_radians=False)
+    if radius_or_weld is None:
+        top_flange = Rectangle(length=b_f_top, thickness=t_f_top)
+        bottom_flange = Rectangle(length=b_f_bottom, thickness=t_f_bottom)
+        web = Rectangle(length=d_w, thickness=t_w, rotation_angle=90, use_radians=False)
 
-    n_tf = Point(0, d - t_f_top / 2)
-    n_w = Point(0, t_f_bottom + d_w / 2)
-    n_bf = Point(0, t_f_bottom / 2)
+        n_tf = Point(0, d - t_f_top / 2)
+        n_w = Point(0, t_f_bottom + d_w / 2)
+        n_bf = Point(0, t_f_bottom / 2)
 
-    I_sections = [(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
+        I_sections = [(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
+
+    else:
+
+        if radius_or_weld not in ["r", "w"]:
+            raise ValueError("Expected either 'r' or 'w' to define radii or welds.")
+
+        if isinstance(radius_or_weld_size, list):
+            rw_size_top = radius_or_weld_size[0]
+            rw_size_bottom = radius_or_weld_size[1]
+        else:
+            rw_size_top = radius_or_weld_size
+            rw_size_bottom = radius_or_weld_size
+
+        # make the bottom flange
+        points = [
+            [-b_f_bottom / 2, t_f_bottom],
+            [-b_f_bottom / 2, 0],
+            [b_f_bottom / 2, 0],
+            [b_f_bottom / 2, t_f_bottom],
+        ]
+
+        # add radii or welds + web
+        if radius_or_weld == "r":
+            # now add bottom right radius
+            points += reversed(
+                build_circle(
+                    centroid=(t_w / 2 + rw_size_bottom, t_f_bottom + rw_size_bottom),
+                    radius=rw_size_bottom,
+                    angles=(180, 270),
+                    use_radians=False,
+                )
+            )
+            # and the top right radius
+            points += reversed(
+                build_circle(
+                    centroid=(t_w / 2 + rw_size_top, d - t_f_top - rw_size_top),
+                    radius=rw_size_top,
+                    angles=(90, 180),
+                    use_radians=False,
+                )
+            )
+
+        else:
+
+            points += [[t_w / 2 + rw_size_bottom, t_f_bottom]]
+            points += [[t_w / 2, t_f_bottom + rw_size_bottom]]
+            points += [[t_w / 2, d - t_f_top - rw_size_top]]
+            points += [[t_w / 2 + rw_size_top, d - t_f_top]]
+
+        # now add top flange
+        points += [
+            [b_f_top / 2, d - t_f],
+            [b_f_top / 2, d],
+            [-b_f_top / 2, d],
+            [-b_f_top / 2, d - t_f],
+        ]
+
+        # now add the other radii / welds
+        if radius_or_weld == "r":
+            # add the top left radius
+            points += reversed(
+                build_circle(
+                    centroid=(-t_w / 2 - rw_size_top, d - t_f_top - rw_size_top),
+                    radius=rw_size_top,
+                    angles=(0, 90),
+                    use_radians=False,
+                )
+            )
+
+            # now add bottom left radii
+            points += reversed(
+                build_circle(
+                    centroid=(-t_w / 2 - rw_size_bottom, t_f_bottom + rw_size_bottom),
+                    radius=rw_size_bottom,
+                    angles=(270, 360),
+                    use_radians=False,
+                )
+            )
+
+        else:
+            points += [[-t_w / 2 - rw_size_top, d - t_f_top]]
+            points += [[-t_w / 2, d - t_f_top - rw_size_top]]
+            points += [[-t_w / 2, t_f_bottom + rw_size_bottom]]
+            points += [[-t_w / 2 - rw_size_bottom, t_f_bottom]]
+
+        # now close
+        points += [[-b_f_bottom / 2, t_f_bottom]]
+
+        poly = Polygon(points)
+
+        I = GenericSection(poly).move_to_centre()
+
+        I_sections = [(I, Point(0, d / 2))]
 
     if box_in:
 

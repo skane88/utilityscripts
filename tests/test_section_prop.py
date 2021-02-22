@@ -272,3 +272,70 @@ def test_against_standard_sects(data, property):
         test = data[property]
 
         assert math.isclose(calculated, test, rel_tol=0.03)
+
+
+@pytest.mark.parametrize(
+    "property", ["d", "bf", "Ag", "Ix", "Zx", "rx", "Iy", "Zy", "ry"]
+)
+@pytest.mark.parametrize("data", get_I_sections(), ids=lambda x: x["Section"])
+def test_against_standard_sects_with_radius(data, property):
+    """
+    Compare the results of section_prop vs tabulated data for standard AS sections.
+    """
+
+    MAP_SSHEET_TO_SECTION_PROP = {
+        "d": ["depth"],
+        "bf": ["width"],
+        "Ag": ["area"],
+        "Ix": ["Ixx", "Iuu", "I11"],
+        "Zx": [
+            "elastic_modulus_uu_plus",
+            "elastic_modulus_uu_minus",
+            "elastic_modulus_uu",
+            "elastic_modulus_11_plus",
+            "elastic_modulus_11_minus",
+            "elastic_modulus_11",
+        ],
+        "Sx": ["plastic_modulus_11"],
+        "rx": ["rxx", "ruu", "r11"],
+        "Iy": ["Iyy", "Ivv", "I22"],
+        "Zy": [
+            "elastic_modulus_vv_plus",
+            "elastic_modulus_vv_minus",
+            "elastic_modulus_vv",
+            "elastic_modulus_22_plus",
+            "elastic_modulus_22_minus",
+            "elastic_modulus_22",
+        ],
+        "Sy": ["plastic_modulus_22"],
+        "ry": ["ryy", "rvv", "r22"],
+        "J": ["J_approx"],
+    }
+
+    if data["Fabrication Type"] == "Hot Rolled":
+        I = make_I(
+            b_f=data["bf"],
+            d=data["d"],
+            t_f=data["tf"],
+            t_w=data["tw"],
+            radius_or_weld="r",
+            radius_or_weld_size=data["r1"],
+        )
+    else:
+        I = make_I(
+            b_f=data["bf"],
+            d=data["d"],
+            t_f=data["tf"],
+            t_w=data["tw"],
+            radius_or_weld="w",
+            radius_or_weld_size=0.005,  # guestimated weld size
+        )
+
+    attribute = MAP_SSHEET_TO_SECTION_PROP[property]
+
+    for a in attribute:
+
+        calculated = getattr(I, a)
+        test = data[property]
+
+        assert math.isclose(calculated, test, rel_tol=0.03)
