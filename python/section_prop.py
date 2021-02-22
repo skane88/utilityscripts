@@ -795,13 +795,16 @@ class GenericSection(Section):
     """
 
     def __init__(
-        self, poly: Polygon,
+        self, poly: Union[List[Tuple[float, float]], Polygon],
     ):
         """
         Initialise a generic section based on an input polygon.
 
         :param poly: a shapely polygon object.
         """
+
+        if isinstance(poly, list):
+            poly = Polygon(poly)
 
         self._polygon = polygon.orient(poly)
 
