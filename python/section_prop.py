@@ -439,6 +439,24 @@ class Section:
         return self.Ivv / self.extreme_x_minus
 
     @property
+    def elastic_modulus_uu(self):
+        """
+        The elastic section modulus assuming a linear-elastic material behaviour about an
+        axis parallel to the global x-x axis but through the shape's centroid.
+        """
+
+        return min(self.elastic_modulus_uu_plus, self.elastic_modulus_uu_minus)
+
+    @property
+    def elastic_modulus_vv(self):
+        """
+        The elastic section modulus assuming a linear-elastic material behaviour about an
+        axis parallel to the global y-y axis but through the shape's centroid.
+        """
+
+        return min(self.elastic_modulus_vv_plus, self.elastic_modulus_vv_minus)
+
+    @property
     def plastic_modulus_uu(self):
         """
         The plastic section modulus assuming a perfectly plastic material behaviour about
@@ -495,6 +513,24 @@ class Section:
         """
 
         return self.I22 / self.extreme_11_minus
+
+    @property
+    def elastic_modulus_11(self):
+        """
+        The elastic section modulus assuming a linear-elastic material behaviour about the
+        1-1 axis.
+        """
+
+        return min(self.elastic_modulus_11_minus, self.elastic_modulus_11_plus)
+
+    @property
+    def elastic_modulus_22(self):
+        """
+        The elastic section modulus assuming a linear-elastic material behaviour about the
+        2-2 axis.
+        """
+
+        return min(self.elastic_modulus_22_minus, self.elastic_modulus_22_plus)
 
     @property
     def plastic_modulus_11(self):

@@ -241,8 +241,10 @@ def test_against_standard_sects(data, property):
         "Zx": [
             "elastic_modulus_uu_plus",
             "elastic_modulus_uu_minus",
+            "elastic_modulus_uu",
             "elastic_modulus_11_plus",
             "elastic_modulus_11_minus",
+            "elastic_modulus_11",
         ],
         "Sx": ["plastic_modulus_11"],
         "rx": ["rxx", "ruu", "r11"],
@@ -250,8 +252,10 @@ def test_against_standard_sects(data, property):
         "Zy": [
             "elastic_modulus_vv_plus",
             "elastic_modulus_vv_minus",
+            "elastic_modulus_vv",
             "elastic_modulus_22_plus",
             "elastic_modulus_22_minus",
+            "elastic_modulus_22",
         ],
         "Sy": ["plastic_modulus_22"],
         "ry": ["ryy", "rvv", "r22"],
