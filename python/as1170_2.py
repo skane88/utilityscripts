@@ -3,8 +3,10 @@ File to contain some basic AS1170.2 helper methods for working with wind loads
 """
 
 from pathlib import Path
+from typing import Tuple, Union
 
 import toml
+import numpy as np
 
 FILE_PATH = Path(__file__)
 DEFAULT_DATA_PATH = FILE_PATH.parent / Path("as1170_2.toml")
@@ -79,3 +81,52 @@ def V_R(*, wind_region: str, R, ignore_F_x: bool = False):
     V_min = STANDARD_DATA["region_windspeed_parameters"][wind_region]["V_min"]
 
     return max(V_min, F * V_R_basic(a=a, b=b, R=R, k=k))
+
+
+def M_d(*, wind_region: str, direction: Union[float, str]) -> Tuple[float, float]:
+    """
+    Return the wind direction multiplier for a given region and wind direction.
+
+    :param wind_region: The wind region where the structure is located.
+    :param direction: The direction as an angle between 0 and 360 degrees.
+        0 / 360 = Wind from North
+        90 = Wind from East
+        180 = Wind from South
+        270 = Wind from West
+        Alternatively, use "any" to return the any direction value.
+    :return: The direction multiplier as a Tuple containing (M_d, M_d_cladding)
+    """
+
+    # first load some required data
+    if len(STANDARD_DATA) == 0:
+        init_standard_data()
+
+    region_M_d_parameters = STANDARD_DATA["region_direction_parameters"][wind_region]
+    wind_direction_defs = STANDARD_DATA["wind_direction_definitions"]
+
+    F_not_clad = region_M_d_parameters["F_not_clad"]
+
+    # next bail out early if the direction doesn't matter
+    if direction == "any":
+        M_d_clad = region_M_d_parameters[direction]
+        M_d = M_d_clad * F_not_clad
+        return (M_d, M_d_clad)
+
+    # now check that direction is within the range of 0-360
+    direction = direction % 360
+
+    # now build a numpy array to use numpy's interp functions.
+    M_d_table = []
+    for d, angles in wind_direction_defs.items():
+        for a in angles:
+            M_d_table.append([a, region_M_d_parameters[d]])
+
+    M_d_table = np.array(M_d_table)
+    # make sure to sort it correctly
+    M_d_table = M_d_table[np.argsort(M_d_table[:, 0])]
+
+    # now interpolate the value
+    M_d_clad = np.interp(direction, M_d_table[:, 0], M_d_table[:, 1])
+    M_d = M_d_clad * F_not_clad
+
+    return (M_d, M_d_clad)
