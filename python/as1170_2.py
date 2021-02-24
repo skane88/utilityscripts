@@ -8,6 +8,8 @@ from typing import Tuple, Union
 import toml
 import numpy as np
 
+from multiinterp import multi_interp
+
 FILE_PATH = Path(__file__)
 DEFAULT_DATA_PATH = FILE_PATH.parent / Path("as1170_2.toml")
 STANDARD_DATA = {}
@@ -130,3 +132,57 @@ def M_d(*, wind_region: str, direction: Union[float, str]) -> Tuple[float, float
     M_d = M_d_clad * F_not_clad
 
     return (M_d, M_d_clad)
+
+
+def M_zcat_basic(*, z, terrain_category) -> float:
+    """
+    Determine the basic terrain category M_zcat at a given height and terrain.
+
+    Does not do any averaging for changing terrain in the windward direction.
+
+    :param z: The height at which the windspeed is being assessed.
+    :param terrain_category: The terrain category, as a number between 1 and 4. Floats are
+        acceptable for intermediate categories.
+    """
+
+    # first load some required data
+    if len(STANDARD_DATA) == 0:
+        init_standard_data()
+    terrain_height_multipliers = STANDARD_DATA["terrain_height_multipliers"]
+
+    # get the basic data into the function as np arrays as we will be interpolating
+    heights = np.array(terrain_height_multipliers["heights"])
+    terrain_cats = np.array(
+        [float(k) for k in terrain_height_multipliers["data"].keys()]
+    )
+
+    min_cat = min(terrain_cats)
+    max_cat = max(terrain_cats)
+
+    if terrain_category < min_cat or terrain_category > max_cat:
+        raise ValueError(
+            f"Terrain Category {terrain_category} is outside the range "
+            + f"{min_cat} to {max_cat}"
+        )
+
+    max_height = max(heights)
+    min_height = min(heights)
+
+    if z < min_height or z > max_height:
+        raise ValueError(
+            f"Height {z} is outside the range " + f"{min_height} to {max_height}"
+        )
+
+    # load the M_zcat data for all terrain types
+    M_zcat_all = np.array(
+        [t for t in terrain_height_multipliers["data"].values()]
+    ).transpose()
+
+    # interpolate for the case of a terrain category that is intermediate.
+    # this returns a list of M_zcat at all input heights.
+    M_zcat_for_terrain = multi_interp(
+        x=terrain_category, xp=terrain_cats, fp=M_zcat_all
+    ).flatten()
+
+    # interpolate M_zcat for the specified height.
+    return np.interp(z, xp=heights, fp=M_zcat_for_terrain)
