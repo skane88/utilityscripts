@@ -103,6 +103,9 @@ def M_d(*, wind_region: str, direction: Union[float, str]) -> Tuple[float, float
     if len(STANDARD_DATA) == 0:
         init_standard_data()
 
+    if isinstance(direction, str):
+        direction = direction.lower()
+
     region_M_d_parameters = STANDARD_DATA["region_direction_parameters"][wind_region]
     wind_direction_defs = STANDARD_DATA["wind_direction_definitions"]
 
