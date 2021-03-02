@@ -30,15 +30,15 @@ def build_V_R_pairs(V_R_data):
 
 
 @pytest.mark.parametrize(
-    "input, expected", build_V_R_pairs("regional_windspeeds_no_F_x")
+    "input_vals, expected", build_V_R_pairs("regional_windspeeds_no_F_x")
 )
-def test_V_R_no_F_x(input, expected):
+def test_V_R_no_F_x(input_vals, expected):
     """
     Basic test of the V_R method. Ignores F_x because that's how the data I have is formatted.
     """
 
-    region = input[0]
-    R = int(input[1])
+    region = input_vals[0]
+    R = int(input_vals[1])
 
     V_R_calc = round(
         V_R(wind_region=region, R=R, ignore_F_x=True)
@@ -47,14 +47,14 @@ def test_V_R_no_F_x(input, expected):
     assert V_R_calc == expected
 
 
-@pytest.mark.parametrize("input, expected", build_V_R_pairs("regional_windspeeds"))
-def test_V_R(input, expected):
+@pytest.mark.parametrize("input_vals, expected", build_V_R_pairs("regional_windspeeds"))
+def test_V_R(input_vals, expected):
     """
     Basic test of the V_R method. Ignores F_x because that's how the data I have is formatted.
     """
 
-    region = input[0]
-    R = int(input[1])
+    region = input_vals[0]
+    R = int(input_vals[1])
 
     V_R_calc = V_R(wind_region=region, R=R, ignore_F_x=False)
 
