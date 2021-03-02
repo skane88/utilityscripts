@@ -14,9 +14,9 @@ TEST_DATA_PATH = FILE_PATH.parent / Path("test_as1170_2.toml")
 TEST_DATA = toml.load(TEST_DATA_PATH)
 
 
-def build_V_R_pairs():
+def build_V_R_pairs(V_R_data):
 
-    test_data = TEST_DATA["regional_windspeeds_no_F_x"]
+    test_data = TEST_DATA[V_R_data]
 
     pairs = []
 
@@ -29,7 +29,9 @@ def build_V_R_pairs():
     return pairs
 
 
-@pytest.mark.parametrize("input, expected", build_V_R_pairs())
+@pytest.mark.parametrize(
+    "input, expected", build_V_R_pairs("regional_windspeeds_no_F_x")
+)
 def test_V_R_no_F_x(input, expected):
     """
     Basic test of the V_R method. Ignores F_x because that's how the data I have is formatted.
@@ -41,5 +43,21 @@ def test_V_R_no_F_x(input, expected):
     V_R_calc = round(
         V_R(wind_region=region, R=R, ignore_F_x=True)
     )  # round because the data from AS1170 is rounded
+
+    assert V_R_calc == expected
+
+
+@pytest.mark.parametrize("input, expected", build_V_R_pairs("regional_windspeeds"))
+def test_V_R(input, expected):
+    """
+    Basic test of the V_R method. Ignores F_x because that's how the data I have is formatted.
+    """
+
+    region = input[0]
+    R = int(input[1])
+
+    V_R_calc = V_R(wind_region=region, R=R, ignore_F_x=False)
+
+    V_R_calc = round(V_R_calc)  # round because the data from AS1170 is rounded
 
     assert V_R_calc == expected
