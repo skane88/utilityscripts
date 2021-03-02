@@ -29,6 +29,28 @@ def init_standard_data(*, file_path=None):
     STANDARD_DATA = toml.load(f=file_path)
 
 
+class WindSite:
+    def __init__(self, wind_region: str, terrain_category: float):
+        self.wind_region = wind_region
+
+        if terrain_category < 1.0 or terrain_category > 4.0:
+            raise ValueError(
+                f"Terrain Category expected to be between 1.0 and 4.0. "
+                + f"Received {terrain_category}"
+            )
+
+        self.terrain_category = terrain_category
+
+    def V_R_basic(self, R: float, ignore_F_x: bool = False):
+        return V_R(wind_region=self.wind_region, R=R, ignore_F_x=ignore_F_x)
+
+    def M_z_cat(self, z):
+        return M_zcat_basic(z=z, terrain_category=self.terrain_category)
+
+    def V_sit(self):
+        raise NotImplementedError()
+
+
 def V_R_basic(*, a, b, R, k):
     """
     Calculate the basic windspeed for a wind region. Ignores parameters F_C or F_D, for those use method V_R
