@@ -16,7 +16,7 @@ TEST_DATA = toml.load(TEST_DATA_PATH)
 
 def build_V_R_pairs():
 
-    test_data = TEST_DATA["regional_windspeeds"]
+    test_data = TEST_DATA["regional_windspeeds_no_F_x"]
 
     pairs = []
 
