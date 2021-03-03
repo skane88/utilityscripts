@@ -51,9 +51,10 @@ class WindSite:
         raise NotImplementedError()
 
 
-def V_R_basic(*, a, b, R, k):
+def V_R_no_F_x(*, a, b, R, k):
     """
-    Calculate the basic windspeed for a wind region. Ignores parameters F_C or F_D, for those use method V_R
+    Calculate the basic windspeed for a wind region. Ignores parameters F_C or F_D,
+    for those use method V_R
 
     :param a: Windspeed parameter 'a'
     :param b: Windspeed parameter 'b'
@@ -104,7 +105,7 @@ def V_R(*, wind_region: str, R, ignore_F_x: bool = False):
     k = STANDARD_DATA["region_windspeed_parameters"][wind_region]["k"]
     V_min = STANDARD_DATA["region_windspeed_parameters"][wind_region]["V_min"]
 
-    return max(V_min, F * V_R_basic(a=a, b=b, R=R, k=k))
+    return max(V_min, F * V_R_no_F_x(a=a, b=b, R=R, k=k))
 
 
 def M_d(*, wind_region: str, direction: Union[float, str]) -> Tuple[float, float]:
