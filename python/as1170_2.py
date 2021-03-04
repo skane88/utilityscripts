@@ -41,11 +41,14 @@ class WindSite:
 
         self.terrain_category = terrain_category
 
-    def V_R_basic(self, R: float, ignore_F_x: bool = False):
+    def V_R(self, R: float, ignore_F_x: bool = False):
         return V_R(wind_region=self.wind_region, R=R, ignore_F_x=ignore_F_x)
 
     def M_z_cat(self, z):
         return M_zcat_basic(z=z, terrain_category=self.terrain_category)
+
+    def M_s(self):
+        raise NotImplementedError()
 
     def V_sit(self):
         raise NotImplementedError()
