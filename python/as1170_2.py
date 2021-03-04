@@ -30,7 +30,7 @@ def init_standard_data(*, file_path=None):
 
 
 class WindSite:
-    def __init__(self, wind_region: str, terrain_category: float):
+    def __init__(self, wind_region: str, terrain_category: float, shielding_data=None):
         self.wind_region = wind_region
 
         if terrain_category < 1.0 or terrain_category > 4.0:
@@ -41,13 +41,22 @@ class WindSite:
 
         self.terrain_category = terrain_category
 
+        self.shielding_data = shielding_data
+
     def V_R(self, R: float, ignore_F_x: bool = False):
         return V_R(wind_region=self.wind_region, R=R, ignore_F_x=ignore_F_x)
 
     def M_z_cat(self, z):
         return M_zcat_basic(z=z, terrain_category=self.terrain_category)
 
-    def M_s(self):
+    def M_s(self, h: float, theta: float):
+
+        if self.shielding_data is None:
+            # if there is no shielding data then we can't calculate the shielding
+            # parameter. The shielding multiplier can conservatively be taken to be 1.0
+            return 1.0
+
+        # TODO: Complete calculation of shielding.
         raise NotImplementedError()
 
     def V_sit(self):
@@ -218,6 +227,7 @@ def M_zcat_basic(*, z, terrain_category) -> float:
 
 
 def shielding_parameter(
+    *,
     h: float,
     building_data: List[Tuple[float, float]] = None,
     h_s: float = None,
