@@ -226,6 +226,17 @@ def M_zcat_basic(*, z, terrain_category) -> float:
     return np.interp(z, xp=heights, fp=M_zcat_for_terrain)
 
 
+def M_zcat_ave():
+    """
+    Calculate the terrain height factor M_zcat for the averaged case.
+
+    :return:
+    """
+
+    # TODO: Implement M_zcat_ave
+    raise NotImplementedError()
+
+
 def shielding_parameter(
     *,
     h: float,
