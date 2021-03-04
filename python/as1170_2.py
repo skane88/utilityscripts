@@ -3,7 +3,7 @@ File to contain some basic AS1170.2 helper methods for working with wind loads
 """
 
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 
 import toml
 import numpy as np
@@ -212,3 +212,57 @@ def M_zcat_basic(*, z, terrain_category) -> float:
 
     # interpolate M_zcat for the specified height.
     return np.interp(z, xp=heights, fp=M_zcat_for_terrain)
+
+
+def shielding_parameter(
+    h: float,
+    building_data: List[Tuple[float, float]] = None,
+    h_s: float = None,
+    b_s: float = None,
+    n_s: float = None,
+):
+    """
+    Calculate the shielding parameter.
+
+    :param h: The average roof height of the design building being considered.
+    :param building_data: A list of tuples containing the height and width of buildings
+        in the sector that are shielding the design building.
+        If None, h_s, b_s and n_s must be explicitly specified.
+    :param h_s: The average height of shielding buildings.
+    :param b_s: The average width of shielding buildings.
+    :param n_s: The no. of shielding buildings.
+    :return: The shielding parameter s.
+    """
+
+    if building_data is not None:
+        n_s = len(building_data)
+
+        heights = [x[0] for x in building_data]
+        widths = [x[1] for x in building_data]
+
+        h_s = sum(heights) / n_s
+        b_s = sum(widths) / n_s
+
+    l_s = h * ((10 / n_s) + 5)
+
+    return l_s / ((h_s * b_s) ** 0.5)
+
+
+def M_s(shielding_parameter):
+    """
+    Determine the shielding multiplier.
+
+    :param shielding_parameter: The shielding parameter s.
+    :return: The shielding multiplier M_s
+    """
+
+    # first load some required data
+    if len(STANDARD_DATA) == 0:
+        init_standard_data()
+
+    shielding_multiplier_data = STANDARD_DATA["shielding_multiplier"]
+
+    xp = np.array([float(x) for x in shielding_multiplier_data.keys()])
+    fp = np.array([float(y) for y in shielding_multiplier_data.values()])
+
+    return np.interp(shielding_parameter, xp, fp)
