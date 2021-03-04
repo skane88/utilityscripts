@@ -964,7 +964,7 @@ class Rectangle(GenericSection):
         # monkey patching needs to go on.
 
         # TODO Consider if we should delete the Rectangle class altogether and just
-        # replace it with a constructor method, similar to make_I and make_T
+        #     replace it with a constructor method, similar to make_I and make_T
 
         moved = super().move(x=x, y=y)
         rect = Rectangle(length=self.length, thickness=self.thickness)
