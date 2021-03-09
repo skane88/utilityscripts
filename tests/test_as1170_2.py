@@ -100,3 +100,18 @@ def test_M_d(input_vals, expected):
 
     assert isclose(M_d_calc[0], expected[0])
     assert isclose(M_d_calc[1], expected[1])
+
+
+def test_M_zcat_basic():
+
+    assert False
+
+
+def test_M_zcat_ave():
+
+    assert False
+
+
+def test_M_s():
+
+    assert False
