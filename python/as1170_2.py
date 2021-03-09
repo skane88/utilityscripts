@@ -290,3 +290,15 @@ def M_s(shielding_parameter):
     fp = np.array([float(y) for y in shielding_multiplier_data.values()])
 
     return np.interp(shielding_parameter, xp, fp)
+
+
+def q_basic(*, V: float, rho_air: float = 1.2):
+    """
+    Calculate the basic wind pressure caused by a certain wind velocity.
+
+    :param rho_air: The density of air. Must be in kg / m³.
+    :param V: The wind velocity. Must be in m/s.
+    :return: The basic wind pressure in Pa.
+    """
+
+    return 0.5 * rho_air * V ** 2
