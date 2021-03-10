@@ -53,7 +53,7 @@ class WindSite:
     def M_z_cat(self, z):
         return M_zcat_basic(z=z, terrain_category=self.terrain_category)
 
-    def M_s(self, h: float, theta: float):
+    def M_s(self):
 
         if self.shielding_data is None:
             # if there is no shielding data then we can't calculate the shielding
