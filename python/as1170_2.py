@@ -46,6 +46,10 @@ class WindSite:
     def V_R(self, R: float, ignore_F_x: bool = False):
         return V_R(wind_region=self.wind_region, R=R, ignore_F_x=ignore_F_x)
 
+    def M_d(self, direction: Union[float, str]):
+
+        return M_d(direction=float, wind_region=self.wind_region)
+
     def M_z_cat(self, z):
         return M_zcat_basic(z=z, terrain_category=self.terrain_category)
 
