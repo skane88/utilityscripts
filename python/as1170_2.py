@@ -63,8 +63,28 @@ class WindSite:
         # TODO: Complete calculation of shielding.
         raise NotImplementedError()
 
-    def V_sit(self):
-        raise NotImplementedError()
+    def M_t(self):
+
+        # TODO: Add an M_t method
+        return 1.0
+
+    def M_lee(self):
+
+        # TODO: Add an M_lee method
+        return 1.0
+
+    def V_sit(
+        self, R: float, direction: Union[float, str], z: float, ignore_F_x: bool = False
+    ):
+
+        V_R = self.V_R(R=R, ignore_F_x=ignore_F_x)
+        M_d = self.M_d(direction=direction)
+        M_zcat = self.M_z_cat(z=z)
+        M_s = self.M_s()
+        M_t = self.M_t()
+        M_lee = self.M_lee()
+
+        return V_R * M_d * M_zcat * M_s * M_t * M_lee
 
 
 def V_R_no_F_x(*, a, b, R, k):
