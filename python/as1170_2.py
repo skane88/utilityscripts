@@ -109,13 +109,12 @@ def F_x(*, wind_region, R):
     :param R: The Average Recurrence Interval (ARI) of the windspeed.
     """
 
-    F_x_val = STANDARD_DATA["region_windspeed_parameters"][wind_region]["F_x"]
     F_x_min_R = STANDARD_DATA["region_windspeed_parameters"][wind_region]["F_x_min_R"]
 
     if R < F_x_min_R:
         return 1.0
 
-    return F_x_val
+    return STANDARD_DATA["region_windspeed_parameters"][wind_region]["F_x"]
 
 
 def V_R(*, wind_region: str, R, ignore_F_x: bool = False):
