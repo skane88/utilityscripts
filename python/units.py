@@ -67,7 +67,6 @@ lb_f = unyt.pound_force
 kN = unyt.kN
 MN = unyt.MN
 
-unyt.define_unit("kip", 1000 * lb_f)
 kip = unyt.kip
 
 # units of pressure
@@ -79,7 +78,6 @@ kPa = unyt.kPa
 MPa = unyt.MPa
 GPa = unyt.GPa
 
-unyt.define_unit("ksi", 1000 * psi)
 ksi = unyt.ksi
 
 unyt.define_unit("psf", 1 * lb_f / (ft ** 2))
