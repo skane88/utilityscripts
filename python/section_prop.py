@@ -830,17 +830,17 @@ class GenericSection(Section):
     @property
     def Ixx(self):
 
-        return sum([Ixx_from_coords(r) for r in self.coords])
+        return sum(Ixx_from_coords(r) for r in self.coords)
 
     @property
     def Iyy(self):
 
-        return sum([Iyy_from_coords(r) for r in self.coords])
+        return sum(Iyy_from_coords(r) for r in self.coords)
 
     @property
     def Ixy(self):
 
-        return sum([Ixy_from_coords(r) for r in self.coords])
+        return sum(Ixy_from_coords(r) for r in self.coords)
 
     @property
     def centroid(self):
@@ -1014,10 +1014,9 @@ class CombinedSection(Section):
             else:
                 all_sections.append((s, n))
 
-        resolved_sections = []
-
-        for s, n in all_sections:
-            resolved_sections.append(s.move_to_point(origin="origin", end_point=n))
+        resolved_sections = [
+            s.move_to_point(origin="origin", end_point=n) for s, n in all_sections
+        ]
 
         for a, b in itertools.combinations(resolved_sections, 2):
 
@@ -1055,7 +1054,7 @@ class CombinedSection(Section):
     @property
     def area(self):
 
-        return sum([s.area for s, n in self.sections])
+        return sum(s.area for s, n in self.sections)
 
     @property
     def centroid(self):
@@ -1073,46 +1072,24 @@ class CombinedSection(Section):
     @property
     def Ixx(self):
 
-        I_xx = 0
-
-        centroid = self.centroid
-
-        for s, n in self.sections:
-
-            I_xx += s.Iuu + s.area * n.y ** 2
-
-        return I_xx
+        return sum(s.Iuu + s.area * n.y ** 2 for s, n in self.sections)
 
     @property
     def Iyy(self):
 
-        I_yy = 0
-
-        centroid = self.centroid
-
-        for s, n in self.sections:
-
-            I_yy += s.Iyy + s.area * n.x ** 2
-
-        return I_yy
+        return sum(s.Iyy + s.area * n.x ** 2 for s, n in self.sections)
 
     @property
     def Ixy(self):
 
-        I_xy = 0
-
         centroid = self.centroid
 
-        for s, n in self.sections:
-
-            I_xy += s.Ixy + s.area * n.x * n.y
-
-        return I_xy
+        return sum(s.Ixy + s.area * n.x * n.y for s, n in self.sections)
 
     @property
     def J_approx(self):
 
-        return sum([s.J_approx for s, n in self.sections])
+        return sum(s.J_approx for s, n in self.sections)
 
     @property
     def bounding_box(self) -> List[float]:
