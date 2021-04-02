@@ -57,9 +57,8 @@ def bisection(
             + f"x_low={x_low}, x_high={x_high}"
         )
 
-    if max_its is not None:
-        if max_its <= 1:
-            raise ValueError("Maximum no. of iterations should be > 1")
+    if max_its is not None and max_its <= 1:
+        raise ValueError("Maximum no. of iterations should be > 1")
 
     i = 0
 
@@ -107,15 +106,14 @@ def bisection(
         else:
             x_high = x_mid
 
-        if max_its is not None:
-            if i >= max_its:
-                if fail_on_max_its:
-                    raise ValueError(
-                        f"Exceeded maximum number of iterations. "
-                        + f"Current root approximation is {x_mid}."
-                    )
-                else:
-                    break
+        if max_its is not None and i >= max_its:
+            if fail_on_max_its:
+                raise ValueError(
+                    f"Exceeded maximum number of iterations. "
+                    + f"Current root approximation is {x_mid}."
+                )
+            else:
+                break
 
     return (x_low + x_high) / 2, i
 
@@ -237,18 +235,17 @@ def secant(
         x_1 = x_2
         x_2 = x_3
 
-        if max_its is not None:
-            if i >= max_its:
+        if max_its is not None and i >= max_its:
 
-                if fallback:
-                    x, i = bisection(
-                        func=func, x_low=x_low, x_high=x_high, tol=tol, *args, **kwargs
-                    )
-                    return x, i, True
-
-                raise ValueError(
-                    f"Exceeded maximum number of iterations. "
-                    + f"Current root approximation is {x_3}."
+            if fallback:
+                x, i = bisection(
+                    func=func, x_low=x_low, x_high=x_high, tol=tol, *args, **kwargs
                 )
+                return x, i, True
+
+            raise ValueError(
+                f"Exceeded maximum number of iterations. "
+                + f"Current root approximation is {x_3}."
+            )
 
     return x_3, i, False
