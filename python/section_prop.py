@@ -1122,7 +1122,7 @@ class CombinedSection(Section):
         Return a generic section of the CombinedSection
         """
 
-        returSection(poly=self.polygon)
+        return GenericSection(poly=self.polygon)
 
     def matplotlib_patches(self, **kwargs):
 
