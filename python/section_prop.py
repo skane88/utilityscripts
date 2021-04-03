@@ -1287,7 +1287,7 @@ class CombinedSection(Section):
 
 def make_square(side):
 
-    return Rectangle(length=side, height=side)
+    return Rectangle(length=side, thickness=side)
 
 
 def make_I(
