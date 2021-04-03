@@ -802,7 +802,7 @@ class Section:
         poly = self.polygon
 
         if not line.intersects(poly):
-            return self
+            return [self]
 
         results = ops.split(poly, line)
 
