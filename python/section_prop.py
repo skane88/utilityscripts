@@ -1805,10 +1805,6 @@ def build_circle(
         min_angle = 0
         max_angle = full_circle
 
-    included_angle = (max_angle - min_angle) % full_circle
-
-    # convert no_points into the no. of points required for the range.
-    no_points = max(int(included_angle * no_points / full_circle), 2)
     angle_range = np.linspace(start=min_angle, stop=max_angle, num=no_points)
     x_points_orig = np.full(no_points, radius)
 
@@ -1824,4 +1820,4 @@ def build_circle(
 
     all_points = np.transpose(np.stack((x_points, y_points)))
 
-    return all_points.tolist()
+    return [(p[0], p[1]) for p in all_points.tolist()]
