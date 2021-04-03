@@ -1745,9 +1745,9 @@ def build_path(poly: Polygon) -> Path:
         :return: A numpy array containing the path codes.
         """
 
-        codes = np.ones(len(ring.coords), dtype=Path.code_type) * Path.LINETO
-        codes[0] = Path.MOVETO
-        return codes
+        path_codes = np.ones(len(ring.coords), dtype=Path.code_type) * Path.LINETO
+        path_codes[0] = Path.MOVETO
+        return path_codes
 
     # build a numpy array of the vertices
     vertices = np.concatenate(
