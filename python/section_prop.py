@@ -300,6 +300,38 @@ class Section:
         raise NotImplementedError
 
     @property
+    def x_min(self) -> float:
+        """
+        THe minimum x co-ordinate. Equivalent to self.bounding_box[0]
+        """
+
+        return self.bounding_box[0]
+
+    @property
+    def x_max(self) -> float:
+        """
+        The maximum x co-ordinate. Equivalent to self.bounding_box[2]
+        """
+
+        return self.bounding_box[2]
+
+    @property
+    def y_min(self) -> float:
+        """
+        THe minimum y co-ordinate. Equivalent to self.bounding_box[1]
+        """
+
+        return self.bounding_box[1]
+
+    @property
+    def y_max(self) -> float:
+        """
+        The maximum y co-ordinate. Equivalent to self.bounding_box[3]
+        """
+
+        return self.bounding_box[3]
+
+    @property
     def extreme_x_plus(self) -> float:
         """
         The distance from the centroid of the shape to the most positive extreme x point.
@@ -761,8 +793,8 @@ class Section:
         multiple sections, so there is the potential that there will be more than 2x
         sections returned.
 
-        No attempt is made to sort the returned sections by their position relative to the
-        split line.
+        No attempt is made to sort the returned sections by their position relative to
+        the split line.
 
         :param line: The line to split the section on.
         """
@@ -775,6 +807,56 @@ class Section:
         results = ops.split(poly, line)
 
         return [GenericSection(p) for p in results]
+
+    def split_horizontal(self, y_val) -> List[S]:
+        """
+        Split the section into two at a given y co-ordinate.
+        This method is intended to allow the following operations to be implemented:
+
+            * Calculation of first moments of area of a portion of the section.
+            * Finding the equal area axis for calculation of plastic section properties.
+            * Splitting the section into multiple sections.
+
+        If the line does not cut the section, the original section will be returned.
+        If the line cuts the section at least 2x Sections will be returned.
+        If the section on one side of the line is non-continuous, it will be returned as
+        multiple sections, so there is the potential that there will be more than 2x
+        sections returned.
+
+        No attempt is made to sort the returned sections by their position relative to
+        the split line.
+
+        :param y_val: The y-coordinate to split the section at.
+        """
+
+        line = LineString([(self.x_min, y_val), (self.x_max, y_val)])
+
+        return self.split(line=line)
+
+    def split_vertical(self, x_val) -> List[S]:
+        """
+        Split the section into two at a given x co-ordinate.
+        This method is intended to allow the following operations to be implemented:
+
+            * Calculation of first moments of area of a portion of the section.
+            * Finding the equal area axis for calculation of plastic section properties.
+            * Splitting the section into multiple sections.
+
+        If the line does not cut the section, the original section will be returned.
+        If the line cuts the section at least 2x Sections will be returned.
+        If the section on one side of the line is non-continuous, it will be returned as
+        multiple sections, so there is the potential that there will be more than 2x
+        sections returned.
+
+        No attempt is made to sort the returned sections by their position relative to
+        the split line.
+
+        :param x_val: The x-coordinate to split the section at.
+        """
+
+        line = LineString([(x_val, self.y_min), (x_val, self.y_max)])
+
+        return self.split(line=line)
 
     def __repr__(self):
         return (
