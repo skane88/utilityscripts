@@ -1350,6 +1350,11 @@ def make_I(
         if radius_or_weld not in ["r", "w"]:
             raise ValueError("Expected either 'r' or 'w' to define radii or welds.")
 
+        if radius_or_weld_size is None:
+            raise ValueError(
+                f"Expected a radius or weld size, got {radius_or_weld_size}."
+            )
+
         if isinstance(radius_or_weld_size, list):
             rw_size_top = radius_or_weld_size[0]
             rw_size_bottom = radius_or_weld_size[1]
@@ -1357,80 +1362,107 @@ def make_I(
             rw_size_top = radius_or_weld_size
             rw_size_bottom = radius_or_weld_size
 
-        # make the bottom flange
-        points = [
+        # prepare radii or welds + web
+        if radius_or_weld == "r":
+            # now add bottom right radius
+            bottom_right = list(
+                reversed(
+                    build_circle(
+                        centroid=(
+                            t_w / 2 + rw_size_bottom,
+                            t_f_bottom + rw_size_bottom,
+                        ),
+                        radius=rw_size_bottom,
+                        angles=(180, 270),
+                        use_radians=False,
+                        no_points=16,
+                    )
+                )
+            )
+            top_right = list(
+                reversed(
+                    build_circle(
+                        centroid=(t_w / 2 + rw_size_top, d - t_f_top - rw_size_top),
+                        radius=rw_size_top,
+                        angles=(90, 180),
+                        use_radians=False,
+                        no_points=16,
+                    )
+                )
+            )
+
+            top_left = list(
+                reversed(
+                    build_circle(
+                        centroid=(-t_w / 2 - rw_size_top, d - t_f_top - rw_size_top),
+                        radius=rw_size_top,
+                        angles=(0, 90),
+                        use_radians=False,
+                        no_points=16,
+                    )
+                )
+            )
+
+            bottom_left = list(
+                reversed(
+                    build_circle(
+                        centroid=(
+                            -t_w / 2 - rw_size_bottom,
+                            t_f_bottom + rw_size_bottom,
+                        ),
+                        radius=rw_size_bottom,
+                        angles=(270, 360),
+                        use_radians=False,
+                        no_points=16,
+                    )
+                )
+            )
+
+        else:
+
+            bottom_right = [
+                [t_w / 2 + rw_size_bottom, t_f_bottom],
+                [t_w / 2, t_f_bottom + rw_size_bottom],
+            ]
+            top_right = [
+                [t_w / 2, d - t_f_top - rw_size_top],
+                [t_w / 2 + rw_size_top, d - t_f_top],
+            ]
+
+            top_left = [
+                [-t_w / 2 - rw_size_top, d - t_f_top],
+                [-t_w / 2, d - t_f_top - rw_size_top],
+            ]
+            bottom_left = [
+                [-t_w / 2, t_f_bottom + rw_size_bottom],
+                [-t_w / 2 - rw_size_bottom, t_f_bottom],
+            ]
+
+        # make the flanges
+        bottom_flange = [
             [-b_f_bottom / 2, t_f_bottom],
             [-b_f_bottom / 2, 0],
             [b_f_bottom / 2, 0],
             [b_f_bottom / 2, t_f_bottom],
         ]
 
-        # add radii or welds + web
-        if radius_or_weld == "r":
-            # now add bottom right radius
-            points += reversed(
-                build_circle(
-                    centroid=(t_w / 2 + rw_size_bottom, t_f_bottom + rw_size_bottom),
-                    radius=rw_size_bottom,
-                    angles=(180, 270),
-                    use_radians=False,
-                )
-            )
-            # and the top right radius
-            points += reversed(
-                build_circle(
-                    centroid=(t_w / 2 + rw_size_top, d - t_f_top - rw_size_top),
-                    radius=rw_size_top,
-                    angles=(90, 180),
-                    use_radians=False,
-                )
-            )
-
-        else:
-
-            points += [[t_w / 2 + rw_size_bottom, t_f_bottom]]
-            points += [[t_w / 2, t_f_bottom + rw_size_bottom]]
-            points += [[t_w / 2, d - t_f_top - rw_size_top]]
-            points += [[t_w / 2 + rw_size_top, d - t_f_top]]
-
-        # now add top flange
-        points += [
+        top_flange = [
             [b_f_top / 2, d - t_f],
             [b_f_top / 2, d],
             [-b_f_top / 2, d],
             [-b_f_top / 2, d - t_f],
         ]
 
-        # now add the other radii / welds
-        if radius_or_weld == "r":
-            # add the top left radius
-            points += reversed(
-                build_circle(
-                    centroid=(-t_w / 2 - rw_size_top, d - t_f_top - rw_size_top),
-                    radius=rw_size_top,
-                    angles=(0, 90),
-                    use_radians=False,
-                )
-            )
+        close_flange = [[-b_f_bottom / 2, t_f_bottom]]
 
-            # now add bottom left radii
-            points += reversed(
-                build_circle(
-                    centroid=(-t_w / 2 - rw_size_bottom, t_f_bottom + rw_size_bottom),
-                    radius=rw_size_bottom,
-                    angles=(270, 360),
-                    use_radians=False,
-                )
-            )
-
-        else:
-            points += [[-t_w / 2 - rw_size_top, d - t_f_top]]
-            points += [[-t_w / 2, d - t_f_top - rw_size_top]]
-            points += [[-t_w / 2, t_f_bottom + rw_size_bottom]]
-            points += [[-t_w / 2 - rw_size_bottom, t_f_bottom]]
-
-        # now close
-        points += [[-b_f_bottom / 2, t_f_bottom]]
+        points = []
+        points += bottom_flange
+        points += bottom_right
+        points += top_right
+        points += top_flange
+        points += top_left
+        points += bottom_left
+        points += close_flange
 
         poly = Polygon(points)
 
