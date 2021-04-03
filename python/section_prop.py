@@ -334,7 +334,8 @@ class Section:
     @property
     def extreme_x_plus(self) -> float:
         """
-        The distance from the centroid of the shape to the most positive extreme x point.
+        The distance from the centroid of the shape to the most positive extreme x
+        point.
         Note that this should always be a positive quantity - if you need it to be
         negative to correctly determine stresses etc. then account for it appropriately.
         """
@@ -344,7 +345,8 @@ class Section:
     @property
     def extreme_x_minus(self) -> float:
         """
-        The distance from the centroid of the shape to the most negative extreme x point.
+        The distance from the centroid of the shape to the most negative extreme x
+        point.
         Note that this should always be a positive quantity - if you need it to be
         negative to correctly determine stresses etc. then account for it appropriately.
         """
@@ -354,7 +356,8 @@ class Section:
     @property
     def extreme_y_plus(self) -> float:
         """
-        The distance from the centroid of the shape to the most positive extreme y point.
+        The distance from the centroid of the shape to the most positive extreme y
+        point.
         Note that this should always be a positive quantity - if you need it to be
         negative to correctly determine stresses etc. then account for it appropriately.
         """
@@ -364,7 +367,8 @@ class Section:
     @property
     def extreme_y_minus(self) -> float:
         """
-        The distance from the centroid of the shape to the most negative extreme y point.
+        The distance from the centroid of the shape to the most negative extreme y
+        point.
         Note that this should always be a positive quantity - if you need it to be
         negative to correctly determine stresses etc. then account for it appropriately.
         """
@@ -393,7 +397,8 @@ class Section:
     @property
     def extreme_11_plus(self):
         """
-        The distance from the centroid of the shape to the most negative extreme 11 point.
+        The distance from the centroid of the shape to the most negative extreme 11
+        point.
         Note that this should always be a positive quantity - if you need it to be
         negative to correctly determine stresses etc. then account for it appropriately.
         """
@@ -403,7 +408,8 @@ class Section:
     @property
     def extreme_11_minus(self):
         """
-        The distance from the centroid of the shape to the most negative extreme 11 point.
+        The distance from the centroid of the shape to the most negative extreme 11
+        point.
         Note that this should always be a positive quantity - if you need it to be
         negative to correctly determine stresses etc. then account for it appropriately.
         """
@@ -413,7 +419,8 @@ class Section:
     @property
     def extreme_22_plus(self):
         """
-        The distance from the centroid of the shape to the most negative extreme 22 point.
+        The distance from the centroid of the shape to the most negative extreme 22
+        point.
         Note that this should always be a positive quantity - if you need it to be
         negative to correctly determine stresses etc. then account for it appropriately.
         """
@@ -423,7 +430,8 @@ class Section:
     @property
     def extreme_22_minus(self):
         """
-        The distance from the centroid of the shape to the most negative extreme 22 point.
+        The distance from the centroid of the shape to the most negative extreme 22
+        point.
         Note that this should always be a positive quantity - if you need it to be
         negative to correctly determine stresses etc. then account for it appropriately.
         """
@@ -433,8 +441,8 @@ class Section:
     @property
     def elastic_modulus_uu_plus(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about an
-        axis parallel to the global x-x axis but through the shape's centroid.
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        an axis parallel to the global x-x axis but through the shape's centroid.
         Calculated at the most positive extreme y point.
         """
 
@@ -443,8 +451,8 @@ class Section:
     @property
     def elastic_modulus_uu_minus(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about an
-        axis parallel to the global x-x axis but through the shape's centroid.
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        an axis parallel to the global x-x axis but through the shape's centroid.
         Calculated at the most negative extreme y point.
         """
 
@@ -453,8 +461,8 @@ class Section:
     @property
     def elastic_modulus_vv_plus(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about an
-        axis parallel to the global y-y axis but through the shape's centroid.
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        an axis parallel to the global y-y axis but through the shape's centroid.
         Calculated at the most positive extreme x point.
         """
 
@@ -463,8 +471,8 @@ class Section:
     @property
     def elastic_modulus_vv_minus(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about an
-        axis parallel to the global y-y axis but through the shape's centroid.
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        an axis parallel to the global y-y axis but through the shape's centroid.
         Calculated at the most negative extreme x point.
         """
 
@@ -473,8 +481,8 @@ class Section:
     @property
     def elastic_modulus_uu(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about an
-        axis parallel to the global x-x axis but through the shape's centroid.
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        an axis parallel to the global x-x axis but through the shape's centroid.
         """
 
         return min(self.elastic_modulus_uu_plus, self.elastic_modulus_uu_minus)
@@ -482,8 +490,8 @@ class Section:
     @property
     def elastic_modulus_vv(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about an
-        axis parallel to the global y-y axis but through the shape's centroid.
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        an axis parallel to the global y-y axis but through the shape's centroid.
         """
 
         return min(self.elastic_modulus_vv_plus, self.elastic_modulus_vv_minus)
@@ -491,8 +499,8 @@ class Section:
     @property
     def plastic_modulus_uu(self):
         """
-        The plastic section modulus assuming a perfectly plastic material behaviour about
-        an axis parallel to the global x-x axis but through the shape's centroid.
+        The plastic section modulus assuming a perfectly plastic material behaviour
+        about an axis parallel to the global x-x axis but through the shape's centroid.
         """
 
         raise NotImplementedError()
@@ -500,8 +508,8 @@ class Section:
     @property
     def plastic_modulus_vv(self):
         """
-        The plastic section modulus assuming a perfectly plastic material behaviour about
-        an axis parallel to the global y-y axis but through the shape's centroid.
+        The plastic section modulus assuming a perfectly plastic material behaviour
+        about an axis parallel to the global y-y axis but through the shape's centroid.
         """
 
         raise NotImplementedError()
@@ -509,8 +517,8 @@ class Section:
     @property
     def elastic_modulus_11_plus(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about the
-        1-1 axis.
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        the 11 axis.
         Calculated at the most positive extreme point.
         """
 
@@ -519,8 +527,8 @@ class Section:
     @property
     def elastic_modulus_11_minus(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about the
-        1-1 axis.
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        the 11 axis.
         Calculated at the most negative extreme point.
         """
 
@@ -529,8 +537,8 @@ class Section:
     @property
     def elastic_modulus_22_plus(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about the
-        2-2 axis.
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        the 22 axis.
         Calculated at the most positive extreme point.
         """
 
@@ -539,8 +547,8 @@ class Section:
     @property
     def elastic_modulus_22_minus(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about the
-        2-2 axis.
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        the 22 axis.
         Calculated at the most negative extreme point.
         """
 
@@ -549,8 +557,8 @@ class Section:
     @property
     def elastic_modulus_11(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about the
-        1-1 axis.
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        the 11 axis.
         """
 
         return min(self.elastic_modulus_11_minus, self.elastic_modulus_11_plus)
@@ -558,8 +566,8 @@ class Section:
     @property
     def elastic_modulus_22(self):
         """
-        The elastic section modulus assuming a linear-elastic material behaviour about the
-        2-2 axis.
+        The elastic section modulus assuming a linear-elastic material behaviour about
+        the 22 axis.
         """
 
         return min(self.elastic_modulus_22_minus, self.elastic_modulus_22_plus)
@@ -567,8 +575,8 @@ class Section:
     @property
     def plastic_modulus_11(self):
         """
-        The plastic section modulus assuming a perfectly plastic material behaviour about
-        the 1-1 axis.
+        The plastic section modulus assuming a perfectly plastic material behaviour
+        about the 11 axis.
         """
 
         raise NotImplementedError()
@@ -576,8 +584,8 @@ class Section:
     @property
     def plastic_modulus_22(self):
         """
-        The plastic section modulus assuming a perfectly plastic material behaviour about
-        the 2-2 axis.
+        The plastic section modulus assuming a perfectly plastic material behaviour
+        about the 22 axis.
         """
 
         raise NotImplementedError()
@@ -955,13 +963,14 @@ class GenericSection(Section):
 
     def _split_poly(self, line: LineString) -> List[Polygon]:
         """
-        A helper function for the split method. This splits the shape up into a number of
-        Polygons based on a given split line.
+        A helper function for the split method. This splits the shape up into a number
+        of Polygons based on a given split line.
 
         NOTE: the reason that this one-liner is not included in the actual split method
         is that some other functions require splitting the shape but do not need the
         additional overhead of a Section object.
-        (e.g. the plastic section modulus calculators which only need area and centroids)
+        (e.g. the plastic section modulus calculators which only need area and
+        centroids)
 
         :param line: The line to split the section on.
         """
@@ -990,8 +999,8 @@ class Rectangle(GenericSection):
         Unless otherwise specified, any methods inherited from the parent GenericSection
         will NOT preserve the length & height information.
 
-        If no translation or rotation specified, the section centroid is aligned with the
-        global origin.
+        If no translation or rotation specified, the section centroid is aligned with
+        the global origin.
 
         :param length: The length of the section. By convention aligned with the x-axis
             pre-rotation.
@@ -999,7 +1008,8 @@ class Rectangle(GenericSection):
             aligned with the y-axis.
         :param rotation_angle: A rotation to apply to the shape.
         :param use_radians: Use radians when rotating or not.
-        :param translation: A Tuple containing an (x, y) translation to move the section.
+        :param translation: A Tuple containing an (x, y) translation to move the
+            section.
             Any translation carried out after rotation.
         """
 
@@ -1264,7 +1274,8 @@ class CombinedSection(Section):
             s: Section
             n: Point
 
-            # first move the section so that it's centroid accounts for n, so that we can rotate it more easily.
+            # first move the section so that it's centroid accounts for n, so that we
+            # can rotate it more easily.
             s = s.move_to_point(origin="origin", end_point=n)
 
             # now rotate it
@@ -1306,8 +1317,8 @@ def make_I(
     :param b_f: The flange width. May be a single number, or a list of 2x widths
         [top, bottom].
     :param d: The total depth of the section.
-    :param t_f: The flange thickness. May be a single number, or a list of 2x thicknesses,
-        [top, bottom].
+    :param t_f: The flange thickness. May be a single number, or a list of 2x
+        thicknesses, [top, bottom].
     :param t_w: The web thickness.
     :param radius_or_weld: Use 'r' or 'w' as appropriate, or None if ignoring.
     :param radius_or_weld_size:
@@ -1522,8 +1533,8 @@ def make_C(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSectio
     :param b_f: The flange width. May be a single number, or a list of 2x widths
         [top, bottom].
     :param d: The total depth of the section.
-    :param t_f: The flange thickness. May be a single number, or a list of 2x thicknesses,
-        [top, bottom].
+    :param t_f: The flange thickness. May be a single number, or a list of 2x
+        thicknesses, [top, bottom].
     :param t_w: The web thickness.
     :param box_in: Box the section in?
     :param t_box: The thickness of any boxing.
@@ -1706,7 +1717,7 @@ def calculate_principal_moments(
     I22 = avg - math.sqrt(diff ** 2 + Iuv ** 2)
     alpha = math.atan2(-Iuv, diff) / 2
 
-    return (I11, I22, alpha)
+    return I11, I22, alpha
 
 
 def build_path(poly: Polygon) -> Path:
