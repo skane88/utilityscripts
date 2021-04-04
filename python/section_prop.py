@@ -1307,7 +1307,8 @@ def make_I(
     t_f,
     t_w,
     radius_or_weld: str = None,
-    radius_or_weld_size=None,
+    radius_size=None,
+    weld_size=None,
     box_in: bool = False,
     t_box=None,
 ) -> CombinedSection:
@@ -1321,7 +1322,8 @@ def make_I(
         thicknesses, [top, bottom].
     :param t_w: The web thickness.
     :param radius_or_weld: Use 'r' or 'w' as appropriate, or None if ignoring.
-    :param radius_or_weld_size:
+    :param radius_size: The size of any radius. Only used if radius_or_weld is 'r'
+    :param weld_size: The size of any weld. Only used if radius_or_weld is 'w'
     :param box_in: Box the section in?
     :param t_box: The thickness of any boxing.
     :return: A CombinedSection representing the I section. Depending on the parameters
@@ -1361,29 +1363,25 @@ def make_I(
         if radius_or_weld not in ["r", "w"]:
             raise ValueError("Expected either 'r' or 'w' to define radii or welds.")
 
-        if radius_or_weld_size is None:
-            raise ValueError(
-                f"Expected a radius or weld size, got {radius_or_weld_size}."
-            )
-
-        if isinstance(radius_or_weld_size, list):
-            rw_size_top = radius_or_weld_size[0]
-            rw_size_bottom = radius_or_weld_size[1]
-        else:
-            rw_size_top = radius_or_weld_size
-            rw_size_bottom = radius_or_weld_size
-
         # prepare radii or welds + web
         if radius_or_weld == "r":
+
+            if radius_size is None:
+                raise ValueError(f"Expected a radius, got {radius_size}.")
+
+            if isinstance(radius_size, list):
+                r_top = radius_size[0]
+                r_bottom = radius_size[1]
+            else:
+                r_top = radius_size
+                r_bottom = radius_size
+
             # now add bottom right radius
             bottom_right = list(
                 reversed(
                     build_circle(
-                        centroid=(
-                            t_w / 2 + rw_size_bottom,
-                            t_f_bottom + rw_size_bottom,
-                        ),
-                        radius=rw_size_bottom,
+                        centroid=(t_w / 2 + r_bottom, t_f_bottom + r_bottom,),
+                        radius=r_bottom,
                         angles=(180, 270),
                         use_radians=False,
                         no_points=16,
@@ -1393,8 +1391,8 @@ def make_I(
             top_right = list(
                 reversed(
                     build_circle(
-                        centroid=(t_w / 2 + rw_size_top, d - t_f_top - rw_size_top),
-                        radius=rw_size_top,
+                        centroid=(t_w / 2 + r_top, d - t_f_top - r_top),
+                        radius=r_top,
                         angles=(90, 180),
                         use_radians=False,
                         no_points=16,
@@ -1405,8 +1403,8 @@ def make_I(
             top_left = list(
                 reversed(
                     build_circle(
-                        centroid=(-t_w / 2 - rw_size_top, d - t_f_top - rw_size_top),
-                        radius=rw_size_top,
+                        centroid=(-t_w / 2 - r_top, d - t_f_top - r_top),
+                        radius=r_top,
                         angles=(0, 90),
                         use_radians=False,
                         no_points=16,
@@ -1417,11 +1415,8 @@ def make_I(
             bottom_left = list(
                 reversed(
                     build_circle(
-                        centroid=(
-                            -t_w / 2 - rw_size_bottom,
-                            t_f_bottom + rw_size_bottom,
-                        ),
-                        radius=rw_size_bottom,
+                        centroid=(-t_w / 2 - r_bottom, t_f_bottom + r_bottom,),
+                        radius=r_bottom,
                         angles=(270, 360),
                         use_radians=False,
                         no_points=16,
@@ -1431,22 +1426,32 @@ def make_I(
 
         else:
 
+            if weld_size is None:
+                raise ValueError(f"Expected a weld size, got {weld_size}")
+
+            if isinstance(weld_size, list):
+                w_top = weld_size[0]
+                w_bottom = weld_size[1]
+            else:
+                w_top = weld_size
+                w_bottom = weld_size
+
             bottom_right = [
-                [t_w / 2 + rw_size_bottom, t_f_bottom],
-                [t_w / 2, t_f_bottom + rw_size_bottom],
+                [t_w / 2 + w_bottom, t_f_bottom],
+                [t_w / 2, t_f_bottom + w_bottom],
             ]
             top_right = [
-                [t_w / 2, d - t_f_top - rw_size_top],
-                [t_w / 2 + rw_size_top, d - t_f_top],
+                [t_w / 2, d - t_f_top - w_top],
+                [t_w / 2 + w_top, d - t_f_top],
             ]
 
             top_left = [
-                [-t_w / 2 - rw_size_top, d - t_f_top],
-                [-t_w / 2, d - t_f_top - rw_size_top],
+                [-t_w / 2 - w_top, d - t_f_top],
+                [-t_w / 2, d - t_f_top - w_top],
             ]
             bottom_left = [
-                [-t_w / 2, t_f_bottom + rw_size_bottom],
-                [-t_w / 2 - rw_size_bottom, t_f_bottom],
+                [-t_w / 2, t_f_bottom + w_bottom],
+                [-t_w / 2 - w_bottom, t_f_bottom],
             ]
 
         # make the flanges
