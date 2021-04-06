@@ -1366,6 +1366,23 @@ def make_I(
                 r_top = radius_size
                 r_bottom = radius_size
 
+            # make the flanges
+            bottom_flange = [
+                [-b_f_bottom / 2, t_f_bottom],
+                [-b_f_bottom / 2, 0],
+                [b_f_bottom / 2, 0],
+                [b_f_bottom / 2, t_f_bottom],
+            ]
+
+            top_flange = [
+                [b_f_top / 2, d - t_f],
+                [b_f_top / 2, d],
+                [-b_f_top / 2, d],
+                [-b_f_top / 2, d - t_f],
+            ]
+
+            close_flange = [[-b_f_bottom / 2, t_f_bottom]]
+
             # now add bottom right radius
             bottom_right = list(
                 reversed(
@@ -1414,6 +1431,21 @@ def make_I(
                 )
             )
 
+            points = []
+            points += bottom_flange
+            points += bottom_right
+            points += top_right
+            points += top_flange
+            points += top_left
+            points += bottom_left
+            points += close_flange
+
+            poly = Polygon(points)
+
+            I = GenericSection(poly).move_to_centre()
+
+            I_sections = [(I, Point(0, d / 2))]
+
         else:
 
             if weld_size is None:
@@ -1425,6 +1457,25 @@ def make_I(
             else:
                 w_top = weld_size
                 w_bottom = weld_size
+
+            # make the flanges
+            bottom_flange = [
+                [-b_f_bottom / 2, t_f_bottom],
+                [-b_f_bottom / 2, 0],
+                [b_f_bottom / 2, 0],
+                [b_f_bottom / 2, t_f_bottom],
+            ]
+
+            top_flange = [
+                [b_f_top / 2, d - t_f],
+                [b_f_top / 2, d],
+                [-b_f_top / 2, d],
+                [-b_f_top / 2, d - t_f],
+            ]
+
+            close_flange = [[-b_f_bottom / 2, t_f_bottom]]
+
+            # now make the welds
 
             bottom_right = [
                 [t_w / 2 + w_bottom, t_f_bottom],
@@ -1444,37 +1495,20 @@ def make_I(
                 [-t_w / 2 - w_bottom, t_f_bottom],
             ]
 
-        # make the flanges
-        bottom_flange = [
-            [-b_f_bottom / 2, t_f_bottom],
-            [-b_f_bottom / 2, 0],
-            [b_f_bottom / 2, 0],
-            [b_f_bottom / 2, t_f_bottom],
-        ]
+            points = []
+            points += bottom_flange
+            points += bottom_right
+            points += top_right
+            points += top_flange
+            points += top_left
+            points += bottom_left
+            points += close_flange
 
-        top_flange = [
-            [b_f_top / 2, d - t_f],
-            [b_f_top / 2, d],
-            [-b_f_top / 2, d],
-            [-b_f_top / 2, d - t_f],
-        ]
+            poly = Polygon(points)
 
-        close_flange = [[-b_f_bottom / 2, t_f_bottom]]
+            I = GenericSection(poly).move_to_centre()
 
-        points = []
-        points += bottom_flange
-        points += bottom_right
-        points += top_right
-        points += top_flange
-        points += top_left
-        points += bottom_left
-        points += close_flange
-
-        poly = Polygon(points)
-
-        I = GenericSection(poly).move_to_centre()
-
-        I_sections = [(I, Point(0, d / 2))]
+            I_sections = [(I, Point(0, d / 2))]
 
     if box_in:
 
