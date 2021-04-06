@@ -1332,15 +1332,13 @@ def make_I(
     """
 
     if isinstance(b_f, list):
-        b_f_top = b_f[0]
-        b_f_bottom = b_f[1]
+        b_f_top, b_f_bottom = b_f
     else:
         b_f_top = b_f
         b_f_bottom = b_f
 
     if isinstance(t_f, list):
-        t_f_top = t_f[0]
-        t_f_bottom = t_f[1]
+        t_f_top, t_f_bottom = t_f
     else:
         t_f_top = t_f
         t_f_bottom = t_f
@@ -1348,15 +1346,7 @@ def make_I(
     d_w = d - (t_f_top + t_f_bottom)
 
     if radius_or_weld is None:
-        top_flange = Rectangle(length=b_f_top, thickness=t_f_top)
-        bottom_flange = Rectangle(length=b_f_bottom, thickness=t_f_bottom)
-        web = Rectangle(length=d_w, thickness=t_w, rotation_angle=90, use_radians=False)
-
-        n_tf = Point(0, d - t_f_top / 2)
-        n_w = Point(0, t_f_bottom + d_w / 2)
-        n_bf = Point(0, t_f_bottom / 2)
-
-        I_sections = [(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
+        I_sections = _simple_I(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w)
 
     else:
 
@@ -1499,6 +1489,34 @@ def make_I(
         I_sections.append((box_plate, n_box_2))
 
     return CombinedSection(sections=I_sections).move_to_centre()
+
+
+def _simple_I(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w):
+    """
+    Make a simple I section out of 3x rectangular sections.
+
+    :param b_f_bottom: The bottom flange width.
+    :param b_f_top: The top flange width.
+    :param d: The depth of the section.
+    :param t_f_bottom: The thickness of the bottom flange.
+    :param t_f_top: The thickness of the top flange.
+    :param t_w: The web thickness.
+    """
+
+    # calcualte the web depth
+    d_w = d - (t_f_top + t_f_bottom)
+
+    # 3x rectangular sections
+    top_flange = Rectangle(length=b_f_top, thickness=t_f_top)
+    bottom_flange = Rectangle(length=b_f_bottom, thickness=t_f_bottom)
+    web = Rectangle(length=d_w, thickness=t_w, rotation_angle=90, use_radians=False)
+
+    # 3x centroids
+    n_tf = Point(0, d - t_f_top / 2)
+    n_w = Point(0, t_f_bottom + d_w / 2)
+    n_bf = Point(0, t_f_bottom / 2)
+
+    return [(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
 
 
 def make_T(b_f, d, t_f, t_w, stem_up: bool = True) -> CombinedSection:
