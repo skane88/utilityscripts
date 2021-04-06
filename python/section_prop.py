@@ -1346,7 +1346,7 @@ def make_I(
     d_w = d - (t_f_top + t_f_bottom)
 
     if radius_or_weld is None:
-        I_sections = _simple_I(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w)
+        I_sections = _I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w)
 
     else:
 
@@ -1556,7 +1556,7 @@ def _I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w):
     return I_sections
 
 
-def _simple_I(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w):
+def _I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w):
     """
     Make a simple I section out of 3x rectangular sections.
 
