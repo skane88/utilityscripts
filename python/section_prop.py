@@ -1356,159 +1356,15 @@ def make_I(
         # prepare radii or welds + web
         if radius_or_weld == "r":
 
-            if radius_size is None:
-                raise ValueError(f"Expected a radius, got {radius_size}.")
-
-            if isinstance(radius_size, list):
-                r_top = radius_size[0]
-                r_bottom = radius_size[1]
-            else:
-                r_top = radius_size
-                r_bottom = radius_size
-
-            # make the flanges
-            bottom_flange = [
-                [-b_f_bottom / 2, t_f_bottom],
-                [-b_f_bottom / 2, 0],
-                [b_f_bottom / 2, 0],
-                [b_f_bottom / 2, t_f_bottom],
-            ]
-
-            top_flange = [
-                [b_f_top / 2, d - t_f],
-                [b_f_top / 2, d],
-                [-b_f_top / 2, d],
-                [-b_f_top / 2, d - t_f],
-            ]
-
-            close_flange = [[-b_f_bottom / 2, t_f_bottom]]
-
-            # now add bottom right radius
-            bottom_right = list(
-                reversed(
-                    build_circle(
-                        centroid=(t_w / 2 + r_bottom, t_f_bottom + r_bottom,),
-                        radius=r_bottom,
-                        angles=(180, 270),
-                        use_radians=False,
-                        no_points=16,
-                    )
-                )
+            I_sections = _I_radius(
+                b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
             )
-            top_right = list(
-                reversed(
-                    build_circle(
-                        centroid=(t_w / 2 + r_top, d - t_f_top - r_top),
-                        radius=r_top,
-                        angles=(90, 180),
-                        use_radians=False,
-                        no_points=16,
-                    )
-                )
-            )
-
-            top_left = list(
-                reversed(
-                    build_circle(
-                        centroid=(-t_w / 2 - r_top, d - t_f_top - r_top),
-                        radius=r_top,
-                        angles=(0, 90),
-                        use_radians=False,
-                        no_points=16,
-                    )
-                )
-            )
-
-            bottom_left = list(
-                reversed(
-                    build_circle(
-                        centroid=(-t_w / 2 - r_bottom, t_f_bottom + r_bottom,),
-                        radius=r_bottom,
-                        angles=(270, 360),
-                        use_radians=False,
-                        no_points=16,
-                    )
-                )
-            )
-
-            points = []
-            points += bottom_flange
-            points += bottom_right
-            points += top_right
-            points += top_flange
-            points += top_left
-            points += bottom_left
-            points += close_flange
-
-            poly = Polygon(points)
-
-            I = GenericSection(poly).move_to_centre()
-
-            I_sections = [(I, Point(0, d / 2))]
 
         else:
 
-            if weld_size is None:
-                raise ValueError(f"Expected a weld size, got {weld_size}")
-
-            if isinstance(weld_size, list):
-                w_top = weld_size[0]
-                w_bottom = weld_size[1]
-            else:
-                w_top = weld_size
-                w_bottom = weld_size
-
-            # make the flanges
-            bottom_flange = [
-                [-b_f_bottom / 2, t_f_bottom],
-                [-b_f_bottom / 2, 0],
-                [b_f_bottom / 2, 0],
-                [b_f_bottom / 2, t_f_bottom],
-            ]
-
-            top_flange = [
-                [b_f_top / 2, d - t_f],
-                [b_f_top / 2, d],
-                [-b_f_top / 2, d],
-                [-b_f_top / 2, d - t_f],
-            ]
-
-            close_flange = [[-b_f_bottom / 2, t_f_bottom]]
-
-            # now make the welds
-
-            bottom_right = [
-                [t_w / 2 + w_bottom, t_f_bottom],
-                [t_w / 2, t_f_bottom + w_bottom],
-            ]
-            top_right = [
-                [t_w / 2, d - t_f_top - w_top],
-                [t_w / 2 + w_top, d - t_f_top],
-            ]
-
-            top_left = [
-                [-t_w / 2 - w_top, d - t_f_top],
-                [-t_w / 2, d - t_f_top - w_top],
-            ]
-            bottom_left = [
-                [-t_w / 2, t_f_bottom + w_bottom],
-                [-t_w / 2 - w_bottom, t_f_bottom],
-            ]
-
-            points = []
-            points += bottom_flange
-            points += bottom_right
-            points += top_right
-            points += top_flange
-            points += top_left
-            points += bottom_left
-            points += close_flange
-
-            poly = Polygon(points)
-
-            I = GenericSection(poly).move_to_centre()
-
-            I_sections = [(I, Point(0, d / 2))]
+            I_sections = _I_weld(
+                b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size
+            )
 
     if box_in:
 
@@ -1523,6 +1379,181 @@ def make_I(
         I_sections.append((box_plate, n_box_2))
 
     return CombinedSection(sections=I_sections).move_to_centre()
+
+
+def _I_weld(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size):
+    """
+    Make an I section with welds between web and flange.
+
+    :param b_f_bottom: Bottom flange width.
+    :param b_f_top: Top flange width.
+    :param d: Depth of the section.
+    :param t_f_bottom: Thickness of bottom flange.
+    :param t_f_top: Thickness of top flange.
+    :param t_w: Thickness of web.
+    :param weld_size: Weld size.
+    """
+
+    if weld_size is None:
+        raise ValueError(f"Expected a weld size, got {weld_size}")
+
+    if isinstance(weld_size, list):
+        w_top = weld_size[0]
+        w_bottom = weld_size[1]
+    else:
+        w_top = weld_size
+        w_bottom = weld_size
+
+    # make the flanges
+    bottom_flange = [
+        [-b_f_bottom / 2, t_f_bottom],
+        [-b_f_bottom / 2, 0],
+        [b_f_bottom / 2, 0],
+        [b_f_bottom / 2, t_f_bottom],
+    ]
+    top_flange = [
+        [b_f_top / 2, d - t_f_top],
+        [b_f_top / 2, d],
+        [-b_f_top / 2, d],
+        [-b_f_top / 2, d - t_f_top],
+    ]
+    close_flange = [[-b_f_bottom / 2, t_f_bottom]]
+
+    # now make the welds
+    bottom_right = [
+        [t_w / 2 + w_bottom, t_f_bottom],
+        [t_w / 2, t_f_bottom + w_bottom],
+    ]
+    top_right = [
+        [t_w / 2, d - t_f_top - w_top],
+        [t_w / 2 + w_top, d - t_f_top],
+    ]
+    top_left = [
+        [-t_w / 2 - w_top, d - t_f_top],
+        [-t_w / 2, d - t_f_top - w_top],
+    ]
+    bottom_left = [
+        [-t_w / 2, t_f_bottom + w_bottom],
+        [-t_w / 2 - w_bottom, t_f_bottom],
+    ]
+
+    # now assemble the polygon that will be used to make the section.
+    points = []
+    points += bottom_flange
+    points += bottom_right
+    points += top_right
+    points += top_flange
+    points += top_left
+    points += bottom_left
+    points += close_flange
+
+    poly = Polygon(points)
+
+    # now make the section.
+    I = GenericSection(poly).move_to_centre()
+    I_sections = [(I, Point(0, d / 2))]
+    return I_sections
+
+
+def _I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w):
+    """
+    Make an I section with a radius between web and flange.
+
+    :param b_f_bottom: Bottom flange thickness.
+    :param b_f_top: Top flange thickness.
+    :param d: Web depth.
+    :param radius_size: Radius between web and flanges.
+    :param t_f_bottom: Thickness of bottom flange.
+    :param t_f_top: Thickness of top flange.
+    :param t_w: Thickness of the web.
+    """
+
+    if radius_size is None:
+        raise ValueError(f"Expected a radius, got {radius_size}.")
+    if isinstance(radius_size, list):
+        r_top = radius_size[0]
+        r_bottom = radius_size[1]
+    else:
+        r_top = radius_size
+        r_bottom = radius_size
+
+    # make the flanges
+    bottom_flange = [
+        [-b_f_bottom / 2, t_f_bottom],
+        [-b_f_bottom / 2, 0],
+        [b_f_bottom / 2, 0],
+        [b_f_bottom / 2, t_f_bottom],
+    ]
+    top_flange = [
+        [b_f_top / 2, d - t_f_top],
+        [b_f_top / 2, d],
+        [-b_f_top / 2, d],
+        [-b_f_top / 2, d - t_f_top],
+    ]
+    close_flange = [[-b_f_bottom / 2, t_f_bottom]]
+
+    # now generate the radii
+    bottom_right = list(
+        reversed(
+            build_circle(
+                centroid=(t_w / 2 + r_bottom, t_f_bottom + r_bottom,),
+                radius=r_bottom,
+                angles=(180, 270),
+                use_radians=False,
+                no_points=16,
+            )
+        )
+    )
+    top_right = list(
+        reversed(
+            build_circle(
+                centroid=(t_w / 2 + r_top, d - t_f_top - r_top),
+                radius=r_top,
+                angles=(90, 180),
+                use_radians=False,
+                no_points=16,
+            )
+        )
+    )
+    top_left = list(
+        reversed(
+            build_circle(
+                centroid=(-t_w / 2 - r_top, d - t_f_top - r_top),
+                radius=r_top,
+                angles=(0, 90),
+                use_radians=False,
+                no_points=16,
+            )
+        )
+    )
+    bottom_left = list(
+        reversed(
+            build_circle(
+                centroid=(-t_w / 2 - r_bottom, t_f_bottom + r_bottom,),
+                radius=r_bottom,
+                angles=(270, 360),
+                use_radians=False,
+                no_points=16,
+            )
+        )
+    )
+
+    # now assemble the polygon that will be used to make the section.
+    points = []
+    points += bottom_flange
+    points += bottom_right
+    points += top_right
+    points += top_flange
+    points += top_left
+    points += bottom_left
+    points += close_flange
+
+    poly = Polygon(points)
+
+    # now make the section.
+    I = GenericSection(poly).move_to_centre()
+    I_sections = [(I, Point(0, d / 2))]
+    return I_sections
 
 
 def _simple_I(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w):
