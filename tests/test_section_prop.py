@@ -319,7 +319,7 @@ def test_against_standard_sects_with_radius(data, property):
             t_f=data["tf"],
             t_w=data["tw"],
             radius_or_weld="r",
-            radius_or_weld_size=data["r1"],
+            radius_size=data["r1"],
         )
     else:
         I = make_I(
@@ -328,7 +328,7 @@ def test_against_standard_sects_with_radius(data, property):
             t_f=data["tf"],
             t_w=data["tw"],
             radius_or_weld="w",
-            radius_or_weld_size=0.005,  # guestimated weld size
+            weld_size=0.005,  # guestimated weld size
         )
 
     attribute = MAP_SSHEET_TO_SECTION_PROP[property]
