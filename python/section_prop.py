@@ -1346,7 +1346,7 @@ def make_I(
     d_w = d - (t_f_top + t_f_bottom)
 
     if radius_or_weld is None:
-        I_sections = _I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w)
+        I_sections = _make_I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w)
 
     else:
 
@@ -1356,13 +1356,13 @@ def make_I(
         # prepare radii or welds + web
         if radius_or_weld == "r":
 
-            I_sections = _I_radius(
+            I_sections = _make_I_radius(
                 b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
             )
 
         else:
 
-            I_sections = _I_weld(
+            I_sections = _make_I_weld(
                 b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size
             )
 
@@ -1381,7 +1381,7 @@ def make_I(
     return CombinedSection(sections=I_sections).move_to_centre()
 
 
-def _I_weld(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size):
+def _make_I_weld(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size):
     """
     Make an I section with welds between web and flange.
 
@@ -1455,7 +1455,7 @@ def _I_weld(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size):
     return I_sections
 
 
-def _I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w):
+def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w):
     """
     Make an I section with a radius between web and flange.
 
@@ -1556,7 +1556,7 @@ def _I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w):
     return I_sections
 
 
-def _I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w):
+def _make_I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w):
     """
     Make a simple I section out of 3x rectangular sections.
 
