@@ -1438,21 +1438,21 @@ def _make_I_weld(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size):
     ]
 
     # now assemble the polygon that will be used to make the section.
-    points = []
-    points += bottom_flange
-    points += bottom_right
-    points += top_right
-    points += top_flange
-    points += top_left
-    points += bottom_left
-    points += close_flange
+    points = (
+        bottom_flange
+        + bottom_right
+        + top_right
+        + top_flange
+        + top_left
+        + bottom_left
+        + close_flange
+    )
 
     poly = Polygon(points)
 
     # now make the section.
     I = GenericSection(poly).move_to_centre()
-    I_sections = [(I, Point(0, d / 2))]
-    return I_sections
+    return [(I, Point(0, d / 2))]
 
 
 def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w):
@@ -1539,21 +1539,21 @@ def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
     )
 
     # now assemble the polygon that will be used to make the section.
-    points = []
-    points += bottom_flange
-    points += bottom_right
-    points += top_right
-    points += top_flange
-    points += top_left
-    points += bottom_left
-    points += close_flange
+    points = (
+        bottom_flange
+        + bottom_right
+        + top_right
+        + top_flange
+        + top_left
+        + bottom_left
+        + close_flange
+    )
 
     poly = Polygon(points)
 
     # now make the section.
     I = GenericSection(poly).move_to_centre()
-    I_sections = [(I, Point(0, d / 2))]
-    return I_sections
+    return [(I, Point(0, d / 2))]
 
 
 def _make_I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w):
