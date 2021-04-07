@@ -1600,20 +1600,36 @@ def make_T(b_f, d, t_f, t_w, stem_up: bool = True) -> CombinedSection:
         GenericSection
     """
 
-    d_w = d - t_f
-
-    flange = Rectangle(length=b_f, thickness=t_f)
-    web = Rectangle(length=d_w, thickness=t_w, rotation_angle=90, use_radians=False)
-
-    n_f = Point(0, t_f / 2)
-    n_w = Point(0, t_f + d_w / 2)
-
-    T = CombinedSection(sections=[(flange, n_f), (web, n_w)]).move_to_centre()
+    T = _make_T_simple(b_f, d, t_f, t_w)
 
     if not stem_up:
         T = T.rotate(angle=180, origin="origin", use_radians=False)
 
     return T
+
+
+def _make_T_simple(b_f, d, t_f, t_w):
+    """
+    Make a simple T-section from Rectangle objects. T stem faces up.
+
+    :param b_f: Flange width.
+    :param d: Depth of section.
+    :param t_f: Thickness of flange.
+    :param t_w: Thickness of web.
+    """
+
+    # calculate web depth
+    d_w = d - t_f
+
+    # create flange and web.
+    flange = Rectangle(length=b_f, thickness=t_f)
+    web = Rectangle(length=d_w, thickness=t_w, rotation_angle=90, use_radians=False)
+
+    # centroids of sections.
+    n_f = Point(0, t_f / 2)
+    n_w = Point(0, t_f + d_w / 2)
+
+    return CombinedSection(sections=[(flange, n_f), (web, n_w)]).move_to_centre()
 
 
 def make_C(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSection:
