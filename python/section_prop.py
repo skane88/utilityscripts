@@ -1331,13 +1331,13 @@ def make_I(
         GenericSection
     """
 
-    if isinstance(b_f, list):
+    if isinstance(b_f, (list, tuple)):
         b_f_top, b_f_bottom = b_f
     else:
         b_f_top = b_f
         b_f_bottom = b_f
 
-    if isinstance(t_f, list):
+    if isinstance(t_f, (list, tuple)):
         t_f_top, t_f_bottom = t_f
     else:
         t_f_top = t_f
@@ -1372,8 +1372,10 @@ def make_I(
             length=d_w, thickness=t_box, rotation_angle=90, use_radians=False
         )
 
-        n_box_1 = Point(-b_f / 2 + t_box / 2, t_f_bottom + d_w / 2)
-        n_box_2 = Point(b_f / 2 - t_box / 2, t_f_bottom + d_w / 2)
+        b_f_min = min(b_f_top, b_f_bottom)
+
+        n_box_1 = Point(-b_f_min / 2 + t_box / 2, t_f_bottom + d_w / 2)
+        n_box_2 = Point(b_f_min / 2 - t_box / 2, t_f_bottom + d_w / 2)
 
         I_sections.append((box_plate, n_box_1))
         I_sections.append((box_plate, n_box_2))
@@ -1452,7 +1454,7 @@ def _make_I_weld(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size):
 
     # now make the section.
     I = GenericSection(poly).move_to_centre()
-    return [(I, Point(0, d / 2))]
+    return [(I, Point(0, abs(I.y_min)))]
 
 
 def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w):
@@ -1553,7 +1555,7 @@ def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
 
     # now make the section.
     I = GenericSection(poly).move_to_centre()
-    return [(I, Point(0, d / 2))]
+    return [(I, Point(0, abs(I.y_min)))]
 
 
 def _make_I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w):
