@@ -703,10 +703,10 @@ class Section:
         if isinstance(end_point, Point):
             end_point = (end_point.x, end_point.y)
 
-        xoff = end_point[0] - origin[0]
-        yoff = end_point[1] - origin[1]
+        x_offset = end_point[0] - origin[0]
+        y_offset = end_point[1] - origin[1]
 
-        return self.move(x=xoff, y=yoff)
+        return self.move(x=x_offset, y=y_offset)
 
     def rotate(
         self,
@@ -1174,8 +1174,6 @@ class CombinedSection(Section):
     @property
     def Ixy(self):
 
-        centroid = self.centroid
-
         return sum(s.Ixy + s.area * n.x * n.y for s, n in self.sections)
 
     @property
@@ -1346,7 +1344,7 @@ def make_I(
     d_w = d - (t_f_top + t_f_bottom)
 
     if radius_or_weld is None:
-        I_sections = _make_I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w)
+        i_sections = _make_I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w)
 
     else:
 
@@ -1356,13 +1354,13 @@ def make_I(
         # prepare radii or welds + web
         if radius_or_weld == "r":
 
-            I_sections = _make_I_radius(
+            i_sections = _make_I_radius(
                 b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
             )
 
         else:
 
-            I_sections = _make_I_weld(
+            i_sections = _make_I_weld(
                 b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size
             )
 
@@ -1377,10 +1375,10 @@ def make_I(
         n_box_1 = Point(-b_f_min / 2 + t_box / 2, t_f_bottom + d_w / 2)
         n_box_2 = Point(b_f_min / 2 - t_box / 2, t_f_bottom + d_w / 2)
 
-        I_sections.append((box_plate, n_box_1))
-        I_sections.append((box_plate, n_box_2))
+        i_sections.append((box_plate, n_box_1))
+        i_sections.append((box_plate, n_box_2))
 
-    return CombinedSection(sections=I_sections).move_to_centre()
+    return CombinedSection(sections=i_sections).move_to_centre()
 
 
 def _make_I_weld(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size):
@@ -1453,8 +1451,8 @@ def _make_I_weld(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size):
     poly = Polygon(points)
 
     # now make the section.
-    I = GenericSection(poly).move_to_centre()
-    return [(I, Point(0, abs(I.y_min)))]
+    i_section = GenericSection(poly).move_to_centre()
+    return [(i_section, Point(0, abs(i_section.y_min)))]
 
 
 def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w):
@@ -1554,8 +1552,8 @@ def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
     poly = Polygon(points)
 
     # now make the section.
-    I = GenericSection(poly).move_to_centre()
-    return [(I, Point(0, abs(I.y_min)))]
+    i = GenericSection(poly).move_to_centre()
+    return [(i, Point(0, abs(i.y_min)))]
 
 
 def _make_I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w):
@@ -1570,7 +1568,7 @@ def _make_I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w):
     :param t_w: The web thickness.
     """
 
-    # calcualte the web depth
+    # calculate the web depth
     d_w = d - (t_f_top + t_f_bottom)
 
     # 3x rectangular sections
@@ -1600,12 +1598,12 @@ def make_T(b_f, d, t_f, t_w, stem_up: bool = True) -> CombinedSection:
         GenericSection
     """
 
-    T = _make_T_simple(b_f, d, t_f, t_w)
+    t = _make_T_simple(b_f, d, t_f, t_w)
 
     if not stem_up:
-        T = T.rotate(angle=180, origin="origin", use_radians=False)
+        t = t.rotate(angle=180, origin="origin", use_radians=False)
 
-    return T
+    return t
 
 
 def _make_T_simple(b_f, d, t_f, t_w):
@@ -1673,7 +1671,7 @@ def make_C(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSectio
     n_w = Point(t_w / 2, t_f_bottom + d_w / 2)
     n_bf = Point(b_f / 2, t_f_bottom / 2)
 
-    C_sections = [(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
+    c_sections = [(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
 
     if box_in:
 
@@ -1683,9 +1681,9 @@ def make_C(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSectio
 
         n_box = Point(b_f - t_box / 2, t_f_bottom + d_w / 2)
 
-        C_sections.append((box_plate, n_box))
+        c_sections.append((box_plate, n_box))
 
-    return CombinedSection(sections=C_sections).move_to_centre()
+    return CombinedSection(sections=c_sections).move_to_centre()
 
 
 def _prepare_coords_for_green(
