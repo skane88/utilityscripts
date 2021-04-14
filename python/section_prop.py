@@ -866,6 +866,58 @@ class Section:
 
         return self.split(line=line)
 
+    def _generic_first_moment_uu(self, v_cut, v_axis, above: bool = True):
+        """
+        Calculate the generic first moment of a portion of the section above a given cut line and about a given axis.
+
+        :param v_cut: The distance above / below the u-u axis to cut the shape.
+        :param v_axis: The axis about which to calculate the first moment, as a distance above the u-u axis.
+        :param above: Calculate the first moment of the part of the shape above or below the cut?
+        """
+
+        cut = self.y_c + v_cut
+        axis = self.y_c + v_axis
+
+        line = LineString([(self.x_min, cut), (self.x_max, cut)])
+
+        broken_section = self.split(line=line)
+
+        first_moment = 0.0
+
+        for s in broken_section:
+
+            if above and s.y_c > cut or not above and s.y_c < cut:
+
+                first_moment += abs(s.area * (s.y_c - axis))
+
+        return first_moment
+
+    def _generic_first_moment_vv(self, u_cut, u_axis, right: bool = True):
+        """
+        Calculate the generic first moment of a portion of the section right of a given cut line and about a given axis.
+
+        :param u_cut: The distance left or right of the v-v axis to cut the shape.
+        :param u_axis: The axis about which to calculate the first moment, as a distance right of the v-v axis.
+        :param right: Calculate the first moment of the part of the shape to the right or left of the cut?
+        """
+
+        cut = self.x_c + u_cut
+        axis = self.x_c + u_axis
+
+        line = LineString([(cut, self.y_min), (cut, self.y_max)])
+
+        broken_section = self.split(line=line)
+
+        first_moment = 0.0
+
+        for s in broken_section:
+
+            if right and s.x_c > cut or not right and s.x_c < cut:
+
+                first_moment += abs(s.area * (s.x_c - axis))
+
+        return first_moment
+
     def __repr__(self):
         return (
             f"{type(self).__name__}: centroid="
