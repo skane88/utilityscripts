@@ -888,6 +888,38 @@ class Section:
 
         return first_moment
 
+    def first_moment_uu(self, cut_height, above: bool = True):
+        """
+        Calculate the generic first moment of a portion of the section above a given cut line about the u-u axis
+
+        :param cut_height: The distance above / below the u-u axis to cut the shape.
+        :param above: Calculate the first moment of the part of the shape above or below the cut?
+        """
+
+        # first we move the section so that the centroid lines up with the global origin
+        s = self.move_to_centre()
+
+        # now we calculate the first moment
+        return s._generic_first_moment(cut_height=cut_height, above=above)
+
+    def first_moment_vv(self, cut_right, right: bool = True):
+        """
+        Calculate the generic first moment of a portion of the section to the right of a given cut line about the
+        v-v axis
+
+        :param cut_right: The distance to the right of the axis to cut the shape.
+        :param right: Calculate the first moment based on the part to the right or left of the cut?
+        """
+
+        # first we move the section so that the centroid lines up with the global origin
+        s = self.move_to_centre()
+
+        # now we need to rotate it so that "right" is "up"
+        s = s.rotate(angle=90, use_radians=False)
+
+        # now return the first moment about u-u.
+        return s.first_moment_uu(cut_height=cut_right, above=right)
+
     def __repr__(self):
         return (
             f"{type(self).__name__}: centroid="
