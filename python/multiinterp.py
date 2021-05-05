@@ -45,13 +45,11 @@ def multi_interp(
     fp = np.array(fp)
 
     if len(fp.shape) == 1:
-        interp = np.interp(x=x, xp=xp, fp=fp, left=left, right=right)
+        return np.interp(x=x, xp=xp, fp=fp, left=left, right=right)
     else:
-        interp = np.vstack(
+        return np.vstack(
             [np.interp(x=x, xp=xp, fp=f, left=left, right=right) for f in fp]
         )
-
-    return interp
 
 
 if __name__ == "__main__":
