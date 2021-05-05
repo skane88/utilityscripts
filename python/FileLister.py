@@ -81,7 +81,7 @@ def lister():
 
         for f in f_iterator:
 
-            f: Path()
+            f: Path
 
             if not report_folders and f.is_dir():
                 continue
