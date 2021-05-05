@@ -13,8 +13,6 @@ if base_path.is_dir():
 
     for f in tqdm(f_iterator, desc="Counting files", unit="Folders"):
 
-        count_files = 0
-
         if not f.is_dir():
             print()
             print(f"{f} is not a folder, continuing")
@@ -23,8 +21,7 @@ if base_path.is_dir():
         print()
         print(f"Counting files in {f}")
 
-        for file in f.glob(filter_val):
-            count_files += 1
+        count_files = sum(1 for _ in f.glob(filter_val))
 
         print(f"    No. files is {count_files}")
         if count_files == 0:
@@ -32,7 +29,7 @@ if base_path.is_dir():
 
     print()
 
-    if len(empty_folders) > 0:
+    if empty_folders:
         print("Empty folders:")
         print(empty_folders)
     else:
