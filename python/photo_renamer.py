@@ -44,13 +44,9 @@ def re_extension():
     print()
     base_path = Path(input("Provide the base path: "))
 
-    warnings = []
-
     if base_path.is_dir():
 
         recursive: bool = None
-        filter_val = "*"
-
         print()
         while recursive is None:
             r = input("Do you want to search subfolders (Y or N)? ")
@@ -71,15 +67,15 @@ def re_extension():
 
             print()
 
-            d_list = []
+            filter_val = "*"
 
-            for f in tqdm(
-                base_path.rglob(filter_val), desc="Parsing links", unit="Links"
-            ):
-
-                if f.is_dir():
-
-                    d_list.append(f)
+            d_list = [
+                f
+                for f in tqdm(
+                    base_path.rglob(filter_val), desc="Parsing links", unit="Links"
+                )
+                if f.is_dir()
+            ]
 
             for d in d_list:
                 directories.add(d)
@@ -92,6 +88,8 @@ def re_extension():
         print()
 
         changed = 0
+
+        warnings = []
 
         for f in tqdm(sorted(directories), desc="Searching for Photos", unit="Files"):
 
