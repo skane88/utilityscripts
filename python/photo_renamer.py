@@ -55,7 +55,7 @@ def re_extension():
         while recursive is None:
             r = input("Do you want to search subfolders (Y or N)? ")
 
-            recursive = true_dict.get(r.lower(), None)
+            recursive = true_dict.get(r.lower())
 
         file_types = [".jpg", ".png", ".bmp", ".jpeg"]
 
