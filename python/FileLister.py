@@ -26,35 +26,35 @@ def lister():
         while recursive is None:
             r = input("Do you want to search subfolders (Y or N)? ")
 
-            recursive = true_dict.get(r.lower(), None)
+            recursive = true_dict.get(r.lower())
 
         while report_folders is None:
             r = input("Do you want to report folders (Y or N)? ")
 
-            report_folders = true_dict.get(r.lower(), None)
+            report_folders = true_dict.get(r.lower())
 
         while incl_full_path is None:
             fp = input("Do you want to include the full file path (Y or N)? ")
 
-            incl_full_path = true_dict.get(fp.lower(), None)
+            incl_full_path = true_dict.get(fp.lower())
 
         if not incl_full_path:
             while incl_relative_path is None:
                 rp = input("Do you want to include the relative path (Y or N)?")
 
-                incl_relative_path = true_dict.get(rp.lower(), None)
+                incl_relative_path = true_dict.get(rp.lower())
         else:
             incl_relative_path = False
 
         while incl_extension is None:
             ie = input("Do you want to include the extension (Y or N)? ")
 
-            incl_extension = true_dict.get(ie.lower(), None)
+            incl_extension = true_dict.get(ie.lower())
 
         while filter_type is None:
             ft = input("Do you want to filter by file type (Y or N)? ")
 
-            filter_type = true_dict.get(ft.lower(), None)
+            filter_type = true_dict.get(ft.lower())
 
         if filter_type:
             filter_val = input(
@@ -64,7 +64,7 @@ def lister():
         while save_to_file is None:
             stf = input("Do you want to save to a file (Y or N)?")
 
-            save_to_file = true_dict.get(stf.lower(), None)
+            save_to_file = true_dict.get(stf.lower())
 
         # now we've got input, now do the actual finding of files
 
@@ -83,9 +83,8 @@ def lister():
 
             f: Path()
 
-            if not report_folders:
-                if f.is_dir():
-                    continue
+            if not report_folders and f.is_dir():
+                continue
 
             text = ""
 
