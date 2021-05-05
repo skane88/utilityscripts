@@ -97,7 +97,7 @@ def re_extension():
 
             counter = 1
 
-            f: Path()
+            f: Path
 
             # now go through the files / photos etc.
             for p in tqdm(
@@ -106,7 +106,7 @@ def re_extension():
                 unit="Photos",
             ):
 
-                p: Path()
+                p: Path
 
                 if p.is_dir():
                     continue
