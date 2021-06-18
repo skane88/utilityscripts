@@ -868,10 +868,12 @@ class Section:
 
     def _generic_first_moment(self, cut_height, above: bool = True):
         """
-        Calculate the generic first moment of a portion of the section above a given cut line about the X-X axis
+        Calculate the generic first moment of a portion of the section above a given cut
+        line about the X-X axis
 
         :param cut_height: The distance above / below the X-X axis to cut the shape.
-        :param above: Calculate the first moment of the part of the shape above or below the cut?
+        :param above: Calculate the first moment of the part of the shape above or below
+            the cut?
         """
 
         line = LineString([(self.x_min, cut_height), (self.x_max, cut_height)])
@@ -890,10 +892,12 @@ class Section:
 
     def first_moment_uu(self, cut_height, above: bool = True):
         """
-        Calculate the generic first moment of a portion of the section above a given cut line about the u-u axis
+        Calculate the generic first moment of a portion of the section above a given cut
+        line about the u-u axis
 
         :param cut_height: The distance above / below the u-u axis to cut the shape.
-        :param above: Calculate the first moment of the part of the shape above or below the cut?
+        :param above: Calculate the first moment of the part of the shape above or below
+            the cut?
         """
 
         # first we move the section so that the centroid lines up with the global origin
@@ -904,11 +908,13 @@ class Section:
 
     def first_moment_vv(self, cut_right, right: bool = True):
         """
-        Calculate the generic first moment of a portion of the section to the right of a given cut line about the
+        Calculate the generic first moment of a portion of the section to the right of a
+        given cut line about the
         v-v axis
 
         :param cut_right: The distance to the right of the axis to cut the shape.
-        :param right: Calculate the first moment based on the part to the right or left of the cut?
+        :param right: Calculate the first moment based on the part to the right or left
+            of the cut?
         """
 
         # first we move the section so that the centroid lines up with the global origin
@@ -922,10 +928,11 @@ class Section:
 
     def first_moment_11(self, cut_22, above: bool = True):
         """
-        Calculate the generic first moment of a portion of the section above a given cut line about the
-        1-1 axis
+        Calculate the generic first moment of a portion of the section above a given cut
+        line about the 1-1 axis
 
-        :param cut_22: The distance above the 1-1 axis (in the 2-2 direction) to cut the shape.
+        :param cut_22: The distance above the 1-1 axis (in the 2-2 direction) to cut the
+            shape.
         :param above: Calculate the first moment based on the part above the cut?
         """
 
@@ -937,11 +944,13 @@ class Section:
 
     def first_moment_22(self, cut_11, right: bool = True):
         """
-        Calculate the generic first moment of a portion of the section above a given cut line about the
-        2-2 axis
+        Calculate the generic first moment of a portion of the section above a given cut
+        line about the 2-2 axis
 
-        :param cut_11: The distance to the right of the 2-2 axis (in the 1-1 direction) to cut the shape.
-        :param right: Calculate the first moment based on the part to the right of the cut?
+        :param cut_11: The distance to the right of the 2-2 axis (in the 1-1 direction)
+            to cut the shape.
+        :param right: Calculate the first moment based on the part to the right of the
+            cut?
         """
 
         # first we move the section so the centroid lines up with the global origin:
