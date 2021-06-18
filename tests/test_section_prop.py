@@ -382,3 +382,61 @@ def test_first_moment_vv(test_input, cut_right, expected):
 
     actual = test_input.first_moment_vv(cut_right=cut_right)
     assert math.isclose(actual, expected)
+
+
+@pytest.mark.parametrize(
+    "test_input,cut_22, expected",
+    [
+        (
+            Rectangle(length=100, thickness=10, rotation_angle=45, use_radians=False),
+            0,
+            12500,
+        ),
+        (
+            make_I(b_f=100, d=100, t_f=10, t_w=10).rotate(angle=45, use_radians=False),
+            0,
+            53000,
+        ),
+        (
+            make_I(b_f=100, d=100, t_f=10, t_w=10).rotate(angle=45, use_radians=False),
+            40,
+            45000,
+        ),
+    ],
+)
+def test_first_moment_11(test_input, cut_22, expected):
+    """
+    Tests for the first moment function.
+    """
+
+    actual = test_input.first_moment_11(cut_22=cut_22)
+    assert math.isclose(actual, expected)
+
+
+@pytest.mark.parametrize(
+    "test_input, cut_11, expected",
+    [
+        (
+            Rectangle(length=100, thickness=10, rotation_angle=45, use_radians=False),
+            0,
+            1250,
+        ),
+        (
+            make_I(b_f=100, d=100, t_f=10, t_w=10).rotate(angle=45, use_radians=False),
+            0,
+            26000,
+        ),
+        (
+            make_I(b_f=100, d=100, t_f=10, t_w=10).rotate(angle=45, use_radians=False),
+            40,
+            9000,
+        ),
+    ],
+)
+def test_first_moment_22(test_input, cut_11, expected):
+    """
+    Tests for the first moment function.
+    """
+
+    actual = test_input.first_moment_22(cut_11=cut_11)
+    assert math.isclose(actual, expected)
