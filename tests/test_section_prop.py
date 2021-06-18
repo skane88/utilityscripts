@@ -14,6 +14,7 @@ from section_prop import (
     Point,
     make_I,
     make_T,
+    Rectangle,
 )
 
 AXIS_INDEPENDENT_PROPERTIES = [
@@ -339,3 +340,39 @@ def test_against_standard_sects_with_radius(data, property):
         test = data[property]
 
         assert math.isclose(calculated, test, rel_tol=0.03)
+
+
+@pytest.mark.parametrize(
+    "test_input,cut_height, expected",
+    [
+        (
+            Rectangle(length=100, thickness=10, rotation_angle=90, use_radians=False),
+            0,
+            12500,
+        )
+    ],
+)
+def test_first_moment_uu(test_input, cut_height, expected):
+    """
+    Tests for the first moment function.
+    """
+
+    assert test_input.first_moment_uu(cut_height=cut_height) == expected
+
+
+@pytest.mark.parametrize(
+    "test_input, cut_right, expected",
+    [
+        (
+            Rectangle(length=100, thickness=10, rotation_angle=90, use_radians=False),
+            0,
+            1250,
+        )
+    ],
+)
+def test_first_moment_vv(test_input, cut_right, expected):
+    """
+    Tests for the first moment function.
+    """
+
+    assert test_input.first_moment_vv(cut_right=cut_right) == expected
