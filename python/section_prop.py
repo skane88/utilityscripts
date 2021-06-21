@@ -436,7 +436,7 @@ class Section:
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        return self.align_to_principal().extreme_y_plus
+        return self.align_to_principal().extreme_y_minus
 
     @property
     def elastic_modulus_uu_plus(self):
