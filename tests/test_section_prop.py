@@ -236,6 +236,8 @@ def test_combined_section_to_poly_is_correct(property, sections):
 def test_against_standard_sects(data, property):
     """
     Compare the results of section_prop vs tabulated data for standard AS sections.
+
+    Note that this ignores the radius / fillet welds in the web-flange intersection.
     """
 
     MAP_SSHEET_TO_SECTION_PROP = {
