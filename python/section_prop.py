@@ -16,6 +16,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import PathPatch
 from matplotlib.path import Path
 
+from solvers import secant
+
 # an allowance for one section overlapping another in a CombinedSection, as a fraction
 # of the smaller section. Set at 0.1% currently.
 OVERLAP_TOLERANCE = 0.001
@@ -503,7 +505,34 @@ class Section:
         about an axis parallel to the global x-x axis but through the shape's centroid.
         """
 
-        raise NotImplementedError()
+        # first calculate the height at which the cut needs to be made
+
+        def helper_func(y):
+            """
+            Helper function that returns the difference of the area above and below a cut
+            line.
+
+            :param y: The height at which to cut the section.
+            """
+
+            sections = self.split_horizontal(y_val=y)
+
+            total_area = []
+
+            for s in sections:
+                if s.y_c > y:
+                    total_area.append(s.area)
+                else:
+                    total_area.append(-s.area)
+
+            return sum(total_area)
+
+        solution = secant(helper_func, x_low=self.y_min, x_high=self.y_max)
+        y = solution[0]
+
+        return self.first_moment_uu(cut_height=y, above=True) + self.first_moment_uu(
+            cut_height=y, above=False
+        )
 
     @property
     def plastic_modulus_vv(self):
@@ -512,7 +541,7 @@ class Section:
         about an axis parallel to the global y-y axis but through the shape's centroid.
         """
 
-        raise NotImplementedError()
+        return self.rotate(angle=90, use_radians=False).plastic_modulus_uu
 
     @property
     def elastic_modulus_11_plus(self):
@@ -579,7 +608,7 @@ class Section:
         about the 11 axis.
         """
 
-        raise NotImplementedError()
+        return self.align_to_principal().plastic_modulus_uu
 
     @property
     def plastic_modulus_22(self):
@@ -588,7 +617,7 @@ class Section:
         about the 22 axis.
         """
 
-        raise NotImplementedError()
+        return self.align_to_principal().plastic_modulus_vv
 
     def matplotlib_patches(self, **kwargs):
         """

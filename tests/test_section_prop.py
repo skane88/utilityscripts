@@ -53,6 +53,8 @@ LOCAL_AXIS_PROPERTIES = [
     "elastic_modulus_uu_minus",
     "elastic_modulus_vv_plus",
     "elastic_modulus_vv_minus",
+    "plastic_modulus_uu",
+    "plastic_modulus_vv",
 ]
 
 PRINCIPAL_AXIS_PROPERTIES = [
@@ -71,6 +73,8 @@ PRINCIPAL_AXIS_PROPERTIES = [
     "elastic_modulus_11_minus",
     "elastic_modulus_22_plus",
     "elastic_modulus_22_minus",
+    "plastic_modulus_11",
+    "plastic_modulus_22",
     "J",
     "J_approx",
     "Iw",
@@ -226,7 +230,7 @@ def test_combined_section_to_poly_is_correct(property, sections):
 
 
 @pytest.mark.parametrize(
-    "property", ["d", "bf", "Ag", "Ix", "Zx", "rx", "Iy", "Zy", "ry", "J"]
+    "property", ["d", "bf", "Ag", "Ix", "Zx", "Sx", "rx", "Iy", "Zy", "Sy", "ry", "J"]
 )
 @pytest.mark.parametrize("data", get_I_sections(), ids=lambda x: x["Section"])
 def test_against_standard_sects(data, property):
@@ -276,7 +280,7 @@ def test_against_standard_sects(data, property):
 
 
 @pytest.mark.parametrize(
-    "property", ["d", "bf", "Ag", "Ix", "Zx", "rx", "Iy", "Zy", "ry"]
+    "property", ["d", "bf", "Ag", "Ix", "Zx", "Sx", "rx", "Iy", "Zy", "ry", "Sy"]
 )
 @pytest.mark.parametrize("data", get_I_sections(), ids=lambda x: x["Section"])
 def test_against_standard_sects_with_radius(data, property):
@@ -440,3 +444,24 @@ def test_first_moment_22(test_input, cut_11, expected):
 
     actual = test_input.first_moment_22(cut_11=cut_11)
     assert math.isclose(actual, expected)
+
+
+def test_plastic_modulus():
+
+    assert False
+
+
+def test_plastic_modulus_11_rotated():
+    """
+    Check that the plastic_modulus_11 / 22 functions work even if section is rotated
+    """
+
+    T_start = make_T(b_f=100, d=100, t_f=10, t_w=10)
+
+    t_expected_11 = T_start.plastic_modulus_uu
+    t_expected_22 = T_start.plastic_modulus_vv
+
+    T_end = T_start.rotate(angle=45, use_radians=False)
+
+    assert math.isclose(T_end.plastic_modulus_11, t_expected_11)
+    assert math.isclose(T_end.plastic_modulus_22, t_expected_22)
