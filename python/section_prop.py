@@ -1210,13 +1210,19 @@ class CombinedSection(Section):
 
     sections: List[Tuple[Section, Point]]
 
-    def __init__(self, sections: List[Tuple[Section, Point]]):
+    def __init__(
+        self, sections: List[Tuple[Section, Union[Point, Tuple[float, float]]]]
+    ):
         """
         :param sections: A list of sections & centroids
         """
 
         all_sections = []
         for s, n in sections:
+
+            if isinstance(n, Tuple):
+                # convert tuples into points
+                n = Point(n[0], n[1])
 
             if isinstance(s, CombinedSection):
 
