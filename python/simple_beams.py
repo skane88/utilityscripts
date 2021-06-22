@@ -120,13 +120,7 @@ class SimpleBeam:
 
         reactions = {"UF": 0.0}
 
-        if self.support_condition in reactions:
-            return reactions[self.support_condition]
-
-        if self.support_condition[::-1] in reactions:
-            return self._flipped_beam().R2
-
-        raise NotImplementedError
+        return self._property_flipper(reactions, flipped_parameter="R2")
 
     @property
     def R2(self):
@@ -136,13 +130,7 @@ class SimpleBeam:
 
         reactions = {"UF": self.load_value}
 
-        if self.support_condition in reactions:
-            return reactions[self.support_condition]
-
-        if self.support_condition[::-1] in reactions:
-            return self._flipped_beam().R1
-
-        raise NotImplementedError
+        return self._property_flipper(reactions, flipped_parameter="R1")
 
     def Rmax(self, absolute: bool = True):
         """
@@ -170,13 +158,7 @@ class SimpleBeam:
 
         mmax = {"UF": self.load_value * (self.length - self.load_location)}
 
-        if self.support_condition in mmax:
-            return mmax[self.support_condition]
-
-        if self.support_condition[::-1] in mmax:
-            return self._flipped_beam().Mmax
-
-        raise NotImplementedError()
+        return self._property_flipper(mmax, flipped_parameter="Mmax")
 
     def M(self, x):
         """
@@ -263,6 +245,25 @@ class SimpleBeam:
             load_end_location=load_end_location,
             load_end_value=load_end_value,
         )
+
+    def _property_flipper(self, property_calcs, flipped_parameter):
+        """
+        A helper method to allow properties to be defined based on one beam orientation
+        only (e.g. "FU" support condition) but calculated for the inverse (e.g. "UF").
+
+        :param property_dict: A dictionary of the calculated properties based on the
+            support condition.
+        :param flipped_parameter: The parameter to query in the flipped condition (e.g.
+            if you want R1, but for the flipped beam, you need to query R2.
+        """
+
+        if self.support_condition in property_calcs:
+            return property_calcs[self.support_condition]
+
+        if self.support_condition[::-1] in property_calcs:
+            return self._flipped_beam().__getattribute__(flipped_parameter)
+
+        raise NotImplementedError
 
     def __repr__(self):
 
