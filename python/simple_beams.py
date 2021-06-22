@@ -3,6 +3,8 @@ File to contain some simple beam analysis formulas. Will aim to include a useful
 exhaustive set of beam formulas.
 """
 
+from inspect import ismethod
+
 import numpy as np
 
 
@@ -118,7 +120,7 @@ class SimpleBeam:
         The reaction at end 1.
         """
 
-        reactions = {"UF": 0.0}
+        reactions = {"UF": lambda: 0.0}
 
         return self._property_flipper(reactions, flipped_parameter="R2")
 
@@ -128,7 +130,7 @@ class SimpleBeam:
         The reaction at end 2.
         """
 
-        reactions = {"UF": self.load_value}
+        reactions = {"UF": lambda: self.load_value}
 
         return self._property_flipper(reactions, flipped_parameter="R1")
 
@@ -156,7 +158,7 @@ class SimpleBeam:
             (Mmax, location from 1)
         """
 
-        mmax = {"UF": self.load_value * (self.length - self.load_location)}
+        mmax = {"UF": lambda: self.load_value * (self.length - self.load_location)}
 
         return self._property_flipper(mmax, flipped_parameter="Mmax")
 
@@ -167,7 +169,15 @@ class SimpleBeam:
         :param x: The distance along the member from point 1.
         """
 
-        raise NotImplementedError()
+        def uf_helper():
+
+            lever = max(0, x - self.load_location)
+
+            return self.load_value * lever
+
+        m = {"UF": uf_helper}
+
+        return self._property_flipper(m, "M", x)
 
     @property
     def Vmax(self):
@@ -246,22 +256,32 @@ class SimpleBeam:
             load_end_value=load_end_value,
         )
 
-    def _property_flipper(self, property_calcs, flipped_parameter):
+    def _property_flipper(self, property_calcs, flipped_parameter, *args):
         """
         A helper method to allow properties to be defined based on one beam orientation
         only (e.g. "FU" support condition) but calculated for the inverse (e.g. "UF").
 
-        :param property_dict: A dictionary of the calculated properties based on the
-            support condition.
+        :param property_dict: A dictionary containing helper functions to calculate the
+            property. If being passed from a method with required arguments,
+            all arguments should already be rolled into the helper functions as part
+            of the definition of the functions (e.g. they should have no parameters).
         :param flipped_parameter: The parameter to query in the flipped condition (e.g.
             if you want R1, but for the flipped beam, you need to query R2.
+        :param args: Any arguments to be used when calling a method on the flipped beam
+            element. If a property is being called then don't provide any args.
         """
 
         if self.support_condition in property_calcs:
-            return property_calcs[self.support_condition]
+            return property_calcs[self.support_condition]()
 
         if self.support_condition[::-1] in property_calcs:
-            return self._flipped_beam().__getattribute__(flipped_parameter)
+
+            flipped = self._flipped_beam()
+
+            if ismethod(getattr(flipped, flipped_parameter)):
+                return getattr(flipped, flipped_parameter)(*args)
+
+            return getattr(flipped, flipped_parameter)
 
         raise NotImplementedError
 
