@@ -18,6 +18,8 @@ class SimpleBeam:
         f1,
         f2,
         length,
+        E,
+        I,
         load_type,
         load_location,
         load_value,
@@ -34,6 +36,8 @@ class SimpleBeam:
             for free / unrestrained
         :param f2: Fixity at end 2
         :param length: Length
+        :param E: The elastic modulus of the beam.
+        :param I: The second moment of inertia of the beam.
         :param load_type: 'P' for point or 'D' for distributed.
         :param load_location: Point load location or start location of distributed load as
             the distance from end 1 at which the load starts. If None, taken to be at
@@ -49,6 +53,8 @@ class SimpleBeam:
         self.f1 = f1
         self.f2 = f2
         self.length = length
+        self.E = E
+        self.I = I
 
         if load_type not in {"P", "D"}:
             raise ValueError(
