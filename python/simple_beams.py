@@ -255,3 +255,14 @@ class SimpleBeam:
             load_end_location=load_end_location,
             load_end_value=load_end_value,
         )
+
+    def __repr__(self):
+
+        return (
+            f"{type(self).__name__}: support conditions:"
+            + f"{self.support_condition}"
+            + ", length="
+            + f"{self.length}"
+            + ", load type="
+            + f"{self.load_type}"
+        )
