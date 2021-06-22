@@ -168,6 +168,14 @@ class SimpleBeam:
             (Mmax, location from 1)
         """
 
+        mmax = {"UF": self.load_value * (self.length - self.load_location)}
+
+        if self.support_condition in mmax:
+            return mmax[self.support_condition]
+
+        if self.support_condition[::-1] in mmax:
+            return self._flipped_beam().Mmax
+
         raise NotImplementedError()
 
     def M(self, x):
