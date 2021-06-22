@@ -34,11 +34,12 @@ class SimpleBeam:
         :param length: Length
         :param load_type: 'P' for point or 'D' for distributed.
         :param load_location: Point load location or start location of distributed load as
-            the distance from end 1 at which the load starts
+            the distance from end 1 at which the load starts. If None, taken to be at
+            end 1 of the beam.
         :param load_value: Value of the point point load or start value of
             distributed load.
         :param load_end_location: Position from end 1 at which the load finishes. Only
-                required for distributed loads.
+                required for distributed loads. If None, taken to be at end 2 of the beam.
         :param load_end_value: End value of distributed load. Only used for distributed
             loads, and if None the distributed load is taken to be constant.
         """
@@ -54,10 +55,44 @@ class SimpleBeam:
             )
 
         self.load_type = load_type
+
+        if load_location is None:
+            load_location = 0
+
+        if load_location < 0:
+            raise ValueError(
+                f"Load is located at point {load_location} "
+                + f"which is before the start of the beam at 0.0."
+            )
+
+        if load_location > self.length:
+            raise ValueError(
+                f"Load is located at point {load_location} "
+                + f"which is beyond the end of the beam (length = {self.length})."
+            )
+
         self.load_location = load_location
+
         self.load_value = load_value
 
         if self.load_type == "D":
+
+            if load_end_location is None:
+                load_end_location = self.length
+
+            if self.load_end_location > self.length:
+                raise ValueError(
+                    f"Load end is located at point {load_end_location} "
+                    + f"which is beyond the end of the beam (length = {self.length})."
+                )
+
+            if self.load_end_location < self.load_location:
+                raise ValueError(
+                    f"Load end is located at point {load_end_location} "
+                    + f"which is before the start of the distributed load "
+                    + f"(start location = {self.length})."
+                )
+
             self.load_end_location = load_end_location
 
             if load_end_value is None:
@@ -83,10 +118,13 @@ class SimpleBeam:
         The reaction at end 1.
         """
 
-        reactions = {"UF": lambda: 0.0}
+        reactions = {"UF": 0.0}
 
         if self.support_condition in reactions:
-            return reactions[self.support_condition]()
+            return reactions[self.support_condition]
+
+        if self.support_condition[::-1] in reactions:
+            return self._flipped_beam().R2
 
         raise NotImplementedError
 
@@ -96,7 +134,15 @@ class SimpleBeam:
         The reaction at end 2.
         """
 
-        raise NotImplementedError()
+        reactions = {"UF": self.load_value}
+
+        if self.support_condition in reactions:
+            return reactions[self.support_condition]
+
+        if self.support_condition[::-1] in reactions:
+            return self._flipped_beam().R1
+
+        raise NotImplementedError
 
     def Rmax(self, absolute: bool = True):
         """
@@ -176,3 +222,36 @@ class SimpleBeam:
         """
 
         return self.length - x
+
+    def _flipped_beam(self):
+        """
+        Generate a flipped / mirrored beam element with appropriate properties.
+        To be used to allow values to be calculated where a beam has mirrored support
+        conditions - e.g. to calculate values where the support condition is "FU", but
+        the property tables etc. only have "UF" in them.
+        """
+
+        f1 = self.f2
+        f2 = self.f1
+
+        if self.load_type == "P":
+            load_location = self.length - self.load_location
+            load_value = self.load_value
+            load_end_location = None
+            load_end_value = None
+        else:
+            load_location = self.length - self.load_end_location
+            load_value = self.load_end_value
+            load_end_location = self.length - self.load_location
+            load_end_value = self.load_value
+
+        return SimpleBeam(
+            f1=f1,
+            f2=f2,
+            length=self.length,
+            load_type=self.load_type,
+            load_location=load_location,
+            load_value=load_value,
+            load_end_location=load_end_location,
+            load_end_value=load_end_value,
+        )
