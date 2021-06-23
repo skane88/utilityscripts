@@ -192,7 +192,9 @@ class SimpleBeam:
             (Vmax, location from 1)
         """
 
-        raise NotImplementedError()
+        vmax = {"UF": lambda: self.load_value}
+
+        return self._property_flipper(vmax, flipped_parameter="Mmax")
 
     def V(self, x):
         """
@@ -201,7 +203,15 @@ class SimpleBeam:
         :param x: The distance along the member from point 1.
         """
 
-        raise NotImplementedError()
+        def uf_helper():
+            if x < self.load_location:
+                return 0
+
+            return self.load_value
+
+        m = {"UF": uf_helper}
+
+        return self._property_flipper(m, "M", x)
 
     @property
     def Deltamax(self):
