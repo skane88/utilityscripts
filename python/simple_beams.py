@@ -220,7 +220,19 @@ class SimpleBeam:
             (Deltamax, location from 1)
         """
 
-        raise NotImplementedError()
+        def ufhelper():
+
+            P = self.load_value
+            L = self.length
+            b = L - self.load_location
+            E = self.E
+            I = self.I
+
+            return ((P * b * b) / (6 * E * I)) * (3 * L - b)
+
+        deltamax = {"UF": ufhelper}
+
+        return self._property_flipper(deltamax, flipped_parameter="Deltamax")
 
     def Delta(self, x):
         """
@@ -229,7 +241,22 @@ class SimpleBeam:
         :param x: The distance along the member from point 1.
         """
 
-        raise NotImplementedError()
+        def ufhelper():
+            P = self.load_value
+            L = self.length
+            a = self.load_location
+            b = L - a
+            E = self.E
+            I = self.I
+
+            if x < a:
+                return ((P * b * b) / (6 * E * I)) * (3 * L - 3 * x - b)
+
+            return ((P * (L - x) ** 2) / (6 * E * I)) * (3 * b - L + x)
+
+        deltamax = {"UF": ufhelper}
+
+        return self._property_flipper(deltamax, flipped_parameter="Delta")
 
     def _invert_x(self, x):
         """
