@@ -194,7 +194,7 @@ class SimpleBeam:
 
         vmax = {"UF": lambda: self.load_value}
 
-        return self._property_flipper(vmax, flipped_parameter="Mmax")
+        return self._property_flipper(vmax, flipped_parameter="Vmax")
 
     def V(self, x):
         """
