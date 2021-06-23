@@ -211,7 +211,7 @@ class SimpleBeam:
 
         m = {"UF": uf_helper}
 
-        return self._property_flipper(m, "M", x)
+        return self._property_flipper(m, "V", x)
 
     @property
     def Deltamax(self):
