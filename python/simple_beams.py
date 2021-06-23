@@ -254,6 +254,8 @@ class SimpleBeam:
         return SimpleBeam(
             f1=f1,
             f2=f2,
+            E=self.E,
+            I=self.I,
             length=self.length,
             load_type=self.load_type,
             load_location=load_location,
