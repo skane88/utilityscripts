@@ -4,8 +4,68 @@ exhaustive set of beam formulas.
 """
 
 from inspect import ismethod
+from typing import Union
 
 import numpy as np
+
+
+class PointLoad:
+    def __init__(self, magnitude, location=None):
+        """
+        Defines a point load.
+
+        :param magnitude: The magnitude of the load.
+        :param location: The location of the load, as a distance from end 1 of the beam.
+            Units are a % of the span. If None, assumed to be 0.0.
+        """
+
+        self.magnitude = magnitude
+        self.location = 0 if location is None else location
+
+
+class DistributedLoad:
+    def __init__(self, magnitude_a, location_a=None, magnitude_b=None, location_b=None):
+        """
+        Defines a distributed load.
+
+        :param magnitude_a: The distributed load at the start of the load. In units of
+            Force / Length.
+        :param location_a: The location of the start of the load, as a distance from end 1
+            of the beam. Units are a % of the span. If None, assumed to be 0.0.
+        :param magnitude_b:  The distributed load at the end of the load. If None, assumed
+            to be the same as magnitude_a. In units of Force / Length.
+        :param location_b: The location of the end of the load, as a distance from end 1
+            of the beam. Units are a % of the span. If None, assumed to be 1.0.
+        """
+
+        self.magnitude_a = magnitude_a
+
+        if location_a is None:
+            location_a = 0.0
+
+        if location_a < 0:
+            raise ValueError(f"location_a must be a positive value, got {location_a}.")
+
+        if location_a > 1.0:
+            raise ValueError(f"Expected location_a to be <1.0, got {location_a}")
+
+        self.location_a = location_a
+
+        if location_b is None:
+            location_b = 1.0
+
+        if location_b < location_a:
+            raise ValueError(
+                f"Expected location_b ({location_b}) to be greater "
+                + f"than location_a ({location_a})"
+            )
+
+        if location_b > 1.0:
+            raise ValueError(f"Expected location_a to be <1.0, got {location_a}")
+
+        self.location_b = location_b
+
+        self.magnitude_b = 0 if magnitude_b is None else magnitude_b
 
 
 class SimpleBeam:
@@ -14,23 +74,16 @@ class SimpleBeam:
     """
 
     def __init__(
-        self,
-        f1,
-        f2,
-        length,
-        E,
-        I,
-        load_type,
-        load_location,
-        load_value,
-        load_end_location=None,
-        load_end_value=None,
+        self, f1, f2, length, E, I, load: Union[PointLoad, DistributedLoad],
     ):
         """
         Defines a simple beam element.
 
-        1 <-----length-----> 2
-        ______________________
+        1 |<------length------>|2
+
+        f1______________________f2
+
+        |<----->x
 
         :param f1: Fixity at end 1. Should be 'F' for fixed, 'P' for pinned or 'U'
             for free / unrestrained
@@ -38,16 +91,7 @@ class SimpleBeam:
         :param length: Length
         :param E: The elastic modulus of the beam.
         :param I: The second moment of inertia of the beam.
-        :param load_type: 'P' for point or 'D' for distributed.
-        :param load_location: Point load location or start location of distributed load as
-            the distance from end 1 at which the load starts. If None, taken to be at
-            end 1 of the beam.
-        :param load_value: Value of the point point load or start value of
-            distributed load.
-        :param load_end_location: Position from end 1 at which the load finishes. Only
-                required for distributed loads. If None, taken to be at end 2 of the beam.
-        :param load_end_value: End value of distributed load. Only used for distributed
-            loads, and if None the distributed load is taken to be constant.
+        :param load: A PointLoad or DistributedLoad object.
         """
 
         self.f1 = f1
@@ -55,62 +99,12 @@ class SimpleBeam:
         self.length = length
         self.E = E
         self.I = I
+        self.load = load
 
-        if load_type not in {"P", "D"}:
-            raise ValueError(
-                f"Invalid load type {load_type}. "
-                + "Expected either a point 'P' or distributed load 'D'"
-            )
+    @property
+    def load_type(self):
 
-        self.load_type = load_type
-
-        if load_location is None:
-            load_location = 0
-
-        if load_location < 0:
-            raise ValueError(
-                f"Load is located at point {load_location} "
-                + f"which is before the start of the beam at 0.0."
-            )
-
-        if load_location > self.length:
-            raise ValueError(
-                f"Load is located at point {load_location} "
-                + f"which is beyond the end of the beam (length = {self.length})."
-            )
-
-        self.load_location = load_location
-
-        self.load_value = load_value
-
-        if self.load_type == "D":
-
-            if load_end_location is None:
-                load_end_location = self.length
-
-            if self.load_end_location > self.length:
-                raise ValueError(
-                    f"Load end is located at point {load_end_location} "
-                    + f"which is beyond the end of the beam (length = {self.length})."
-                )
-
-            if self.load_end_location < self.load_location:
-                raise ValueError(
-                    f"Load end is located at point {load_end_location} "
-                    + f"which is before the start of the distributed load "
-                    + f"(start location = {self.length})."
-                )
-
-            self.load_end_location = load_end_location
-
-            if load_end_value is None:
-                self.load_end_value = self.load_value
-            else:
-                self.load_end_value = load_end_value
-
-        else:
-            self.load_end_location = None
-            self.load_end_value = None
+        return type(self.load).__name__
 
     @property
     def support_condition(self):
@@ -136,7 +130,12 @@ class SimpleBeam:
         The reaction at end 2.
         """
 
-        reactions = {"UF": lambda: self.load_value}
+        def uf_helper():
+
+            if isinstance(self.load, PointLoad):
+                return self.load.magnitude
+
+        reactions = {"UF": uf_helper}
 
         return self._property_flipper(reactions, flipped_parameter="R1")
 
@@ -277,28 +276,21 @@ class SimpleBeam:
         f1 = self.f2
         f2 = self.f1
 
-        if self.load_type == "P":
-            load_location = self.length - self.load_location
-            load_value = self.load_value
-            load_end_location = None
-            load_end_value = None
+        if isinstance(self.load, PointLoad):
+            load = PointLoad(
+                magnitude=self.load.magnitude, location=1.0 - self.load.location
+            )
+
         else:
-            load_location = self.length - self.load_end_location
-            load_value = self.load_end_value
-            load_end_location = self.length - self.load_location
-            load_end_value = self.load_value
+            load = DistributedLoad(
+                magnitude_a=self.load.magnitude_b,
+                magnitude_b=self.load.magnitude_a,
+                location_a=1.0 - self.load.location_b,
+                location_b=1.0 - self.load.location_a,
+            )
 
         return SimpleBeam(
-            f1=f1,
-            f2=f2,
-            E=self.E,
-            I=self.I,
-            length=self.length,
-            load_type=self.load_type,
-            load_location=load_location,
-            load_value=load_value,
-            load_end_location=load_end_location,
-            load_end_value=load_end_value,
+            f1=f1, f2=f2, E=self.E, I=self.I, length=self.length, load=load
         )
 
     def _property_flipper(self, property_calcs, flipped_parameter, *args):
