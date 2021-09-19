@@ -130,11 +130,7 @@ def V_R(*, wind_region: str, R, ignore_F_x: bool = False):
     if len(STANDARD_DATA) == 0:
         init_standard_data()
 
-    if not ignore_F_x:
-        F = F_x(wind_region=wind_region, R=R)
-    else:
-        F = 1.0
-
+    F = F_x(wind_region=wind_region, R=R) if not ignore_F_x else 1.0
     a = STANDARD_DATA["region_windspeed_parameters"][wind_region]["a"]
     b = STANDARD_DATA["region_windspeed_parameters"][wind_region]["b"]
     k = STANDARD_DATA["region_windspeed_parameters"][wind_region]["k"]

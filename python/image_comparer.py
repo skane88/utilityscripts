@@ -123,16 +123,14 @@ def get_number(
                 if max_val is None:
                     if number >= min_val:
                         ok = True
-                        continue
-                    else:
-                        continue
+
+                    continue
 
                 if min_val is None:
                     if number <= max_val:
                         ok = True
-                        continue
-                    else:
-                        continue
+
+                    continue
 
                 if number >= min_val and number <= max_val:
                     ok = True

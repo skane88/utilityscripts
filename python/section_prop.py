@@ -16,6 +16,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import PathPatch
 from matplotlib.path import Path
 
+from solvers import secant
+
 # an allowance for one section overlapping another in a CombinedSection, as a fraction
 # of the smaller section. Set at 0.1% currently.
 OVERLAP_TOLERANCE = 0.001
@@ -436,7 +438,7 @@ class Section:
         negative to correctly determine stresses etc. then account for it appropriately.
         """
 
-        return self.align_to_principal().extreme_y_plus
+        return self.align_to_principal().extreme_y_minus
 
     @property
     def elastic_modulus_uu_plus(self):
@@ -503,7 +505,34 @@ class Section:
         about an axis parallel to the global x-x axis but through the shape's centroid.
         """
 
-        raise NotImplementedError()
+        # first calculate the height at which the cut needs to be made
+
+        def helper_func(y):
+            """
+            Helper function that returns the difference of the area above and below a cut
+            line.
+
+            :param y: The height at which to cut the section.
+            """
+
+            sections = self.split_horizontal(y_val=y)
+
+            total_area = []
+
+            for s in sections:
+                if s.y_c > y:
+                    total_area.append(s.area)
+                else:
+                    total_area.append(-s.area)
+
+            return sum(total_area)
+
+        solution = secant(helper_func, x_low=self.y_min, x_high=self.y_max)
+        y = solution[0]
+
+        return self.first_moment_uu(cut_height=y, above=True) + self.first_moment_uu(
+            cut_height=y, above=False
+        )
 
     @property
     def plastic_modulus_vv(self):
@@ -512,7 +541,7 @@ class Section:
         about an axis parallel to the global y-y axis but through the shape's centroid.
         """
 
-        raise NotImplementedError()
+        return self.rotate(angle=90, use_radians=False).plastic_modulus_uu
 
     @property
     def elastic_modulus_11_plus(self):
@@ -579,7 +608,7 @@ class Section:
         about the 11 axis.
         """
 
-        raise NotImplementedError()
+        return self.align_to_principal().plastic_modulus_uu
 
     @property
     def plastic_modulus_22(self):
@@ -588,7 +617,7 @@ class Section:
         about the 22 axis.
         """
 
-        raise NotImplementedError()
+        return self.align_to_principal().plastic_modulus_vv
 
     def matplotlib_patches(self, **kwargs):
         """
@@ -866,10 +895,106 @@ class Section:
 
         return self.split(line=line)
 
+    def _generic_first_moment(self, cut_height, above: bool = True):
+        """
+        Calculate the generic first moment of a portion of the section above a given cut
+        line about the X-X axis
+
+        :param cut_height: The distance above / below the X-X axis to cut the shape.
+        :param above: Calculate the first moment of the part of the shape above or below
+            the cut?
+        """
+
+        line = LineString([(self.x_min, cut_height), (self.x_max, cut_height)])
+
+        broken_section = self.split(line=line)
+
+        first_moment = 0.0
+
+        for s in broken_section:
+
+            if above and s.y_c > cut_height or not above and s.y_c < cut_height:
+
+                first_moment += abs(s.area * s.y_c)
+
+        return first_moment
+
+    def first_moment_uu(self, cut_height, above: bool = True):
+        """
+        Calculate the generic first moment of a portion of the section above a given cut
+        line about the u-u axis
+
+        :param cut_height: The distance above / below the u-u axis to cut the shape.
+        :param above: Calculate the first moment of the part of the shape above or below
+            the cut?
+        """
+
+        # first we move the section so that the centroid lines up with the global origin
+        s = self.move_to_centre()
+
+        # now we calculate the first moment
+        return s._generic_first_moment(cut_height=cut_height, above=above)
+
+    def first_moment_vv(self, cut_right, right: bool = True):
+        """
+        Calculate the generic first moment of a portion of the section to the right of a
+        given cut line about the
+        v-v axis
+
+        :param cut_right: The distance to the right of the axis to cut the shape.
+        :param right: Calculate the first moment based on the part to the right or left
+            of the cut?
+        """
+
+        # first we move the section so that the centroid lines up with the global origin
+        s = self.move_to_centre()
+
+        # now we need to rotate it so that "right" is "up"
+        s = s.rotate(angle=90, use_radians=False)
+
+        # now return the first moment about u-u.
+        return s._generic_first_moment(cut_height=cut_right, above=right)
+
+    def first_moment_11(self, cut_22, above: bool = True):
+        """
+        Calculate the generic first moment of a portion of the section above a given cut
+        line about the 1-1 axis
+
+        :param cut_22: The distance above the 1-1 axis (in the 2-2 direction) to cut the
+            shape.
+        :param above: Calculate the first moment based on the part above the cut?
+        """
+
+        # first we move the section so the centroid lines up with the global origin:
+        s = self.align_to_principal()
+
+        # now calculate the first moment
+        return s._generic_first_moment(cut_height=cut_22, above=above)
+
+    def first_moment_22(self, cut_11, right: bool = True):
+        """
+        Calculate the generic first moment of a portion of the section above a given cut
+        line about the 2-2 axis
+
+        :param cut_11: The distance to the right of the 2-2 axis (in the 1-1 direction)
+            to cut the shape.
+        :param right: Calculate the first moment based on the part to the right of the
+            cut?
+        """
+
+        # first we move the section so the centroid lines up with the global origin:
+        s = self.align_to_principal()
+
+        # now rotate by 90 deg so the 2-2 axis is now the 1-1 axis
+        s = s.rotate(angle=90, use_radians=False)
+
+        # now calculate the first moment
+        return s._generic_first_moment(cut_height=cut_11, above=right)
+
     def __repr__(self):
         return (
             f"{type(self).__name__}: centroid="
-            + f"{self.centroid} "
+            + f"{self.centroid}"
             + ", bounding box="
             + f"{self.bounding_box}"
             + ", area="
@@ -1085,13 +1210,19 @@ class CombinedSection(Section):
 
     sections: List[Tuple[Section, Point]]
 
-    def __init__(self, sections: List[Tuple[Section, Point]]):
+    def __init__(
+        self, sections: List[Tuple[Section, Union[Point, Tuple[float, float]]]]
+    ):
         """
         :param sections: A list of sections & centroids
         """
 
         all_sections = []
         for s, n in sections:
+
+            if isinstance(n, Tuple):
+                # convert tuples into points
+                n = Point(n[0], n[1])
 
             if isinstance(s, CombinedSection):
 
