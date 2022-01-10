@@ -22,6 +22,8 @@ def lister():
         filter_type: bool = None
         filter_val = "*"
         save_to_file: bool = None
+        all_lower_case: bool = None
+        sort_file: bool = None
 
         while recursive is None:
             r = input("Do you want to search subfolders (Y or N)? ")
@@ -66,6 +68,16 @@ def lister():
 
             save_to_file = true_dict.get(stf.lower())
 
+        while all_lower_case is None:
+            alc = input("Do you want to convert file names to lower case (Y or N)?")
+
+            all_lower_case = true_dict.get(alc.lower())
+
+        while sort_file is None:
+            sf = input("Do you want to sort the file names (Y or N)?")
+
+            sort_file = true_dict.get(sf.lower())
+
         # now we've got input, now do the actual finding of files
 
         if recursive:
@@ -105,6 +117,14 @@ def lister():
 
         # now save to file if necessary
         if save_to_file:
+
+            # lower case everything if required
+            if all_lower_case:
+                text_to_save = [t.lower() for t in text_to_save]
+
+            # sort list of files if required
+            if sort_file:
+                text_to_save = sorted(text_to_save)
 
             # first get a file name
             start_int = 1
