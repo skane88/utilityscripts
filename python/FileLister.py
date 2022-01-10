@@ -7,6 +7,11 @@ from pathlib import Path
 
 
 def lister():
+    """
+    Lists all the folders / files in a given directory, and also has the ability
+    to save the list to a text file.
+    """
+
     base_path = Path(input("Provide the base path: "))
 
     print()
@@ -97,24 +102,24 @@ def lister():
 
         text_to_save = []
 
-        for f in f_iterator:
+        for file in f_iterator:
 
-            f: Path
+            file: Path
 
-            if not report_folders and f.is_dir():
+            if not report_folders and file.is_dir():
                 continue
 
             text = ""
 
             if incl_full_path:
-                text = str(f)
+                text = str(file)
             else:
                 if incl_relative_path:
-                    text = str(f.relative_to(base_path))
+                    text = str(file.relative_to(base_path))
                 else:
-                    text = f.name
+                    text = file.name
             if not incl_extension:
-                text = text.replace(f.suffix, "")
+                text = text.replace(file.suffix, "")
 
             if save_to_file:
                 text_to_save += [text]
@@ -150,10 +155,10 @@ def lister():
                 file_exists = output_file.exists()
                 start_int += 1
 
-            with open(output_file, "w") as f:
+            with open(output_file, "w") as file:
 
                 for line in text_to_save:
-                    f.write(f"{line}\n")
+                    file.write(f"{line}\n")
 
     else:
         print("The provided path is not a directory.")
