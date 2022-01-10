@@ -60,6 +60,13 @@ W = unyt.W
 kW = unyt.kW
 MW = unyt.MW
 
+# units of current
+A = unyt.A
+mA = unyt.mA
+
+# units of voltage
+V = unyt.V
+
 # units of force
 N = unyt.newton
 lb_f = unyt.pound_force
