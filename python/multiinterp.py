@@ -63,20 +63,25 @@ if __name__ == "__main__":
     print(multi_interp(x=x, xp=xp, fp=fp))
 
     def wrapper(func, *args, **kwargs):
-        def wrapped():
+        """
+        Helper function to allow us to test the multi_interp function
+        with timeit.
+        """
+
+        def inner_func():
             return func(*args, **kwargs)
 
-        return wrapped
+        return inner_func
 
     wrapped = wrapper(multi_interp, x=x, xp=xp, fp=fp)
 
-    number = 10000
+    NUMBER = 10000
     ti = timeit.Timer(wrapped)
 
-    time_info = ti.repeat(repeat=10, number=number)
+    time_info = ti.repeat(repeat=10, number=NUMBER)
 
     print()
-    print(f"Average time to run multi_interp: {1e6 * min(time_info) / number} us")
+    print(f"Average time to run multi_interp: {1e6 * min(time_info) / NUMBER} us")
     print()
     print("Done")
     print("=" * 88)
