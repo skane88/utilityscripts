@@ -75,7 +75,7 @@ def get_number(
 
     prefix = prefix.strip()
     number = None
-    ok = False
+    acceptable = False
 
     allow_none_string = ""
 
@@ -88,7 +88,7 @@ def get_number(
 
             default_on_none = f"Default={default_val}"
 
-        allow_none_string = f" (Use 'None', 'none' or '' for " + f"{default_on_none})"
+        allow_none_string = " (Use 'None', 'none' or '' for " + f"{default_on_none})"
 
     if min_val is None and max_val is None:
         limit_string = ""
@@ -99,41 +99,41 @@ def get_number(
     else:
         limit_string = f", number must satisfy {min_val}<=number<={max_val}"
 
-    while not ok:
+    while not acceptable:
 
         number = input(prefix + limit_string + allow_none_string + ": ")
 
         if number is None:
             if allow_none:
-                ok = True
+                acceptable = True
         elif number == "" or number.lower() == "none":
             number = default_val
 
             if allow_none:
-                ok = True
+                acceptable = True
 
         else:
             try:
                 number = number_type(number)
 
                 if min_val is None and max_val is None:
-                    ok = True
+                    acceptable = True
                     continue
 
                 if max_val is None:
                     if number >= min_val:
-                        ok = True
+                        acceptable = True
 
                     continue
 
                 if min_val is None:
                     if number <= max_val:
-                        ok = True
+                        acceptable = True
 
                     continue
 
                 if number >= min_val and number <= max_val:
-                    ok = True
+                    acceptable = True
 
             except ValueError:
                 pass
@@ -188,13 +188,16 @@ def hash_diff(*, image_1: Path, image_2: Path, hash_size: int = 8) -> int:
     :return: Are the images the same?
     """
 
-    hash_1 = get_hash(image=image_1, hash_size=8)
-    hash_2 = get_hash(image=image_2, hash_size=8)
+    hash_1 = get_hash(image=image_1, hash_size=hash_size)
+    hash_2 = get_hash(image=image_2, hash_size=hash_size)
 
     return abs(hash_1 - hash_2)
 
 
 def main():
+    """
+    Compare 2x images to see if they are the same.
+    """
 
     print("Compares images to determine if they are the same.")
 
@@ -242,11 +245,14 @@ def main():
     print()
 
     if difference == 0:
-        print("Images are identical at the given hash size.")
+        print(
+            "Images are identical at the given hash size.\n"
+            + "This may change at larger hash sizes."
+        )
 
     else:
         print(
-            f"NOTE: This is a meaningless number that depends on the hash size used.\n"
+            "NOTE: This is a meaningless number that depends on the hash size used.\n"
             + "Smaller numbers indicate more similar images.\n"
             + "How close images should be is up to the user."
         )
