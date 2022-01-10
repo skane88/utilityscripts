@@ -43,17 +43,17 @@ def bisection(
 
     if isinf(x_low) or isinf(x_high):
         raise ValueError(
-            f"Guesses should not be inf: " + f"x_low={x_low}, x_high={x_high}"
+            "Guesses should not be inf: " + f"x_low={x_low}, x_high={x_high}"
         )
 
     if isnan(x_low) or isnan(x_high):
         raise ValueError(
-            f"Guesses should not be nan: " + f"x_low={x_low}, x_high={x_high}"
+            "Guesses should not be nan: " + f"x_low={x_low}, x_high={x_high}"
         )
 
     if isclose(x_high, x_low, abs_tol=tol):
         raise ValueError(
-            f"Expected guesses to be different. Current guesses: "
+            "Expected guesses to be different. Current guesses: "
             + f"x_low={x_low}, x_high={x_high}"
         )
 
@@ -77,23 +77,23 @@ def bisection(
 
         if isinf(y_low) or isinf(y_high):
             raise ValueError(
-                f"Either x_low or x_high result in infinity. No valid solution can be "
-                + f"found. Current guesses: "
+                "Either x_low or x_high result in infinity. No valid solution can be "
+                + "found. Current guesses: "
                 + f"(x_low, y_low)=({x_low},{y_low}), "
                 + f"(x_high, y_high)=({x_high}, {y_high})"
             )
 
         if isnan(y_low) or isnan(y_high):
             raise ValueError(
-                f"Either x_low or x_high result in nan. No valid solution can be "
-                + f"found. Current guesses: "
+                "Either x_low or x_high result in nan. No valid solution can be "
+                + "found. Current guesses: "
                 + f"(x_low, y_low)=({x_low},{y_low}), "
                 + f"(x_high, y_high)=({x_high}, {y_high})"
             )
 
         if y_low * y_high > 0.0:
             raise ValueError(
-                f"Expected the guesses to bracket the root. Current guesses: "
+                "Expected the guesses to bracket the root. Current guesses: "
                 + f"(x_low, y_low)=({x_low},{y_low}), "
                 + f"(x_high, y_high)=({x_high}, {y_high})"
             )
@@ -109,7 +109,7 @@ def bisection(
         if max_its is not None and i >= max_its:
             if fail_on_max_its:
                 raise ValueError(
-                    f"Exceeded maximum number of iterations. "
+                    "Exceeded maximum number of iterations. "
                     + f"Current root approximation is {x_mid}."
                 )
             else:
@@ -177,17 +177,17 @@ def secant(
 
     if isinf(x_low) or isinf(x_high):
         raise ValueError(
-            f"Guesses should not be inf: " + f"x_low={x_low}, x_high={x_high}"
+            "Guesses should not be inf: " + f"x_low={x_low}, x_high={x_high}"
         )
 
     if isnan(x_low) or isnan(x_high):
         raise ValueError(
-            f"Guesses should not be nan: " + f"x_low={x_low}, x_high={x_high}"
+            "Guesses should not be nan: " + f"x_low={x_low}, x_high={x_high}"
         )
 
     if isclose(x_high, x_low, abs_tol=tol):
         raise ValueError(
-            f"Expected guesses to be different. Current guesses: "
+            "Expected guesses to be different. Current guesses: "
             + f"x_low={x_low}, x_high={x_high}"
         )
 
@@ -206,9 +206,9 @@ def secant(
 
         if isinf(a) or isinf(b) or isinf(c) or isinf(d):
             raise ValueError(
-                f"The solution to the functions results in an infinite "
-                + f"value. Recommend different initial guesses. Equation being solved "
-                + f"is: (a - b) / (c - d). "
+                "The solution to the functions results in an infinite "
+                + "value. Recommend different initial guesses. Equation being solved "
+                + "is: (a - b) / (c - d). "
                 + f"a = x_low x func(x_high) = {a}, "
                 + f"b = x_high x func(x_low) = {b}, "
                 + f"c = func(x_high) = {c}, "
@@ -217,18 +217,18 @@ def secant(
 
         if isclose(c, d, abs_tol=tol):
             raise ValueError(
-                f"Both guesses result in the same solution to the function, probably due"
-                + f" to floating point arithmetic errors. This will result in a divide "
+                "Both guesses result in the same solution to the function, probably due"
+                + " to floating point arithmetic errors. This will result in a divide "
                 + f"by zero error. Current guesses x_low = {x_1}, x_high = {x_2}. "
                 + f"Denominator in solution is ({c} - {d} = {c - d}). Consider "
-                + f"different initial guesses"
+                + "different initial guesses"
             )
 
         x_3 = (a - b) / (c - d)
 
         if isnan(x_3) or isinf(x_3):
             raise ValueError(
-                f"Guessed solution is inf or nan. Current guesses are: "
+                "Guessed solution is inf or nan. Current guesses are: "
                 + f"x_low = {x_1}, x_high={x_2}, guessed solution is {x_3}"
             )
 
@@ -244,7 +244,7 @@ def secant(
                 return x, i, True
 
             raise ValueError(
-                f"Exceeded maximum number of iterations. "
+                "Exceeded maximum number of iterations. "
                 + f"Current root approximation is {x_3}."
             )
 
