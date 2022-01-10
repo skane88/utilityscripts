@@ -2,12 +2,18 @@
 This file renumbers photos in a folder to integer numbers starting at 0001.
 """
 
-import sys
-from tqdm import tqdm
 from pathlib import Path
+
+from tqdm import tqdm
 
 
 def first_num(filename: Path):
+    """
+    Get a number to sort filenames based on.
+    If there are spaces, it is clearly not a numeric file name.
+    If the first character in the name is not a digit, then it is not a number.
+    If the first character is a number then sort based on that.
+    """
 
     filename = filename.name
 
@@ -22,7 +28,10 @@ def first_num(filename: Path):
     return int(filename[0])
 
 
-def re_extension():
+def rename_photos():
+    """
+    This file renumbers photos in a folder to integer numbers starting at 0001.
+    """
 
     true_dict = {"n": False, "no": False, "y": True, "yes": True}
 
@@ -49,9 +58,9 @@ def re_extension():
         recursive: bool = None
         print()
         while recursive is None:
-            r = input("Do you want to search subfolders (Y or N)? ")
+            recursive = input("Do you want to search subfolders (Y or N)? ")
 
-            recursive = true_dict.get(r.lower())
+            recursive = true_dict.get(recursive.lower())
 
         file_types = [".jpg", ".png", ".bmp", ".jpeg"]
 
@@ -77,8 +86,8 @@ def re_extension():
                 if f.is_dir()
             ]
 
-            for d in d_list:
-                directories.add(d)
+            for directory in d_list:
+                directories.add(directory)
 
         else:
             # if only the local folder, just use iterdir
@@ -91,35 +100,40 @@ def re_extension():
 
         warnings = []
 
-        for f in tqdm(sorted(directories), desc="Searching for Photos", unit="Files"):
+        for folder in tqdm(
+            sorted(directories), desc="Searching for Photos", unit="Files"
+        ):
 
             counter = 1
 
-            f: Path
+            folder: Path
 
             # now go through the files / photos etc.
-            for p in tqdm(
-                sorted(f.iterdir(), key=first_num),
+            for photo in tqdm(
+                sorted(folder.iterdir(), key=first_num),
                 desc="Renaming Photos",
                 unit="Photos",
             ):
 
-                p: Path
+                photo: Path
 
-                if p.is_dir():
+                if photo.is_dir():
                     continue
 
-                if p.suffix.lower() in file_types:
+                if photo.suffix.lower() in file_types:
                     # now we need to rename
-                    new_path = p.parent / Path(f"{counter:04d}").with_suffix(p.suffix)
+                    new_path = photo.parent / Path(f"{counter:04d}").with_suffix(
+                        photo.suffix
+                    )
 
                     if new_path.exists():
 
                         warning_string = "ERROR\n"
                         warning_string += (
-                            f"Tried replacing: \n    {f}\nwith\n    {new_path}\n"
+                            f"Tried replacing: \n    {folder}\n"
+                            + f"with\n    {new_path}\n"
                         )
-                        warning_string += f"But new path already exists\n"
+                        warning_string += "But new path already exists\n"
                         warning_string += "-" * 40
                         warning_string += "\n"
 
@@ -127,7 +141,7 @@ def re_extension():
 
                         continue
 
-                    p.rename(new_path)
+                    photo.rename(new_path)
                     changed += 1
 
                     counter += 1
@@ -143,4 +157,4 @@ def re_extension():
 
 
 if __name__ == "__main__":
-    re_extension()
+    rename_photos()
