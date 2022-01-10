@@ -4,6 +4,9 @@ Contains tools for working with my blog.
 
 import sys
 
+import matplotlib as mpl
+import numpy as np
+
 
 def make_cmap(colors, position=None, bit=False):
     """
@@ -15,14 +18,13 @@ def make_cmap(colors, position=None, bit=False):
     Arrange your tuples so that the first color is the lowest value for the
     colorbar and the last is the highest.
     position contains values from 0 to 1 to dictate the location of each color.
-    
-    Function from: http://schubert.atmos.colostate.edu/~cslocum/custom_cmap.html
+
+    Function from:
+    http://schubert.atmos.colostate.edu/~cslocum/custom_cmap.html
     """
-    import matplotlib as mpl
-    import numpy as np
 
     bit_rgb = np.linspace(0, 1, 256)
-    if position == None:
+    if position is None:
         position = np.linspace(0, 1, len(colors))
     else:
         if len(position) != len(colors):
@@ -46,14 +48,17 @@ def make_cmap(colors, position=None, bit=False):
     return cmap
 
 
-def color_list(N, cmap):
+def color_list(no_cols, cmap):
     """
     This function returns a list of N colours based on a colour map.
+
+    :param no_cols: The number of colours to return.
+    :param cmap: The colourmap to return from.
     """
     ret_list = []
 
-    for i in range(N):
-        ret_list.append(cmap(i / (N - 1)))
+    for i in range(no_cols):
+        ret_list.append(cmap(i / (no_cols - 1)))
 
     return ret_list
 
