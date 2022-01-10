@@ -6,10 +6,11 @@ It relies on the Pint units package.
 Also imports math & sets up pi
 """
 
-import unyt
 from math import pi
 
-# define a unicode pi value for pretty printing.
+import unyt
+
+# define a unicode pi value for pretty printing if req'd.
 π = pi
 
 # units of length
