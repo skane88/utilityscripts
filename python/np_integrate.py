@@ -1,3 +1,8 @@
+"""
+Very basic integration of numpy arrays.
+There are probably better ways to do this in numpy...
+"""
+
 import numpy as np
 
 

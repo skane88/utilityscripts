@@ -1,3 +1,7 @@
+"""
+Some basic math utilities
+"""
+
 import math
 
 
@@ -35,7 +39,8 @@ def round_significant(x, s: int = 3):
     # get the exponent in powers of 10s
     max10exp = math.floor(math.log10(x))
 
-    # figure out the power we need to get the correct no. of significant figures
+    # figure out the power we need to get
+    # the correct no. of significant figures
     sig10pow = 10 ** (max10exp - s + 1)
 
     # raie the number to have s digits past the decimal point
