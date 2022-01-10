@@ -796,7 +796,7 @@ class Section:
             A string: use 'centroid' for the object's geometric centroid,
             'center' for the bounding box center, or 'origin' for the global (0, 0)
             origin.
-            """
+        """
 
         ctr = self.centroid
 
@@ -810,7 +810,7 @@ class Section:
 
         else:
             raise ValueError(
-                f"Expected origin to be either "
+                "Expected origin to be either "
                 + f"'center', 'centroid' or 'origin', got {origin}"
             )
         return origin
@@ -1010,7 +1010,8 @@ class GenericSection(Section):
     """
 
     def __init__(
-        self, poly: Union[List[Tuple[float, float]], Polygon],
+        self,
+        poly: Union[List[Tuple[float, float]], Polygon],
     ):
         """
         Initialise a generic section based on an input polygon.
@@ -1627,7 +1628,10 @@ def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
     bottom_right = list(
         reversed(
             build_circle(
-                centroid=(t_w / 2 + r_bottom, t_f_bottom + r_bottom,),
+                centroid=(
+                    t_w / 2 + r_bottom,
+                    t_f_bottom + r_bottom,
+                ),
                 radius=r_bottom,
                 angles=(180, 270),
                 use_radians=False,
@@ -1660,7 +1664,10 @@ def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
     bottom_left = list(
         reversed(
             build_circle(
-                centroid=(-t_w / 2 - r_bottom, t_f_bottom + r_bottom,),
+                centroid=(
+                    -t_w / 2 - r_bottom,
+                    t_f_bottom + r_bottom,
+                ),
                 radius=r_bottom,
                 angles=(270, 360),
                 use_radians=False,
