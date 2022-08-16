@@ -2,12 +2,11 @@
 Contains some tests for the AS1170.2 module.
 """
 
-from pathlib import Path
 from math import isclose
+from pathlib import Path
 
-import toml
 import pytest
-
+import toml
 from as1170_2 import V_R, M_d
 
 FILE_PATH = Path(__file__)
@@ -23,10 +22,7 @@ def build_V_R_pairs(V_R_data):
 
     for region, v in test_data.items():
 
-        for R, V_R in v.items():
-
-            pairs.append([(region, R), V_R])
-
+        pairs.extend([(region, R), V_R] for R, V_R in v.items())
     return pairs
 
 
@@ -84,8 +80,9 @@ def build_direction_pairs():
             if isinstance(direction, str):
                 continue
 
-            pairs.append([(region, direction + 360), M_d])
-            pairs.append([(region, direction - 360), M_d])
+            pairs.extend(
+                ([(region, direction + 360), M_d], [(region, direction - 360), M_d])
+            )
 
     return pairs
 
