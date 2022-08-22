@@ -2,7 +2,7 @@
 Intended to contain some helper functions & classes for basic geometric operations (calculating areas etc.)
 """
 
-from math import cos, sin, asin, acos, sqrt, pi
+from math import acos, asin, cos, pi, sin, sqrt
 
 
 class Chord:
@@ -96,6 +96,11 @@ class Chord:
 
         else:
             return 2 * self.r * sin(self.theta / 2) if self._x is None else self._x
+
+    @property
+    def area(self):
+
+        return ((self.r**2) / 2) * (self.theta - sin(self.theta))
 
 
 if __name__ == "__main__":
