@@ -1170,9 +1170,9 @@ class Rectangle(GenericSection):
         a = length / 2
         b = thickness / 2
 
-        p1 = a * b ** 3
+        p1 = a * b**3
         p2 = 16 / 3
-        p3 = 3.36 * (b / a) * (1 - (b ** 4 / (12 * (a ** 4))))
+        p3 = 3.36 * (b / a) * (1 - (b**4 / (12 * (a**4))))
 
         return p1 * (p2 - p3)
 
@@ -1296,12 +1296,12 @@ class CombinedSection(Section):
     @property
     def Ixx(self):
 
-        return sum(s.Iuu + s.area * n.y ** 2 for s, n in self.sections)
+        return sum(s.Iuu + s.area * n.y**2 for s, n in self.sections)
 
     @property
     def Iyy(self):
 
-        return sum(s.Iyy + s.area * n.x ** 2 for s, n in self.sections)
+        return sum(s.Iyy + s.area * n.x**2 for s, n in self.sections)
 
     @property
     def Ixy(self):
@@ -1420,10 +1420,8 @@ class CombinedSection(Section):
         return CombinedSection(sections=sections)
 
     def __repr__(self):
-
         super_repr = super().__repr__()
-
-        return super_repr + f", no. sections={self.no_sections}"
+        return f"{super_repr}, no. sections={self.no_sections}"
 
 
 def make_square(side):
@@ -1460,56 +1458,42 @@ def make_I(
         entered this may be a collection of rectangular plates or perhaps only a single
         GenericSection
     """
-
     if isinstance(b_f, (list, tuple)):
         b_f_top, b_f_bottom = b_f
     else:
         b_f_top = b_f
         b_f_bottom = b_f
-
     if isinstance(t_f, (list, tuple)):
         t_f_top, t_f_bottom = t_f
     else:
         t_f_top = t_f
         t_f_bottom = t_f
-
     d_w = d - (t_f_top + t_f_bottom)
-
     if radius_or_weld is None:
         i_sections = _make_I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w)
-
-    else:
-
-        if radius_or_weld not in ["r", "w"]:
-            raise ValueError("Expected either 'r' or 'w' to define radii or welds.")
-
-        # prepare radii or welds + web
-        if radius_or_weld == "r":
-
-            i_sections = _make_I_radius(
+    elif radius_or_weld in {"r", "w"}:
+        i_sections = (
+            _make_I_radius(
                 b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
             )
-
-        else:
-
-            i_sections = _make_I_weld(
+            if radius_or_weld == "r"
+            else _make_I_weld(
                 b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size
             )
+        )
 
+    else:
+        raise ValueError("Expected either 'r' or 'w' to define radii or welds.")
     if box_in:
-
         box_plate = Rectangle(
             length=d_w, thickness=t_box, rotation_angle=90, use_radians=False
         )
 
         b_f_min = min(b_f_top, b_f_bottom)
-
         n_box_1 = Point(-b_f_min / 2 + t_box / 2, t_f_bottom + d_w / 2)
         n_box_2 = Point(b_f_min / 2 - t_box / 2, t_f_bottom + d_w / 2)
-
         i_sections.append((box_plate, n_box_1))
         i_sections.append((box_plate, n_box_2))
-
     return CombinedSection(sections=i_sections).move_to_centre()
 
 
@@ -1879,7 +1863,7 @@ def Ixx_from_coords(
     xi, xj, yi, yj = _prepare_coords_for_green(coords)
 
     # carry out Green's integration and return
-    return np.sum((yj ** 2 + yj * yi + yi ** 2) * (xi * yj - xj * yi)) / 12
+    return np.sum((yj**2 + yj * yi + yi**2) * (xi * yj - xj * yi)) / 12
 
 
 def Iyy_from_coords(
@@ -1902,7 +1886,7 @@ def Iyy_from_coords(
     xi, xj, yi, yj = _prepare_coords_for_green(coords)
 
     # carry out Green's integration and return
-    return np.sum((xj ** 2 + xj * xi + xi ** 2) * (xi * yj - xj * yi)) / 12
+    return np.sum((xj**2 + xj * xi + xi**2) * (xi * yj - xj * yi)) / 12
 
 
 def Ixy_from_coords(coords):
@@ -1955,8 +1939,8 @@ def calculate_principal_moments(
 
     avg = (Iuu + Ivv) / 2
     diff = (Iuu - Ivv) / 2  # Note that this is signed
-    I11 = avg + math.sqrt(diff ** 2 + Iuv ** 2)
-    I22 = avg - math.sqrt(diff ** 2 + Iuv ** 2)
+    I11 = avg + math.sqrt(diff**2 + Iuv**2)
+    I22 = avg - math.sqrt(diff**2 + Iuv**2)
     alpha = math.atan2(-Iuv, diff) / 2
 
     return I11, I22, alpha
