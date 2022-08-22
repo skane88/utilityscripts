@@ -45,15 +45,19 @@ class Chord:
 
         if theta is not None:
 
+            assert theta <= 2 * pi
+
             self._theta = theta
 
         elif x is not None:
 
-            assert x < 2 * r
+            assert x <= 2 * r
 
             self._x = x
 
         else:
+
+            assert y2 <= 2 * r
 
             self._y2 = y2
 
