@@ -2,9 +2,24 @@
 Contains some tests for the geometry module.
 """
 
-from math import isclose
+from math import isclose, pi
 
-from geometry import Chord
+from geometry import Chord, Circle
+
+
+def test_circle():
+
+    c1 = Circle(r=1)
+
+    assert isclose(c1.d, 2)
+    assert isclose(c1.area, pi)
+    assert isclose(c1.circumference, pi * 2)
+
+    c2 = Circle(d=2)
+
+    assert isclose(c2.r, 1)
+    assert isclose(c1.area, pi)
+    assert isclose(c1.circumference, pi * 2)
 
 
 def test_chord():

@@ -1,8 +1,72 @@
 """
-Intended to contain some helper functions & classes for basic geometric operations (calculating areas etc.)
+Intended to contain some helper functions & classes for basic geometric operations
+(calculating areas etc.). This is not intended to calculate section properties.
 """
 
 from math import acos, asin, cos, pi, sin, sqrt
+
+
+class Circle:
+    """
+    A class to calculate some basic properties of circles.
+    """
+
+    def __init__(self, *, r=None, d=None):
+        """
+        Define a Circle object. A circle can be defined by either a radius or a
+        diameter.
+
+        :param r: the radius of the circle.
+        :param d: the diameter of the circle.
+        """
+
+        none_list = [r, d]
+
+        self._r = None
+        self._d = None
+
+        if sum(x is not None for x in none_list) == 0:
+            raise ValueError("Need to specify one of r or d.")
+
+        if sum(x is not None for x in none_list) > 1:
+            raise ValueError("Specify only one of tr or d.")
+
+        if r is None:
+            self._d = d
+
+        else:
+            self._r = r
+
+    @property
+    def r(self):
+        """
+        The radius of the circle.
+        """
+        return self.d / 2 if self._r is None else self._r
+
+    @property
+    def d(self):
+        """
+        The diameter of the circle.
+        """
+
+        return self.r * 2 if self._d is None else self._d
+
+    @property
+    def area(self):
+        """
+        The area of the circle.
+        """
+
+        return pi * self.r**2
+
+    @property
+    def circumference(self):
+        """
+        The circumference of the circle.
+        """
+
+        return self.d * pi
 
 
 class Chord:
