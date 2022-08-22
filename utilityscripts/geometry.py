@@ -102,6 +102,16 @@ class Chord:
 
         return ((self.r**2) / 2) * (self.theta - sin(self.theta))
 
+    def point(self, phi):
+
+        if not 0 <= phi <= self.theta:
+            raise ValueError("Expected phi to be in the range of 0 <= phi <= theta")
+
+        start_angle = (pi - self.theta) / 2
+        angle = start_angle + phi
+
+        return self.r * cos(angle), self.r * sin(angle)
+
 
 if __name__ == "__main__":
 
