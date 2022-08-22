@@ -81,15 +81,13 @@ kip = unyt.kip
 Pa = unyt.pascal
 psi = unyt.psi
 bar = unyt.bar
+psf = unyt.psf
 
 kPa = unyt.kPa
 MPa = unyt.MPa
 GPa = unyt.GPa
 
 ksi = unyt.ksi
-
-unyt.define_unit("psf", 1 * lb_f / (ft ** 2))
-psf = unyt.psf
 
 # units of angle
 deg = unyt.degree
