@@ -169,6 +169,16 @@ class Circular_Segment:
         return ((self.r**2) / 2) * (self.theta - sin(self.theta))
 
     def point(self, phi):
+        """
+        Return a point on the segment, located at an angle phi within the segment.
+
+        It is assumed that:
+
+        * The segment is located at the top of the circle.
+        * The angle phi is taken anti-clockwise from the RHS most extreme point of the segment.
+
+        :param phi: the angle at which the point is calculated. Must be between 0 and theta.
+        """
 
         if not 0 <= phi <= self.theta:
             raise ValueError("Expected phi to be in the range of 0 <= phi <= theta")
