@@ -69,25 +69,23 @@ class Circle:
         return self.d * pi
 
 
-class Chord_Segment:
+class Circular_Segment:
     """
-    A class to calculate the properties of the chord of a circle.
-
-    NOTE: a Chord is limited to the case where the chord length is less than
-    the diameter of the circle.
+    A class to calculate the properties of a Segment of a Circle.
     """
 
     def __init__(self, *, r, theta=None, x=None, y2=None):
         """
-        Define a Chord_Segment object. This can be fully defined provided
-        the radius of the circle (r) and one of the following are provided:
+        Define a Circular_Segment object. This can be fully defined provided
+        the radius of the circle (r) and one of the following properties of
+        the chord that defines the segment are provided:
             * The angle of the chord (theta),
             * The length of the chord (x), or
             * The thickness of the chord (y2).
 
         :param r: The radius of the circle.
-        :param theta: The angle of the Chord.
-        :param x: The length of the Chord. Must be <= 2*r, which limits a
+        :param theta: The angle of the chord.
+        :param x: The length of the chord. Must be <= 2*r, which limits a
             segment defined this way to half a circle. The assumption is
             that the segment is the smaller resulting segment.
         :param y2: The thickness of the segment.
@@ -183,26 +181,26 @@ class Chord_Segment:
 
 if __name__ == "__main__":
 
-    c1 = Chord_Segment(r=1.888, y2=0.1)
+    c1 = Circular_Segment(r=1.888, y2=0.1)
     print("Chord c1")
     print(c1.theta)
     print(c1.y2)
     print(c1.x)
     print()
 
-    c2 = Chord_Segment(r=1.888, theta=c1.theta)
+    c2 = Circular_Segment(r=1.888, theta=c1.theta)
     print("Chord c2")
     print(c2.y2)
     print()
 
-    c3 = Chord_Segment(r=1.888, theta=2 * pi)
+    c3 = Circular_Segment(r=1.888, theta=2 * pi)
     print("Chord c3")
     print(c3.theta)
     print(c3.y2)
     print(c3.x)
     print()
 
-    c4 = Chord_Segment(r=1.888, y2=2 * 1.888 - 0.1)
+    c4 = Circular_Segment(r=1.888, y2=2 * 1.888 - 0.1)
     print("Chord c4")
     print(c4.theta)
     print(c4.y2)
