@@ -178,6 +178,14 @@ class Circular_Segment:
 
         return self.r * cos(angle), self.r * sin(angle)
 
+    @property
+    def circle(self):
+        """
+        Return a full circle that the segment is based on.
+        """
+
+        return Circle(r=self.r)
+
     def inverse_segment(self):
         """
         Return the segment that corresponds to the other side of the chord line.
