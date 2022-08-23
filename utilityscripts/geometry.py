@@ -69,7 +69,7 @@ class Circle:
         return self.d * pi
 
 
-class Chord:
+class Chord_Segment:
     """
     A class to calculate the properties of the chord of a circle.
 
@@ -79,7 +79,7 @@ class Chord:
 
     def __init__(self, *, r, theta=None, x=None, y2=None):
         """
-        Define a Chord object. A chord object can be fully defined provided
+        Define a Chord_Segment object. This can be fully defined provided
         the radius of the circle (r) and one of the following are provided:
             * The angle of the chord (theta),
             * The length of the chord (x), or
@@ -88,9 +88,9 @@ class Chord:
         :param r: The radius of the circle.
         :param theta: The angle of the Chord.
         :param x: The length of the Chord. Must be <= 2*r, which limits a
-            Chord defined this way to half a circle. The assumption is
-            that the Chord is the smaller resulting Chord of the circle.
-        :param y2: The thickness of the Chord.
+            segment defined this way to half a circle. The assumption is
+            that the segment is the smaller resulting segment.
+        :param y2: The thickness of the segment.
         """
 
         self._r = r
@@ -183,26 +183,26 @@ class Chord:
 
 if __name__ == "__main__":
 
-    c1 = Chord(r=1.888, y2=0.1)
+    c1 = Chord_Segment(r=1.888, y2=0.1)
     print("Chord c1")
     print(c1.theta)
     print(c1.y2)
     print(c1.x)
     print()
 
-    c2 = Chord(r=1.888, theta=c1.theta)
+    c2 = Chord_Segment(r=1.888, theta=c1.theta)
     print("Chord c2")
     print(c2.y2)
     print()
 
-    c3 = Chord(r=1.888, theta=2 * pi)
+    c3 = Chord_Segment(r=1.888, theta=2 * pi)
     print("Chord c3")
     print(c3.theta)
     print(c3.y2)
     print(c3.x)
     print()
 
-    c4 = Chord(r=1.888, y2=2 * 1.888 - 0.1)
+    c4 = Chord_Segment(r=1.888, y2=2 * 1.888 - 0.1)
     print("Chord c4")
     print(c4.theta)
     print(c4.y2)

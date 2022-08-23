@@ -4,7 +4,7 @@ Contains some tests for the geometry module.
 
 from math import isclose, pi
 
-from geometry import Chord, Circle
+from geometry import Chord_Segment, Circle
 
 
 def test_circle():
@@ -26,10 +26,10 @@ def test_chord():
 
     radius = 1.75
 
-    c1 = Chord(r=radius, y2=0.5)
+    c1 = Chord_Segment(r=radius, y2=0.5)
 
-    c2 = Chord(r=radius, x=c1.x)
-    c3 = Chord(r=radius, theta=c1.theta)
+    c2 = Chord_Segment(r=radius, x=c1.x)
+    c3 = Chord_Segment(r=radius, theta=c1.theta)
 
     assert isclose(c1.area, 0.84309861652350)  # value calculated in Excel
 
