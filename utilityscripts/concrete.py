@@ -5,8 +5,6 @@ File to contain some utilities for working with concrete.
 import re
 from math import pi
 
-from geometry import Circle
-
 MESH_DATA = {
     "RL1218": {"bar_dia": 11.9, "pitch": 100, "cross_bar_dia": 7.6, "cross_pitch": 200},
     "RL1018": {"bar_dia": 9.5, "pitch": 100, "cross_bar_dia": 7.6, "cross_pitch": 200},
