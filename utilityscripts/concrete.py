@@ -71,7 +71,7 @@ def reo_area(
         bar_dia = mesh_data["bar_dia"]
         cross_bar_dia = mesh_data["cross_bar_dia"]
         pitch = mesh_data["pitch"]
-        cross_pitch = mesh_data["pitch"]
+        cross_pitch = mesh_data["cross_pitch"]
 
         if main_direction:
             bar_spacing = pitch
