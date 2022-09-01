@@ -40,11 +40,19 @@ def reo_area(
     is_bars_spacing = bars_with_spacing.fullmatch(bar_spec)
     is_mesh = mesh.fullmatch(bar_spec)
 
-    all_matches = [is_no_bars, is_bars_spacing, mesh]
+    all_matches = [is_no_bars, is_bars_spacing, is_mesh]
 
     if all(x is not None for x in all_matches):
         raise ValueError(
             "Expected bar specification to match only one regular expression."
+        )
+
+    if all(x is None for x in all_matches):
+        raise ValueError(
+            "Expected designation to match one of the following bar designations:\n"
+            + "number-bar\n"
+            + "bar-spacing or \n"
+            + "mesh"
         )
 
     if is_no_bars:
