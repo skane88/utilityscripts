@@ -15,6 +15,8 @@ def test_bar_area_nos():
     assert isclose(reo_area("2-N20"), 628, rel_tol=REL_TOL)
     assert isclose(reo_area("1-N36"), 1020, rel_tol=REL_TOL)
     assert isclose(reo_area("9-N32"), 7200, rel_tol=REL_TOL)
+    assert isclose(reo_area("L12"), 113, rel_tol=REL_TOL)
+    assert isclose(reo_area("R12"), 113, rel_tol=REL_TOL)
 
 
 def test_bar_area_spacing():
@@ -30,3 +32,4 @@ def test_bar_area_mesh():
     assert isclose(reo_area("SL82", main_direction=False), 227, rel_tol=REL_TOL)
     assert isclose(reo_area("RL1218"), 1112, rel_tol=REL_TOL)
     assert isclose(reo_area("RL1218", main_direction=False), 227, rel_tol=REL_TOL)
+    assert isclose(reo_area("SL82", width=1200), 272, rel_tol=REL_TOL)

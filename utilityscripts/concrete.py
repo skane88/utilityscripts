@@ -30,7 +30,7 @@ def reo_area(
     Calculate areas of reinforcement from a standard Australian specification code.
     """
 
-    bar_pattern = "([LN][0-9]+){1}"
+    bar_pattern = "([LNR][0-9]+){1}"
 
     no_bars = re.compile(f"(([0-9]+)(-))*{bar_pattern}")
     bars_with_spacing = re.compile(f"{bar_pattern}(([-@]){{1}}([0-9]+)){{1}}")
