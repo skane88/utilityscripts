@@ -106,7 +106,8 @@ def M_uo_min(Z, f_ct_f, P_e=0, A_g=0, e=0):
     """
     Calculate the minimum required moment capacity.
 
-    :param Z: the uncracked section modulus, taken at the face of the section at which cracking occurs.
+    :param Z: the uncracked section modulus, taken at the face of the section at which
+        cracking occurs.
     :param f_ct_f: the characteristic flexural strength of the concrete.
     :param P_e: effective prestress force, accounting for losses.
     :param A_g: gross area.
