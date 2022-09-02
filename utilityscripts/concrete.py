@@ -102,6 +102,26 @@ def gamma(f_c):
     return max(0.67, 0.97 - 0.0025 * f_c)
 
 
+def generate_rectilinear_block(f_c, strain, max_compression_strain: float = 0.003):
+    """
+    Generate a rectilinear stress-strain curve as required by AS3600.
+
+    :param f_c: the characteristic compressive strength of the concrete.
+    :param max_compression_strain: the maximum allowable compressive strain in the
+        concrete. According to AS3600 S8.1.3 this is 0.003.
+    """
+
+    if strain > max_compression_strain:
+        return 0
+
+    gamma_val = gamma(f_c)
+
+    if strain < max_compression_strain - max_compression_strain * gamma_val:
+        return 0
+
+    return alpha_2(f_c) * f_c
+
+
 def M_uo_min(Z, f_ct_f, P_e=0, A_g=0, e=0):
     """
     Calculate the minimum required moment capacity.
