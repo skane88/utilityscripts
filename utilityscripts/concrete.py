@@ -5,6 +5,16 @@ File to contain some utilities for working with concrete.
 import re
 from math import pi
 
+from humre import (
+    DIGIT,
+    chars,
+    exactly,
+    group,
+    one_or_more,
+    one_or_more_group,
+    zero_or_more,
+)
+
 MESH_DATA = {
     "RL1218": {"bar_dia": 11.9, "pitch": 100, "cross_bar_dia": 7.6, "cross_pitch": 200},
     "RL1018": {"bar_dia": 9.5, "pitch": 100, "cross_bar_dia": 7.6, "cross_pitch": 200},
@@ -30,11 +40,31 @@ def reo_area(
     Calculate areas of reinforcement from a standard Australian specification code.
     """
 
-    bar_pattern = "([LNRY][0-9]+){1}"
+    bar_pattern = exactly(
+        1,
+        group(chars(*("L", "N", "R", "Y")) + one_or_more(DIGIT)),
+    )
 
-    no_bars = re.compile(f"(([0-9]+)(-))*{bar_pattern}")
-    bars_with_spacing = re.compile(f"{bar_pattern}(([-@]){{1}}([0-9]+)){{1}}")
-    mesh = re.compile("(([SR]L){1}([0-9]+){1}){1}")
+    no_bars = re.compile(
+        (zero_or_more(group(f"{one_or_more_group(DIGIT)}(-)")) + bar_pattern)
+    )
+
+    bars_with_spacing = re.compile(
+        bar_pattern
+        + exactly(
+            1, group(exactly(1, group(chars(*("-", "@")))) + group(one_or_more(DIGIT)))
+        )
+    )
+
+    mesh = re.compile(
+        exactly(
+            1,
+            group(
+                exactly(1, group(chars(*("S", "R")) + "L"))
+                + exactly(1, group(one_or_more(DIGIT)))
+            ),
+        )
+    )
 
     is_no_bars = no_bars.fullmatch(bar_spec)
     is_bars_spacing = bars_with_spacing.fullmatch(bar_spec)
