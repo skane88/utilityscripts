@@ -169,3 +169,11 @@ def M_uo_min(Z, f_ct_f, P_e=0, A_g=0, e=0):
     """
 
     return 1.2 * (Z * (f_ct_f + P_e / A_g) + P_e * e)
+
+
+def M_uo():
+    """
+    Method to calculate the concrete capacity of a rectangular beam as per AS3600.
+    """
+
+    pass
