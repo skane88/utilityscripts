@@ -176,3 +176,30 @@ def M_uo():
     """
 
     pass
+
+
+def V_uo(f_c, u, d_om, beta_h=1.0):
+    """
+    Calculate the punching shear capacity.
+
+    :param f_c: The characteristic strength of the concrete. Units are MPa.
+    :param u: The punching shear perimeter. Units are m.
+    :param d_om: The effective depth in punching shear. Units are m.
+    :param beta_h: The shape factor for the punching shear area.
+    :returns: Punching shear capacity in kN, provided input units are as specified.
+    """
+
+    def f_cv(f_c, beta_h=1):
+        """
+        Helper method to determine the punching shear strength.
+
+        :param f_c: The characteristic strength of the concrete.
+        :param beta_h: The shape factor for the punching shear area.
+        """
+
+        f_cv_1 = 0.17 * (1 + 2 / beta_h)
+        f_cv_2 = 0.34
+
+        return min(f_cv_1, f_cv_2) * f_c**0.5
+
+    return f_cv(f_c, beta_h) * u * d_om * 1000  # *1000 to convert to kN.
