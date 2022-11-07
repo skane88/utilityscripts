@@ -17,6 +17,12 @@ from humre import (
 
 MESH_DATA = {
     "RL1218": {"bar_dia": 11.9, "pitch": 100, "cross_bar_dia": 7.6, "cross_pitch": 200},
+    "RL1118": {
+        "bar_dia": 10.65,
+        "pitch": 100,
+        "cross_bar_dia": 7.6,
+        "cross_pitch": 200,
+    },
     "RL1018": {"bar_dia": 9.5, "pitch": 100, "cross_bar_dia": 7.6, "cross_pitch": 200},
     "RL818": {"bar_dia": 7.6, "pitch": 100, "cross_bar_dia": 7.6, "cross_pitch": 200},
     "SL102": {"bar_dia": 9.5, "pitch": 200, "cross_bar_dia": 9.5, "cross_pitch": 200},
