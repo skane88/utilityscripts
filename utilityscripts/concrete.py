@@ -43,9 +43,40 @@ def circle_area(dia):
     return pi * (dia**2) / 4
 
 
-def reo_area(
-    bar_spec: str = None, width: float = 1000, main_direction: bool = True
-) -> float:
+def is_bar(bar_spec: str) -> bool:
+    """
+    Determine if a bar specification matches a standard bar code.
+    """
+
+    bar = re.compile(
+        exactly(
+            1,
+            group(chars(*("L", "N", "R", "Y")) + one_or_more(DIGIT)),
+        )
+    )
+
+    return bar.fullmatch(bar_spec) is not None
+
+
+def is_mesh(bar_spec: str) -> bool:
+    """
+    Determine if a bar specification matches a standard mesh code.
+    """
+
+    mesh = re.compile(
+        exactly(
+            1,
+            group(
+                exactly(1, group(chars(*("S", "R")) + "L"))
+                + exactly(1, group(one_or_more(DIGIT)))
+            ),
+        )
+    )
+
+    return mesh.fullmatch(bar_spec) is not None
+
+
+def reo_area(bar_spec: str, width: float = 1000, main_direction: bool = True) -> float:
     """
     Calculate areas of reinforcement from a standard Australian specification code.
     """
