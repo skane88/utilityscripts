@@ -38,6 +38,20 @@ D500L_STRESS_STRAIN = [[-0.015, -0.0025, 0, 0.0025, 0.015], [-500, -500, 0, 500,
 R250N_STRESS_STRAIN = [[-0.05, -0.0025, 0, 0.0025, 0.05], [-500, -500, 0, 500, 500]]
 
 
+BAR_RE = exactly(
+    1,
+    group(chars(*("L", "N", "R", "Y")) + one_or_more(DIGIT)),
+)
+
+MESH_RE = exactly(
+    1,
+    group(
+        exactly(1, group(chars(*("S", "R")) + "L"))
+        + exactly(1, group(one_or_more(DIGIT)))
+    ),
+)
+
+
 def circle_area(dia):
 
     return pi * (dia**2) / 4
@@ -48,14 +62,7 @@ def is_bar(bar_spec: str) -> bool:
     Determine if a bar specification matches a standard bar code.
     """
 
-    bar = re.compile(
-        exactly(
-            1,
-            group(chars(*("L", "N", "R", "Y")) + one_or_more(DIGIT)),
-        )
-    )
-
-    return bar.fullmatch(bar_spec) is not None
+    return re.compile(BAR_RE).fullmatch(bar_spec) is not None
 
 
 def is_mesh(bar_spec: str) -> bool:
@@ -63,17 +70,7 @@ def is_mesh(bar_spec: str) -> bool:
     Determine if a bar specification matches a standard mesh code.
     """
 
-    mesh = re.compile(
-        exactly(
-            1,
-            group(
-                exactly(1, group(chars(*("S", "R")) + "L"))
-                + exactly(1, group(one_or_more(DIGIT)))
-            ),
-        )
-    )
-
-    return mesh.fullmatch(bar_spec) is not None
+    return re.compile(MESH_RE).fullmatch(bar_spec) is not None
 
 
 def reo_area(bar_spec: str, width: float = 1000, main_direction: bool = True) -> float:
@@ -81,37 +78,22 @@ def reo_area(bar_spec: str, width: float = 1000, main_direction: bool = True) ->
     Calculate areas of reinforcement from a standard Australian specification code.
     """
 
-    bar_pattern = exactly(
-        1,
-        group(chars(*("L", "N", "R", "Y")) + one_or_more(DIGIT)),
-    )
-
     no_bars = re.compile(
-        (zero_or_more(group(f"{one_or_more_group(DIGIT)}(-)")) + bar_pattern)
+        (zero_or_more(group(f"{one_or_more_group(DIGIT)}(-)")) + BAR_RE)
     )
 
     bars_with_spacing = re.compile(
-        bar_pattern
+        BAR_RE
         + exactly(
             1, group(exactly(1, group(chars(*("-", "@")))) + group(one_or_more(DIGIT)))
         )
     )
 
-    mesh = re.compile(
-        exactly(
-            1,
-            group(
-                exactly(1, group(chars(*("S", "R")) + "L"))
-                + exactly(1, group(one_or_more(DIGIT)))
-            ),
-        )
-    )
-
     is_no_bars = no_bars.fullmatch(bar_spec)
     is_bars_spacing = bars_with_spacing.fullmatch(bar_spec)
-    is_mesh = mesh.fullmatch(bar_spec)
+    mesh = re.compile(MESH_RE).fullmatch(bar_spec)
 
-    all_matches = [is_no_bars, is_bars_spacing, is_mesh]
+    all_matches = [is_no_bars, is_bars_spacing, mesh]
 
     if all(x is not None for x in all_matches):
         raise ValueError(
@@ -141,7 +123,7 @@ def reo_area(bar_spec: str, width: float = 1000, main_direction: bool = True) ->
         bar_spacing = is_bars_spacing[4]
         no_bars = width / int(bar_spacing)
 
-    if is_mesh:
+    if mesh:
 
         mesh_data = MESH_DATA[bar_spec]
 
