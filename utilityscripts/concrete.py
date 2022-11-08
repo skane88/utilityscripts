@@ -38,11 +38,11 @@ D500L_STRESS_STRAIN = [[-0.015, -0.0025, 0, 0.0025, 0.015], [-500, -500, 0, 500,
 R250N_STRESS_STRAIN = [[-0.05, -0.0025, 0, 0.0025, 0.05], [-500, -500, 0, 500, 500]]
 
 
+# Regular expressions for bar and mesh specifications.
 BAR_RE = exactly(
     1,
     group(chars(*("L", "N", "R", "Y")) + one_or_more(DIGIT)),
 )
-
 MESH_RE = exactly(
     1,
     group(
