@@ -121,7 +121,10 @@ def reo_properties(bar_spec: str):
         )
 
     if is_no_bars:
-        no_bars = is_no_bars[1][:-1]
+        if is_no_bars[1] is None:
+            no_bars = 1
+        else:
+            no_bars = is_no_bars[1][:-1]
 
         no_bars = 1 if no_bars is None else int(no_bars)
         bar_type = is_no_bars[4][:1]
@@ -146,7 +149,7 @@ def reo_properties(bar_spec: str):
         ret_val["is_mesh"] = False
         ret_val["main_dia"] = bar_dia
         ret_val["bar_type"] = bar_type
-        ret_val["main_spacing"] = bar_spacing
+        ret_val["main_spacing"] = float(bar_spacing)
         ret_val["secondary_dia"] = None
         ret_val["secondary_spacing"] = None
         ret_val["no_main"] = None
