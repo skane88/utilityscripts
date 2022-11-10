@@ -180,71 +180,31 @@ def reo_properties(bar_spec: str):
     return ret_val
 
 
-def reo_area(bar_spec: str, width: float = 1000, main_direction: bool = True) -> float:
+def reo_area(
+    bar_spec: str,
+    width: float = 1000,
+    length: float = 1000,
+    main_direction: bool = True,
+) -> float:
     """
     Calculate areas of reinforcement from a standard Australian specification code.
     """
 
-    no_bars = re.compile(
-        (zero_or_more(group(f"{one_or_more_group(DIGIT)}(-)")) + BAR_RE)
-    )
+    reo_data = reo_properties(bar_spec=bar_spec)
 
-    bars_with_spacing = re.compile(
-        BAR_RE
-        + exactly(
-            1, group(exactly(1, group(chars(*("-", "@")))) + group(one_or_more(DIGIT)))
-        )
-    )
+    if main_direction:
+        bar_dia = reo_data["main_dia"]
+        no_bars = reo_data["no_main"]
+        bar_spacing = reo_data["main_spacing"]
+        distance = width
+    else:
+        bar_dia = reo_data["secondary_dia"]
+        no_bars = reo_data["no_secondary"]
+        bar_spacing = reo_data["secondary_spacing"]
+        distance = length
 
-    is_no_bars = no_bars.fullmatch(bar_spec)
-    is_bars_spacing = bars_with_spacing.fullmatch(bar_spec)
-    mesh = re.compile(MESH_RE).fullmatch(bar_spec)
-
-    all_matches = [is_no_bars, is_bars_spacing, mesh]
-
-    if all(x is not None for x in all_matches):
-        raise ValueError(
-            "Expected bar specification to match only one regular expression."
-        )
-
-    if all(x is None for x in all_matches):
-        raise ValueError(
-            "Expected designation to match one of the following bar designations:\n"
-            + "number-bar\n"
-            + "bar-spacing or \n"
-            + "mesh"
-        )
-
-    if is_no_bars:
-
-        no_bars = is_no_bars[2]
-
-        no_bars = 1 if no_bars is None else int(no_bars)
-        bar_type = is_no_bars[4]
-        bar_dia = int(bar_type[1:])
-
-    if is_bars_spacing:
-
-        bar_type = is_bars_spacing[1]
-        bar_dia = int(bar_type[1:])
-        bar_spacing = is_bars_spacing[4]
-        no_bars = width / int(bar_spacing)
-
-    if mesh:
-
-        mesh_data = MESH_DATA[bar_spec]
-
-        pitch = mesh_data["pitch"]
-        cross_pitch = mesh_data["cross_pitch"]
-
-        if main_direction:
-            bar_dia = mesh_data["bar_dia"]
-            bar_spacing = pitch
-        else:
-            bar_dia = mesh_data["cross_bar_dia"]
-            bar_spacing = cross_pitch
-
-        no_bars = width / int(bar_spacing)
+    if no_bars is None:
+        no_bars = distance / bar_spacing
 
     bar_area = 0.25 * pi * bar_dia**2
 
