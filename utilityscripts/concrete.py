@@ -73,6 +73,110 @@ def is_mesh(bar_spec: str) -> bool:
     return re.compile(MESH_RE).fullmatch(bar_spec) is not None
 
 
+def reo_properties(bar_spec: str):
+    """
+    Returns a dictionary with a number of properties from a standard bar specification.
+    """
+
+    ret_val = {
+        "is_bar": None,
+        "is_mesh": None,
+        "bar_type": None,
+        "main_dia": None,
+        "secondary_dia": None,
+        "main_spacing": None,
+        "secondary_spacing": None,
+        "no_main": None,
+        "no_secondary": None,
+    }
+
+    no_bars = re.compile(
+        (zero_or_more(group(f"{one_or_more_group(DIGIT)}(-)")) + BAR_RE)
+    )
+
+    bars_with_spacing = re.compile(
+        BAR_RE
+        + exactly(
+            1, group(exactly(1, group(chars(*("-", "@")))) + group(one_or_more(DIGIT)))
+        )
+    )
+
+    is_no_bars = no_bars.fullmatch(bar_spec)
+    is_bars_spacing = bars_with_spacing.fullmatch(bar_spec)
+    mesh = re.compile(MESH_RE).fullmatch(bar_spec)
+
+    all_matches = [is_no_bars, is_bars_spacing, mesh]
+
+    if all(x is not None for x in all_matches):
+        raise ValueError(
+            "Expected bar specification to match only one regular expression."
+        )
+
+    if all(x is None for x in all_matches):
+        raise ValueError(
+            "Expected designation to match one of the following bar designations:\n"
+            + "number-bar\n"
+            + "bar-spacing or \n"
+            + "mesh"
+        )
+
+    if is_no_bars:
+        no_bars = is_no_bars[1][:-1]
+
+        no_bars = 1 if no_bars is None else int(no_bars)
+        bar_type = is_no_bars[4][:1]
+        bar_dia = int(is_no_bars[4][1:])
+
+        ret_val["is_bar"] = True
+        ret_val["is_mesh"] = False
+        ret_val["main_dia"] = bar_dia
+        ret_val["bar_type"] = bar_type
+        ret_val["main_spacing"] = None
+        ret_val["secondary_dia"] = None
+        ret_val["secondary_spacing"] = None
+        ret_val["no_main"] = no_bars
+        ret_val["no_secondary"] = None
+
+    if is_bars_spacing:
+        bar_type = is_bars_spacing[1][:1]
+        bar_dia = int(is_bars_spacing[1][1:])
+        bar_spacing = is_bars_spacing[4]
+
+        ret_val["is_bar"] = True
+        ret_val["is_mesh"] = False
+        ret_val["main_dia"] = bar_dia
+        ret_val["bar_type"] = bar_type
+        ret_val["main_spacing"] = bar_spacing
+        ret_val["secondary_dia"] = None
+        ret_val["secondary_spacing"] = None
+        ret_val["no_main"] = None
+        ret_val["no_secondary"] = None
+
+    if mesh:
+
+        mesh_data = MESH_DATA[bar_spec]
+
+        pitch = mesh_data["pitch"]
+        cross_pitch = mesh_data["cross_pitch"]
+
+        bar_dia = mesh_data["bar_dia"]
+        bar_spacing = pitch
+        secondary_bar_dia = mesh_data["cross_bar_dia"]
+        secondary_bar_spacing = cross_pitch
+
+        ret_val["is_bar"] = True
+        ret_val["is_mesh"] = False
+        ret_val["main_dia"] = bar_dia
+        ret_val["bar_type"] = bar_spec[:2]
+        ret_val["main_spacing"] = bar_spacing
+        ret_val["secondary_dia"] = secondary_bar_dia
+        ret_val["secondary_spacing"] = secondary_bar_spacing
+        ret_val["no_main"] = None
+        ret_val["no_secondary"] = None
+
+    return ret_val
+
+
 def reo_area(bar_spec: str, width: float = 1000, main_direction: bool = True) -> float:
     """
     Calculate areas of reinforcement from a standard Australian specification code.
