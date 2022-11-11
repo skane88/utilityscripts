@@ -30,10 +30,17 @@ def test_bar_area(bar_spec, area):
     assert isclose(reo_area(bar_spec), area, rel_tol=REL_TOL)
 
 
-def test_bar_area_mesh():
+@pytest.mark.parametrize(
+    "bar_spec,area,main_direction",
+    [
+        ("SL82", 227, True),
+        ("SL82", 227, False),
+        ("RL1218", 1112, True),
+        ("RL1218", 227, False),
+    ],
+)
+def test_bar_area_mesh(bar_spec, area, main_direction):
 
-    assert isclose(reo_area("SL82"), 227, rel_tol=REL_TOL)
-    assert isclose(reo_area("SL82", main_direction=False), 227, rel_tol=REL_TOL)
-    assert isclose(reo_area("RL1218"), 1112, rel_tol=REL_TOL)
-    assert isclose(reo_area("RL1218", main_direction=False), 227, rel_tol=REL_TOL)
-    assert isclose(reo_area("SL82", width=1200), 272, rel_tol=REL_TOL)
+    assert isclose(
+        reo_area(bar_spec, main_direction=main_direction), area, rel_tol=REL_TOL
+    )
