@@ -182,12 +182,20 @@ def reo_properties(bar_spec: str):
 
 def reo_area(
     bar_spec: str,
-    width: float = 1000,
-    length: float = 1000,
     main_direction: bool = True,
+    width: float = 1000,
 ) -> float:
     """
     Calculate areas of reinforcement from a standard Australian specification code.
+
+    For specifications based on bar spacing (e.g. "N16-200") or for a mesh (e.g. "SL82",
+    a width must be provided to calculate the area correctly, otherwise the value
+    returned is over a nominal 1000mm width of reinforcement.
+
+    :param bar_spec: a standard Australian bar specification code.
+    :param main_direction: for mesh, calculate the area in the main or secondary
+        direction?
+    :param width: the width over which to calculate the area.
     """
 
     reo_data = reo_properties(bar_spec=bar_spec)
@@ -196,15 +204,13 @@ def reo_area(
         bar_dia = reo_data["main_dia"]
         no_bars = reo_data["no_main"]
         bar_spacing = reo_data["main_spacing"]
-        distance = width
     else:
         bar_dia = reo_data["secondary_dia"]
         no_bars = reo_data["no_secondary"]
         bar_spacing = reo_data["secondary_spacing"]
-        distance = length
 
     if no_bars is None:
-        no_bars = distance / bar_spacing
+        no_bars = width / bar_spacing
 
     bar_area = 0.25 * pi * bar_dia**2
 
