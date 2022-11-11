@@ -4,26 +4,30 @@ Some tests for the concrete module.
 
 from math import isclose
 
+import pytest
+
 from utilityscripts.concrete import reo_area
 
 REL_TOL = 0.01
 
 
-def test_bar_area_nos():
+@pytest.mark.parametrize(
+    "bar_spec,area",
+    [
+        ("N20", 314),
+        ("2-N20", 628),
+        ("1-N36", 1020),
+        ("9-N32", 7200),
+        ("L12", 113),
+        ("R12", 113),
+        ("N20-200", 1570),
+        ("N16-380", 526),
+        ("N36-160", 6375),
+    ],
+)
+def test_bar_area(bar_spec, area):
 
-    assert isclose(reo_area("N20"), 314, rel_tol=REL_TOL)
-    assert isclose(reo_area("2-N20"), 628, rel_tol=REL_TOL)
-    assert isclose(reo_area("1-N36"), 1020, rel_tol=REL_TOL)
-    assert isclose(reo_area("9-N32"), 7200, rel_tol=REL_TOL)
-    assert isclose(reo_area("L12"), 113, rel_tol=REL_TOL)
-    assert isclose(reo_area("R12"), 113, rel_tol=REL_TOL)
-
-
-def test_bar_area_spacing():
-
-    assert isclose(reo_area("N20-200"), 1570, rel_tol=REL_TOL)
-    assert isclose(reo_area("N16-380"), 526, rel_tol=REL_TOL)
-    assert isclose(reo_area("N36-160"), 6375, rel_tol=REL_TOL)
+    assert isclose(reo_area(bar_spec), area, rel_tol=REL_TOL)
 
 
 def test_bar_area_mesh():
