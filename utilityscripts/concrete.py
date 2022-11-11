@@ -121,11 +121,7 @@ def reo_properties(bar_spec: str):
         )
 
     if is_no_bars:
-        if is_no_bars[1] is None:
-            no_bars = 1
-        else:
-            no_bars = is_no_bars[1][:-1]
-
+        no_bars = 1 if is_no_bars[1] is None else is_no_bars[1][:-1]
         no_bars = 1 if no_bars is None else int(no_bars)
         bar_type = is_no_bars[4][:1]
         bar_dia = int(is_no_bars[4][1:])
