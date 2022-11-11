@@ -182,8 +182,9 @@ def reo_properties(bar_spec: str):
 
 def reo_area(
     bar_spec: str,
-    main_direction: bool = True,
+    *,
     width: float = 1000,
+    main_direction: bool = True,
 ) -> float:
     """
     Calculate areas of reinforcement from a standard Australian specification code.
