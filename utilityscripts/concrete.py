@@ -62,7 +62,7 @@ def is_bar(bar_spec: str) -> bool:
     Determine if a bar specification matches a standard bar code.
     """
 
-    return re.compile(BAR_RE).fullmatch(bar_spec) is not None
+    return reo_properties(bar_spec)["is_bar"]
 
 
 def is_mesh(bar_spec: str) -> bool:
@@ -70,7 +70,7 @@ def is_mesh(bar_spec: str) -> bool:
     Determine if a bar specification matches a standard mesh code.
     """
 
-    return re.compile(MESH_RE).fullmatch(bar_spec) is not None
+    return reo_properties(bar_spec)["is_mesh"]
 
 
 def reo_properties(bar_spec: str):
