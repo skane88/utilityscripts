@@ -181,7 +181,7 @@ def reo_area(
     *,
     width: float = 1000,
     main_direction: bool = True,
-) -> float:
+):
     """
     Calculate areas of reinforcement from a standard Australian specification code.
 
@@ -209,9 +209,17 @@ def reo_area(
     if no_bars is None:
         no_bars = width / bar_spacing
 
-    bar_area = 0.25 * pi * bar_dia**2
+    single_bar_area = 0.25 * pi * bar_dia**2
+    total_area = single_bar_area * no_bars
+    area_unit_width = total_area / (width / 1000)
 
-    return bar_area * no_bars
+    return {
+        "single_bar_area": single_bar_area,
+        "total_area": total_area,
+        "area_unit_width": area_unit_width,
+        "no_bars": no_bars,
+        "width": width,
+    }
 
 
 def alpha_2(f_c):

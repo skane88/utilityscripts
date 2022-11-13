@@ -27,7 +27,7 @@ REL_TOL = 0.01
 )
 def test_bar_area(bar_spec, area):
 
-    assert isclose(reo_area(bar_spec), area, rel_tol=REL_TOL)
+    assert isclose(reo_area(bar_spec)["total_area"], area, rel_tol=REL_TOL)
 
 
 @pytest.mark.parametrize(
@@ -42,7 +42,9 @@ def test_bar_area(bar_spec, area):
 def test_bar_area_mesh(bar_spec, area, main_direction):
 
     assert isclose(
-        reo_area(bar_spec, main_direction=main_direction), area, rel_tol=REL_TOL
+        reo_area(bar_spec, main_direction=main_direction)["total_area"],
+        area,
+        rel_tol=REL_TOL,
     )
 
 
@@ -52,7 +54,9 @@ def test_bar_area_mesh(bar_spec, area, main_direction):
 def test_bar_area_full(bar_spec, width, main_direction, area):
 
     assert isclose(
-        reo_area(bar_spec=bar_spec, main_direction=main_direction, width=width),
+        reo_area(bar_spec=bar_spec, main_direction=main_direction, width=width)[
+            "total_area"
+        ],
         area,
         rel_tol=REL_TOL,
     )
