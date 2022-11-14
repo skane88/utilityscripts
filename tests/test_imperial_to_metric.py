@@ -10,14 +10,17 @@ from utilityscripts.imperial_to_metric import feet_inches_to_m
 
 
 @pytest.mark.parametrize(
-    "example,expected", [(r"23'", 7.0104),
-    (r'12"', 0.3048),
-    (r'11.0"', 0.3048),
-    (r'11 1/2"', 0.2921),
-    (r"1'" + r'6"', 0.4572),
-    (r"12'" + r'9.5"', 3.8989),
-    (r"1'" + r'6 1/2"', 0.4699),
-    ]
+    "example,expected",
+    [
+        (r"23'", 7.0104),
+        (r'12"', 0.3048),
+        (r'11.0"', 0.2794),
+        (r'11 1/2"', 0.2921),
+        (r"1'" + r'6"', 0.4572),
+        (r"12'" + r'9.5"', 3.8989),
+        (r"1'" + r'6 1/2"', 0.4699),
+        ("23'6 1/2\"", 7.1755),
+    ],
 )
 def test_convert_to_metric(example, expected):
 
