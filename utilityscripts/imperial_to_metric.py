@@ -3,6 +3,7 @@ Utility script to convert old imperial sections to modern metric equivalents.
 """
 
 import re
+from fractions import Fraction
 
 from humre import (
     DIGIT,
@@ -35,10 +36,14 @@ FRACTIONAL_INCHES = group(
     + group(f"{one_or_more(DIGIT)}/{one_or_more(DIGIT)}")
 )
 
-INCHES = either(WHOLE_INCHES, DECIMAL_INCHES, FRACTIONAL_INCHES) + DOUBLE_QUOTE
+INCHES = group(either(WHOLE_INCHES, DECIMAL_INCHES, FRACTIONAL_INCHES)) + group(
+    DOUBLE_QUOTE
+)
 
 FEET_AND_INCHES = (
-    optional_group(FEET) + group(zero_or_more(WHITESPACE)) + optional_group(INCHES)
+    optional_group(FEET)
+    + optional_group(zero_or_more(WHITESPACE))
+    + optional_group(INCHES)
 )
 
 
@@ -56,23 +61,14 @@ def feet_inches_to_m(section):
 
     feet = float(feet_and_inches[3]) if is_feet else 0
 
-    is_inches = feet_and_inches[6]
+    if feet_and_inches[6]:
 
-    f = feet_and_inches[5]
-    g = feet_and_inches[6]
-    h = feet_and_inches[7]
-    i = feet_and_inches[8]
-    j = feet_and_inches[9]
-    k = feet_and_inches[10]
-    l = feet_and_inches[11]
-
-    if is_inches:
-
-        if feet_and_inches[7]:
+        if feet_and_inches[10]:
+            inches = float(sum(Fraction(s) for s in feet_and_inches[10].split()))
+        elif feet_and_inches[9]:
+            inches = float(feet_and_inches[9])
+        else:
             inches = float(feet_and_inches[7])
-        if feet_and_inches[8]:
-            inches = float(feet_and_inches[8])
-
     else:
         inches = 0
 
