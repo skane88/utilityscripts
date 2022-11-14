@@ -49,14 +49,50 @@ def test_bar_area_mesh(bar_spec, area, main_direction):
 
 
 @pytest.mark.parametrize(
-    "bar_spec,width,main_direction,area", [("SL82", 1200, True, 272)]
+    "bar_spec,width,main_direction,expected",
+    [
+        (
+            "SL82",
+            1200,
+            True,
+            {
+                "single_bar_area": 45.4,
+                "total_area": 272,
+                "area_unit_width": 227,
+                "no_bars": 6.0,
+                "width": 1200,
+            },
+        ),
+        (
+            "SL82",
+            1200,
+            False,
+            {
+                "single_bar_area": 45.4,
+                "total_area": 272,
+                "area_unit_width": 227,
+                "no_bars": 6.0,
+                "width": 1200,
+            },
+        ),
+    ],
 )
-def test_bar_area_full(bar_spec, width, main_direction, area):
+def test_bar_area_full(bar_spec, width, main_direction, expected):
+
+    return_vals = reo_area(
+        bar_spec=bar_spec, main_direction=main_direction, width=width
+    )
 
     assert isclose(
-        reo_area(bar_spec=bar_spec, main_direction=main_direction, width=width)[
-            "total_area"
-        ],
-        area,
+        return_vals["single_bar_area"], expected["single_bar_area"], rel_tol=REL_TOL
+    )
+    assert isclose(
+        return_vals["total_area"],
+        expected["total_area"],
         rel_tol=REL_TOL,
     )
+    assert isclose(
+        return_vals["area_unit_width"], expected["area_unit_width"], rel_tol=REL_TOL
+    )
+    assert isclose(return_vals["no_bars"], expected["no_bars"], rel_tol=REL_TOL)
+    assert isclose(return_vals["width"], expected["width"], rel_tol=REL_TOL)
