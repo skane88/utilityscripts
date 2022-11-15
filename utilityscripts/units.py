@@ -15,6 +15,8 @@ import unyt
 
 # units of length
 m = unyt.metre
+um = unyt.micrometre
+μm = unyt.micrometre
 inch = unyt.inch
 ft = unyt.foot
 yd = unyt.yard
@@ -103,7 +105,7 @@ unyt.define_unit("ha", (100 * m) ** 2)
 ha = unyt.ha
 
 # units of volume
-unyt.define_unit(symbol="L", value=0.001 * (m ** 3), prefixable=True)
+unyt.define_unit(symbol="L", value=0.001 * (m**3), prefixable=True)
 L = unyt.L
 
 # units of velocity
