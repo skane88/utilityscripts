@@ -49,13 +49,7 @@ FEET_AND_INCHES = (
 
 def feet_inches_to_m(section):
 
-    feet = re.compile(FEET)
-    inches = re.compile(INCHES)
-    feet_and_inches = re.compile(FEET_AND_INCHES)
-
-    feet = feet.match(section)
-    inches = inches.match(section)
-    feet_and_inches = feet_and_inches.match(section)
+    feet_and_inches = re.compile(FEET_AND_INCHES).match(section)
 
     is_feet = feet_and_inches[1]
 
