@@ -54,6 +54,12 @@ def feet_inches_to_m(imperial: str) -> float:
     :param imperial: the text to convert.
     """
 
+    if r"\'" in imperial or r"\"" in imperial:
+        raise ValueError(
+            "Escaped \" or ' found in input string. "
+            + "Did you mean to use a raw string, or not escape the character?"
+        )
+
     feet_and_inches = re.compile(FEET_AND_INCHES).match(imperial)
 
     is_feet = feet_and_inches[1]
