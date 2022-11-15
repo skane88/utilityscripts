@@ -47,9 +47,14 @@ FEET_AND_INCHES = (
 )
 
 
-def feet_inches_to_m(section):
+def feet_inches_to_m(imperial: str) -> float:
+    """
+    Convert a text string of feet & inches (e.g. 6' or 32" or 1' 1 1/4") into m.
 
-    feet_and_inches = re.compile(FEET_AND_INCHES).match(section)
+    :param imperial: the text to convert.
+    """
+
+    feet_and_inches = re.compile(FEET_AND_INCHES).match(imperial)
 
     is_feet = feet_and_inches[1]
 
