@@ -56,8 +56,8 @@ def feet_inches_to_m(imperial: str) -> float:
 
     if r"\'" in imperial or r"\"" in imperial:
         raise ValueError(
-            "Escaped \" or ' found in input string. "
-            + "Did you mean to use a raw string, or not escape the character?"
+            "Escaped \\\" or \\' found in input string. "
+            + "Did you mean to use a raw string, or to not escape the character?"
         )
 
     feet_and_inches = re.compile(FEET_AND_INCHES).match(imperial)
