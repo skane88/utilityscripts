@@ -20,6 +20,8 @@ from utilityscripts.imperial_to_metric import feet_inches_to_m
         (r"12'" + r'9.5"', 3.8989),
         (r"1'" + r'6 1/2"', 0.4699),
         ("23'6 1/2\"", 7.1755),
+        ('3/8"', 0.009525),
+        ('1/2"', 0.0127),
     ],
 )
 def test_convert_to_metric(example, expected):
