@@ -63,18 +63,18 @@ def ft_in_str_to_m(imperial: str) -> float:
     feet_and_inches = re.compile(FEET_AND_INCHES).match(imperial)
 
     base = feet_and_inches[0]
-    foot_part = feet_and_inches[1]
     foot_value = feet_and_inches[3]
-    foot_symbol = feet_and_inches[4]
-    inch_part = feet_and_inches[6]
     whole_inches = feet_and_inches[7]
     decimal_inches = feet_and_inches[9]
     fractional_inches = feet_and_inches[10]
-    inch_symbol = feet_and_inches[14]
 
+    foot_part = feet_and_inches[1]
+    foot_symbol = feet_and_inches[4]
     if foot_part is not None and foot_symbol is None:
         raise ValueError('Expected an inch symbol (") on the inch part.')
 
+    inch_part = feet_and_inches[6]
+    inch_symbol = feet_and_inches[14]
     if inch_part is not None and inch_symbol is None:
         raise ValueError('Expected an inch symbol (") on the inch part.')
 
