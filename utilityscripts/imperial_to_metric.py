@@ -62,6 +62,7 @@ def feet_inches_to_m(imperial: str) -> float:
 
     feet_and_inches = re.compile(FEET_AND_INCHES).match(imperial)
 
+    base = feet_and_inches[0]
     foot_part = feet_and_inches[1]
     foot_value = feet_and_inches[3]
     foot_symbol = feet_and_inches[4]
@@ -77,7 +78,7 @@ def feet_inches_to_m(imperial: str) -> float:
     if inch_part is not None and inch_symbol is None:
         raise ValueError('Expected an inch symbol (") on the inch part.')
 
-    if foot_part is None and inch_part is None:
+    if base == "":
         raise ValueError("Could not parse the input string into feet & inches.")
 
     if foot_part:
