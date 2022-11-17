@@ -31,8 +31,8 @@ FEET = group(group(one_or_more(DIGIT)) + group(QUOTE))
 WHOLE_INCHES = group(one_or_more(DIGIT)) + negative_lookahead(PERIOD)
 DECIMAL_INCHES = group(one_or_more(DIGIT) + PERIOD + one_or_more(DIGIT))
 FRACTIONAL_INCHES = group(
-    group(one_or_more(DIGIT))
-    + zero_or_more(WHITESPACE)
+    optional_group(one_or_more(DIGIT))
+    + optional_group(zero_or_more(WHITESPACE))
     + group(f"{one_or_more(DIGIT)}/{one_or_more(DIGIT)}")
 )
 
@@ -62,18 +62,31 @@ def feet_inches_to_m(imperial: str) -> float:
 
     feet_and_inches = re.compile(FEET_AND_INCHES).match(imperial)
 
-    is_feet = feet_and_inches[1]
+    foot_part = feet_and_inches[1]
+    foot_value = feet_and_inches[3]
+    foot_symbol = feet_and_inches[4]
+    inch_part = feet_and_inches[6]
+    whole_inches = feet_and_inches[7]
+    decimal_inches = feet_and_inches[9]
+    fractional_inches = feet_and_inches[10]
+    inch_symbol = feet_and_inches[14]
 
-    feet = float(feet_and_inches[3]) if is_feet else 0
+    if foot_part is not None and foot_symbol is None:
+        raise ValueError('Expected an inch symbol (") on the inch part')
 
-    if feet_and_inches[6]:
+    if inch_part is not None and inch_symbol is None:
+        raise ValueError('Expected an inch symbol (") on the inch part')
 
-        if feet_and_inches[10]:
-            inches = float(sum(Fraction(s) for s in feet_and_inches[10].split()))
-        elif feet_and_inches[9]:
-            inches = float(feet_and_inches[9])
+    feet = float(foot_value) if foot_part else 0
+
+    if inch_part:
+
+        if fractional_inches:
+            inches = float(sum(Fraction(s) for s in fractional_inches.split()))
+        elif decimal_inches:
+            inches = float(decimal_inches)
         else:
-            inches = float(feet_and_inches[7])
+            inches = float(whole_inches)
     else:
         inches = 0
 
