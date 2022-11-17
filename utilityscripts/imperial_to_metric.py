@@ -82,11 +82,7 @@ def ft_in_str_to_m(imperial: str) -> float:
     if base == "":
         raise ValueError("Could not parse the input string into feet & inches.")
 
-    if foot_part:
-        feet = float(foot_value)
-    else:
-        feet = 0
-
+    feet = float(foot_value) if foot_part else 0
     if inch_part:
 
         if fractional_inches:
