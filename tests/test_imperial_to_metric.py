@@ -36,6 +36,7 @@ def test_convert_to_metric(example, expected):
         (r'23\' 6 1/2"', 7.1755),
         (r'23 6 1/2"', 7.1755),
         (r"23\' 6 1/2", 7.1755),
+        (r"23 4'", 7.1755),
     ],
 )
 def test_convert_to_metric_errors(example, expected):
