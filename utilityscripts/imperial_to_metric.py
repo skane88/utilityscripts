@@ -76,33 +76,18 @@ def ft_in_str_to_m(imperial: str) -> float:
     fractional_inches = feet_and_inches[10]
 
     foot_part = feet_and_inches[1]
-    foot_symbol = feet_and_inches[4]
-    if foot_part is not None and foot_symbol is None:
-        raise ValueError('Expected an inch symbol (") on the inch part.')
 
     inch_part = feet_and_inches[6]
-    inch_symbol = feet_and_inches[14]
-    if inch_part is not None and inch_symbol is None:
-        raise ValueError('Expected an inch symbol (") on the inch part.')
 
     if base == "":
         raise ValueError("Could not parse the input string into feet & inches.")
 
     if foot_part:
-        if len(foot_part.split()) > 1:
-            raise ValueError(f"The foot part ({foot_part}) has spaces in it.")
-
         feet = float(foot_value)
     else:
         feet = 0
 
     if inch_part:
-
-        if len(inch_part.split()) > 2:
-            raise ValueError(
-                f"The inch part ({inch_part}) has more "
-                + "than one group of whitespaces in it."
-            )
 
         if fractional_inches:
             inches = float(sum(Fraction(s) for s in fractional_inches.split()))
