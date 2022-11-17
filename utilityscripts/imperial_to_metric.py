@@ -47,7 +47,7 @@ FEET_AND_INCHES = (
 )
 
 
-def feet_inches_to_m(imperial: str) -> float:
+def ft_in_str_to_m(imperial: str) -> float:
     """
     Convert a text string of feet & inches (e.g. 6' or 32" or 1' 1 1/4") into m.
 
