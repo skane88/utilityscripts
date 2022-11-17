@@ -11,16 +11,12 @@ from humre import (
     PERIOD,
     QUOTE,
     WHITESPACE,
-    chars,
     either,
-    exactly,
     group,
     negative_lookahead,
     one_or_more,
-    one_or_more_group,
     optional_group,
     zero_or_more,
-    zero_or_more_group,
 )
 
 FEET_TO_INCHES = 12
@@ -49,7 +45,7 @@ FEET_AND_INCHES = (
 
 def ft_in_to_m(feet: float = 0, inches: float = 0) -> float:
     """
-    Convertes ft and inches into metres.
+    Converts ft and inches into metres.
 
     :param feet: The feet to convert.
     :param inches: The inches to convert.
