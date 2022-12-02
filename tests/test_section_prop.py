@@ -2,19 +2,20 @@
 Some tests for the section properties file
 """
 
-import pytest
-import pandas as pd
 import math
 
-from section_prop import (
-    Section,
-    GenericSection,
+import pandas as pd
+import pytest
+
+from utilityscripts.section_prop import (
     CombinedSection,
-    Polygon,
+    GenericSection,
     Point,
+    Polygon,
+    Rectangle,
+    Section,
     make_I,
     make_T,
-    Rectangle,
 )
 
 AXIS_INDEPENDENT_PROPERTIES = [
@@ -160,7 +161,8 @@ def make_sections_for_combined_same_as_generic():
 
 
 @pytest.mark.parametrize(
-    "property", ALL_PROPERTIES,
+    "property",
+    ALL_PROPERTIES,
 )
 @pytest.mark.parametrize("sections", make_sections_for_combined_same_as_generic())
 def test_combined_section_gives_same_as_generic(property, sections):
@@ -215,7 +217,8 @@ def make_sections_for_combined_to_poly_is_correct():
 
 
 @pytest.mark.parametrize(
-    "property", ALL_PROPERTIES,
+    "property",
+    ALL_PROPERTIES,
 )
 @pytest.mark.parametrize("sections", make_sections_for_combined_to_poly_is_correct())
 def test_combined_section_to_poly_is_correct(property, sections):
@@ -278,7 +281,7 @@ def test_against_standard_sects(data, property):
         calculated = getattr(I, a)
         test = data[property]
 
-        assert math.isclose(calculated, test, rel_tol=0.03)
+        assert math.isclose(calculated, test, rel_tol=0.1)
 
 
 @pytest.mark.parametrize(
