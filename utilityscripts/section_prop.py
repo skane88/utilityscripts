@@ -2,21 +2,20 @@
 Calculates basic section properties
 """
 
-import math
 import itertools
-from typing import List, Tuple, Union, TypeVar
+import math
+from typing import List, Tuple, TypeVar, Union
 
-from shapely.geometry import Point, Polygon, polygon, LineString
-from shapely.coords import CoordinateSequence
+import matplotlib.pyplot as plt
+import numpy as np
 import shapely.affinity as aff
 import shapely.ops as ops
-
-import numpy as np
-import matplotlib.pyplot as plt
 from matplotlib.patches import PathPatch
 from matplotlib.path import Path
+from shapely.coords import CoordinateSequence
+from shapely.geometry import LineString, Point, Polygon, polygon
 
-from solvers import secant
+from utilityscripts.solvers import secant
 
 # an allowance for one section overlapping another in a CombinedSection, as a fraction
 # of the smaller section. Set at 0.1% currently.
@@ -1316,17 +1315,15 @@ class CombinedSection(Section):
     @property
     def bounding_box(self) -> List[float]:
 
-        test_bounding_box = None
+        for section, node in self.sections:
 
-        for s, n in self.sections:
+            bbox = section.bounding_box
+            bbox[0] += node.x
+            bbox[1] += node.y
+            bbox[2] += node.x
+            bbox[3] += node.y
 
-            bbox = s.bounding_box
-            bbox[0] += n.x
-            bbox[1] += n.y
-            bbox[2] += n.x
-            bbox[3] += n.y
-
-            if test_bounding_box is None:
+            if "test_bounding_box" not in locals():
 
                 test_bounding_box = bbox
 
