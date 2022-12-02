@@ -160,6 +160,16 @@ def make_sections_for_combined_same_as_generic():
     return sections
 
 
+@pytest.mark.parametrize("sections", make_sections_for_combined_same_as_generic())
+def test_combined_section_and_generic_centroid(sections):
+
+    a = sections[1].move(x=23, y=23)
+    b = sections[0].move(x=23, y=23)
+
+    assert math.isclose(a.centroid.x, b.centroid.x)
+    assert math.isclose(a.centroid.y, b.centroid.y)
+
+
 @pytest.mark.parametrize(
     "property",
     ALL_PROPERTIES,
