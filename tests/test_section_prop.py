@@ -546,6 +546,25 @@ def test_plastic_modulus_uuvv():
     )
 
 
+def test_plastic_modulus_uuvv2():
+
+    I = make_I(
+        b_f=0.1905,
+        d=0.6096,
+        t_f=0.0256794,
+        t_w=0.014478,
+        radius_or_weld="r",
+        radius_size=0.018542,
+    ).move(x=0, y=0.6096 / 2 + 0.025)
+    plate = Rectangle(length=0.21, thickness=0.025).move(x=0, y=0.025 / 2)
+    strengthened = CombinedSection([(I, (0, 0)), (plate, (0, 0))])
+
+    uu = strengthened.first_moment_uu(cut_uu=-(strengthened.centroid.y - 0.025))
+    xx = strengthened.first_moment_uu(cut_xx=0.025)
+
+    assert math.isclose(uu, xx)
+
+
 def test_plastic_modulus_11_rotated():
     """
     Check that the plastic_modulus_11 / 22 functions work even if section is rotated

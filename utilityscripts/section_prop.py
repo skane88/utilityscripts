@@ -529,8 +529,8 @@ class Section:
         solution = secant(helper_func, x_low=self.y_min, x_high=self.y_max)
         y = solution[0]
 
-        return self.first_moment_uu(cut_height=y, above=True) + self.first_moment_uu(
-            cut_height=y, above=False
+        return self.first_moment_uu(cut_uu=y, above=True) + self.first_moment_uu(
+            cut_uu=y, above=False
         )
 
     @property
@@ -970,7 +970,7 @@ class Section:
             )
 
         # calculate the cut height.
-        cut_height = self.centroid.y - cut_xx if cut_xx is not None else cut_uu
+        cut_height = cut_xx - self.centroid.y if cut_xx is not None else cut_uu
 
         # next we move the section so that the centroid lines up with the global origin
         s = self.move_to_centre()
