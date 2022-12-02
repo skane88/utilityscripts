@@ -461,9 +461,71 @@ def test_first_moment_22(test_input, cut_11, expected):
     assert math.isclose(actual, expected)
 
 
-def test_plastic_modulus():
+@pytest.mark.parametrize(
+    "sect_a,sect_b",
+    [
+        (
+            make_I(b_f=100, d=100, t_f=10, t_w=10),
+            GenericSection(
+                [
+                    (-50, -50),
+                    (50, -50),
+                    (50, -40),
+                    (5, -40),
+                    (5, 40),
+                    (50, 40),
+                    (50, 50),
+                    (-50, 50),
+                    (-50, 40),
+                    (-5, 40),
+                    (-5, -40),
+                    (-50, -40),
+                ]
+            ),
+        )
+    ],
+)
+def test_plastic_modulus_same(sect_a, sect_b):
+    """
+    Test the plastic modulus determined about an axis is the same regardless of which
+    direction it is calculated and whether it is calculated from a CombinedSection or a GenericSection
+    :param sect_a: The first section.
+    :param sect_b: The second section.
+    """
 
-    assert False
+    assert math.isclose(
+        sect_a.first_moment_11(cut_22=25, above=True),
+        sect_a.first_moment_11(cut_22=25, above=False),
+    )
+    assert math.isclose(
+        sect_b.first_moment_11(cut_22=25, above=True),
+        sect_b.first_moment_11(cut_22=25, above=False),
+    )
+    assert math.isclose(
+        sect_a.first_moment_11(cut_22=25, above=True),
+        sect_b.first_moment_11(cut_22=25, above=True),
+    )
+    assert math.isclose(
+        sect_a.first_moment_11(cut_22=25, above=False),
+        sect_b.first_moment_11(cut_22=25, above=False),
+    )
+
+    assert math.isclose(
+        sect_a.first_moment_22(cut_11=25, right=True),
+        sect_a.first_moment_22(cut_11=25, right=False),
+    )
+    assert math.isclose(
+        sect_b.first_moment_22(cut_11=25, right=True),
+        sect_b.first_moment_22(cut_11=25, right=False),
+    )
+    assert math.isclose(
+        sect_a.first_moment_22(cut_11=25, right=True),
+        sect_b.first_moment_22(cut_11=25, right=True),
+    )
+    assert math.isclose(
+        sect_a.first_moment_22(cut_11=25, right=False),
+        sect_b.first_moment_22(cut_11=25, right=False),
+    )
 
 
 def test_plastic_modulus_11_rotated():
