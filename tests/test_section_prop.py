@@ -488,43 +488,61 @@ def test_first_moment_22(test_input, cut_11, expected):
 def test_plastic_modulus_same(sect_a, sect_b):
     """
     Test the plastic modulus determined about an axis is the same regardless of which
-    direction it is calculated and whether it is calculated from a CombinedSection or a GenericSection
+    direction it is calculated and whether it is calculated from a CombinedSection
+    or a GenericSection
+
     :param sect_a: The first section.
     :param sect_b: The second section.
     """
 
     assert math.isclose(
-        sect_a.first_moment_11(cut_22=25, above=True),
-        sect_a.first_moment_11(cut_22=25, above=False),
+        sect_a.first_moment_11(cut_22=15, above=True),
+        sect_a.first_moment_11(cut_22=15, above=False),
     )
     assert math.isclose(
-        sect_b.first_moment_11(cut_22=25, above=True),
-        sect_b.first_moment_11(cut_22=25, above=False),
+        sect_b.first_moment_11(cut_22=15, above=True),
+        sect_b.first_moment_11(cut_22=15, above=False),
     )
     assert math.isclose(
-        sect_a.first_moment_11(cut_22=25, above=True),
-        sect_b.first_moment_11(cut_22=25, above=True),
+        sect_a.first_moment_11(cut_22=15, above=True),
+        sect_b.first_moment_11(cut_22=15, above=True),
     )
     assert math.isclose(
-        sect_a.first_moment_11(cut_22=25, above=False),
-        sect_b.first_moment_11(cut_22=25, above=False),
+        sect_a.first_moment_11(cut_22=15, above=False),
+        sect_b.first_moment_11(cut_22=15, above=False),
     )
 
     assert math.isclose(
-        sect_a.first_moment_22(cut_11=25, right=True),
-        sect_a.first_moment_22(cut_11=25, right=False),
+        sect_a.first_moment_22(cut_11=15, right=True),
+        sect_a.first_moment_22(cut_11=15, right=False),
     )
     assert math.isclose(
-        sect_b.first_moment_22(cut_11=25, right=True),
-        sect_b.first_moment_22(cut_11=25, right=False),
+        sect_b.first_moment_22(cut_11=15, right=True),
+        sect_b.first_moment_22(cut_11=15, right=False),
     )
     assert math.isclose(
-        sect_a.first_moment_22(cut_11=25, right=True),
-        sect_b.first_moment_22(cut_11=25, right=True),
+        sect_a.first_moment_22(cut_11=15, right=True),
+        sect_b.first_moment_22(cut_11=15, right=True),
     )
     assert math.isclose(
-        sect_a.first_moment_22(cut_11=25, right=False),
-        sect_b.first_moment_22(cut_11=25, right=False),
+        sect_a.first_moment_22(cut_11=15, right=False),
+        sect_b.first_moment_22(cut_11=15, right=False),
+    )
+
+
+def test_plastic_modulus_uuvv():
+    """
+    Test the first_moment_uu and first_moment_vv methods are the same whether cutting
+    based on the u-u / v-v axes or the x-x / y-y axes.
+    """
+
+    sect = make_I(b_f=100, d=100, t_f=10, t_w=10).move(x=10, y=10)
+
+    assert math.isclose(
+        sect.first_moment_uu(cut_uu=15), sect.first_moment_uu(cut_xx=25)
+    )
+    assert math.isclose(
+        sect.first_moment_vv(cut_vv=15), sect.first_moment_vv(cut_yy=25)
     )
 
 

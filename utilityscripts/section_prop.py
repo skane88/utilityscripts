@@ -945,34 +945,65 @@ class Section:
         # now return the first moment about u-u.
         return s._generic_first_moment(cut_height=cut_right, above=right)
 
-    def first_moment_uu(self, cut_height, above: bool = True):
+    def first_moment_uu(self, cut_uu=None, cut_xx=None, above: bool = True):
         """
         Calculate the generic first moment of a portion of the section above a given cut
-        line about the u-u axis
+        line about the u-u axis. Either of the following cut distances can be provided:
+            the distance from the section's u-u axis, or the distance from the
+            global x-x axis.
 
-        :param cut_height: The distance above / below the u-u axis to cut the shape.
+        :param cut_uu: The distance above / below the u-u axis to cut the shape.
+        :param cut_xx: The distance above / below the x-x axis to cut the shape.
         :param above: Calculate the first moment of the part of the shape above or below
             the cut?
         """
 
-        # first we move the section so that the centroid lines up with the global origin
+        if cut_uu is None and cut_xx is None:
+            raise ValueError(
+                "Expected the cut distance from the u-u or the x-x axes to be provided."
+            )
+
+        if cut_uu is not None and cut_xx is not None:
+            raise ValueError(
+                "Cut distances provided from both the u-u and the x-x axes. "
+                + "Provide only one."
+            )
+
+        # calculate the cut height.
+        cut_height = self.centroid.y - cut_xx if cut_xx is not None else cut_uu
+
+        # next we move the section so that the centroid lines up with the global origin
         s = self.move_to_centre()
 
         # now we calculate the first moment
         return s._generic_first_moment(cut_height=cut_height, above=above)
 
-    def first_moment_vv(self, cut_right, right: bool = True):
+    def first_moment_vv(self, cut_vv=None, cut_yy=None, right: bool = True):
         """
         Calculate the generic first moment of a portion of the section to the right of a
         given cut line about the
         v-v axis
 
-        :param cut_right: The distance to the right of the axis to cut the shape.
+        :param cut_vv: The distance to the right of the axis to cut the shape.
         :param right: Calculate the first moment based on the part to the right or left
             of the cut?
         """
 
-        # first we move the section so that the centroid lines up with the global origin
+        if cut_vv is None and cut_yy is None:
+            raise ValueError(
+                "Expected the cut distance from the v-v or the y-y axes to be provided."
+            )
+
+        if cut_vv is not None and cut_yy is not None:
+            raise ValueError(
+                "Cut distances provided from both the v-v and the y-y axes. "
+                + "Provide only one."
+            )
+
+        # calculate the cut height.
+        cut_right = self.centroid.x - cut_yy if cut_yy is not None else cut_vv
+
+        # next we move the section so that the centroid lines up with the global origin
         s = self.move_to_centre()
 
         # now we need to rotate it so that "right" is "up"
