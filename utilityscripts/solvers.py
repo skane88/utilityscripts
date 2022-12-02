@@ -2,8 +2,8 @@
 This file contains a number of solvers for general use.
 """
 
+from math import isclose, isinf, isnan
 from sys import float_info
-from math import isclose, isnan, isinf
 
 
 def bisection(
@@ -42,14 +42,10 @@ def bisection(
     """
 
     if isinf(x_low) or isinf(x_high):
-        raise ValueError(
-            "Guesses should not be inf: " + f"x_low={x_low}, x_high={x_high}"
-        )
+        raise ValueError(f"Guesses should not be inf: x_low={x_low}, x_high={x_high}")
 
     if isnan(x_low) or isnan(x_high):
-        raise ValueError(
-            "Guesses should not be nan: " + f"x_low={x_low}, x_high={x_high}"
-        )
+        raise ValueError(f"Guesses should not be nan: x_low={x_low}, x_high={x_high}")
 
     if isclose(x_high, x_low, abs_tol=tol):
         raise ValueError(
@@ -176,25 +172,20 @@ def secant(
     """
 
     if isinf(x_low) or isinf(x_high):
-        raise ValueError(
-            "Guesses should not be inf: " + f"x_low={x_low}, x_high={x_high}"
-        )
+        raise ValueError(f"Guesses should not be inf: x_low={x_low}, x_high={x_high}")
 
     if isnan(x_low) or isnan(x_high):
-        raise ValueError(
-            "Guesses should not be nan: " + f"x_low={x_low}, x_high={x_high}"
-        )
+        raise ValueError(f"Guesses should not be nan: x_low={x_low}, x_high={x_high}")
 
     if isclose(x_high, x_low, abs_tol=tol):
         raise ValueError(
-            "Expected guesses to be different. Current guesses: "
-            + f"x_low={x_low}, x_high={x_high}"
+            "Expected guesses to be different. "
+            + f"Current guesses: x_low={x_low}, x_high={x_high}"
         )
 
     i = 0
     x_1 = x_low
     x_2 = x_high
-
     while abs(x_2 - x_1) > tol and not isclose(x_1, x_2, abs_tol=tol):
 
         i += 1
@@ -228,8 +219,7 @@ def secant(
 
         if isnan(x_3) or isinf(x_3):
             raise ValueError(
-                "Guessed solution is inf or nan. Current guesses are: "
-                + f"x_low = {x_1}, x_high={x_2}, guessed solution is {x_3}"
+                f"Guessed solution is inf or nan. Current guesses are: x_low = {x_1}, x_high={x_2}, guessed solution is {x_3}"
             )
 
         x_1 = x_2
