@@ -918,6 +918,33 @@ class Section:
 
         return first_moment
 
+    def first_moment_xx(self, cut_height, above: bool = False):
+        """
+        Calculate the first moment of a portion of the section about the X-X axis.
+
+        :param cut_height: The distance above / below the X-X axis to cut the shape.
+        :param above: Calculate the first moment of the part of the shape above or below
+            the cut?
+        """
+
+        return self._generic_first_moment(cut_height=cut_height, above=above)
+
+    def first_moment_yy(self, cut_right, right: bool = True):
+        """
+        Calculate the generic first moment of a portion of the section to the right of a
+        given cut line about the y-y axis
+
+        :param cut_right: The distance to the right of the axis to cut the shape.
+        :param right: Calculate the first moment based on the part to the right or left
+            of the cut?
+        """
+
+        # now we need to rotate it so that "right" is "up"
+        s = self.rotate(angle=90, use_radians=False)
+
+        # now return the first moment about u-u.
+        return s._generic_first_moment(cut_height=cut_right, above=right)
+
     def first_moment_uu(self, cut_height, above: bool = True):
         """
         Calculate the generic first moment of a portion of the section above a given cut
@@ -1285,10 +1312,10 @@ class CombinedSection(Section):
         mx = 0
         my = 0
 
-        for s, n in self.sections:
+        for section, node in self.sections:
 
-            mx += s.area * n.x
-            my += s.area * n.y
+            mx += section.area * (section.centroid.x + node.x)
+            my += section.area * (section.centroid.y + node.y)
 
         return Point(mx / self.area, my / self.area)
 
