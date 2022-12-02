@@ -378,7 +378,7 @@ def test_first_moment_uu(test_input, cut_height, expected):
     Tests for the first moment function.
     """
 
-    actual = test_input.first_moment_uu(cut_height=cut_height)
+    actual = test_input.first_moment_uu(cut_uu=cut_height)
     assert math.isclose(actual, expected)
 
 
@@ -399,7 +399,7 @@ def test_first_moment_vv(test_input, cut_right, expected):
     Tests for the first moment function.
     """
 
-    actual = test_input.first_moment_vv(cut_right=cut_right)
+    actual = test_input.first_moment_vv(cut_vv=cut_right)
     assert math.isclose(actual, expected)
 
 
@@ -565,6 +565,24 @@ def test_plastic_modulus_uuvv2():
     assert math.isclose(uu, xx)
 
 
+def test_plastic_modulus_uu3():
+
+    I = make_I(
+        b_f=0.1905,
+        d=0.6096,
+        t_f=0.0256794,
+        t_w=0.014478,
+        radius_or_weld="r",
+        radius_size=0.018542,
+    ).move(x=0, y=0.6096 / 2 + 0.025)
+    plate = Rectangle(length=0.21, thickness=0.025).move(x=0, y=0.025 / 2)
+    strengthened = CombinedSection([(I, (0, 0)), (plate, (0, 0))])
+
+    uu = strengthened.first_moment_uu(cut_xx=0)
+
+    assert math.isclose(uu, 0.0, abs_tol=1e-6)
+
+
 def test_plastic_modulus_11_rotated():
     """
     Check that the plastic_modulus_11 / 22 functions work even if section is rotated
@@ -577,5 +595,5 @@ def test_plastic_modulus_11_rotated():
 
     T_end = T_start.rotate(angle=45, use_radians=False)
 
-    assert math.isclose(T_end.plastic_modulus_11, t_expected_11)
-    assert math.isclose(T_end.plastic_modulus_22, t_expected_22)
+    assert math.isclose(T_end.plastic_modulus_11, t_expected_11, abs_tol=1e-6)
+    assert math.isclose(T_end.plastic_modulus_22, t_expected_22, abs_tol=1e-6)

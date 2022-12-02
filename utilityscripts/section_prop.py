@@ -914,9 +914,9 @@ class Section:
 
             if above and s.y_c > cut_height or not above and s.y_c < cut_height:
 
-                first_moment += abs(s.area * s.y_c)
+                first_moment += s.area * s.y_c
 
-        return first_moment
+        return abs(first_moment)
 
     def first_moment_xx(self, cut_height, above: bool = False):
         """
