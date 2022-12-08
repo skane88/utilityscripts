@@ -67,6 +67,9 @@ def ft_in_str_to_m(imperial: str) -> float:
             + "Did you mean to use a raw string, or to not escape the character?"
         )
 
+    if imperial.count("'") > 1 or imperial.count('"') > 1:
+        raise ValueError("Multiple occurrences of the foot (') or inch symbols (\").")
+
     feet_and_inches = re.compile(FEET_AND_INCHES).match(imperial)
 
     base = feet_and_inches[0]
