@@ -733,8 +733,7 @@ def main():
             print("=" * 40)
 
     print()
-    print("Have a Nice Day!")
-    print()
+    input("Have a Nice Day! (press any key to exit)\n")
 
 
 if __name__ == "__main__":
