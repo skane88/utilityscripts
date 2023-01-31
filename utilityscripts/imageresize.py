@@ -13,9 +13,12 @@ from tkinter import Tk, filedialog
 from typing import List, Optional, Set, Tuple, Union
 
 from PIL import Image, ImageFile, UnidentifiedImageError
+from pillow_heif import register_heif_opener
 from tqdm import tqdm
 
-VALID_EXTENSIONS = [".jpg", ".jpeg", ".bmp", ".png"]
+register_heif_opener()
+
+VALID_EXTENSIONS = [".jpg", ".jpeg", ".bmp", ".png", ".heic"]
 
 yes_set = {"y", "Y", "Yes", "YES", "yes"}
 no_set = {"n", "N", "No", "NO", "no"}
