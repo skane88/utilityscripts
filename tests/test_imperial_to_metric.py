@@ -21,11 +21,14 @@ from utilityscripts.imperial_to_metric import ft_in_str_to_m
         (r"1'" + r'6 1/2"', 0.4699),
         ("23'6 1/2\"", 7.1755),
         ('3/8"', 0.009525),
+        ('3 / 8"', 0.009525),
         ('1/2"', 0.0127),
+        ('1 / 2"', 0.0127),
+        ('5/16"', 0.0079375),
+        ('5 / 16"', 0.0079375),
     ],
 )
 def test_convert_to_metric(example, expected):
-
     assert isclose(ft_in_str_to_m(example), expected)
 
 
