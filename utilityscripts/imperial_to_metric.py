@@ -29,7 +29,11 @@ DECIMAL_INCHES = group(one_or_more(DIGIT) + PERIOD + one_or_more(DIGIT))
 FRACTIONAL_INCHES = group(
     optional_group(one_or_more(DIGIT))
     + optional_group(zero_or_more(WHITESPACE))
-    + group(f"{one_or_more(DIGIT)}/{one_or_more(DIGIT)}")
+    + group(
+        f"{one_or_more(DIGIT)}{zero_or_more(WHITESPACE)}"
+        + "/"
+        + f"{zero_or_more(WHITESPACE)}{one_or_more(DIGIT)}"
+    )
 )
 
 INCHES = group(either(WHOLE_INCHES, DECIMAL_INCHES, FRACTIONAL_INCHES)) + group(
@@ -87,8 +91,8 @@ def ft_in_str_to_m(imperial: str) -> float:
 
     feet = float(foot_value) if foot_part else 0
     if inch_part:
-
         if fractional_inches:
+            fractional_inches = fractional_inches.replace(" / ", "/")
             inches = float(sum(Fraction(s) for s in fractional_inches.split()))
         elif decimal_inches:
             inches = float(decimal_inches)
