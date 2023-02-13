@@ -29,11 +29,7 @@ DECIMAL_INCHES = group(one_or_more(DIGIT) + PERIOD + one_or_more(DIGIT))
 FRACTIONAL_INCHES = group(
     optional_group(one_or_more(DIGIT))
     + optional_group(zero_or_more(WHITESPACE))
-    + group(
-        f"{one_or_more(DIGIT)}{zero_or_more(WHITESPACE)}"
-        + "/"
-        + f"{zero_or_more(WHITESPACE)}{one_or_more(DIGIT)}"
-    )
+    + group(f"{one_or_more(DIGIT)}/{one_or_more(DIGIT)}")
 )
 
 INCHES = group(either(WHOLE_INCHES, DECIMAL_INCHES, FRACTIONAL_INCHES)) + group(
@@ -74,6 +70,8 @@ def ft_in_str_to_m(imperial: str) -> float:
     if imperial.count("'") > 1 or imperial.count('"') > 1:
         raise ValueError("Multiple occurrences of the foot (') or inch symbols (\").")
 
+    imperial = imperial.replace(" / ", "/")
+
     feet_and_inches = re.compile(FEET_AND_INCHES).match(imperial)
 
     base = feet_and_inches[0]
@@ -92,7 +90,6 @@ def ft_in_str_to_m(imperial: str) -> float:
     feet = float(foot_value) if foot_part else 0
     if inch_part:
         if fractional_inches:
-            fractional_inches = fractional_inches.replace(" / ", "/")
             inches = float(sum(Fraction(s) for s in fractional_inches.split()))
         elif decimal_inches:
             inches = float(decimal_inches)
