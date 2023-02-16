@@ -911,9 +911,7 @@ class Section:
         first_moment = 0.0
 
         for s in broken_section:
-
             if above and s.y_c > cut_height or not above and s.y_c < cut_height:
-
                 first_moment += s.area * s.y_c
 
         return abs(first_moment)
@@ -1083,7 +1081,6 @@ class GenericSection(Section):
 
     @property
     def polygon(self) -> Polygon:
-
         return self._polygon
 
     @property
@@ -1102,31 +1099,25 @@ class GenericSection(Section):
 
     @property
     def Ixx(self):
-
         return sum(Ixx_from_coords(r) for r in self.coords)
 
     @property
     def Iyy(self):
-
         return sum(Iyy_from_coords(r) for r in self.coords)
 
     @property
     def Ixy(self):
-
         return sum(Ixy_from_coords(r) for r in self.coords)
 
     @property
     def centroid(self):
-
         return self.polygon.centroid
 
     @property
     def bounding_box(self) -> List[float]:
-
         return list(self.polygon.bounds)
 
     def move(self, x: float, y: float):
-
         return GenericSection(poly=aff.translate(geom=self.polygon, xoff=x, yoff=y))
 
     def rotate(
@@ -1135,7 +1126,6 @@ class GenericSection(Section):
         origin: Union[str, Point, Tuple[float, float]] = "origin",
         use_radians: bool = True,
     ):
-
         origin = self._make_origin_tuple(origin)
 
         return GenericSection(
@@ -1161,7 +1151,6 @@ class GenericSection(Section):
         return ops.split(self.polygon, line)
 
     def split(self, line: LineString) -> List[S]:
-
         return [GenericSection(p) for p in self._split_poly(line=line)]
 
 
@@ -1234,7 +1223,6 @@ class Rectangle(GenericSection):
         return p1 * (p2 - p3)
 
     def move(self, x: float, y: float):
-
         # to maintain the length & thickness properties through the move some
         # monkey patching needs to go on.
 
@@ -1253,7 +1241,6 @@ class Rectangle(GenericSection):
         origin: Union[str, Point, Tuple[float, float]] = "origin",
         use_radians: bool = True,
     ):
-
         # to maintain the length & thickness properties through the rotation some
         # monkey patching needs to go on.
 
@@ -1265,7 +1252,6 @@ class Rectangle(GenericSection):
 
 
 class CombinedSection(Section):
-
     sections: List[Tuple[Section, Point]]
 
     def __init__(
@@ -1277,16 +1263,13 @@ class CombinedSection(Section):
 
         all_sections = []
         for s, n in sections:
-
             if isinstance(n, Tuple):
                 # convert tuples into points
                 n = Point(n[0], n[1])
 
             if isinstance(s, CombinedSection):
-
                 s: CombinedSection
                 for t, o in s.sections:
-
                     x = n.x + o.x
                     y = n.y + o.y
 
@@ -1300,7 +1283,6 @@ class CombinedSection(Section):
         ]
 
         for a, b in itertools.combinations(resolved_sections, 2):
-
             if a.polygon.overlaps(b.polygon):
                 # if the intersection is small, we can perhaps ignore it.
 
@@ -1317,16 +1299,13 @@ class CombinedSection(Section):
 
     @property
     def no_sections(self):
-
         return len(self.sections)
 
     @property
     def polygon(self) -> Polygon:
-
         all_polys = []
 
         for s, n in self.sections:
-
             moved_sect = s.move_to_point(end_point=n)
             all_polys.append(moved_sect.polygon)
 
@@ -1334,17 +1313,14 @@ class CombinedSection(Section):
 
     @property
     def area(self):
-
         return sum(s.area for s, n in self.sections)
 
     @property
     def centroid(self):
-
         mx = 0
         my = 0
 
         for section, node in self.sections:
-
             mx += section.area * (section.centroid.x + node.x)
             my += section.area * (section.centroid.y + node.y)
 
@@ -1352,29 +1328,23 @@ class CombinedSection(Section):
 
     @property
     def Ixx(self):
-
         return sum(s.Iuu + s.area * n.y**2 for s, n in self.sections)
 
     @property
     def Iyy(self):
-
         return sum(s.Iyy + s.area * n.x**2 for s, n in self.sections)
 
     @property
     def Ixy(self):
-
         return sum(s.Ixy + s.area * n.x * n.y for s, n in self.sections)
 
     @property
     def J_approx(self):
-
         return sum(s.J_approx for s, n in self.sections)
 
     @property
     def bounding_box(self) -> List[float]:
-
         for section, node in self.sections:
-
             bbox = section.bounding_box
             bbox[0] += node.x
             bbox[1] += node.y
@@ -1382,11 +1352,9 @@ class CombinedSection(Section):
             bbox[3] += node.y
 
             if "test_bounding_box" not in locals():
-
                 test_bounding_box = bbox
 
             else:
-
                 test_bounding_box[0] = min(test_bounding_box[0], bbox[0])
                 test_bounding_box[1] = min(test_bounding_box[1], bbox[1])
                 test_bounding_box[2] = max(test_bounding_box[2], bbox[2])
@@ -1402,7 +1370,6 @@ class CombinedSection(Section):
         return GenericSection(poly=self.polygon)
 
     def matplotlib_patches(self, **kwargs):
-
         """
         Constructs a collection of matplotlib patches of the shape for use in plotting.
         Relies on each underlying section returning a shapely Polygon and the
@@ -1414,7 +1381,6 @@ class CombinedSection(Section):
         patches = []
 
         for s, n in self.sections:
-
             plot_section = s.move_to_point(origin="origin", end_point=n)
 
             patches.append(build_patch(plot_section.polygon, **kwargs))
@@ -1422,7 +1388,6 @@ class CombinedSection(Section):
         return patches
 
     def add_element(self, section, centroid):
-
         self.sections.append((section, centroid))
 
     def move(self, x: float, y: float) -> S:
@@ -1436,7 +1401,6 @@ class CombinedSection(Section):
         sections = []
 
         for s, n in self.sections:
-
             offset = Point(n.x + x, n.y + y)
 
             sections.append((s, offset))
@@ -1449,13 +1413,11 @@ class CombinedSection(Section):
         origin: Union[str, Point, Tuple[float, float]] = "origin",
         use_radians: bool = True,
     ):
-
         sections = []
 
         origin = self._make_origin_tuple(origin)
 
         for s, n in self.sections:
-
             s: Section
             n: Point
 
@@ -1480,7 +1442,6 @@ class CombinedSection(Section):
 
 
 def make_square(side):
-
     return Rectangle(length=side, thickness=side)
 
 
@@ -1851,7 +1812,6 @@ def make_C(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSectio
     c_sections = [(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
 
     if box_in:
-
         box_plate = Rectangle(
             length=d_w, thickness=t_box, rotation_angle=90, use_radians=False
         )
@@ -2032,8 +1992,8 @@ def build_path(poly: Polygon) -> Path:
 
     # build a numpy array of the vertices
     vertices = np.concatenate(
-        [np.asarray(poly.exterior)] + [np.asarray(c) for c in poly.interiors]
-    )
+        [np.asarray(poly.exterior.xy)] + [np.asarray(c.xy) for c in poly.interiors]
+    ).transpose()
     codes = np.concatenate(
         [get_codes(poly.exterior)] + [get_codes(c) for c in poly.interiors]
     )
@@ -2085,7 +2045,6 @@ def build_circle(
     full_circle = math.radians(360)
 
     if angles is not None:
-
         min_angle = angles[0]
         max_angle = angles[1]
 
