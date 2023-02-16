@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from tqdm import tqdm
 
 base_path = Path(input("Provide the base path: "))
@@ -12,7 +13,6 @@ if base_path.is_dir():
     empty_folders = set()
 
     for f in tqdm(f_iterator, desc="Counting files", unit="Folders"):
-
         if not f.is_dir():
             print()
             print(f"{f} is not a folder, continuing")

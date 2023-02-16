@@ -17,7 +17,6 @@ def lister():
     print()
 
     if base_path.is_dir():
-
         true_dict = {"n": False, "no": False, "y": True, "yes": True}
         recursive: bool = None
         report_folders: bool = None
@@ -103,7 +102,6 @@ def lister():
         text_to_save = []
 
         for file in f_iterator:
-
             file: Path
 
             if not report_folders and file.is_dir():
@@ -128,7 +126,6 @@ def lister():
 
         # now save to file if necessary
         if save_to_file:
-
             # lower case everything if required
             if all_lower_case:
                 text_to_save = [t.lower() for t in text_to_save]
@@ -147,7 +144,6 @@ def lister():
             output_file: Path
 
             while file_exists:
-
                 output_file = base_path / Path(
                     f"{file_name}{start_int:02d}"
                 ).with_suffix(file_ext)
@@ -156,7 +152,6 @@ def lister():
                 start_int += 1
 
             with open(output_file, "w") as file:
-
                 for line in text_to_save:
                     file.write(f"{line}\n")
 

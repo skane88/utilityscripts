@@ -74,7 +74,13 @@ class SimpleBeam:
     """
 
     def __init__(
-        self, f1, f2, length, E, I, load: Union[PointLoad, DistributedLoad],
+        self,
+        f1,
+        f2,
+        length,
+        E,
+        I,
+        load: Union[PointLoad, DistributedLoad],
     ):
         """
         Defines a simple beam element.
@@ -103,7 +109,6 @@ class SimpleBeam:
 
     @property
     def load_type(self):
-
         return type(self.load).__name__
 
     @property
@@ -131,7 +136,6 @@ class SimpleBeam:
         """
 
         def uf_helper():
-
             if isinstance(self.load, PointLoad):
                 return self.load.magnitude
 
@@ -175,7 +179,6 @@ class SimpleBeam:
         """
 
         def uf_helper():
-
             lever = max(0, x - self.load_location)
 
             return self.load_value * lever
@@ -220,7 +223,6 @@ class SimpleBeam:
         """
 
         def ufhelper():
-
             P = self.load_value
             L = self.length
             b = L - self.load_location
@@ -312,7 +314,6 @@ class SimpleBeam:
             return property_calcs[self.support_condition]()
 
         if self.support_condition[::-1] in property_calcs:
-
             flipped = self._flipped_beam()
 
             if ismethod(getattr(flipped, flipped_parameter)):
@@ -323,7 +324,6 @@ class SimpleBeam:
         raise NotImplementedError
 
     def __repr__(self):
-
         return (
             f"{type(self).__name__}, support conditions:"
             + f"{self.support_condition}"

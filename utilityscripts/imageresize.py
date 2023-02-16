@@ -86,7 +86,6 @@ def get_true_false(
     false_set = intermediate_set
 
     if allow_quit:
-
         if exit_set is None:
             exit_set = quit_set
 
@@ -98,7 +97,6 @@ def get_true_false(
 
     # next build a prompt for the user if none is provided.
     if true_false_prompt is None:
-
         prompt_set = {c.lower() for c in true_set}
 
         true_prompt = sorted(list(prompt_set))
@@ -123,7 +121,6 @@ def get_true_false(
         true_false_prompt = true_false_prompt.lower()
 
     if allow_quit:
-
         exit_set = sorted(list(exit_set))
 
         quit_prompt = f"{exit_set[0]}" if len(exit_set) == 1 else f"{exit_set}"
@@ -217,7 +214,6 @@ def get_number(
         limit_string = f", number must satisfy {min_val}<=number<={max_val}"
 
     while not ok:
-
         number = input(prefix + limit_string + allow_none_string + ": ")
 
         if number is None:
@@ -366,7 +362,6 @@ def compress_image(
     # now we have figured out the level of quality required, resize the image.
 
     if quality_acceptable >= quality_min_orig:
-
         if size > target_size and not save_larger_than_target:
             raise Exception("No valid quality level found, not saving.")
 
@@ -435,7 +430,6 @@ def _save_image(
     if exif is None:
         exif = picture.info["exif"] if "exif" in picture.info else None
     try:
-
         if exif is None:
             picture.save(fp=file_path, format=format, quality=quality)
         else:
@@ -501,7 +495,6 @@ def _help_resize(input_vals):
             )
 
         except UnidentifiedImageError as err:
-
             warning = [str(err)]
             new_file_path = None
 
@@ -601,7 +594,6 @@ def compress_all_in_folder(
     cpus = max(int(os.cpu_count() * 0.5), 1)
 
     with mp.Pool(processes=cpus) as p:
-
         total = len(files_to_resize)
 
         t_size = [target_size] * total
@@ -627,7 +619,6 @@ def compress_all_in_folder(
 
         if verbose:
             with tqdm(total=total, unit="Images") as pbar:
-
                 for vals in p.imap_unordered(_help_resize, input_vals):
                     new_files.append(vals)
                     pbar.update()
@@ -726,7 +717,6 @@ def main():
         )
 
         if len(warnings) > 0:
-
             print("=" * 40)
             print(f"THERE ARE {len(warnings)} WARNINGS:")
             print()

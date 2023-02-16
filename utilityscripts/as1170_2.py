@@ -3,11 +3,10 @@ File to contain some basic AS1170.2 helper methods for working with wind loads
 """
 
 from pathlib import Path
-from typing import Tuple, Union, List
+from typing import List, Tuple, Union
 
-import toml
 import numpy as np
-
+import toml
 from multiinterp import multi_interp
 
 FILE_PATH = Path(__file__)
@@ -47,14 +46,12 @@ class WindSite:
         return V_R(wind_region=self.wind_region, R=R, ignore_F_x=ignore_F_x)
 
     def M_d(self, direction: Union[float, str]):
-
         return M_d(direction=float, wind_region=self.wind_region)
 
     def M_z_cat(self, z):
         return M_zcat_basic(z=z, terrain_category=self.terrain_category)
 
     def M_s(self):
-
         if self.shielding_data is None:
             # if there is no shielding data then we can't calculate the shielding
             # parameter. The shielding multiplier can conservatively be taken to be 1.0
@@ -64,19 +61,16 @@ class WindSite:
         raise NotImplementedError()
 
     def M_t(self):
-
         # TODO: Add an M_t method
         return 1.0
 
     def M_lee(self):
-
         # TODO: Add an M_lee method
         return 1.0
 
     def V_sit(
         self, R: float, direction: Union[float, str], z: float, ignore_F_x: bool = False
     ):
-
         V_R = self.V_R(R=R, ignore_F_x=ignore_F_x)
         M_d = self.M_d(direction=direction)
         M_zcat = self.M_z_cat(z=z)
@@ -98,7 +92,7 @@ def V_R_no_F_x(*, a, b, R, k):
     :param k: Windspeed parameter 'k'
     """
 
-    return a - b * R ** -k
+    return a - b * R**-k
 
 
 def F_x(*, wind_region, R):
@@ -320,4 +314,4 @@ def q_basic(*, V: float, rho_air: float = 1.2):
     :return: The basic wind pressure in Pa.
     """
 
-    return 0.5 * rho_air * V ** 2
+    return 0.5 * rho_air * V**2

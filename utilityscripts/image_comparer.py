@@ -2,13 +2,12 @@
 A script to quickly compare 2x images using PILlow
 """
 
-from typing import List, Tuple
-
 from pathlib import Path
 from tkinter import Tk, filedialog
+from typing import List, Tuple
 
-from PIL import Image, ImageFile
 import imagehash
+from PIL import Image, ImageFile
 
 DIFFERENCE_THRESHOLD = 20  # how similar should images be?
 
@@ -100,7 +99,6 @@ def get_number(
         limit_string = f", number must satisfy {min_val}<=number<={max_val}"
 
     while not acceptable:
-
         number = input(prefix + limit_string + allow_none_string + ": ")
 
         if number is None:
@@ -152,13 +150,11 @@ def get_hash(*, image: Path, hash_size: int = 8) -> int:
     """
 
     try:
-
         i = Image.open(image)
 
         return imagehash.average_hash(i, hash_size=hash_size)
 
     except OSError as err:
-
         print("Hit an OSError, trying again.")
         print(f"i1 = {image}")
         print(err)
@@ -259,5 +255,4 @@ def main():
 
 
 if __name__ == "__main__":
-
     main()

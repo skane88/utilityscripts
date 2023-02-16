@@ -54,7 +54,6 @@ def rename_photos():
     base_path = Path(input("Provide the base path: "))
 
     if base_path.is_dir():
-
         recursive: bool = None
         print()
         while recursive is None:
@@ -103,7 +102,6 @@ def rename_photos():
         for folder in tqdm(
             sorted(directories), desc="Searching for Photos", unit="Files"
         ):
-
             counter = 1
 
             folder: Path
@@ -114,7 +112,6 @@ def rename_photos():
                 desc="Renaming Photos",
                 unit="Photos",
             ):
-
                 photo: Path
 
                 if photo.is_dir():
@@ -127,7 +124,6 @@ def rename_photos():
                     )
 
                     if new_path.exists():
-
                         warning_string = "ERROR\n"
                         warning_string += (
                             f"Tried replacing: \n    {folder}\n"

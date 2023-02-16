@@ -3,12 +3,12 @@ This file changes files of one extension type to another extension type.
 """
 
 import sys
-from tqdm import tqdm
 from pathlib import Path
+
+from tqdm import tqdm
 
 
 def re_extension():
-
     true_dict = {"n": False, "no": False, "y": True, "yes": True}
 
     print()
@@ -32,7 +32,6 @@ def re_extension():
     warnings = []
 
     if base_path.is_dir():
-
         recursive: bool = None
         filter_val = "*"
 
@@ -62,7 +61,6 @@ def re_extension():
         changed = 0
 
         for f in tqdm(f_iterator, desc="Renaming Extensions", unit="Files"):
-
             f: Path()
 
             if f.is_dir():
@@ -74,7 +72,6 @@ def re_extension():
             new_path = f.with_suffix(new_ext)
 
             if new_path.exists():
-
                 warning_string = "ERROR\n"
                 warning_string += f"Tried replacing: \n    {f}\nwith\n    {new_path}\n"
                 warning_string += f"But new path already exists\n"

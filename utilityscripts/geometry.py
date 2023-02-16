@@ -106,19 +106,16 @@ class Circular_Segment:
         self._y2 = None
 
         if theta is not None:
-
             assert theta <= 2 * pi
 
             self._theta = theta
 
         elif x is not None:
-
             assert x <= 2 * r
 
             self._x = x
 
         else:
-
             assert y2 <= 2 * r
 
             self._y2 = y2
@@ -129,7 +126,6 @@ class Circular_Segment:
 
     @property
     def theta(self):
-
         if self._theta is not None:
             return self._theta
 
@@ -141,7 +137,6 @@ class Circular_Segment:
 
     @property
     def y2(self):
-
         if self._y2 is not None:
             return self._y2
 
@@ -153,7 +148,6 @@ class Circular_Segment:
 
     @property
     def x(self):
-
         if self._x is not None:
             return self._x
 
@@ -165,7 +159,6 @@ class Circular_Segment:
 
     @property
     def area(self):
-
         return ((self.r**2) / 2) * (self.theta - sin(self.theta))
 
     def point(self, phi):
@@ -207,7 +200,6 @@ class Circular_Segment:
 
 
 if __name__ == "__main__":
-
     c1 = Circular_Segment(r=1.888, y2=0.1)
     print("Chord c1")
     print(c1.theta)

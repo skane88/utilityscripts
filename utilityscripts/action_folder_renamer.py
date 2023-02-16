@@ -5,12 +5,12 @@ time, so who knows?
 """
 
 import sys
-from tqdm import tqdm
 from pathlib import Path
+
+from tqdm import tqdm
 
 
 def re_name():
-
     true_dict = {"n": False, "no": False, "y": True, "yes": True}
 
     print()
@@ -34,7 +34,6 @@ def re_name():
     warnings = []
 
     if base_path.is_dir():
-
         filter_val = "*"
 
         # now we've got input, now do the actual finding of files
@@ -45,7 +44,6 @@ def re_name():
         changed = 0
 
         for f in tqdm(f_iterator, desc="Renaming Folders", unit="Folders"):
-
             f: Path()
 
             if f.is_dir():
@@ -60,7 +58,6 @@ def re_name():
             new_path = folder_parent / folder_action_no / file_name
 
             if new_path.exists():
-
                 warning_string = "ERROR\n"
                 warning_string += f"Tried replacing: \n    {f}\nwith\n    {new_path}\n"
                 warning_string += f"But new path already exists\n"

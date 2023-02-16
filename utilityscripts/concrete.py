@@ -53,7 +53,6 @@ MESH_RE = exactly(
 
 
 def circle_area(dia):
-
     return pi * (dia**2) / 4
 
 
@@ -152,7 +151,6 @@ def reo_properties(bar_spec: str):
         ret_val["no_secondary"] = None
 
     if mesh:
-
         mesh_data = MESH_DATA[bar_spec]
 
         pitch = mesh_data["pitch"]
@@ -223,12 +221,10 @@ def reo_area(
 
 
 def alpha_2(f_c):
-
     return max(0.67, 0.85 - 0.0015 * f_c)
 
 
 def gamma(f_c):
-
     return max(0.67, 0.97 - 0.0025 * f_c)
 
 

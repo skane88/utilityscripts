@@ -51,14 +51,12 @@ def round_significant(x, s: int = 3):
 
 
 if __name__ == "__main__":
-
     round_pairs = [(11.1212341234, 0.25), (-12.34, 0.5), (0.0623413, 0.1)]
 
     print()
     print("Testing round_nearest")
     print()
     for x, a in round_pairs:
-
         print(f"x: {x}, a: {a}, round_nearest={round_nearest(x,a)}")
 
     print()

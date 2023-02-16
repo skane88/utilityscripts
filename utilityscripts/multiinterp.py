@@ -3,7 +3,7 @@ This file contains some interpolation functions.
 """
 
 import timeit
-from typing import Union, List
+from typing import List, Union
 
 import numpy as np
 
@@ -53,7 +53,6 @@ def multi_interp(
 
 
 if __name__ == "__main__":
-
     x = [-0.50, -0.25, 0.00, 0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00, 2.25, 2.50]
 
     xp = [0, 1, 2]

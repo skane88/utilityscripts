@@ -59,7 +59,6 @@ def bisection(
     i = 0
 
     while abs(x_high - x_low) > tol and not isclose(x_high, x_low, abs_tol=tol):
-
         i += 1
 
         y_low = func(x_low, *args, **kwargs)
@@ -187,7 +186,6 @@ def secant(
     x_1 = x_low
     x_2 = x_high
     while abs(x_2 - x_1) > tol and not isclose(x_1, x_2, abs_tol=tol):
-
         i += 1
 
         a = x_1 * func(x_2, *args, **kwargs)
@@ -226,7 +224,6 @@ def secant(
         x_2 = x_3
 
         if max_its is not None and i >= max_its:
-
             if fallback:
                 x, i = bisection(
                     func=func, x_low=x_low, x_high=x_high, tol=tol, *args, **kwargs
