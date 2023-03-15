@@ -27,6 +27,7 @@ from utilityscripts.imperial_to_metric import ft_in_str_to_m
         ('1 / 2"', 0.0127),
         ('5/16"', 0.0079375),
         ('5 / 16"', 0.0079375),
+        ("1' 1 7/8 \"", 0.352425),
     ],
 )
 def test_convert_to_metric(example, expected):

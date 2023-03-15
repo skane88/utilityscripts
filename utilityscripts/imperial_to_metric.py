@@ -71,6 +71,9 @@ def ft_in_str_to_m(imperial: str) -> float:
         raise ValueError("Multiple occurrences of the foot (') or inch symbols (\").")
 
     imperial = imperial.replace(" / ", "/")
+    imperial = imperial.replace(" /", "/")
+    imperial = imperial.replace("/ ", "/")
+    imperial = imperial.replace(' "', '"')
 
     feet_and_inches = re.compile(FEET_AND_INCHES).match(imperial)
 
