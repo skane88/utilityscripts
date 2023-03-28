@@ -6,7 +6,7 @@ It relies on the Pint units package.
 Also imports math & sets up pi
 """
 
-from math import pi
+from math import acos, asin, atan, cos, degrees, pi, radians, sin, tan
 
 import unyt
 
