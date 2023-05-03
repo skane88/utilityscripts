@@ -79,6 +79,10 @@ MN = unyt.MN
 
 kip = unyt.kip
 
+# units of moment
+Nm = N * m
+kNm = kN * m
+
 # units of pressure
 Pa = unyt.pascal
 psi = unyt.psi
