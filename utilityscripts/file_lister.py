@@ -5,6 +5,8 @@ to save the list to a text file.
 
 from pathlib import Path
 
+from ui_funcs import get_folder, get_true_false
+
 
 def lister():
     """
@@ -12,81 +14,48 @@ def lister():
     to save the list to a text file.
     """
 
-    base_path = Path(input("Provide the base path: "))
+    base_path = get_folder(save=False, type_prompt="Folder to Search")
 
     print()
 
     if base_path.is_dir():
-        true_dict = {"n": False, "no": False, "y": True, "yes": True}
-        recursive: bool = None
-        report_folders: bool = None
-        incl_full_path: bool = None
-        incl_relative_path: bool = None
-        incl_extension: bool = None
-        filter_type: bool = None
         filter_val = "*"
-        save_to_file: bool = None
-        all_lower_case: bool = None
-        sort_file: bool = None
+        different_folder: bool = None
 
-        while recursive is None:
-            recursive = input("Do you want to search subfolders (Y or N)? ")
-
-            recursive = true_dict.get(recursive.lower())
-
-        while report_folders is None:
-            report_folders = input("Do you want to report folders (Y or N)? ")
-
-            report_folders = true_dict.get(report_folders.lower())
-
-        while incl_full_path is None:
-            incl_full_path = input(
-                "Do you want to include the full file path (Y or N)? "
-            )
-
-            incl_full_path = true_dict.get(incl_full_path.lower())
+        recursive = get_true_false(prefix="Do you want to search subfolders")
+        report_folders = get_true_false(prefix="Do you want to report folders")
+        incl_full_path = get_true_false(prefix="Do you want to include the full path")
 
         if not incl_full_path:
-            while incl_relative_path is None:
-                incl_relative_path = input(
-                    "Do you want to include the relative path (Y or N)?"
-                )
-
-                incl_relative_path = true_dict.get(incl_relative_path.lower())
+            incl_relative_path = get_true_false(prefix="Relative paths")
         else:
             incl_relative_path = False
 
-        while incl_extension is None:
-            incl_extension = input("Do you want to include the extension (Y or N)? ")
-
-            incl_extension = true_dict.get(incl_extension.lower())
-
-        while filter_type is None:
-            filter_type = input("Do you want to filter by file type (Y or N)? ")
-
-            filter_type = true_dict.get(filter_type.lower())
+        incl_extension = get_true_false(prefix="Do you want to include the extension")
+        filter_type = get_true_false(prefix="Do you want to filter by file type")
 
         if filter_type:
             filter_val = input(
                 "Input a valid 'glob' type filter (i.e. '*', '*.' or '*.pdf'): "
             )
 
-        while save_to_file is None:
-            save_to_file = input("Do you want to save to a file (Y or N)?")
+        save_to_file = get_true_false(prefix="Do you want to save to a file")
 
-            save_to_file = true_dict.get(save_to_file.lower())
-
-        while all_lower_case is None:
-            all_lower_case = input(
-                "Do you want to convert file names to lower case (Y or N)?"
+        if save_to_file:
+            different_folder = get_true_false(
+                prefix="Do you want to save the list to a different location?",
+                allow_quit=False,
             )
 
-            all_lower_case = true_dict.get(all_lower_case.lower())
+        if different_folder:
+            save_folder = get_folder(type_prompt="Output Folder")
+        else:
+            save_folder = base_path
 
-        while sort_file is None:
-            sort_file = input("Do you want to sort the file names (Y or N)?")
-
-            sort_file = true_dict.get(sort_file.lower())
+        all_lower_case = get_true_false(
+            prefix="Do you want to convert file names to lower case"
+        )
+        sort_file = get_true_false(prefix="Do you want to sort the file names")
 
         # now we've got input, now do the actual finding of files
 
@@ -144,7 +113,7 @@ def lister():
             output_file: Path
 
             while file_exists:
-                output_file = base_path / Path(
+                output_file = save_folder / Path(
                     f"{file_name}{start_int:02d}"
                 ).with_suffix(file_ext)
 
