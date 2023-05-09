@@ -42,16 +42,18 @@ def file_lister(base_path: Path):
     recursive = get_true_false(prefix="Do you want to search subfolders")
     report_folders = get_true_false(prefix="Do you want to report folders")
     incl_full_path = get_true_false(prefix="Do you want to include the full path")
-    if not incl_full_path:
-        incl_relative_path = get_true_false(prefix="Relative paths")
-    else:
-        incl_relative_path = False
+
+    incl_relative_path = (
+        False if incl_full_path else get_true_false(prefix="Relative paths")
+    )
+
     incl_extension = get_true_false(prefix="Do you want to include the extension")
-    filter_type = get_true_false(prefix="Do you want to filter by file type")
-    if filter_type:
+
+    if filter_type := get_true_false(prefix="Do you want to filter by file type"):
         filter_val = input(
             "Input a valid 'glob' type filter (i.e. '*', '*.' or '*.pdf'): "
         )
+
     save_to_file = get_true_false(prefix="Do you want to save to a file")
     if save_to_file:
         different_folder = get_true_false(
@@ -86,10 +88,7 @@ def file_lister(base_path: Path):
         if incl_full_path:
             text = str(file)
         else:
-            if incl_relative_path:
-                text = str(file.relative_to(base_path))
-            else:
-                text = file.name
+            text = str(file.relative_to(base_path)) if incl_relative_path else file.name
         if not incl_extension:
             text = text.replace(file.suffix, "")
 
