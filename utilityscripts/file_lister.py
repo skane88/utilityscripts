@@ -89,6 +89,7 @@ def file_lister(base_path: Path):
             text = str(file)
         else:
             text = str(file.relative_to(base_path)) if incl_relative_path else file.name
+
         if not incl_extension:
             text = text.replace(file.suffix, "")
 
