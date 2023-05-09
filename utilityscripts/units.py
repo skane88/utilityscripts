@@ -8,116 +8,111 @@ Also imports math & sets up pi
 
 from math import acos, asin, atan, cos, degrees, pi, radians, sin, tan
 
-import unyt
+import pint
 
 # define a unicode pi value for pretty printing if req'd.
 π = pi
 
+ureg = pint.UnitRegistry()
+
 # units of length
-m = unyt.metre
-um = unyt.micrometre
-μm = unyt.micrometre
-inch = unyt.inch
-ft = unyt.foot
-yd = unyt.yard
-mi = unyt.mile
+m = ureg.metre
+um = ureg.micrometre
+μm = ureg.micrometre
+inch = ureg.inch
+ft = ureg.foot
+yd = ureg.yard
+mi = ureg.mile
 
 # derived units of length
-mm = unyt.mm
-cm = unyt.cm
-km = unyt.km
-unyt.define_unit("naut_mi", 1852 * m)
-naut_mi = unyt.naut_mi
+mm = ureg.mm
+cm = ureg.cm
+km = ureg.km
+ureg.define("naut_mi = 1852 * m")
+naut_mi = ureg.naut_mi
 
 # units of time
-s = unyt.second
-minutes = unyt.minute
-days = unyt.day
-hr = unyt.hour
-yr = unyt.year
-
-unyt.define_unit("week", 7 * days)
-week = unyt.week
+s = ureg.second
+minutes = ureg.minute
+days = ureg.day
+hr = ureg.hour
+yr = ureg.year
+week = ureg.week
 
 # units of frequency
-Hz = unyt.Hz
+Hz = ureg.Hz
 
 # units of mass
-g = unyt.gram
-kg = unyt.kg
-t_us = unyt.ton
-lb = unyt.pound
-
-unyt.define_unit("t", 1000 * kg, prefixable=True)
-t = unyt.t
+g = ureg.gram
+kg = ureg.kg
+t_us = ureg.ton
+lb = ureg.pound
+t = ureg.t
 
 # units of energy
-J = unyt.J
+J = ureg.J
 
-kJ = unyt.kJ
-MJ = unyt.MJ
+kJ = ureg.kJ
+MJ = ureg.MJ
 
 # units of power
-W = unyt.W
+W = ureg.W
 
-kW = unyt.kW
-MW = unyt.MW
+kW = ureg.kW
+MW = ureg.MW
 
 # units of current
-A = unyt.A
-mA = unyt.mA
+A = ureg.A
+mA = ureg.mA
 
 # units of voltage
-V = unyt.V
+V = ureg.V
 
 # units of force
-N = unyt.newton
-lb_f = unyt.pound_force
+N = ureg.newton
+lb_f = ureg.pound_force
 
-kN = unyt.kN
-MN = unyt.MN
+kN = ureg.kN
+MN = ureg.MN
 
-kip = unyt.kip
+kip = ureg.kip
 
 # units of moment
 Nm = N * m
 kNm = kN * m
 
 # units of pressure
-Pa = unyt.pascal
-psi = unyt.psi
-bar = unyt.bar
-psf = unyt.psf
+Pa = ureg.pascal
+psi = ureg.psi
+bar = ureg.bar
+psf = lb_f / (ft**2)
 
-kPa = unyt.kPa
-MPa = unyt.MPa
-GPa = unyt.GPa
+kPa = ureg.kPa
+MPa = ureg.MPa
+GPa = ureg.GPa
 
-ksi = unyt.ksi
+ksi = ureg.ksi
 
 # units of angle
-deg = unyt.degree
-rad = unyt.radian
+deg = ureg.degree
+rad = ureg.radian
 
 # units of temperature
-degC = unyt.degC
-degK = unyt.K
-degF = unyt.degF
+degC = ureg.degC
+degK = ureg.K
+degF = ureg.degF
 
 # units of area
-unyt.define_unit("ha", (100 * m) ** 2)
-ha = unyt.ha
+ha = ureg.ha
 
 # units of volume
-unyt.define_unit(symbol="L", value=0.001 * (m**3), prefixable=True)
-L = unyt.L
+L = ureg.L
 
 # units of velocity
-unyt.define_unit(symbol="knot", value=1852 * m / hr)
-knot = unyt.knot
+knot = ureg.knot
 
 # constants
-g_acc = unyt.standard_gravity
+g_acc = ureg.standard_gravity
 
 # set default printing
-unyt.default_format = ".3f~P"
+ureg.default_format = ".3f~P"
