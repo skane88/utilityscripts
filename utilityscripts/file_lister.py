@@ -24,57 +24,57 @@ def main():
         input("Press any key to exit.")
         return
 
+    file_lister(base_path)
+
+    print()
+    input("Press any key to exit.")
+
+
+def file_lister(base_path: Path):
+    """
+    list the files given a base path to search.
+
+    :param base_path: The path to search.
+    """
+
     filter_val = "*"
     different_folder: bool = None
-
     recursive = get_true_false(prefix="Do you want to search subfolders")
     report_folders = get_true_false(prefix="Do you want to report folders")
     incl_full_path = get_true_false(prefix="Do you want to include the full path")
-
     if not incl_full_path:
         incl_relative_path = get_true_false(prefix="Relative paths")
     else:
         incl_relative_path = False
-
     incl_extension = get_true_false(prefix="Do you want to include the extension")
     filter_type = get_true_false(prefix="Do you want to filter by file type")
-
     if filter_type:
         filter_val = input(
             "Input a valid 'glob' type filter (i.e. '*', '*.' or '*.pdf'): "
         )
-
     save_to_file = get_true_false(prefix="Do you want to save to a file")
-
     if save_to_file:
         different_folder = get_true_false(
             prefix="Do you want to save the list to a different location?",
             allow_quit=False,
         )
-
     if different_folder:
         save_folder = get_folder(type_prompt="Output Folder")
     else:
         save_folder = base_path
-
     all_lower_case = get_true_false(
         prefix="Do you want to convert file names to lower case"
     )
     sort_file = get_true_false(prefix="Do you want to sort the file names")
-
     # now we've got input, now do the actual finding of files
-
     if recursive:
         # if subfolders are required, use rglob
         f_iterator = base_path.rglob(filter_val)
     else:
         # if only the local folder, just use iterdir
         f_iterator = base_path.glob(filter_val)
-
     print()
-
     text_to_save = []
-
     for file in f_iterator:
         file: Path
 
@@ -97,7 +97,6 @@ def main():
             text_to_save += [text]
         else:
             print(text)
-
     # now save to file if necessary
     if save_to_file:
         # lower case everything if required
@@ -126,9 +125,6 @@ def main():
         with open(output_file, "w") as file:
             for line in text_to_save:
                 file.write(f"{line}\n")
-
-    print()
-    input("Press any key to exit.")
 
 
 if __name__ == "__main__":
