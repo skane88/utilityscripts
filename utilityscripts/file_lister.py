@@ -8,7 +8,7 @@ from pathlib import Path
 from ui_funcs import get_folder, get_true_false
 
 
-def lister():
+def main():
     """
     Lists all the folders / files in a given directory, and also has the ability
     to save the list to a text file.
@@ -110,8 +110,6 @@ def lister():
             file_name = "FileLister "
             file_exists = True
 
-            output_file: Path
-
             while file_exists:
                 output_file = save_folder / Path(
                     f"{file_name}{start_int:02d}"
@@ -132,4 +130,4 @@ def lister():
 
 
 if __name__ == "__main__":
-    lister()
+    main()
