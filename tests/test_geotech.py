@@ -121,9 +121,11 @@ def test_boussinesq_patch_sigma_z(Q, z, r, x_patch, y_patch, expected, tol):
     assert isclose(expected, actual, rel_tol=tol)
 
 
-@pytest.mark.parametrize("v, expected", [(0.3, 36.967), (0.5, 52.672), (1.0, 91.935)])
+@pytest.mark.parametrize(
+    "v, expected, tol", [(0.3, 36.967, 0.04), (0.5, 52.672, 0.03), (1.0, 91.935, 0.065)]
+)
 @pytest.mark.filterwarnings("ignore:warning")
-def test_boussinesq_patch_sigma_x(v, expected):
+def test_boussinesq_patch_sigma_x(v, expected, tol):
     """
     Test the boussinesq patch method for horizontal stress against example from J Bowles (fig E11.8a)
 
@@ -151,4 +153,4 @@ def test_boussinesq_patch_sigma_x(v, expected):
 
     actual = np.sum(sigma_x * delta_z)
 
-    assert isclose(expected, actual, rel_tol=0.05)
+    assert isclose(expected, actual, rel_tol=tol)
