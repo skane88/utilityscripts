@@ -26,7 +26,6 @@ REL_TOL = 0.01
     ],
 )
 def test_bar_area(bar_spec, area):
-
     assert isclose(reo_area(bar_spec)["total_area"], area, rel_tol=REL_TOL)
 
 
@@ -37,10 +36,11 @@ def test_bar_area(bar_spec, area):
         ("SL82", 227, False),
         ("RL1218", 1112, True),
         ("RL1218", 227, False),
+        ("F1218", 1227, True),
+        ("F1218", 251, False),
     ],
 )
 def test_bar_area_mesh(bar_spec, area, main_direction):
-
     assert isclose(
         reo_area(bar_spec, main_direction=main_direction)["total_area"],
         area,
@@ -78,7 +78,6 @@ def test_bar_area_mesh(bar_spec, area, main_direction):
     ],
 )
 def test_bar_area_full(bar_spec, width, main_direction, expected):
-
     return_vals = reo_area(
         bar_spec=bar_spec, main_direction=main_direction, width=width
     )
