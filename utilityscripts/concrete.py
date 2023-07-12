@@ -178,10 +178,10 @@ def reo_properties(bar_spec: str):
         secondary_bar_dia = mesh_data["cross_bar_dia"]
         secondary_bar_spacing = cross_pitch
 
-        ret_val["is_bar"] = True
-        ret_val["is_mesh"] = False
+        ret_val["is_bar"] = False
+        ret_val["is_mesh"] = True
         ret_val["main_dia"] = bar_dia
-        ret_val["bar_type"] = bar_spec[:2]
+        ret_val["bar_type"] = mesh[2]
         ret_val["main_spacing"] = bar_spacing
         ret_val["secondary_dia"] = secondary_bar_dia
         ret_val["secondary_spacing"] = secondary_bar_spacing
