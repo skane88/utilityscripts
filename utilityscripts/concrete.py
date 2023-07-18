@@ -313,3 +313,25 @@ def V_uo(f_c, u, d_om, beta_h=1.0):
         return min(f_cv_1, f_cv_2) * f_c**0.5
 
     return f_cv(f_c, beta_h) * u * d_om * 1000  # *1000 to convert to kN.
+
+
+def l_syt(f_c, f_sy, d_b, k_1=1.0, k_3=1.0, k_4=1.0, k_5=1.0):
+    """
+    Calculate the development length of a bar as per AS3600 S13.1.2.3
+
+    :param f_c: The concrete characteristic compressive strength, f'c. In MPa.
+    :param f_sy: The steel yield strength (in MPa)
+    :param d_b: The diameter of the bar (in mm)
+    :param k_1: The member depth parameter.
+    :param k_3: The bar spacing parameter.
+    :param k_4: Transverse reinforcement parameter.
+    :param k_5: Transverse stress parameter.
+    :return: The development length in mm.
+    """
+
+    k_2 = (132 - d_b) / 100
+    k_prod = max(0.7, k_3 * k_4 * k_5)
+    l = 0.5 * k_1 * k_prod * f_sy * d_b / (k_2 * f_c**0.5)
+    l_min = 0.058 * f_sy * k_1 * d_b
+
+    return max(l, l_min)
