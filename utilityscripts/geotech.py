@@ -262,8 +262,8 @@ def boussinesq_patch_sigma_z(q, x, y, z, x_patch, y_patch, n_int_x=10, n_int_y=1
     by 2x to account for this effect.
 
     :param q: The applied pressure.
-    :param x: the distance from the centroid of the load patch to a vertical plane through
-       the soil (e.g. a retaining wall)
+    :param x: the distance from the centroid of the load patch to a vertical plane
+        through the soil (e.g. a retaining wall)
     :param y: the distance from the centroid of the load patch and the point of interest
         on the vertical plane.
     :param z: The depth between the surface and the point at which stresses are
@@ -319,8 +319,8 @@ def boussinesq_patch_sigma_x(q, x, y, z, v, x_patch, y_patch, n_int_x=10, n_int_
     splitting the footing in half to determine the pressure accurately).
 
     :param q: The applied pressure.
-    :param x: the distance from the centroid of the load patch to a vertical plane through
-       the soil (e.g. a retaining wall)
+    :param x: the distance from the centroid of the load patch to a vertical plane
+        through the soil (e.g. a retaining wall)
     :param y: the distance from the centroid of the load patch and the point of interest
         on the vertical plane.
     :param z: The depth between the surface and the point at which stresses are
