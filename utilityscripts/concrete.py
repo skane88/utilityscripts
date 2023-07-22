@@ -331,7 +331,7 @@ def l_syt(f_c, f_sy, d_b, k_1=1.0, k_3=1.0, k_4=1.0, k_5=1.0):
 
     k_2 = (132 - d_b) / 100
     k_prod = max(0.7, k_3 * k_4 * k_5)
-    l = 0.5 * k_1 * k_prod * f_sy * d_b / (k_2 * f_c**0.5)
+    l_calc = 0.5 * k_1 * k_prod * f_sy * d_b / (k_2 * f_c**0.5)
     l_min = 0.058 * f_sy * k_1 * d_b
 
-    return max(l, l_min)
+    return max(l_calc, l_min)
