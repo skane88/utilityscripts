@@ -80,7 +80,7 @@ def compress_image(
     try:
         picture = open_image(file_path=file_path)
 
-    except OSError as err:
+    except OSError:
         # one cause of potential errors is that a jpg file is truncated.
         # therefore try allowing PILlow to open truncated images.
         # we could leave this on be default (set .LOAD_TRUNCATED_IMAGES = True
@@ -155,7 +155,8 @@ def compress_image(
         # if we get to here, we seem to have an error.
         raise Exception(
             (
-                f"Expected quality level to be => than minimum allowable. Values were: calculated quality ={quality_acceptable}, "
+                "Expected quality level to be => than minimum allowable. "
+                + f"Values were: calculated quality ={quality_acceptable}, "
                 + f"minimum allowable = {quality_min_orig}"
             )
         )
@@ -207,7 +208,7 @@ def _save_image(
         else:
             picture.save(fp=file_path, format=format, quality=quality, exif=exif)
 
-    except OSError as err:
+    except OSError:
         # one cause of potential errors is that a jpg file is truncated.
         # therefore try allowing PILlow to open truncated images.
         # we could leave this on be default (set .LOAD_TRUNCATED_IMAGES = True
@@ -476,7 +477,7 @@ def main():
         + f"{folder}{subfolder_text}"
     )
 
-    if compress := get_true_false(prefix="Do you wish to continue"):
+    if get_true_false(prefix="Do you wish to continue"):
         files, warnings = compress_all_in_folder(
             folder=folder,
             incl_subfolders=subfolders,
