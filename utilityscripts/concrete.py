@@ -90,12 +90,14 @@ def is_mesh(bar_spec: str) -> bool:
     return reo_properties(bar_spec).is_mesh
 
 
-def reo_properties(bar_spec: str, *, width=1000.0):
+def reo_properties(bar_spec: str, *, main_width=1000.0, secondary_width=1000.0):
     """
     Returns a dictionary with a number of properties from a standard bar specification.
 
     :param bar_spec: a standard Australian bar specification code.
-    :param width: the width over which to calculate the area.
+    :param main_width: the width over which to calculate the area of the main bars.
+    :param secondary_width:
+        the width over which to calculate the area of the secondary bars.
     """
 
     ReoProperties = namedtuple(
@@ -116,7 +118,8 @@ def reo_properties(bar_spec: str, *, width=1000.0):
             "secondary_area_total",
             "main_area_unit",
             "secondary_area_unit",
-            "width",
+            "main_width",
+            "secondary_width",
         ],
     )
 
@@ -175,9 +178,10 @@ def reo_properties(bar_spec: str, *, width=1000.0):
             secondary_bar_area=None,
             main_area_total=main_area_total,
             secondary_area_total=None,
-            main_area_unit=main_area_total / (width / 1000),
+            main_area_unit=main_area_total / (main_width / 1000),
             secondary_area_unit=None,
-            width=width,
+            main_width=main_width,
+            secondary_width=None,
         )
 
     if is_bars_spacing:
@@ -185,7 +189,7 @@ def reo_properties(bar_spec: str, *, width=1000.0):
         main_dia = int(is_bars_spacing[1][1:])
         bar_spacing = float(is_bars_spacing[4])
 
-        no_main = width / bar_spacing
+        no_main = main_width / bar_spacing
         main_bar_area = 0.25 * pi * main_dia**2
         main_area_total = main_bar_area * no_main
 
@@ -203,9 +207,10 @@ def reo_properties(bar_spec: str, *, width=1000.0):
             secondary_bar_area=None,
             main_area_total=main_area_total,
             secondary_area_total=None,
-            main_area_unit=main_area_total / (width / 1000),
+            main_area_unit=main_area_total / (main_width / 1000),
             secondary_area_unit=None,
-            width=width,
+            main_width=main_width,
+            secondary_width=None,
         )
 
     if mesh:
@@ -213,11 +218,11 @@ def reo_properties(bar_spec: str, *, width=1000.0):
 
         main_dia = mesh_data["bar_dia"]
         pitch = mesh_data["pitch"]
-        no_main = width / pitch
+        no_main = main_width / pitch
 
         secondary_dia = mesh_data["cross_bar_dia"]
         cross_pitch = mesh_data["cross_pitch"]
-        no_secondary = width / cross_pitch
+        no_secondary = secondary_width / cross_pitch
 
         main_bar_area = 0.25 * pi * main_dia**2
         secondary_bar_area = 0.25 * pi * secondary_dia**2
@@ -239,9 +244,10 @@ def reo_properties(bar_spec: str, *, width=1000.0):
             secondary_bar_area=secondary_bar_area,
             main_area_total=main_area_total,
             secondary_area_total=secondary_area_total,
-            main_area_unit=main_area_total / (width / 1000),
-            secondary_area_unit=secondary_area_total / (width / 1000),
-            width=width,
+            main_area_unit=main_area_total / (main_width / 1000),
+            secondary_area_unit=secondary_area_total / (secondary_width / 1000),
+            main_width=main_width,
+            secondary_width=secondary_width,
         )
 
     return ret_val

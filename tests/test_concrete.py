@@ -80,7 +80,11 @@ def test_bar_area_mesh(bar_spec, area, main_direction):
     ],
 )
 def test_bar_area_full(bar_spec, width, main_direction, expected):
-    return_vals = reo_properties(bar_spec=bar_spec, width=width)
+    return_vals = reo_properties(
+        bar_spec=bar_spec,
+        main_width=width if main_direction else 1000.0,
+        secondary_width=1000.0 if main_direction else width,
+    )
 
     assert isclose(
         return_vals.main_bar_area if main_direction else return_vals.secondary_bar_area,
@@ -106,4 +110,8 @@ def test_bar_area_full(bar_spec, width, main_direction, expected):
         expected["no_bars"],
         rel_tol=REL_TOL,
     )
-    assert isclose(return_vals.width, expected["width"], rel_tol=REL_TOL)
+    assert isclose(
+        return_vals.main_width if main_direction else return_vals.secondary_width,
+        expected["width"],
+        rel_tol=REL_TOL,
+    )
