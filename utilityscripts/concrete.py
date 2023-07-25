@@ -3,6 +3,7 @@ File to contain some utilities for working with concrete.
 """
 
 import re
+from collections import namedtuple
 from math import pi
 
 from humre import (
@@ -94,6 +95,21 @@ def reo_properties(bar_spec: str):
     Returns a dictionary with a number of properties from a standard bar specification.
     """
 
+    ReoProperties = namedtuple(
+        "ReoProperties",
+        [
+            "is_bar",
+            "is_mesh",
+            "bar_type",
+            "main_dia",
+            "secondary_dia",
+            "main_spacing",
+            "secondary_spacing",
+            "no_main",
+            "no_secondary",
+        ],
+    )
+
     ret_val = {
         "is_bar": None,
         "is_mesh": None,
@@ -142,51 +158,49 @@ def reo_properties(bar_spec: str):
         bar_type = is_no_bars[4][:1]
         bar_dia = int(is_no_bars[4][1:])
 
-        ret_val["is_bar"] = True
-        ret_val["is_mesh"] = False
-        ret_val["main_dia"] = bar_dia
-        ret_val["bar_type"] = bar_type
-        ret_val["main_spacing"] = None
-        ret_val["secondary_dia"] = None
-        ret_val["secondary_spacing"] = None
-        ret_val["no_main"] = no_bars
-        ret_val["no_secondary"] = None
+        ret_val = ReoProperties(
+            is_bar=True,
+            is_mesh=False,
+            main_dia=bar_dia,
+            bar_type=bar_type,
+            main_spacing=None,
+            secondary_dia=None,
+            secondary_spacing=None,
+            no_main=no_bars,
+            no_secondary=None,
+        )
 
     if is_bars_spacing:
         bar_type = is_bars_spacing[1][:1]
         bar_dia = int(is_bars_spacing[1][1:])
-        bar_spacing = is_bars_spacing[4]
+        bar_spacing = float(is_bars_spacing[4])
 
-        ret_val["is_bar"] = True
-        ret_val["is_mesh"] = False
-        ret_val["main_dia"] = bar_dia
-        ret_val["bar_type"] = bar_type
-        ret_val["main_spacing"] = float(bar_spacing)
-        ret_val["secondary_dia"] = None
-        ret_val["secondary_spacing"] = None
-        ret_val["no_main"] = None
-        ret_val["no_secondary"] = None
+        ret_val = ReoProperties(
+            is_bar=True,
+            is_mesh=False,
+            main_dia=bar_dia,
+            bar_type=bar_type,
+            main_spacing=bar_spacing,
+            secondary_dia=None,
+            secondary_spacing=None,
+            no_main=None,
+            no_secondary=None,
+        )
 
     if mesh:
         mesh_data = MESH_DATA[bar_spec]
 
-        pitch = mesh_data["pitch"]
-        cross_pitch = mesh_data["cross_pitch"]
-
-        bar_dia = mesh_data["bar_dia"]
-        bar_spacing = pitch
-        secondary_bar_dia = mesh_data["cross_bar_dia"]
-        secondary_bar_spacing = cross_pitch
-
-        ret_val["is_bar"] = False
-        ret_val["is_mesh"] = True
-        ret_val["main_dia"] = bar_dia
-        ret_val["bar_type"] = mesh[2]
-        ret_val["main_spacing"] = bar_spacing
-        ret_val["secondary_dia"] = secondary_bar_dia
-        ret_val["secondary_spacing"] = secondary_bar_spacing
-        ret_val["no_main"] = None
-        ret_val["no_secondary"] = None
+        ret_val = ReoProperties(
+            is_bar=False,
+            is_mesh=True,
+            main_dia=mesh_data["bar_dia"],
+            bar_type=mesh[2],
+            main_spacing=mesh_data["pitch"],
+            secondary_dia=mesh_data["cross_bar_dia"],
+            secondary_spacing=mesh_data["cross_pitch"],
+            no_main=None,
+            no_secondary=None,
+        )
 
     return ret_val
 
@@ -213,13 +227,13 @@ def reo_area(
     reo_data = reo_properties(bar_spec=bar_spec)
 
     if main_direction:
-        bar_dia = reo_data["main_dia"]
-        no_bars = reo_data["no_main"]
-        bar_spacing = reo_data["main_spacing"]
+        bar_dia = reo_data.main_dia
+        no_bars = reo_data.no_main
+        bar_spacing = reo_data.main_spacing
     else:
-        bar_dia = reo_data["secondary_dia"]
-        no_bars = reo_data["no_secondary"]
-        bar_spacing = reo_data["secondary_spacing"]
+        bar_dia = reo_data.secondary_dia
+        no_bars = reo_data.no_secondary
+        bar_spacing = reo_data.secondary_spacing
 
     if no_bars is None:
         no_bars = width / bar_spacing
