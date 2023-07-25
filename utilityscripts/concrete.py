@@ -79,7 +79,7 @@ def is_bar(bar_spec: str) -> bool:
     Determine if a bar specification matches a standard bar code.
     """
 
-    return reo_properties(bar_spec)["is_bar"]
+    return reo_properties(bar_spec).is_bar
 
 
 def is_mesh(bar_spec: str) -> bool:
@@ -87,7 +87,7 @@ def is_mesh(bar_spec: str) -> bool:
     Determine if a bar specification matches a standard mesh code.
     """
 
-    return reo_properties(bar_spec)["is_mesh"]
+    return reo_properties(bar_spec).is_mesh
 
 
 def reo_properties(bar_spec: str):
@@ -259,7 +259,7 @@ def gamma(f_c):
     return max(0.67, 0.97 - 0.0025 * f_c)
 
 
-def generate_rectilinear_block(f_c, max_compression_strain: float = 0.003):
+def generate_rectilinear_block(*, f_c, max_compression_strain: float = 0.003):
     """
     Generate a point on a rectilinear stress-strain curve as required by AS3600.
 
@@ -279,7 +279,7 @@ def generate_rectilinear_block(f_c, max_compression_strain: float = 0.003):
     ]
 
 
-def M_uo_min(Z, f_ct_f, P_e=0, A_g=0, e=0):
+def M_uo_min(*, Z, f_ct_f, P_e=0, A_g=0, e=0):
     """
     Calculate the minimum required moment capacity.
 
@@ -302,7 +302,7 @@ def M_uo():
     pass
 
 
-def V_uo(f_c, u, d_om, beta_h=1.0):
+def V_uo(*, f_c, u, d_om, beta_h=1.0):
     """
     Calculate the punching shear capacity.
 
@@ -313,7 +313,7 @@ def V_uo(f_c, u, d_om, beta_h=1.0):
     :returns: Punching shear capacity in kN, provided input units are as specified.
     """
 
-    def f_cv(f_c, beta_h=1):
+    def f_cv(f_c, beta_h=1.0):
         """
         Helper method to determine the punching shear strength.
 
@@ -329,7 +329,7 @@ def V_uo(f_c, u, d_om, beta_h=1.0):
     return f_cv(f_c, beta_h) * u * d_om * 1000  # *1000 to convert to kN.
 
 
-def l_syt(f_c, f_sy, d_b, k_1=1.0, k_3=1.0, k_4=1.0, k_5=1.0):
+def l_syt(*, f_c, f_sy, d_b, k_1=1.0, k_3=1.0, k_4=1.0, k_5=1.0):
     """
     Calculate the development length of a bar as per AS3600 S13.1.2.3
 
