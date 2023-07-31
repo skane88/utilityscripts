@@ -107,6 +107,7 @@ ha = ureg.ha
 
 # units of volume
 L = ureg.L
+floz = ureg.fluid_ounce
 
 # units of velocity
 knot = ureg.knot
