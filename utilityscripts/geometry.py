@@ -3,7 +3,7 @@ Intended to contain some helper functions & classes for basic geometric operatio
 (calculating areas etc.). This is not intended to calculate section properties.
 """
 
-from math import acos, asin, cos, pi, sin, sqrt
+from math import asin, cos, pi, sin, sqrt
 
 
 class Circle:
@@ -168,9 +168,11 @@ class Circular_Segment:
         It is assumed that:
 
         * The segment is located at the top of the circle.
-        * The angle phi is taken anti-clockwise from the RHS most extreme point of the segment.
+        * The angle phi is taken anti-clockwise from the RHS most extreme point of
+            the segment.
 
-        :param phi: the angle at which the point is calculated. Must be between 0 and theta.
+        :param phi: the angle at which the point is calculated. Must be between 0
+            and theta.
         """
 
         if not 0 <= phi <= self.theta:
