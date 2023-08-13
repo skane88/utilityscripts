@@ -508,8 +508,8 @@ class Section:
 
         def helper_func(y):
             """
-            Helper function that returns the difference of the area above and below a cut
-            line.
+            Helper function that returns the difference of the area above and below
+            a cut line.
 
             :param y: The height at which to cut the section.
             """

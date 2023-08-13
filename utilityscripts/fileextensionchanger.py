@@ -2,7 +2,6 @@
 This file changes files of one extension type to another extension type.
 """
 
-import sys
 from pathlib import Path
 
 from tqdm import tqdm
@@ -74,7 +73,7 @@ def re_extension():
             if new_path.exists():
                 warning_string = "ERROR\n"
                 warning_string += f"Tried replacing: \n    {f}\nwith\n    {new_path}\n"
-                warning_string += f"But new path already exists\n"
+                warning_string += "But new path already exists\n"
                 warning_string += "-" * 40
                 warning_string += "\n"
 

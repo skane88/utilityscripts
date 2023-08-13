@@ -34,7 +34,7 @@ class WindSite:
 
         if terrain_category < 1.0 or terrain_category > 4.0:
             raise ValueError(
-                f"Terrain Category expected to be between 1.0 and 4.0. "
+                "Terrain Category expected to be between 1.0 and 4.0. "
                 + f"Received {terrain_category}"
             )
 
@@ -192,8 +192,8 @@ def M_zcat_basic(*, z, terrain_category) -> float:
     Does not do any averaging for changing terrain in the windward direction.
 
     :param z: The height at which the windspeed is being assessed.
-    :param terrain_category: The terrain category, as a number between 1 and 4. Floats are
-        acceptable for intermediate categories.
+    :param terrain_category: The terrain category, as a number between 1 and 4.
+        Floats are acceptable for intermediate categories.
     """
 
     # first load some required data

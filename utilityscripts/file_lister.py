@@ -49,7 +49,7 @@ def file_lister(base_path: Path):
 
     incl_extension = get_true_false(prefix="Do you want to include the extension")
 
-    if filter_type := get_true_false(prefix="Do you want to filter by file type"):
+    if get_true_false(prefix="Do you want to filter by file type"):
         filter_val = input(
             "Input a valid 'glob' type filter (i.e. '*', '*.' or '*.pdf'): "
         )

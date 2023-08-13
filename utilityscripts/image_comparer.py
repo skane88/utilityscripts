@@ -7,6 +7,7 @@ from tkinter import Tk, filedialog
 from typing import List, Tuple
 
 import imagehash
+from imagehash import ImageHash
 from PIL import Image, ImageFile
 
 DIFFERENCE_THRESHOLD = 20  # how similar should images be?
@@ -130,7 +131,7 @@ def get_number(
 
                     continue
 
-                if number >= min_val and number <= max_val:
+                if min_val <= number <= max_val:
                     acceptable = True
 
             except ValueError:
@@ -139,13 +140,13 @@ def get_number(
     return number
 
 
-def get_hash(*, image: Path, hash_size: int = 8) -> int:
+def get_hash(*, image: Path, hash_size: int = 8) -> ImageHash:
     """
     Get the hash of an image
     :param image: Path to Image.
     :param hash_size: The hash size to use.
-        Higher numbers preserve more information about the image when the comparison is done.
-        Recommend it is not set below 8.
+        Higher numbers preserve more information about the image when the
+        comparison is done. Recommend it is not set below 8.
     :return: The image hash.
     """
 

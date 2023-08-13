@@ -4,7 +4,6 @@ appropriate folders...but it's been a while and I didn't comment this properly a
 time, so who knows?
 """
 
-import sys
 from pathlib import Path
 
 from tqdm import tqdm
@@ -60,7 +59,7 @@ def re_name():
             if new_path.exists():
                 warning_string = "ERROR\n"
                 warning_string += f"Tried replacing: \n    {f}\nwith\n    {new_path}\n"
-                warning_string += f"But new path already exists\n"
+                warning_string += "But new path already exists\n"
                 warning_string += "-" * 40
                 warning_string += "\n"
 
