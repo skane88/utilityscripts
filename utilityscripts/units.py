@@ -45,9 +45,9 @@ Hz = ureg.Hz
 # units of mass
 g = ureg.gram
 kg = ureg.kg
-t_us = ureg.ton
+ton = ureg.t
 lb = ureg.pound
-t = ureg.t
+ton_us = ureg.ton
 
 # units of energy
 J = ureg.J
