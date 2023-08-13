@@ -114,6 +114,12 @@ knot = ureg.knot
 
 # constants
 g_acc = ureg.standard_gravity
+rho_air = 1.2 * kg / m**3  # see AS1170.2
+rho_water = 1000 * kg / m**3
+rho_seawater = 1025 * kg / m**3
+rho_concrete = 2400 * kg / m**3
+rho_steel = 7850 * kg / m**3  # see AS4100
+
 
 # set default printing
 ureg.default_format = ".3f~P"
