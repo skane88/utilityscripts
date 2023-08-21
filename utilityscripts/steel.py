@@ -1,6 +1,8 @@
 """
 To contain some utilities for steel design
 """
+from dataclasses import dataclass
+from math import asin
 
 
 def alpha_m(*, M_m, M_2, M_3, M_4):
@@ -77,3 +79,39 @@ def as_s5_15_3(*, gamma, a_w, alpha_v, v_star, v_u, d_p, s, phi=0.9):
     a_4 = (s / d_p) - ((s / d_p) ** 2 / (1 + (s / d_p) ** 2) ** 0.5)
 
     return a_1 * a_2 * a_3 * a_4
+
+
+@dataclass
+class Lug:
+    t: float  # thickness of the plate.
+    b: float  # width of the lug
+    h: float  # height to the centre of the hole
+    r: float  # radius of the outside of the lug, centred on the hole
+    dia_hole: float  # Diameter of the hole
+    e_hole: float = 0.0  # eccentricty of the hole.
+
+    @property
+    def r_hole(self):
+        return self.dia_hole / 2
+
+    @property
+    def x_cp(self):
+        return self.b / 2 + self.e_hole
+
+    @property
+    def y_cp(self):
+        return self.h
+
+    @property
+    def _l1c(self):
+        """
+        Distance from the left hand corner to the centre of the lug.
+        """
+        return (self.x_cp**2 + self.y_cp**2) ** 0.5
+
+    @property
+    def _theta1_tp1(self):
+        """
+        Angle from the base of the lug to the centre of the lug.
+        """
+        return asin(self.y_cp / self._l1c)
