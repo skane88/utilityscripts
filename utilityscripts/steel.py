@@ -81,6 +81,32 @@ def as_s5_15_3(*, gamma, a_w, alpha_v, v_star, v_u, d_p, s, phi=0.9):
     return a_1 * a_2 * a_3 * a_4
 
 
+def v_by(*, d_f, t_p, f_up):
+    """
+    Calculate the bolt hole bearing capacity, as limited by local yielding, as per
+    AS4100 S9.2.2.4
+
+    :param d_f: The fastener diameter.
+    :param t_p: The thickness of the plate.
+    :param f_up: The ultimate tensile stress of the plate.
+    """
+
+    return 3.2 * d_f * t_p * f_up
+
+
+def v_bt(*, a_e, t_p, f_up):
+    """
+    Calculate the bolt hole bearing capacity, as limited by tearout, as per
+    AS4100 S9.2.2.4
+
+    :param a_e: Fastener edge distance.
+    :param t_p: Thickness of plate.
+    :param f_up: The ultimate tensile stress of the plate.
+    """
+
+    return a_e * t_p * f_up
+
+
 @dataclass
 class Lug:
     t: float  # thickness of the plate.
