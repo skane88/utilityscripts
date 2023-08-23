@@ -136,14 +136,14 @@ class Lug:
         return (self.x_cp**2 + self.y_cp**2) ** 0.5
 
     @property
-    def _theta1_ctr(self):
+    def _theta1_lhs_ctr(self):
         """
         Angle from the base of the lug to the centre of the lug.
         """
         return asin(self.y_cp / self._l_lhs_ctr)
 
     @property
-    def _theta2_tp1(self):
+    def _theta2_lhs_tp1(self):
         """
         The angle between the lines formed by the LHS corner to the tangent point
         and the LHS corner to the centre of the lug.
@@ -152,12 +152,12 @@ class Lug:
         return asin(self.r / self._l_lhs_ctr)
 
     @property
-    def _theta_tp1(self):
+    def _theta_lhs_tp1(self):
         """
         The angle between tp1 and horizontal, taken from the LHS of the lug
         """
 
-        return self._theta1_ctr + self._theta2_tp1
+        return self._theta1_lhs_ctr + self._theta2_lhs_tp1
 
     @property
     def _l_lhs_tp1(self):
@@ -173,7 +173,7 @@ class Lug:
         The x co-ordinate of the LHS tangent point, tp1.
         """
 
-        return self._l_lhs_tp1 * cos(self._theta_tp1)
+        return self._l_lhs_tp1 * cos(self._theta_lhs_tp1)
 
     @property
     def y_tp1(self):
@@ -181,4 +181,60 @@ class Lug:
         The y co-ordinate of the LHS tangent point, tp1
         """
 
-        return self._l_lhs_tp1 * sin(self._theta_tp1)
+        return self._l_lhs_tp1 * sin(self._theta_lhs_tp1)
+
+    @property
+    def _l_rhs_ctr(self):
+        """
+        Distance from the RHS corner to the centre of the lug.
+        """
+
+        return ((self.b - self.x_cp) ** 2 + self.y_cp**2) ** 0.5
+
+    @property
+    def _theta1_rhs_ctr(self):
+        """
+        Angle from the base of the lug at the RHS to the centre of the lug.
+        """
+        return asin(self.y_cp / self._l_rhs_ctr)
+
+    @property
+    def _theta2_rhs_tp2(self):
+        """
+        The angle between the lines formed by the RHS corner to the tangent point
+        and the LHS corner to the centre of the lug.
+        """
+
+        return asin(self.r / self._l_rhs_ctr)
+
+    @property
+    def _theta_rhs_tp2(self):
+        """
+        The angle between tp2 and horizontal, taken from the RHS of the lug
+        """
+
+        return self._theta1_rhs_ctr + self._theta2_rhs_tp2
+
+    @property
+    def _l_rhs_tp2(self):
+        """
+        The length of the side of the lug from the RHS corner to tp2.
+        """
+
+        return (self._l_rhs_ctr**2 - self.r**2) ** 0.5
+
+    @property
+    def x_tp2(self):
+        """
+        The x co-ordinate of the RHS tangent point, tp2.
+        """
+
+        return self._l_rhs_tp2 * cos(self._theta_rhs_tp2)
+
+    @property
+    def y_tp2(self):
+        """
+        The y co-ordinate of the RHS tangent point, tp2
+        """
+
+        return self._l_rhs_tp2 * sin(self._theta_rhs_tp2)
