@@ -2,7 +2,7 @@
 To contain some utilities for steel design
 """
 from dataclasses import dataclass
-from math import asin
+from math import asin, cos, sin
 
 
 def alpha_m(*, M_m, M_2, M_3, M_4):
@@ -136,8 +136,49 @@ class Lug:
         return (self.x_cp**2 + self.y_cp**2) ** 0.5
 
     @property
-    def _theta1_tp1(self):
+    def _theta1_ctr(self):
         """
         Angle from the base of the lug to the centre of the lug.
         """
         return asin(self.y_cp / self._l1c)
+
+    @property
+    def _theta2_tp1(self):
+        """
+        The angle between the lines formed by the LHS corner to the tangent point
+        and the LHS corner to the centre of the lug.
+        """
+
+        return asin(self.r / self._l1c)
+
+    @property
+    def _theta_tp1(self):
+        """
+        The angle between tp1 and horizontal, taken from the LHS of the lug
+        """
+
+        return self._theta1_ctr + self._theta2_tp1
+
+    @property
+    def _l_lhs_tp1(self):
+        """
+        The length of the side of the lug from the LHS corner to tp1.
+        """
+
+        return (self._l1c**2 - self.r**2) ** 0.5
+
+    @property
+    def x_tp1(self):
+        """
+        The x co-ordinate of the LHS tangent point, tp1.
+        """
+
+        return self._l_lhs_tp1 * cos(self._theta_tp1)
+
+    @property
+    def y_tp1(self):
+        """
+        The y co-ordinate of the LHS tangent point, tp1
+        """
+
+        return self._l_lhs_tp1 * sin(self._theta_tp1)
