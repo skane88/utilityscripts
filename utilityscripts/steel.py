@@ -129,7 +129,7 @@ class Lug:
         return self.h
 
     @property
-    def _l_lhs_c(self):
+    def _l_lhs_ctr(self):
         """
         Distance from the left hand corner to the centre of the lug.
         """
@@ -140,7 +140,7 @@ class Lug:
         """
         Angle from the base of the lug to the centre of the lug.
         """
-        return asin(self.y_cp / self._l_lhs_c)
+        return asin(self.y_cp / self._l_lhs_ctr)
 
     @property
     def _theta2_tp1(self):
@@ -149,7 +149,7 @@ class Lug:
         and the LHS corner to the centre of the lug.
         """
 
-        return asin(self.r / self._l_lhs_c)
+        return asin(self.r / self._l_lhs_ctr)
 
     @property
     def _theta_tp1(self):
@@ -165,7 +165,7 @@ class Lug:
         The length of the side of the lug from the LHS corner to tp1.
         """
 
-        return (self._l_lhs_c**2 - self.r**2) ** 0.5
+        return (self._l_lhs_ctr**2 - self.r**2) ** 0.5
 
     @property
     def x_tp1(self):
