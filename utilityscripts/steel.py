@@ -229,7 +229,7 @@ class Lug:
         The x co-ordinate of the RHS tangent point, tp2.
         """
 
-        return self._l_rhs_tp2 * cos(self._theta_rhs_tp2)
+        return self.b - (self._l_rhs_tp2 * cos(self._theta_rhs_tp2))
 
     @property
     def y_tp2(self):
