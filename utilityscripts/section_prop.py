@@ -1633,7 +1633,7 @@ def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
                     t_f_bottom + r_bottom,
                 ),
                 radius=r_bottom,
-                angles=(180, 270),
+                limit_angles=(180, 270),
                 use_radians=False,
                 no_points=16,
             )
@@ -1644,7 +1644,7 @@ def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
             build_circle(
                 centroid=(t_w / 2 + r_top, d - t_f_top - r_top),
                 radius=r_top,
-                angles=(90, 180),
+                limit_angles=(90, 180),
                 use_radians=False,
                 no_points=16,
             )
@@ -1655,7 +1655,7 @@ def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
             build_circle(
                 centroid=(-t_w / 2 - r_top, d - t_f_top - r_top),
                 radius=r_top,
-                angles=(0, 90),
+                limit_angles=(0, 90),
                 use_radians=False,
                 no_points=16,
             )
@@ -1669,7 +1669,7 @@ def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
                     t_f_bottom + r_bottom,
                 ),
                 radius=r_bottom,
-                angles=(270, 360),
+                limit_angles=(270, 360),
                 use_radians=False,
                 no_points=16,
             )
@@ -2026,7 +2026,7 @@ def build_circle(
     centroid=Union[Point, Tuple[float, float]],
     radius,
     no_points: int = 64,
-    angles: Tuple[float, float] = None,
+    limit_angles: Tuple[float, float] = None,
     use_radians: bool = True,
 ) -> List[Tuple[float, float]]:
     """
@@ -2035,7 +2035,8 @@ def build_circle(
     :param centroid: The centroid of the circle.
     :param radius: The radius of the circle.
     :param no_points: The no. of points to include in the definition of the circle.
-    :param angles: Angles to limit the circular arc. Should be of the format (min, max).
+    :param limit_angles: Angles to limit the circular arc. Should be of the format
+        (min, max).
         Angles to be taken CCW.
     :param use_radians: Use radians for angles?
     :return: A circle, or part thereof, as a list of lists defining the points:
@@ -2044,9 +2045,9 @@ def build_circle(
 
     full_circle = math.radians(360)
 
-    if angles is not None:
-        min_angle = angles[0]
-        max_angle = angles[1]
+    if limit_angles is not None:
+        min_angle = limit_angles[0]
+        max_angle = limit_angles[1]
 
         if not use_radians:
             min_angle = math.radians(min_angle)
