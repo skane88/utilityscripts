@@ -138,7 +138,7 @@ class Lug:
     @property
     def _theta1_lhs_ctr(self):
         """
-        Angle from the base of the lug to the centre of the lug.
+        Angle from the LHS base of the lug to the centre of the lug.
         """
         return asin(self.y_cp / self._l_lhs_ctr)
 
