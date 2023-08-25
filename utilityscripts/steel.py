@@ -2,7 +2,11 @@
 To contain some utilities for steel design
 """
 from dataclasses import dataclass
-from math import asin, cos, sin
+from math import asin, atan, cos, radians, sin
+
+import shapely as shp
+
+from utilityscripts.section_prop import build_circle
 
 
 def alpha_m(*, M_m, M_2, M_3, M_4):
@@ -129,6 +133,14 @@ class Lug:
         return self.h
 
     @property
+    def cp(self):
+        """
+        Return the centre of the circle as a tuple (x, y)
+        """
+
+        return self.x_cp, self.y_cp
+
+    @property
     def _l_lhs_ctr(self):
         """
         Distance from the left hand corner to the centre of the lug.
@@ -238,3 +250,54 @@ class Lug:
         """
 
         return self._l_rhs_tp2 * sin(self._theta_rhs_tp2)
+
+    @property
+    def _theta3_tp1(self):
+        """
+        The horizontal angle from the centre of the circle to the tangent point.
+        """
+
+        y_tp1_ctr = self.y_tp1 - self.y_cp
+        x_tp1_ctr = self.x_cp - self.x_tp1
+
+        return atan(y_tp1_ctr / x_tp1_ctr)
+
+    @property
+    def _theta3_tp2(self):
+        """
+        The horizontal angle from the centre of the circle to the tangent point.
+        """
+
+        y_tp2_ctr = self.y_tp2 - self.y_cp
+        x_tp2_ctr = self.x_tp2 - self.x_cp
+
+        return atan(y_tp2_ctr / x_tp2_ctr)
+
+    def lug_polygon(self, no_points=64):
+        """
+        Return a Shapely polygon describing the lug.
+
+        :param no_points: the no. of points to use for the circular sections of the lug.
+        """
+
+        points = [(0, 0), (self.b, 0)]
+
+        points += build_circle(
+            centroid=self.cp,
+            radius=self.r,
+            no_points=no_points,
+            limit_angles=(self._theta3_tp2, radians(180) - self._theta3_tp1),
+        )
+
+        points.append((0, 0))
+
+        hole_points = build_circle(
+            centroid=(self.x_cp, self.y_cp),
+            radius=self.dia_hole / 2,
+            no_points=no_points,
+        )
+        hole_points.reverse()
+
+        lug = shp.Polygon(shell=points, holes=[hole_points])
+
+        return lug
