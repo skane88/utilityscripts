@@ -126,10 +126,17 @@ class Lug:
 
     @property
     def x_cp(self):
+        """
+        The x co-ordinate of the centre of the hole, from the bottom LHS corner.
+        """
+
         return self.b / 2 + self.e_hole
 
     @property
     def y_cp(self):
+        """
+        The y co-ordinate of the centre of the hole, from the bottom LHS corner.
+        """
         return self.h
 
     @property
@@ -145,6 +152,7 @@ class Lug:
         """
         Distance from the left hand corner to the centre of the lug.
         """
+
         return (self.x_cp**2 + self.y_cp**2) ** 0.5
 
     @property
@@ -152,6 +160,7 @@ class Lug:
         """
         Angle from the LHS base of the lug to the centre of the lug.
         """
+
         return asin(self.y_cp / self._l_lhs_ctr)
 
     @property
