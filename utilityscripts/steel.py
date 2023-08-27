@@ -4,7 +4,9 @@ To contain some utilities for steel design
 from dataclasses import dataclass
 from math import asin, atan, cos, radians, sin
 
+import matplotlib.pyplot as plt
 import shapely as shp
+from shapely.plotting import plot_polygon
 
 from utilityscripts.section_prop import build_circle
 
@@ -310,3 +312,40 @@ class Lug:
         lug = shp.Polygon(shell=points, holes=[hole_points])
 
         return lug
+
+    def plot_lug(
+        self,
+        ax=None,
+        face_color=(0.85, 0.85, 0.85, 1.0),
+        edge_color=(0, 0, 0),
+        add_points=False,
+    ):
+        """
+        Plot the lug. Uses Shapely's plotting library to plot the lug.
+
+        Also returns a tuple of:
+
+        if add_points is False:
+            (PathPatch, None)
+        else:
+            (PathPatch, Line2D)
+
+        :param ax: The matplotlib axis on which to plot the lug.
+        :param face_color: A matplotlib color specification to color the face.
+        :param edge_color: A matplotlib color specification for the edge.
+        :param add_points: Plot the vertices of the lug?
+        """
+
+        lug_patch = plot_polygon(
+            self.lug_polygon(),
+            add_points=add_points,
+            facecolor=face_color,
+            edgecolor=edge_color,
+        )
+
+        plt.show()
+
+        if add_points is False:
+            return (lug_patch, None)
+        else:
+            return lug_patch
