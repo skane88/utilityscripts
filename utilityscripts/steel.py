@@ -118,7 +118,7 @@ class Lug:
     h: float  # height to the centre of the hole
     r: float  # radius of the outside of the lug, centred on the hole
     dia_hole: float  # Diameter of the hole
-    e_hole: float = 0.0  # eccentricty of the hole.
+    e_hole: float = 0.0  # eccentricity of the hole.
 
     @property
     def r_hole(self):
