@@ -115,6 +115,10 @@ def v_bt(*, a_e, t_p, f_up):
 
 @dataclass
 class Lug:
+    """
+    A class to describe the geometry of a standard lifting lug.
+    """
+
     t: float  # thickness of the plate.
     b: float  # width of the lug
     h: float  # height to the centre of the hole
