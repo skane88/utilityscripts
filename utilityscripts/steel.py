@@ -353,3 +353,34 @@ class Lug:
             return (lug_patch, None)
         else:
             return lug_patch
+
+
+@dataclass
+class LugLoad:
+    """
+    A class to hold a definition for a load to apply to the Lug class.
+    """
+
+    swl: float  # the safe working load of the lug.
+    daf: float = 1.0  # the dynamic amplification factor for the load
+    hole_offset: float = (
+        0.0  # any offset from the hole centre - for example due to a shackle etc.
+    )
+    min_inplane_angle: float = (
+        0.0  # the minimum angle of the load, in plane. In Radians.
+    )
+    max_inplane_angle: float = (
+        0.0  # the maximum angle of the load, in plane. In Radians.
+    )
+    min_outplane_angle: float = (
+        0.0  # The minimum angle of the load, out of plane. In Radians
+    )
+    max_outplane_angle: float = (
+        0.0  # The maximum angle of the load, out of plane. In Radians
+    )
+    off_vertical_allowance: float = (
+        0.04  # An allowance for any un-intended out-of-plane loading. In % of SWL.
+    )
+    apply_daf_to_off_vertical: bool = (
+        False  # Apply the dynamic amplification factor to the off-vertical allowance?
+    )
