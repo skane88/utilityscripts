@@ -288,6 +288,62 @@ class Lug:
 
         return atan(y_tp2_ctr / x_tp2_ctr)
 
+    @property
+    def i_xx(self):
+        """
+        The second moment of inertia about the major axis.
+        """
+
+        return self.t * self.b**3 / 12
+
+    @property
+    def i_yy(self):
+        """
+        The second moment of inertia about the minor axis.
+        """
+
+        return self.b * self.t**3 / 12
+
+    @property
+    def base_area(self):
+        """
+        The area at the base of the lug.
+        """
+
+        return self.b * self.t
+
+    @property
+    def z_major(self):
+        """
+        Elastic modulus about the major axis.
+        """
+
+        return self.t * self.b**2 / 6
+
+    @property
+    def z_minor(self):
+        """
+        Elastic modulus about the minor axis.
+        """
+
+        return self.b * self.t**2 / 6
+
+    @property
+    def s_major(self):
+        """
+        Plastic modulus about the major axis.
+        """
+
+        return self.t * self.b**2 / 4
+
+    @property
+    def s_minor(self):
+        """
+        Plastic modulus about the minor axis.
+        """
+
+        return self.b * self.t**2 / 4
+
     def lug_polygon(self, no_points=64):
         """
         Return a Shapely polygon describing the lug.
