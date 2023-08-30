@@ -346,6 +346,14 @@ class Lug:
 
         return self.b * self.t**2 / 4
 
+    @property
+    def base_line(self):
+        """
+        Return a Shapely LineString describing the base of the lug.
+        """
+
+        return LineString([(0, 0), (self.b, 0)])
+
     def slice(self, angle: float = 0.0, use_radians: bool = True):
         """
         Generate a line describing a slice through the lug.
