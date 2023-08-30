@@ -33,11 +33,16 @@ naut_mi = ureg.naut_mi
 
 # units of time
 s = ureg.second
+minute = ureg.minute
 minutes = ureg.minute
+day = ureg.day
 days = ureg.day
 hr = ureg.hour
+hrs = ureg.hour
 yr = ureg.year
+yrs = ureg.year
 week = ureg.week
+weeks = ureg.week
 
 # units of frequency
 Hz = ureg.Hz
