@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from shapely import LineString, Polygon
 from shapely.affinity import rotate
 from shapely.ops import split
-from shapely.plotting import plot_line, plot_polygon
+from shapely.plotting import plot_polygon
 
 from utilityscripts.section_prop import build_circle
 
@@ -364,10 +364,7 @@ class Lug:
             line, angle=angle, origin=(self.x_cp, self.y_cp), use_radians=use_radians
         )
 
-        line = split(line, self.lug_polygon()).geoms[1]
-        print(line)
-
-        plot_line(line)
+        return split(line, self.lug_polygon()).geoms[1]
 
     def lug_polygon(self, no_points=96):
         """
