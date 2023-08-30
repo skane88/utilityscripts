@@ -5,8 +5,10 @@ from dataclasses import dataclass
 from math import asin, atan, cos, radians, sin
 
 import matplotlib.pyplot as plt
-import shapely as shp
-from shapely.plotting import plot_polygon
+from shapely import LineString, Polygon
+from shapely.affinity import rotate
+from shapely.ops import split
+from shapely.plotting import plot_line, plot_polygon
 
 from utilityscripts.section_prop import build_circle
 
@@ -344,7 +346,30 @@ class Lug:
 
         return self.b * self.t**2 / 4
 
-    def lug_polygon(self, no_points=64):
+    def slice(self, angle: float = 0.0, use_radians: bool = True):
+        """
+        Generate a line describing a slice through the lug.
+
+        :param angle: The angle of the slice, in radians. 0.0rad is vertical.
+            +ve angles are CCW
+        :param use_radians: use radians or degrees?
+        """
+
+        start = (self.x_cp, self.y_cp)
+        end = (self.x_cp, self.y_cp + self.r)
+
+        line = LineString([start, end])
+
+        line = rotate(
+            line, angle=angle, origin=(self.x_cp, self.y_cp), use_radians=use_radians
+        )
+
+        line = split(line, self.lug_polygon()).geoms[1]
+        print(line)
+
+        plot_line(line)
+
+    def lug_polygon(self, no_points=96):
         """
         Return a Shapely polygon describing the lug.
 
@@ -369,7 +394,7 @@ class Lug:
         )
         hole_points.reverse()
 
-        lug = shp.Polygon(shell=points, holes=[hole_points])
+        lug = Polygon(shell=points, holes=[hole_points])
 
         return lug
 
