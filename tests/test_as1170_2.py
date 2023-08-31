@@ -66,28 +66,32 @@ def build_direction_pairs():
     pairs = []
 
     for region, v in test_data.items():
-        for direction, m_d in v.items():
+        for direction, m_d_val in v.items():
             if direction.lower() != "any":
                 direction = float(direction)
 
-            m_d = tuple(m_d)
+            m_d_val = tuple(m_d_val)
 
-            pairs.append([(region, direction), m_d])
+            pairs.append([(region, direction), m_d_val])
 
             if isinstance(direction, str):
                 continue
 
             pairs.extend(
-                ([(region, direction + 360), M_d], [(region, direction - 360), M_d])
+                (
+                    [(region, direction + 360), m_d_val],
+                    [(region, direction - 360), m_d_val],
+                )
             )
 
     return pairs
 
 
-@pytest.mark.parametrize("input_vals, expected", build_direction_pairs())
-def test_m_d(input_vals, expected):
-    wind_region = input_vals[0]
-    direction = input_vals[1]
+@pytest.mark.parametrize("input_vals", build_direction_pairs())
+def test_m_d(input_vals):
+    wind_region = input_vals[0][0]
+    direction = input_vals[0][1]
+    expected = input_vals[1]
 
     m_d_calc = M_d(wind_region=wind_region, direction=direction)
 

@@ -154,35 +154,35 @@ def M_d(*, wind_region: str, direction: Union[float, str]) -> Tuple[float, float
     if isinstance(direction, str):
         direction = direction.lower()
 
-    region_M_d_parameters = STANDARD_DATA["region_direction_parameters"][wind_region]
+    region_m_d_parameters = STANDARD_DATA["region_direction_parameters"][wind_region]
     wind_direction_defs = STANDARD_DATA["wind_direction_definitions"]
 
-    F_not_clad = region_M_d_parameters["F_not_clad"]
+    F_not_clad = region_m_d_parameters["F_not_clad"]
 
     # next bail out early if the direction doesn't matter
     if direction == "any":
-        M_d_clad = region_M_d_parameters[direction]
-        M_d = M_d_clad * F_not_clad
-        return (M_d, M_d_clad)
+        m_d_clad = region_m_d_parameters[direction]
+        m_d = m_d_clad * F_not_clad
+        return m_d, m_d_clad
 
     # now check that direction is within the range of 0-360
     direction = direction % 360
 
     # now build a numpy array to use numpy's interp functions.
-    M_d_table = []
+    m_d_table = []
     for d, angles in wind_direction_defs.items():
         for a in angles:
-            M_d_table.append([a, region_M_d_parameters[d]])
+            m_d_table.append([a, region_m_d_parameters[d]])
 
-    M_d_table = np.array(M_d_table)
+    m_d_table = np.array(m_d_table)
     # make sure to sort it correctly
-    M_d_table = M_d_table[np.argsort(M_d_table[:, 0])]
+    m_d_table = m_d_table[np.argsort(m_d_table[:, 0])]
 
     # now interpolate the value
-    M_d_clad = np.interp(direction, M_d_table[:, 0], M_d_table[:, 1])
-    M_d = M_d_clad * F_not_clad
+    m_d_clad = np.interp(direction, m_d_table[:, 0], m_d_table[:, 1])
+    m_d = m_d_clad * F_not_clad
 
-    return (M_d, M_d_clad)
+    return m_d, m_d_clad
 
 
 def M_zcat_basic(*, z, terrain_category) -> float:
