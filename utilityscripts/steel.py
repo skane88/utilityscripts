@@ -426,12 +426,21 @@ class Lug:
         :param add_points: Plot the vertices of the lug?
         """
 
-        lug_patch = plot_polygon(
-            self.lug_polygon(),
-            add_points=add_points,
-            facecolor=face_color,
-            edgecolor=edge_color,
-        )
+        if ax is None:
+            lug_patch = plot_polygon(
+                self.lug_polygon(),
+                add_points=add_points,
+                facecolor=face_color,
+                edgecolor=edge_color,
+            )
+        else:
+            lug_patch = plot_polygon(
+                self.lug_polygon(),
+                ax=ax,
+                add_points=add_points,
+                facecolor=face_color,
+                edgecolor=edge_color,
+            )
 
         plt.show()
 
