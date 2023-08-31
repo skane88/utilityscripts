@@ -2,7 +2,7 @@
 Contains tests for the geotech module.
 """
 
-from math import isclose, radians
+from math import isclose
 
 import numpy as np
 import pytest
@@ -25,7 +25,6 @@ def test_q_ult():
 
     c = 0
     gamma = 18
-    phi = radians(38)
 
     N_c = 1
     N_gamma = 67
@@ -127,10 +126,12 @@ def test_boussinesq_patch_sigma_z(Q, z, r, x_patch, y_patch, expected, tol):
 @pytest.mark.filterwarnings("ignore:warning")
 def test_boussinesq_patch_sigma_x(v, expected, tol):
     """
-    Test the boussinesq patch method for horizontal stress against example from J Bowles (fig E11.8a)
+    Test the boussinesq patch method for horizontal stress against example from
+    J Bowles (fig E11.8a)
 
-    Note that Bowles' results may have an error in them for the case of v = 1.0, where the result
-    calculated by this method is higher by about 6% than Bowles calculates.
+    Note that Bowles' results may have an error in them for the case of v = 1.0,
+    where the result calculated by this method is higher by about 6% than
+    Bowles calculates.
     """
 
     height = 7.5

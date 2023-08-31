@@ -15,14 +15,12 @@ TEST_DATA = toml.load(TEST_DATA_PATH)
 
 
 def build_V_R_pairs(V_R_data):
-
     test_data = TEST_DATA[V_R_data]
 
     pairs = []
 
     for region, v in test_data.items():
-
-        pairs.extend([(region, R), V_R] for R, V_R in v.items())
+        pairs.extend([(region, r), v_r] for r, v_r in v.items())
     return pairs
 
 
@@ -31,7 +29,8 @@ def build_V_R_pairs(V_R_data):
 )
 def test_V_R_no_F_x(input_vals, expected):
     """
-    Basic test of the V_R method. Ignores F_x because that's how the data I have is formatted.
+    Basic test of the V_R method.
+    Ignores F_x because that's how the data I have is formatted.
     """
 
     region = input_vals[0]
@@ -47,7 +46,8 @@ def test_V_R_no_F_x(input_vals, expected):
 @pytest.mark.parametrize("input_vals, expected", build_V_R_pairs("regional_windspeeds"))
 def test_V_R(input_vals, expected):
     """
-    Basic test of the V_R method. Ignores F_x because that's how the data I have is formatted.
+    Basic test of the V_R method.
+    Ignores F_x because that's how the data I have is formatted.
     """
 
     region = input_vals[0]
@@ -61,21 +61,18 @@ def test_V_R(input_vals, expected):
 
 
 def build_direction_pairs():
-
     test_data = TEST_DATA["wind_direction_factor"]
 
     pairs = []
 
     for region, v in test_data.items():
-
-        for direction, M_d in v.items():
-
+        for direction, m_d in v.items():
             if direction.lower() != "any":
                 direction = float(direction)
 
-            M_d = tuple(M_d)
+            m_d = tuple(m_d)
 
-            pairs.append([(region, direction), M_d])
+            pairs.append([(region, direction), m_d])
 
             if isinstance(direction, str):
                 continue
@@ -88,27 +85,23 @@ def build_direction_pairs():
 
 
 @pytest.mark.parametrize("input_vals, expected", build_direction_pairs())
-def test_M_d(input_vals, expected):
-
+def test_m_d(input_vals, expected):
     wind_region = input_vals[0]
     direction = input_vals[1]
 
-    M_d_calc = M_d(wind_region=wind_region, direction=direction)
+    m_d_calc = M_d(wind_region=wind_region, direction=direction)
 
-    assert isclose(M_d_calc[0], expected[0])
-    assert isclose(M_d_calc[1], expected[1])
+    assert isclose(m_d_calc[0], expected[0])
+    assert isclose(m_d_calc[1], expected[1])
 
 
 def test_M_zcat_basic():
-
     assert False
 
 
 def test_M_zcat_ave():
-
     assert False
 
 
 def test_M_s():
-
     assert False

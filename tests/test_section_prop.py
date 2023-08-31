@@ -10,10 +10,8 @@ import pytest
 from utilityscripts.section_prop import (
     CombinedSection,
     GenericSection,
-    Point,
     Polygon,
     Rectangle,
-    Section,
     make_I,
     make_T,
 )
@@ -90,7 +88,6 @@ ALL_PROPERTIES = (
 
 
 def get_I_sections():
-
     df = pd.read_excel("steel_sections.xlsx")
     df = df[df["Section Type"] == "I"]  # filter for I sections
 
@@ -127,7 +124,6 @@ def I_poly(b_f, d, t_f, t_w):
 
 
 def make_sections_for_combined_same_as_generic():
-
     sections = []
 
     # first section will be a T offset so its bottom flange is at the 0,0 origin
@@ -162,7 +158,6 @@ def make_sections_for_combined_same_as_generic():
 
 @pytest.mark.parametrize("sections", make_sections_for_combined_same_as_generic())
 def test_combined_section_and_generic_centroid(sections):
-
     a = sections[1].move(x=23, y=23)
     b = sections[0].move(x=23, y=23)
 
@@ -186,7 +181,6 @@ def test_combined_section_gives_same_as_generic(property, sections):
 
 
 def make_sections_for_combined_to_poly_is_correct():
-
     sections = []
 
     # first section will be a T offset so its bottom flange is at the 0,0 origin
@@ -282,13 +276,12 @@ def test_against_standard_sects(data, property):
         "J": ["J_approx"],
     }
 
-    I = make_I(b_f=data["bf"], d=data["d"], t_f=data["tf"], t_w=data["tw"])
+    i_sect = make_I(b_f=data["bf"], d=data["d"], t_f=data["tf"], t_w=data["tw"])
 
     attribute = MAP_SSHEET_TO_SECTION_PROP[property]
 
     for a in attribute:
-
-        calculated = getattr(I, a)
+        calculated = getattr(i_sect, a)
         test = data[property]
 
         assert math.isclose(calculated, test, rel_tol=0.1)
@@ -333,7 +326,7 @@ def test_against_standard_sects_with_radius(data, property):
     }
 
     if data["Fabrication Type"] == "Hot Rolled":
-        I = make_I(
+        i_sect = make_I(
             b_f=data["bf"],
             d=data["d"],
             t_f=data["tf"],
@@ -342,7 +335,7 @@ def test_against_standard_sects_with_radius(data, property):
             radius_size=data["r1"],
         )
     else:
-        I = make_I(
+        i_sect = make_I(
             b_f=data["bf"],
             d=data["d"],
             t_f=data["tf"],
@@ -354,8 +347,7 @@ def test_against_standard_sects_with_radius(data, property):
     attribute = MAP_SSHEET_TO_SECTION_PROP[property]
 
     for a in attribute:
-
-        calculated = getattr(I, a)
+        calculated = getattr(i_sect, a)
         test = data[property]
 
         assert math.isclose(calculated, test, rel_tol=0.03)
@@ -547,8 +539,7 @@ def test_plastic_modulus_uuvv():
 
 
 def test_plastic_modulus_uuvv2():
-
-    I = make_I(
+    i_sect = make_I(
         b_f=0.1905,
         d=0.6096,
         t_f=0.0256794,
@@ -557,7 +548,7 @@ def test_plastic_modulus_uuvv2():
         radius_size=0.018542,
     ).move(x=0, y=0.6096 / 2 + 0.025)
     plate = Rectangle(length=0.21, thickness=0.025).move(x=0, y=0.025 / 2)
-    strengthened = CombinedSection([(I, (0, 0)), (plate, (0, 0))])
+    strengthened = CombinedSection([(i_sect, (0, 0)), (plate, (0, 0))])
 
     uu = strengthened.first_moment_uu(cut_uu=-(strengthened.centroid.y - 0.025))
     xx = strengthened.first_moment_uu(cut_xx=0.025)
@@ -566,8 +557,7 @@ def test_plastic_modulus_uuvv2():
 
 
 def test_plastic_modulus_uu3():
-
-    I = make_I(
+    i_sect = make_I(
         b_f=0.1905,
         d=0.6096,
         t_f=0.0256794,
@@ -576,7 +566,7 @@ def test_plastic_modulus_uu3():
         radius_size=0.018542,
     ).move(x=0, y=0.6096 / 2 + 0.025)
     plate = Rectangle(length=0.21, thickness=0.025).move(x=0, y=0.025 / 2)
-    strengthened = CombinedSection([(I, (0, 0)), (plate, (0, 0))])
+    strengthened = CombinedSection([(i_sect, (0, 0)), (plate, (0, 0))])
 
     uu = strengthened.first_moment_uu(cut_xx=0)
 
