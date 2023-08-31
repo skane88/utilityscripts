@@ -464,9 +464,9 @@ class LugLoad:
     max_outplane_angle: float = (
         0.0  # The maximum angle of the load, out of plane. In Radians
     )
-    off_vertical_allowance: float = (
+    out_of_plane_allowance: float = (
         0.04  # An allowance for any un-intended out-of-plane loading. In % of SWL.
     )
-    apply_daf_to_off_vertical: bool = (
-        False  # Apply the dynamic amplification factor to the off-vertical allowance?
+    apply_daf_to_out_of_plane: bool = (
+        False  # Apply the dynamic amplification factor to the out of plane allowance?
     )
