@@ -315,6 +315,22 @@ class Lug:
         return self.b * self.t
 
     @property
+    def face_area(self):
+        """
+        The face area of the lug.
+        """
+
+        return self.lug_polygon().area
+
+    @property
+    def volume(self):
+        """
+        The volume of material in the lug.
+        """
+
+        return self.lug_polygon().area * self.t
+
+    @property
     def z_major(self):
         """
         Elastic modulus about the major axis.
