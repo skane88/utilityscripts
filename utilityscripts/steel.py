@@ -372,6 +372,61 @@ class Lug:
 
         return LineString([(0, 0), (self.b, 0)])
 
+    def resolve_load(
+        self,
+        load,
+        out_of_plane_load: float = 0.0,
+        angle_in_plane: float = 0.0,
+        angle_out_of_plane: float = 0.0,
+        hole_offset: float = 0.0,
+        out_of_plane_offset: float = 0.0,
+    ):
+        """
+        Resolves a load into its components.
+
+        Returns a tuple of the form:
+            (
+                fx: in-plane shear forces.
+                fy: vertical forces.
+                fz: out-of-plane shear forces.
+                mx: bending about the lug's strong axis.
+                my: bending about the lug's weak axis.
+                mz: torsional loads about the lug.
+            )
+
+        :param load: The load to resolve.
+            This should already have any dynamic factors, ULS factors etc. applied.
+        :param out_of_plane_load: Any blanket out-of-plane load to apply.
+            E.g. AS1418's nominal 4% off-vertical allowance etc.
+            This should already have any dynamic factors, ULS factors etc. applied.
+            NOTE: The sign of this load is important - this method makes no attempt
+            to resolve it into the same direction as the lug load.
+        :param angle_in_plane: The angle of the load in plane, in radians.
+            Vertical is 0.0, and CCW is +ve.
+        :param angle_out_of_plane: The angle fo the load out of plane, in radians.
+            Vertical is 0.0, and CCW is +ve.
+        :param hole_offset: Any offset in the direction of the load application.
+            E.g. if a D-shackle is used that fits tightly to the lug, the load actually
+            applies to the top of the D-shackle, not at the hole in the lug.
+            This may develop a moment about the weak axis of the lug.
+        :param out_of_plane_offset: Any hole offset in the z direction, such as caused
+            by the shackle not being centred on the lug.
+        """
+
+        ex = self.x_cp - hole_offset * sin(angle_in_plane)
+        ey = self.y_cp + hole_offset * cos(angle_in_plane)
+        ez = out_of_plane_offset
+
+        fx = load * sin(-angle_in_plane) * cos(angle_out_of_plane)
+        fy = load * cos(angle_in_plane) * cos(angle_out_of_plane)
+        fz = load * -sin(angle_out_of_plane) + out_of_plane_load
+
+        mx = fx * self.y_cp - fy * self.x_cp
+        my = fy * ez - fz * ey
+        mz = -fx * ez + fz * ex
+
+        return fx, fy, fz, mx, my, mz
+
     def slice(self, angle: float = 0.0, use_radians: bool = True):
         """
         Generate a line describing a slice through the lug.
