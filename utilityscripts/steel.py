@@ -135,15 +135,17 @@ class Lug:
     @property
     def x_cp(self):
         """
-        The x co-ordinate of the centre of the hole, from the bottom LHS corner.
+        The x co-ordinate of the centre of the hole,
+        from the centre of the base of the lug.
         """
 
-        return self.b / 2 + self.e_hole
+        return self.e_hole
 
     @property
     def y_cp(self):
         """
-        The y co-ordinate of the centre of the hole, from the bottom LHS corner.
+        The y co-ordinate of the centre of the hole,
+        from the centre of the base of the lug.
         """
         return self.h
 
@@ -161,7 +163,7 @@ class Lug:
         Distance from the left hand corner to the centre of the lug.
         """
 
-        return (self.x_cp**2 + self.y_cp**2) ** 0.5
+        return ((self.b / 2 + self.x_cp) ** 2 + self.y_cp**2) ** 0.5
 
     @property
     def _theta1_lhs_ctr(self):
@@ -202,7 +204,7 @@ class Lug:
         The x co-ordinate of the LHS tangent point, tp1.
         """
 
-        return self._l_lhs_tp1 * cos(self._theta_lhs_tp1)
+        return self._l_lhs_tp1 * cos(self._theta_lhs_tp1) - self.b / 2
 
     @property
     def y_tp1(self):
@@ -218,7 +220,7 @@ class Lug:
         Distance from the RHS corner to the centre of the lug.
         """
 
-        return ((self.b - self.x_cp) ** 2 + self.y_cp**2) ** 0.5
+        return ((self.b / 2 - self.x_cp) ** 2 + self.y_cp**2) ** 0.5
 
     @property
     def _theta1_rhs_ctr(self):
@@ -258,7 +260,7 @@ class Lug:
         The x co-ordinate of the RHS tangent point, tp2.
         """
 
-        return self.b - (self._l_rhs_tp2 * cos(self._theta_rhs_tp2))
+        return self.b / 2 - (self._l_rhs_tp2 * cos(self._theta_rhs_tp2))
 
     @property
     def y_tp2(self):
@@ -397,7 +399,7 @@ class Lug:
         :param no_points: the no. of points to use for the circular sections of the lug.
         """
 
-        points = [(0, 0), (self.b, 0)]
+        points = [(-self.b / 2, 0), (self.b / 2, 0)]
 
         points += build_circle(
             centroid=self.cp,
@@ -406,7 +408,7 @@ class Lug:
             limit_angles=(self._theta3_tp2, radians(180) - self._theta3_tp1),
         )
 
-        points.append((0, 0))
+        points.append((-self.b / 2, 0))
 
         hole_points = build_circle(
             centroid=(self.x_cp, self.y_cp),
