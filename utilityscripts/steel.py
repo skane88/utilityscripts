@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from math import asin, atan, cos, radians, sin
 
 import matplotlib.pyplot as plt
+import numpy as np
 from shapely import LineString, Polygon
 from shapely.affinity import rotate
 from shapely.ops import split
@@ -531,24 +532,87 @@ class LugLoad:
 
     swl: float  # the safe working load of the lug.
     daf: float = 1.0  # the dynamic amplification factor for the load
+    uls: float = 1.0  # the ULS load factor.
     hole_offset: float = (
         0.0  # any offset from the hole centre - for example due to a shackle etc.
     )
-    min_inplane_angle: float = (
+    min_in_plane_angle: float = (
         0.0  # the minimum angle of the load, in plane. In Radians.
     )
-    max_inplane_angle: float = (
+    max_in_plane_angle: float = (
         0.0  # the maximum angle of the load, in plane. In Radians.
     )
-    min_outplane_angle: float = (
+    min_out_plane_angle: float = (
         0.0  # The minimum angle of the load, out of plane. In Radians
     )
-    max_outplane_angle: float = (
+    max_out_plane_angle: float = (
         0.0  # The maximum angle of the load, out of plane. In Radians
     )
     out_of_plane_allowance: float = (
         0.04  # An allowance for any un-intended out-of-plane loading. In % of SWL.
     )
-    apply_daf_to_out_of_plane: bool = (
-        False  # Apply the dynamic amplification factor to the out of plane allowance?
+    daf_out_of_plane: float = (
+        1.0  # Dynamic factor to apply to the out-of-plane allowance.
     )
+    uls_out_of_plane: float = (
+        1.0  # ULS load factor to apply to the out-of-plane allowance.
+    )
+    out_of_plane_offset: float = 0.0
+    # Any horizontal offset out-of-plane (e.g. for shackles too wide for the lug)
+
+    def generate_loads(
+        self, match_sign_out_plane: bool = True, no_increments: int = 101
+    ):
+        """
+
+        :param match_sign_out_plane: For the blanket out-of-plane load, should the
+             sign of the out-of-plane load match that of the main load?
+        :param no_increments:
+        """
+
+        if self.min_in_plane_angle == self.max_in_plane_angle:
+            in_plane = [self.min_in_plane_angle]
+        else:
+            in_plane = np.linspace(
+                self.min_in_plane_angle, self.max_in_plane_angle, no_increments
+            )
+
+        if self.min_out_plane_angle == self.max_out_plane_angle:
+            out_plane = [self.min_out_plane_angle]
+        else:
+            out_plane = np.linspace(
+                self.min_out_plane_angle, self.max_out_plane_angle, no_increments
+            )
+
+        load = self.swl * self.daf * self.uls
+        out_plane_load = (
+            self.out_of_plane_allowance * self.daf_out_of_plane * self.uls_out_of_plane
+        )
+
+        if match_sign_out_plane:
+            out_plane_load = abs(out_plane_load)
+
+        loads = []
+
+        for i in in_plane:
+            for o in out_plane:
+                if match_sign_out_plane:
+                    if o > 0:
+                        sign = -1
+                    else:
+                        sign = 1
+                else:
+                    sign = 1
+
+                loads.append(
+                    {
+                        "load": load,
+                        "out_of_plane_load": out_plane_load * sign,
+                        "angle_in_plane": i,
+                        "angle_out_of_plane": o,
+                        "hole_offset": self.hole_offset,
+                        "out_of_plane_offset": self.out_of_plane_offset,
+                    }
+                )
+
+        return loads
