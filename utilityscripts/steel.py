@@ -20,14 +20,14 @@ def alpha_m(*, M_m, M_2, M_3, M_4):
 
     :param M_m: The maximum moment.
     :param M_2: The moment at the 1st 1/4 point.
-    :param M_3: The moment at midspan.
+    :param M_3: The moment at mid-span.
     :param M_4: The moment at the 2nd 1/4 point.
     """
 
     return 1.7 * M_m / (M_2**2 + M_3**2 + M_4**2) ** 0.5
 
 
-def alpha_v(*, d_p, t_w, f_y, s, f_yref=250.0):
+def alpha_v(*, d_p, t_w, f_y, s, f_y_ref=250.0):
     """
     Calculate the stiffened web shear buckling parameter alpha_v as per
     AS4100 S5.11.5.2.
@@ -37,10 +37,10 @@ def alpha_v(*, d_p, t_w, f_y, s, f_yref=250.0):
     :param f_y: The yield strength of the web panel.
     :param s: The length of the web or spacing of vertical stiffeners that meet the
         requirement of AS4100.
-    :param f_yref: The reference yield stress, nominally 250.
+    :param f_y_ref: The reference yield stress, nominally 250.
     """
 
-    a1 = (82 / ((d_p / t_w) * (f_y / f_yref) ** 0.5)) ** 2
+    a1 = (82 / ((d_p / t_w) * (f_y / f_y_ref) ** 0.5)) ** 2
 
     a2_param = 1.0 if (s / d_p) <= 1.0 else 0.75
 
@@ -105,7 +105,7 @@ def v_by(*, d_f, t_p, f_up):
 
 def v_bt(*, a_e, t_p, f_up):
     """
-    Calculate the bolt hole bearing capacity, as limited by tearout, as per
+    Calculate the bolt hole bearing capacity, as limited by tear-out, as per
     AS4100 S9.2.2.4
 
     :param a_e: Fastener edge distance.
@@ -485,7 +485,7 @@ class Lug:
         add_points=False,
     ):
         """
-        Plot the lug. Uses Shapely's plotting library to plot the lug.
+        Plot the lug. Uses the Shapely plotting library to plot the lug.
 
         Also returns a tuple of:
 
@@ -519,7 +519,7 @@ class Lug:
         plt.show()
 
         if add_points is False:
-            return (lug_patch, None)
+            return lug_patch, None
         else:
             return lug_patch
 
