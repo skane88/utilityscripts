@@ -70,8 +70,14 @@ MESH_RE = exactly(
 )
 
 
-def circle_area(dia):
-    return pi * (dia**2) / 4
+def circle_area(diameter):
+    """
+    Calculate the area of a circle.
+
+    :param dia: the diameter of the circle.
+    """
+
+    return pi * (diameter**2) / 4
 
 
 def is_bar(bar_spec: str) -> bool:
@@ -254,10 +260,22 @@ def reo_properties(bar_spec: str, *, main_width=1000.0, secondary_width=1000.0):
 
 
 def alpha_2(f_c):
+    """
+    Calculate parameter alpha_2 as per AS3600-2018.
+
+    :param f_c: The characteristic compressive strength of the concrete
+    """
+
     return max(0.67, 0.85 - 0.0015 * f_c)
 
 
 def gamma(f_c):
+    """
+    Calculate parameter gamma as per AS3600-2018.
+
+    :param f_c: The characteristic compressive strength of the concrete.
+    """
+
     return max(0.67, 0.97 - 0.0025 * f_c)
 
 
