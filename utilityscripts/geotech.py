@@ -415,6 +415,9 @@ def brinch_hansen_n_c(*, phi: float):
     :param phi: THe soil friction angle.
     """
 
+    if phi == 0.0:
+        return 0
+
     return ((exp(pi * tan(phi)) * (tan((phi / 2) + (pi / 4)) ** 2)) - 1) / (tan(phi))
 
 
