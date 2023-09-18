@@ -362,6 +362,9 @@ def brinch_hansen_kqz(*, z: float, b: float, phi: float):
     :param phi: The shear angle of the soil.
     """
 
+    if phi == 0:
+        return 0.0
+
     ko_q = brinch_hansen_ko_q(phi=phi)
     kinf_q = brinch_hansen_kinf_q(phi=phi)
     alpha_q = brinch_hansen_alpha_q(phi=phi)

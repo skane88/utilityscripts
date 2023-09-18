@@ -161,6 +161,7 @@ def test_boussinesq_patch_sigma_x(v, expected, tol):
 @pytest.mark.parametrize(
     "b, z, phi, expected",
     [
+        (1, 0, 0, 0),
         (1, 0, 5, 0.45),
         (1, 1, 5, 0.500),
         (1, 20, 5, 0.725),
