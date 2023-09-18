@@ -3,7 +3,7 @@ Contains some methods for working with geotech properties.
 """
 
 import warnings
-from math import exp, pi, radians, tan
+from math import cos, exp, pi, radians, sin, tan
 
 import numpy as np
 
@@ -351,3 +351,91 @@ def boussinesq_patch_sigma_x(q, x, y, z, v, x_patch, y_patch, n_int_x=10, n_int_
             sigma_x += boussinesq_point_sigma_x(Q=Q, x=xi, y=yi, z=z, v=v)
 
     return sigma_x
+
+
+def brinch_hansen_kqz(*, z: float, b: float, phi: float):
+    """
+    Earth pressure coefficient for overburden pressure.
+
+    :param z: The depth at which the coefficient is considered.
+    :param b: The pile diameter
+    :param phi: The shear angle of the soil.
+    """
+
+    ko_q = brinch_hansen_ko_q(phi=phi)
+    kinf_q = brinch_hansen_kinf_q(phi=phi)
+    alpha_q = brinch_hansen_alpha_q(phi=phi)
+
+    return (ko_q + kinf_q * alpha_q * (z / b)) / (1 + alpha_q * (z / b))
+
+
+def brinch_hansen_ko_q(*, phi: float):
+    """
+    Brinch-Hansen parameter Ko_q.
+
+    :param phi: The shear angle for the soil.
+    """
+
+    a1 = exp((phi + pi / 2) * tan(phi)) * cos(phi) * tan((phi / 2) + pi / 4)
+    a2 = exp((phi - pi / 2) * tan(phi)) * cos(phi) * tan(pi / 4 - phi / 2)
+
+    return a1 - a2
+
+
+def brinch_hansen_kinf_q(*, phi: float):
+    """
+    The Brinch-Hansen parameter Kinf_q
+
+    :param phi: The shear angle for the soil.
+    """
+
+    n_c = brinch_hansen_n_c(phi=phi)
+    dinf_c = brinch_hansen_dinf_c(phi=phi)
+
+    return n_c * dinf_c * k_o(phi=phi) * tan(phi)
+
+
+def brinch_hansen_n_c(*, phi: float):
+    """
+    Brinch-Hansen parameter N_c
+
+    :param phi: THe soil friction angle.
+    """
+
+    return ((exp(pi * tan(phi)) * (tan((phi / 2) + (pi / 4)) ** 2)) - 1) / (tan(phi))
+
+
+def brinch_hansen_dinf_c(*, phi):
+    """
+    Brinch-Hansen parmeter dinf_c
+
+    :param phi: The soil friction angle.
+    """
+
+    return 1.58 + 4.09 * (tan(phi) ** 4)
+
+
+def k_o(*, phi: float):
+    """
+    The soil at-rest pressure coefficient.
+
+    :param phi: The soil friction angle.
+    """
+
+    return 1 - sin(phi)
+
+
+def brinch_hansen_alpha_q(*, phi: float):
+    """
+    Brinch-Hansen parameter alpha_q
+
+    :param phi: The soil friction angle.
+    """
+
+    ko_q = brinch_hansen_ko_q(phi=phi)
+    kinf_q = brinch_hansen_kinf_q(phi=phi)
+
+    a1 = ko_q / (kinf_q - ko_q)
+    a2 = (k_o(phi=phi) * sin(phi)) / (sin((phi / 2) + (pi / 4)))
+
+    return a1 * a2

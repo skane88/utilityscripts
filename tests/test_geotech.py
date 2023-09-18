@@ -2,7 +2,7 @@
 Contains tests for the geotech module.
 """
 
-from math import isclose
+from math import isclose, radians
 
 import numpy as np
 import pytest
@@ -11,6 +11,7 @@ from utilityscripts.geotech import (
     boussinesq_patch_sigma_x,
     boussinesq_patch_sigma_z,
     boussinesq_point_sigma_z,
+    brinch_hansen_kqz,
     q_ult,
 )
 
@@ -155,3 +156,32 @@ def test_boussinesq_patch_sigma_x(v, expected, tol):
     actual = np.sum(sigma_x * delta_z)
 
     assert isclose(expected, actual, rel_tol=tol)
+
+
+@pytest.mark.parametrize(
+    "b, z, phi, expected",
+    [
+        (1, 1, 5, 0.500),
+        (1, 20, 5, 0.725),
+        (1, 20000, 5, 0.82),
+        (1, 1, 30, 6.0),
+        (1, 20, 30, 14),
+        (1, 20000, 30, 17.7),
+        (1, 1, 45, 22),
+        (1, 20, 45, 75),
+        (1, 20000, 45, 222),
+    ],
+)
+def test_bh_kqz(b, z, phi, expected):
+    """
+    Test the Brinch-Hansen Kqz method against values graphed in the
+    Australian Structural Engineer's Guidebook.
+
+    Values are fairly imprecise because they are read off a graph.
+    """
+
+    phi = radians(phi)
+
+    actual = brinch_hansen_kqz(z=z, b=b, phi=phi)
+
+    assert isclose(expected, actual, rel_tol=0.1)
