@@ -8,6 +8,16 @@ from math import cos, exp, pi, radians, sin, tan
 import numpy as np
 
 
+def k_o(*, phi: float):
+    """
+    The soil at-rest pressure coefficient.
+
+    :param phi: The soil friction angle.
+    """
+
+    return 1 - sin(phi)
+
+
 def q_ult(
     c,
     N_c,
@@ -416,16 +426,6 @@ def brinch_hansen_dinf_c(*, phi):
     """
 
     return 1.58 + 4.09 * (tan(phi) ** 4)
-
-
-def k_o(*, phi: float):
-    """
-    The soil at-rest pressure coefficient.
-
-    :param phi: The soil friction angle.
-    """
-
-    return 1 - sin(phi)
 
 
 def brinch_hansen_alpha_q(*, phi: float):
