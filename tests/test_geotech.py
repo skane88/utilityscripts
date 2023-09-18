@@ -11,6 +11,7 @@ from utilityscripts.geotech import (
     boussinesq_patch_sigma_x,
     boussinesq_patch_sigma_z,
     boussinesq_point_sigma_z,
+    brinch_hansen_kcz,
     brinch_hansen_kqz,
     q_ult,
 )
@@ -187,5 +188,41 @@ def test_bh_kqz(b, z, phi, expected):
     phi = radians(phi)
 
     actual = brinch_hansen_kqz(z=z, b=b, phi=phi)
+
+    assert isclose(expected, actual, rel_tol=0.1)
+
+
+@pytest.mark.parametrize(
+    "b, z, phi, expected",
+    [
+        (1, 0, 0, 2.6),
+        (1, 1, 0, 4.8),
+        (1, 20, 0, 7.8),
+        (1, 20000, 0, 8.14),
+        (1, 0, 5, 2.9),
+        (1, 1, 5, 5.6),
+        (1, 20, 5, 9.8),
+        (1, 20000, 5, 10.2),
+        (1, 0, 30, 7),
+        (1, 1, 30, 17),
+        (1, 20, 30, 51),
+        (1, 20000, 30, 61.4),
+        (1, 0, 45, 18),
+        (1, 1, 45, 48),
+        (1, 20, 45, 360),
+        (1, 20000, 45, 759),
+    ],
+)
+def test_bh_kcz(b, z, phi, expected):
+    """
+    Test the Brinch-Hansen Kcz method against values graphed in the
+    Australian Structural Engineer's Guidebook.
+
+    Values are fairly imprecise because they are read off a graph.
+    """
+
+    phi = radians(phi)
+
+    actual = brinch_hansen_kcz(z=z, b=b, phi=phi)
 
     assert isclose(expected, actual, rel_tol=0.1)

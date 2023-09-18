@@ -445,3 +445,63 @@ def brinch_hansen_alpha_q(*, phi: float):
     a2 = (k_o(phi=phi) * sin(phi)) / (sin((phi / 2) + (pi / 4)))
 
     return a1 * a2
+
+
+def brinch_hansen_kcz(*, b: float, z: float, phi: float):
+    """
+    Brinch-Hansen K_c parameter.
+
+    :param b: Pile diameter.
+    :param z: Depth at which parameter is assessed.
+    :param phi: Soil shear angle.
+    """
+
+    if phi == 0.0:
+        phi = 0.0000000001  # subs to give a value at phi=0.0
+
+    ko_c = brinch_hansen_ko_c(phi=phi)
+    kinf_c = brinch_hansen_kinf_c(phi=phi)
+    alpha_c = brinch_hansen_alpha_c(phi=phi)
+
+    a1 = ko_c + kinf_c * alpha_c * (z / b)
+    a2 = 1 + alpha_c * (z / b)
+
+    return a1 / a2
+
+
+def brinch_hansen_ko_c(*, phi: float):
+    """
+    Brinch-Hansen parameter Ko_c
+
+    :param phi: Soil shear angle.
+    """
+
+    a1 = exp((phi + pi / 2) * tan(phi)) * cos(phi) * tan((phi / 2) + (pi / 4)) - 1
+
+    return a1 / (tan(phi))
+
+
+def brinch_hansen_kinf_c(*, phi: float):
+    """
+    Brinch-Hansen Kinf_c parameter.
+
+    :param phi: Soil shear angle.
+    """
+
+    return brinch_hansen_n_c(phi=phi) * brinch_hansen_dinf_c(phi=phi)
+
+
+def brinch_hansen_alpha_c(*, phi: float):
+    """
+    Brinch-Hansen alpha_c parameter.
+
+    :param phi: Soil shear angle.
+    """
+
+    ko_c = brinch_hansen_ko_c(phi=phi)
+    kinf_c = brinch_hansen_kinf_c(phi=phi)
+
+    a1 = ko_c / (kinf_c - ko_c)
+    a2 = 2 * sin((phi / 2) + (pi / 4))
+
+    return a1 * a2
