@@ -18,6 +18,26 @@ def k_o(*, phi: float):
     return 1 - sin(phi)
 
 
+def k_p(*, phi: float):
+    """
+    The soil passive pressure coefficient.
+
+    :param phi: The soil friction angle.
+    """
+
+    return (1 + sin(phi)) / (1 - sin(phi))
+
+
+def k_a(*, phi: float):
+    """
+    The soil active pressure coefficient.
+
+    :param phi: The soil friction angle.
+    """
+
+    return (1 - sin(phi)) / (1 + sin(phi))
+
+
 def q_ult(
     c,
     N_c,
