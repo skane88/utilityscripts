@@ -8,7 +8,6 @@ from geometry import Circle, Circular_Segment
 
 
 def test_circle():
-
     c1 = Circle(r=1)
 
     assert isclose(c1.d, 2)
@@ -23,7 +22,6 @@ def test_circle():
 
 
 def test_segment():
-
     radius = 1.75
 
     c1 = Circular_Segment(r=radius, y2=0.5)
@@ -58,7 +56,6 @@ def test_segment_2():
     tolerance = 0.00001
 
     for test, vals in test_chords.items():
-
         c = Circular_Segment(r=vals["r"], theta=vals["theta"])
 
         assert isclose(c.r, vals["r"], rel_tol=tolerance)
