@@ -43,7 +43,7 @@ class WindSite:
         self.shielding_data = shielding_data
 
     def V_R(self, R: float, ignore_F_x: bool = False):
-        return V_R(wind_region=self.wind_region, R=R, ignore_F_x=ignore_F_x)
+        return V_R(wind_region=self.wind_region, R=R, ignore_M_c=ignore_F_x)
 
     def M_d(self, direction: Union[float, str]):
         return M_d(direction=float, wind_region=self.wind_region)
@@ -111,29 +111,59 @@ def F_x(*, wind_region, R):
     return STANDARD_DATA["region_windspeed_parameters"][wind_region]["F_x"]
 
 
-def V_R(*, wind_region: str, R, ignore_F_x: bool = False):
+def M_c(*, wind_region, R, version: str = "2021"):
+    """
+    Calculate the climate change factor M_C.
+
+    :param wind_region: The wind region.
+    :param R: The Average Recurrence Interval (ARI) of the windspeed.
+    :param version: The version of the standard to look up.
+    """
+
+    M_c_min_R = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region][
+        "M_c_min_R"
+    ]
+
+    if R < M_c_min_R:
+        return 1.0
+
+    return STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["M_c"]
+
+
+def V_R(*, wind_region: str, R, version: str = "2021", ignore_M_c: bool = False):
     """
     Calculate the regional windspeed V_R based on the region and return period.
 
     :param wind_region: The wind region where the structure is located.
     :param R: The Average Recurrence Interval (ARI) of the windspeed.
-    :param ignore_F_x: Ignore the cyclonic region factor F_C or F_D?
+    :param ignore_M_c: Ignore the cyclonic region factor M_c, or for older standards
+        the uncertainty factor F_C or F_D?
     :return: The regional windspeed.
     """
 
     if len(STANDARD_DATA) == 0:
         init_standard_data()
 
-    F = F_x(wind_region=wind_region, R=R) if not ignore_F_x else 1.0
-    a = STANDARD_DATA["region_windspeed_parameters"][wind_region]["a"]
-    b = STANDARD_DATA["region_windspeed_parameters"][wind_region]["b"]
-    k = STANDARD_DATA["region_windspeed_parameters"][wind_region]["k"]
-    V_min = STANDARD_DATA["region_windspeed_parameters"][wind_region]["V_min"]
+    if ignore_M_c:
+        F = 1.0
+    else:
+        F = (
+            M_c(wind_region=wind_region, R=R)
+            if version == "2021"
+            else F_x(wind_region=wind_region, R=R)
+        )
+
+    a = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["a"]
+    b = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["b"]
+    k = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["k"]
+    V_min = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["V_min"]
 
     return max(V_min, F * V_R_no_F_x(a=a, b=b, R=R, k=k))
 
 
-def M_d(*, wind_region: str, direction: Union[float, str]) -> Tuple[float, float]:
+def M_d(
+    *, wind_region: str, direction: float | str, version: str = "2021"
+) -> Tuple[float, float]:
     """
     Return the wind direction multiplier for a given region and wind direction.
 
@@ -143,7 +173,8 @@ def M_d(*, wind_region: str, direction: Union[float, str]) -> Tuple[float, float
         90 = Wind from East
         180 = Wind from South
         270 = Wind from West
-        Alternatively, use "any" to return the any direction value.
+        Alternatively, use "ANY" to return the any direction value, or the cardinal
+        values (e.g. "N", "NE", "E", ..., "NW").
     :return: The direction multiplier as a Tuple containing (M_d, M_d_cladding)
     """
 
@@ -152,18 +183,24 @@ def M_d(*, wind_region: str, direction: Union[float, str]) -> Tuple[float, float
         init_standard_data()
 
     if isinstance(direction, str):
-        direction = direction.lower()
+        direction = direction.upper()
 
-    region_m_d_parameters = STANDARD_DATA["region_direction_parameters"][wind_region]
+    region_m_d_parameters = STANDARD_DATA[version]["region_direction_parameters"][
+        wind_region
+    ]
     wind_direction_defs = STANDARD_DATA["wind_direction_definitions"]
 
     F_not_clad = region_m_d_parameters["F_not_clad"]
 
     # next bail out early if the direction doesn't matter
-    if direction == "any":
+    if direction == "ANY":
         m_d_clad = region_m_d_parameters[direction]
         m_d = m_d_clad * F_not_clad
         return m_d, m_d_clad
+
+    # next if the user has provided a text direction (e.g. "NW") get the angle value.
+    if direction in wind_direction_defs:
+        direction = wind_direction_defs[direction][0]
 
     # now check that direction is within the range of 0-360
     direction = direction % 360

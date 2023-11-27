@@ -37,7 +37,7 @@ def test_V_R_no_F_x(input_vals, expected):
     R = int(input_vals[1])
 
     V_R_calc = round(
-        V_R(wind_region=region, R=R, ignore_F_x=True)
+        V_R(wind_region=region, R=R, ignore_M_c=True)
     )  # round because the data from AS1170 is rounded
 
     assert V_R_calc == expected
@@ -53,7 +53,7 @@ def test_V_R(input_vals, expected):
     region = input_vals[0]
     R = int(input_vals[1])
 
-    V_R_calc = V_R(wind_region=region, R=R, ignore_F_x=False)
+    V_R_calc = V_R(wind_region=region, R=R, ignore_M_c=False)
 
     V_R_calc = round(V_R_calc)  # round because the data from AS1170 is rounded
 
