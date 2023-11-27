@@ -1,6 +1,16 @@
 # contains data for the AS1170.2 module
 
-[region_windspeed_parameters]
+[wind_direction_definitions]
+N = [0.0, 360.0]
+NE = [45.0]
+E = [90.0]
+SE = [135.0]
+S = [180.0]
+SW = [225.0]
+W = [270.0]
+NW = [315.0]
+
+[2011.region_windspeed_parameters]
 'A1' = { 'a' = 67, 'b' = 41, 'k' = 0.1, 'V_min' = 30.0, 'F_x' = 1.00, 'F_x_min_R' = 0 }
 'A2' = { 'a' = 67, 'b' = 41, 'k' = 0.1, 'V_min' = 30.0, 'F_x' = 1.00, 'F_x_min_R' = 0 }
 'A3' = { 'a' = 67, 'b' = 41, 'k' = 0.1, 'V_min' = 30.0, 'F_x' = 1.00, 'F_x_min_R' = 0 }
@@ -13,7 +23,23 @@
 'C' = { 'a' = 122, 'b' = 104, 'k' = 0.1, 'V_min' = 23.0, 'F_x' = 1.05, 'F_x_min_R' = 50 }
 'D' = { 'a' = 156, 'b' = 142, 'k' = 0.1, 'V_min' = 23.0, 'F_x' = 1.10, 'F_x_min_R' = 50 }
 
-[region_direction_parameters.A1]
+[2021.region_windspeed_parameters]
+'A0' = { 'a' = 67, 'b' = 41, 'k' = 0.1, 'V_min' = 30.0, 'M_c' = 1.00, 'M_c_min_R' = 0 }
+'A1' = { 'a' = 67, 'b' = 41, 'k' = 0.1, 'V_min' = 30.0, 'M_c' = 1.00, 'M_c_min_R' = 0 }
+'A2' = { 'a' = 67, 'b' = 41, 'k' = 0.1, 'V_min' = 30.0, 'M_c' = 1.00, 'M_c_min_R' = 0 }
+'A3' = { 'a' = 67, 'b' = 41, 'k' = 0.1, 'V_min' = 30.0, 'M_c' = 1.00, 'M_c_min_R' = 0 }
+'A4' = { 'a' = 67, 'b' = 41, 'k' = 0.1, 'V_min' = 30.0, 'M_c' = 1.00, 'M_c_min_R' = 0 }
+'A5' = { 'a' = 67, 'b' = 41, 'k' = 0.1, 'V_min' = 30.0, 'M_c' = 1.00, 'M_c_min_R' = 0 }
+'B1' = { 'a' = 106, 'b' = 92, 'k' = 0.1, 'V_min' = 26.0, 'M_c' = 1.05, 'M_c_min_R' = 0 }
+'B2' = { 'a' = 106, 'b' = 92, 'k' = 0.1, 'V_min' = 26.0, 'M_c' = 1.05, 'M_c_min_R' = 0 }
+'C' = { 'a' = 122, 'b' = 104, 'k' = 0.1, 'V_min' = 23.0, 'M_c' = 1.05, 'M_c_min_R' = 0 }
+'D' = { 'a' = 156, 'b' = 142, 'k' = 0.1, 'V_min' = 23.0, 'M_c' = 1.05, 'M_c_min_R' = 0 }
+'NZ1' = { 'a' = 61, 'b' = 30, 'k' = 0.1, 'V_min' = 31.0, 'M_c' = 1.00, 'M_c_min_R' = 0 }
+'NZ2' = { 'a' = 61, 'b' = 30, 'k' = 0.1, 'V_min' = 31.0, 'M_c' = 1.00, 'M_c_min_R' = 0 }
+'NZ3' = { 'a' = 61, 'b' = 30, 'k' = 0.1, 'V_min' = 37.0, 'M_c' = 1.00, 'M_c_min_R' = 0 }
+'NZ4' = { 'a' = 61, 'b' = 30, 'k' = 0.1, 'V_min' = 38.0, 'M_c' = 1.00, 'M_c_min_R' = 0 }
+
+[2011.region_direction_parameters.A1]
 N = 0.90
 NE = 0.80
 E = 0.80
@@ -22,9 +48,9 @@ S = 0.85
 SW = 0.95
 W = 1.00
 NW = 0.95
-any = 1.00
+ANY = 1.00
 F_not_clad = 1.00
-[region_direction_parameters.A2]
+[2011.region_direction_parameters.A2]
 N = 0.80
 NE = 0.80
 E = 0.80
@@ -33,9 +59,9 @@ S = 0.90
 SW = 0.95
 W = 1.00
 NW = 0.95
-any = 1.00
+ANY = 1.00
 F_not_clad = 1.00
-[region_direction_parameters.A3]
+[2011.region_direction_parameters.A3]
 N = 0.85
 NE = 0.80
 E = 0.80
@@ -44,9 +70,9 @@ S = 0.80
 SW = 0.85
 W = 0.90
 NW = 1.00
-any = 1.00
+ANY = 1.00
 F_not_clad = 1.00
-[region_direction_parameters.A4]
+[2011.region_direction_parameters.A4]
 N = 0.90
 NE = 0.85
 E = 0.90
@@ -55,9 +81,9 @@ S = 0.95
 SW = 0.95
 W = 0.95
 NW = 0.90
-any = 1.00
+ANY = 1.00
 F_not_clad = 1.00
-[region_direction_parameters.A5]
+[2011.region_direction_parameters.A5]
 N = 1.00
 NE = 0.85
 E = 0.80
@@ -66,9 +92,9 @@ S = 0.85
 SW = 0.90
 W = 1.00
 NW = 0.95
-any = 1.00
+ANY = 1.00
 F_not_clad = 1.00
-[region_direction_parameters.A6]
+[2011.region_direction_parameters.A6]
 N = 0.85
 NE = 0.95
 E = 1.00
@@ -77,9 +103,9 @@ S = 0.85
 SW = 0.95
 W = 1.00
 NW = 0.95
-any = 1.00
+ANY = 1.00
 F_not_clad = 1.00
-[region_direction_parameters.A7]
+[2011.region_direction_parameters.A7]
 N = 0.90
 NE = 0.90
 E = 0.80
@@ -88,9 +114,9 @@ S = 0.90
 SW = 0.90
 W = 1.00
 NW = 1.00
-any = 1.00
+ANY = 1.00
 F_not_clad = 1.00
-[region_direction_parameters.W]
+[2011.region_direction_parameters.W]
 N = 1.00
 NE = 0.95
 E = 0.80
@@ -99,9 +125,9 @@ S = 1.00
 SW = 1.00
 W = 0.90
 NW = 0.95
-any = 1.00
+ANY = 1.00
 F_not_clad = 1.00
-[region_direction_parameters.B]
+[2011.region_direction_parameters.B]
 N = 1.00
 NE = 1.00
 E = 1.00
@@ -110,9 +136,9 @@ S = 1.00
 SW = 1.00
 W = 1.00
 NW = 1.00
-any = 1.00
+ANY = 1.00
 F_not_clad = 0.95
-[region_direction_parameters.C]
+[2011.region_direction_parameters.C]
 N = 1.00
 NE = 1.00
 E = 1.00
@@ -121,9 +147,9 @@ S = 1.00
 SW = 1.00
 W = 1.00
 NW = 1.00
-any = 1.00
+ANY = 1.00
 F_not_clad = 0.95
-[region_direction_parameters.D]
+[2011.region_direction_parameters.D]
 N = 1.00
 NE = 1.00
 E = 1.00
@@ -132,28 +158,173 @@ S = 1.00
 SW = 1.00
 W = 1.00
 NW = 1.00
-any = 1.00
+ANY = 1.00
 F_not_clad = 0.95
 
-[wind_direction_definitions]
-N = [0.0, 360.0]
-NE = [45.0]
-E = [90.0]
-SE = [135.0]
-S = [180.0]
-SW = [225.0]
-W = [270.0]
-NW = [315.0]
+[2021.region_direction_parameters.A0]
+N = 0.90
+NE = 0.85
+E = 0.85
+SE = 0.90
+S = 0.90
+SW = 0.95
+W = 1.00
+NW = 0.95
+ANY = 1.00
+F_not_clad = 1.00
+[2021.region_direction_parameters.A1]
+N = 0.90
+NE = 0.85
+E = 0.85
+SE = 0.80
+S = 0.80
+SW = 0.95
+W = 1.00
+NW = 0.95
+ANY = 1.00
+F_not_clad = 1.00
+[2021.region_direction_parameters.A2]
+N = 0.85
+NE = 0.75
+E = 0.85
+SE = 0.95
+S = 0.95
+SW = 0.95
+W = 1.00
+NW = 0.95
+ANY = 1.00
+F_not_clad = 1.00
+[2021.region_direction_parameters.A3]
+N = 0.90
+NE = 0.75
+E = 0.75
+SE = 0.90
+S = 0.90
+SW = 0.95
+W = 1.00
+NW = 0.95
+ANY = 1.00
+F_not_clad = 1.00
+[2021.region_direction_parameters.A4]
+N = 0.85
+NE = 0.75
+E = 0.75
+SE = 0.80
+S = 0.80
+SW = 0.90
+W = 1.00
+NW = 1.00
+ANY = 1.00
+F_not_clad = 1.00
+[2021.region_direction_parameters.A5]
+N = 0.95
+NE = 0.80
+E = 0.80
+SE = 0.80
+S = 0.80
+SW = 0.95
+W = 1.00
+NW = 0.95
+ANY = 1.00
+F_not_clad = 1.00
+[2021.region_direction_parameters.B1]
+N = 0.75
+NE = 0.75
+E = 0.85
+SE = 0.90
+S = 0.95
+SW = 0.95
+W = 0.95
+NW = 0.90
+ANY = 1.00
+F_not_clad = 1.00
+[2021.region_direction_parameters.B2]
+N = 1.00
+NE = 1.00
+E = 1.00
+SE = 1.00
+S = 1.00
+SW = 1.00
+W = 1.00
+NW = 1.00
+ANY = 1.00
+F_not_clad = 0.90
+[2021.region_direction_parameters.C]
+N = 1.00
+NE = 1.00
+E = 1.00
+SE = 1.00
+S = 1.00
+SW = 1.00
+W = 1.00
+NW = 1.00
+ANY = 1.00
+F_not_clad = 0.90
+[2021.region_direction_parameters.D]
+N = 1.00
+NE = 1.00
+E = 1.00
+SE = 1.00
+S = 1.00
+SW = 1.00
+W = 1.00
+NW = 1.00
+ANY = 1.00
+F_not_clad = 0.90
+[2021.region_direction_parameters.NZ1]
+N = 0.90
+NE = 0.95
+E = 0.95
+SE = 0.95
+S = 0.90
+SW = 1.00
+W = 1.00
+NW = 0.95
+ANY = 1.00
+F_not_clad = 1.00
+[2021.region_direction_parameters.NZ2]
+N = 0.95
+NE = 0.90
+E = 0.80
+SE = 0.90
+S = 0.95
+SW = 1.00
+W = 1.00
+NW = 1.00
+ANY = 1.00
+F_not_clad = 1.00
+[2021.region_direction_parameters.NZ3]
+N = 1.00
+NE = 0.75
+E = 0.75
+SE = 0.85
+S = 0.95
+SW = 0.95
+W = 0.90
+NW = 1.00
+ANY = 1.00
+F_not_clad = 1.00
+[2021.region_direction_parameters.NZ4]
+N = 0.95
+NE = 0.75
+E = 0.75
+SE = 0.75
+S = 0.85
+SW = 0.95
+W = 1.00
+NW = 1.00
+ANY = 1.00
+F_not_clad = 1.00
 
-[terrain_height_multipliers]
+[2011.terrain_height_multipliers]
 heights = [0.0, 3.0, 5.0, 10.0, 15.0, 20.0, 30.0, 40.0, 50.0, 75.0, 100.0, 150.0, 200.0]
-[terrain_height_multipliers.data]
+[2011.terrain_height_multipliers.data]
 1 = [0.99, 0.99, 1.05, 1.12, 1.16, 1.19, 1.22, 1.24, 1.25, 1.27, 1.29, 1.31, 1.32]
 2 = [0.91, 0.91, 0.91, 1.00, 1.05, 1.08, 1.12, 1.16, 1.18, 1.22, 1.24, 1.27, 1.29]
 3 = [0.83, 0.83, 0.83, 0.83, 0.89, 0.94, 1.00, 1.04, 1.07, 1.12, 1.16, 1.21, 1.24]
 4 = [0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.80, 0.85, 0.90, 0.98, 1.03, 1.11, 1.16]
 
-[shielding_multiplier]
+[2011.shielding_multiplier]
 "1.5" = 0.7
 "3.0" = 0.8
 "6.0" = 0.9
