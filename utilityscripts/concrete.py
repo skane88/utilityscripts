@@ -369,3 +369,116 @@ def l_syt(*, f_c, f_sy, d_b, k_1=1.0, k_3=1.0, k_4=1.0, k_5=1.0):
     l_min = 0.058 * f_sy * k_1 * d_b
 
     return max(l_calc, l_min)
+
+
+class PadFooting:
+    """
+    Class to describe a basic pad footing.
+    """
+
+    def __init__(
+        self,
+        bx,
+        bz,
+        d_pad,
+        bx_pedestal,
+        bz_pedestal,
+        h_pedestal,
+        soil_level,
+        washout_depth,
+        concrete_density: float = 24.0,
+    ):
+        """
+
+        :param bx: The pedestal width in the x direction.
+        :param bz: The pedestal width in the z direction.
+        :param d_pad: The depth of the footing pad.
+        :param bx_pedestal: The pedestal width in the x direction.
+        :param bz_pedestal: The pedestal width in the z direction.
+        :param h_pedestal: The pedestal height.
+        :param soil_level: The depth of soil above the top of the pad.
+        :param washout_depth: The depth of soil to ignore for uplift assessment.
+            This is typically an allowance for soil being washed out, but soil may
+            also be removed for other reasons, such as excessive cleanup activities or
+            operational changes around the footing.
+        :param concrete_density: The density of concrete to use in the assessment.
+            A default value of 24kN/m^3 is used, but if the density is different (due
+            to reinforcement steel for example) or different units (e.g. 2400kg/m^3)
+            are being used then update as required.
+        """
+
+        self.bx = bx
+        self.bz = bz
+        self.d_pad = d_pad
+        self.bx_pedestal = bx_pedestal
+        self.bz_pedestal = bz_pedestal
+        self.h_pedestal = h_pedestal
+        self.soil_level = soil_level
+        self.washout_depth = washout_depth
+        self.concrete_density = concrete_density
+
+    @property
+    def vol_concrete(self):
+        """
+        Return the volume of concrete in the footing.
+        """
+
+        return (
+            self.bx * self.bz * self.d_pad
+            + self.bx_pedestal * self.bz_pedestal * self.h_pedestal
+        )
+
+    @property
+    def footing_mass(self):
+        """
+        The mass of the concrete in the footing.
+        """
+
+        return self.vol_concrete * self.concrete_density
+
+    @property
+    def soil_level_washout(self):
+        """
+        The depth of soil after accounting for washout.
+        """
+
+        return self.soil_level - self.washout_depth
+
+    def vol_soil_vertical(self, washout: bool = True):
+        """
+        Return the volume of soil immediately above the footing.
+
+        :param washout: Consider the effects of soil washout.
+        """
+
+        depth = self.soil_level_washout if washout else self.soil_level
+
+        return (self.pad_area - self.bx_pedestal * self.bz_pedestal) * depth
+
+    @property
+    def pad_area(self):
+        """
+        Return the pad area.
+        """
+
+        return self.bx * self.bz
+
+    @property
+    def elastic_modulus_x(self):
+        """
+        Calculate the footing's elastic modulus in the x direction.
+
+        Used to calculate pressures at serviceability.
+        """
+
+        return self.bz * self.bx**2 / 6
+
+    @property
+    def elastic_modulus_z(self):
+        """
+        Calculate the footing's elastic modulus in the z direction.
+
+        Used to calculate pressures at serviceability.
+        """
+
+        return self.bx * self.bz**2 / 6
