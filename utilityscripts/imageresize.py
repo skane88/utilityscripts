@@ -19,6 +19,10 @@ register_heif_opener()
 VALID_EXTENSIONS = [".jpg", ".jpeg", ".bmp", ".png", ".heic"]
 
 
+class ImageResizeException(Exception):
+    """Exception raised when errors occur in this module"""
+
+
 def compress_image(
     *,
     file_path: Path,
@@ -53,8 +57,7 @@ def compress_image(
     if not file_path.exists():
         if missing_ok:
             return None
-        else:
-            raise FileNotFoundError(f"Could not find file at {file_path}")
+        raise FileNotFoundError(f"Could not find file at {file_path}")
 
     if file_path.suffix.lower() not in VALID_EXTENSIONS:
         # if file path is not a valid image, just bail out.
@@ -127,7 +130,7 @@ def compress_image(
                 quality_max = quality_average - 1
 
         if quality_acceptable <= -1:
-            raise Exception("No valid quality level found")
+            raise ImageResizeException("No valid quality level found")
 
         size = _get_size(picture_to_size=picture, quality=quality_acceptable)
 
@@ -135,7 +138,7 @@ def compress_image(
 
     if quality_acceptable >= quality_min_orig:
         if size > target_size and not save_larger_than_target:
-            raise Exception("No valid quality level found, not saving.")
+            raise ImageResizeException("No valid quality level found, not saving.")
 
         # get a new file path in case the old was not a jpg
         new_file_path = file_path.with_suffix(".jpg")
@@ -144,7 +147,7 @@ def compress_image(
             picture=picture,
             file_path=new_file_path,
             quality=quality_acceptable,
-            format="JPEG",
+            image_format="JPEG",
         )
 
         # need to delete the original file if not a JPG.
@@ -153,7 +156,7 @@ def compress_image(
 
     else:
         # if we get to here, we seem to have an error.
-        raise Exception(
+        raise ImageResizeException(
             (
                 "Expected quality level to be => than minimum allowable. "
                 + f"Values were: calculated quality ={quality_acceptable}, "
@@ -187,7 +190,7 @@ def _save_image(
     picture: Image,
     file_path: Union[Path, io.BytesIO],
     quality: int,
-    format: str = "JPEG",
+    image_format: str = "JPEG",
     exif=None,
 ):
     """
@@ -195,7 +198,7 @@ def _save_image(
     :param picture: The image to save.
     :param file_path: The path to save it to.
     :param quality: The quality level to save at.
-    :param format: The file format to save in. Must be a format known to PILlow.
+    :param image_format: The file format to save in. Must be a format known to PILlow.
     :param exif: Any exif data to save to image in a format compatible with PILlow.
         If None, any existing exif data on the image will be used instead.
     """
@@ -204,9 +207,9 @@ def _save_image(
         exif = picture.info["exif"] if "exif" in picture.info else None
     try:
         if exif is None:
-            picture.save(fp=file_path, format=format, quality=quality)
+            picture.save(fp=file_path, format=image_format, quality=quality)
         else:
-            picture.save(fp=file_path, format=format, quality=quality, exif=exif)
+            picture.save(fp=file_path, format=image_format, quality=quality, exif=exif)
 
     except OSError:
         # one cause of potential errors is that a jpg file is truncated.
@@ -298,7 +301,6 @@ def compress_all_in_folder(
     *,
     folder: Path,
     incl_subfolders: bool = False,
-    with_progress: bool = False,
     target_size: int = 512000,
     quality_min: int = 25,
     quality_max: int = 95,
@@ -312,7 +314,6 @@ def compress_all_in_folder(
 
     :param folder: The folder to search.
     :param incl_subfolders: Do you want to resize images in subfolders?
-    :param with_progress: Do you want a progress indicator?
     :param target_size: The target size in bytes of the image.
         Default of 512000 bytes = 500kb
     :param quality_min: The minimum quality setting for the PILlow save function.
@@ -369,25 +370,25 @@ def compress_all_in_folder(
     with mp.Pool(processes=cpus) as p:
         total = len(files_to_resize)
 
-        t_size = [target_size] * total
-        q_min = [quality_min] * total
-        q_max = [quality_max] * total
-        save_larger = [save_larger_than_target] * total
-        d_orig = [delete_orig] * total
-        m_ok = [missing_ok] * total
-        v_bose = [verbose] * total
-        i_errors = [ignore_errors] * total
+        target_size_list = [target_size] * total
+        quality_min_list = [quality_min] * total
+        quality_max_list = [quality_max] * total
+        save_larger_list = [save_larger_than_target] * total
+        delete_orig_list = [delete_orig] * total
+        missing_ok_list = [missing_ok] * total
+        verbose_list = [verbose] * total
+        ignore_errors_list = [ignore_errors] * total
 
         input_vals = zip(
             files_to_resize,
-            t_size,
-            q_min,
-            q_max,
-            save_larger,
-            d_orig,
-            m_ok,
-            v_bose,
-            i_errors,
+            target_size_list,
+            quality_min_list,
+            quality_max_list,
+            save_larger_list,
+            delete_orig_list,
+            missing_ok_list,
+            verbose_list,
+            ignore_errors_list,
         )
 
         if verbose:
@@ -398,10 +399,10 @@ def compress_all_in_folder(
         else:
             new_files = p.imap_unordered(_help_resize, input_vals)
 
-    for op, np, o_size, f_size, warn in new_files:
-        output_files = [np]
-        original_size += o_size
-        final_size += f_size
+    for _, new_path, orig_size, final_size, warn in new_files:
+        output_files = [new_path]
+        original_size += orig_size
+        final_size += final_size
 
         if warn is not None:
             warnings += [warn]
@@ -478,10 +479,9 @@ def main():
     )
 
     if get_true_false(prefix="Do you wish to continue"):
-        files, warnings = compress_all_in_folder(
+        _, warnings = compress_all_in_folder(
             folder=folder,
             incl_subfolders=subfolders,
-            with_progress=True,
             target_size=max_size,
             save_larger_than_target=True,
             verbose=True,
