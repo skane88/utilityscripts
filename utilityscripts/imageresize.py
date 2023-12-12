@@ -457,7 +457,7 @@ def main():
         prefix="What maximum file size do you want, in kb",
         allow_none=True,
         min_val=50,
-        default_val=250,
+        default_val=512,
     )
     max_size = max_size * 1024
 
