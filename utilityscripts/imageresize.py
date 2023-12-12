@@ -399,10 +399,10 @@ def compress_all_in_folder(
         else:
             new_files = p.imap_unordered(_help_resize, input_vals)
 
-    for _, new_path, orig_size, final_size, warn in new_files:
+    for _, new_path, orig_size, fin_size, warn in new_files:
         output_files = [new_path]
         original_size += orig_size
-        final_size += final_size
+        final_size += fin_size
 
         if warn is not None:
             warnings += [warn]
