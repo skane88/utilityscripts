@@ -4,9 +4,9 @@ Test file for the build_patch method of the section_prop file.
 Should show a 10x10 square with a 5x5 triangle inside it. The triangle should be hollow
 """
 
-from shapely.geometry import Polygon, polygon
 import matplotlib.pyplot as plt
 import section_prop
+from shapely.geometry import Polygon, polygon
 
 fig, ax = plt.subplots()
 

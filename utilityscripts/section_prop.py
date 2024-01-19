@@ -1824,7 +1824,7 @@ def make_C(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSectio
 
 
 def _prepare_coords_for_green(
-    coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray]
+    coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray],
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Prepares a set of co-ordinates for use in Green's integration algorithms.
@@ -1858,7 +1858,7 @@ def _prepare_coords_for_green(
 
 
 def Ixx_from_coords(
-    coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray]
+    coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray],
 ) -> float:
     """
     Calculate the moment of inertia about the global x axis by Green's theorem.
@@ -1882,7 +1882,7 @@ def Ixx_from_coords(
 
 
 def Iyy_from_coords(
-    coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray]
+    coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray],
 ) -> float:
     """
     Calculate the moment of inertia about the global y axis by Green's theorem
