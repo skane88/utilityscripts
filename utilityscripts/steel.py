@@ -150,6 +150,8 @@ def local_thickness_reqd(
 ):
     """
     Calculate the local thickness of a plate required to transfer a load back to a support by local bending.
+    This assumes a 45deg load dispersion through the plate towards the support, ignoring and load transfer into
+    the 2nd dimension.
 
     :param point_force: The load to transfer.
     :param f_y: The yield stress of the plate.
