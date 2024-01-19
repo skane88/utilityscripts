@@ -2,7 +2,7 @@
 To contain some utilities for steel design
 """
 from dataclasses import dataclass
-from math import asin, atan, cos, radians, sin
+from math import asin, atan, cos, pi, radians, sin
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -114,6 +114,47 @@ def v_bt(*, a_e, t_p, f_up):
     """
 
     return a_e * t_p * f_up
+
+
+def jack_bolt_effort(*, load, p, r_effort, r_bolt, mu, against: bool = True):
+    """
+    Calculate the force required to turn a jacking bolt.
+
+    :param load: The weight or load.
+    :param p: The pitch of the screw
+    :param r_effort: The radius of the effort force.
+    :param r_bolt: The radius of the screw / bolt.
+    :param mu: The assumed coefficient of friction.
+        Note that for bolts this can vary dramatically depending on thread condition.
+    :param against: Is the jacking against the load or with the load?
+        Jacking against the load (e.g. raising a load under gravity)
+        requires larger force than jacking with the load (e.g. lowering a load under gravity).
+    """
+
+    if against:
+        return (
+            load
+            * ((2 * pi * mu * r_bolt + p) / (2 * pi * r_bolt - mu * p))
+            * (r_bolt / r_effort)
+        )
+
+    return (
+        load
+        * ((2 * pi * mu * r_bolt - p) / (2 * pi * r_bolt + mu * p))
+        * (r_bolt / r_effort)
+    )
+
+
+def local_thickness_reqd(*, N, f_y, phi=0.9):
+    """
+    Calculate the local thickness of a plate required to transfer a load back to a support by local bending.
+
+    :param N: The load to transfer.
+    :param f_y: The yield stress of the plate.
+    :param phi: A capacity reduction factor.
+    """
+
+    return ((2 * N) / (phi * f_y)) ** 0.5
 
 
 @dataclass
