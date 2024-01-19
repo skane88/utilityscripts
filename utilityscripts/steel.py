@@ -599,6 +599,7 @@ class LugLoad:
         1.0  # ULS load factor to apply to the out-of-plane allowance.
     )
     out_of_plane_offset: float = 0.0
+
     # Any horizontal offset out-of-plane (e.g. for shackles too wide for the lug)
 
     def generate_loads(
