@@ -6,7 +6,7 @@ from math import isclose, radians
 
 import pytest
 
-from utilityscripts.steel import Lug
+from utilityscripts.steel import Lug, local_thickness_reqd
 
 
 def create_lug():
@@ -72,3 +72,33 @@ def test_lug_load_resolve(lug, load, out_of_plane_load, expected):
 
     for z in zipped:
         assert isclose(z[0], z[1], rel_tol=0.001)
+
+
+def test_thickness_reqd():
+    """
+    Test the method that calculates the thickness required for a plate with a point load.
+    """
+
+    force = 10e3
+    f_y = 250e6
+    phi = 0.9
+
+    assert local_thickness_reqd(
+        point_force=force, f_y=f_y, phi=phi
+    ) == local_thickness_reqd(
+        point_force=force, f_y=f_y, phi=phi, width_lever=(0.0, 0.0)
+    )
+
+    assert (
+        local_thickness_reqd(point_force=force, f_y=f_y, phi=phi)
+        == 0.009428090415820633
+    )
+
+    width_lever = (0.022, 0.035)
+
+    assert (
+        local_thickness_reqd(
+            point_force=force, f_y=f_y, phi=phi, width_lever=width_lever
+        )
+        == 0.008223919396586149
+    )

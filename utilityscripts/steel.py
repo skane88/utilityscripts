@@ -145,16 +145,31 @@ def jack_bolt_effort(*, load, p, r_effort, r_bolt, mu, against: bool = True):
     )
 
 
-def local_thickness_reqd(*, N, f_y, phi=0.9):
+def local_thickness_reqd(
+    *, point_force, f_y, phi=0.9, width_lever: tuple[float, float] = None
+):
     """
     Calculate the local thickness of a plate required to transfer a load back to a support by local bending.
 
-    :param N: The load to transfer.
+    :param point_force: The load to transfer.
     :param f_y: The yield stress of the plate.
     :param phi: A capacity reduction factor.
+    :param width_lever: A tuple containing the width of the applied load and the lever arm between load and support.
+        If None, the load is treated as a point load.
     """
 
-    return ((2 * N) / (phi * f_y)) ** 0.5
+    if width_lever is None:
+        return ((2 * point_force) / (phi * f_y)) ** 0.5
+
+    lw = width_lever[0]
+    lever = width_lever[1]
+
+    if lever == 0:
+        width_lever_ratio = 0
+    else:
+        width_lever_ratio = lw / lever
+
+    return 2 / (((phi * f_y / point_force) * (width_lever_ratio + 2)) ** 0.5)
 
 
 @dataclass
