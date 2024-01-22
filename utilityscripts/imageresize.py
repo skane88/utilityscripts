@@ -4,14 +4,14 @@ Contains a utility for resizing images before they are saved.
 
 import io
 import math
-import multiprocessing as mp
+import multiprocessing
 import os
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 from PIL import Image, ImageFile, UnidentifiedImageError
 from pillow_heif import register_heif_opener
-from tqdm import tqdm
+from rich.progress import MofNCompleteColumn, Progress, SpinnerColumn, TimeElapsedColumn
 from ui_funcs import get_folder, get_number, get_true_false
 
 register_heif_opener()
@@ -57,6 +57,7 @@ def compress_image(
     if not file_path.exists():
         if missing_ok:
             return None
+
         raise FileNotFoundError(f"Could not find file at {file_path}")
 
     if file_path.suffix.lower() not in VALID_EXTENSIONS:
@@ -147,7 +148,7 @@ def compress_image(
             picture=picture,
             file_path=new_file_path,
             quality=quality_acceptable,
-            image_format="JPEG",
+            img_format="JPEG",
         )
 
         # need to delete the original file if not a JPG.
@@ -190,7 +191,7 @@ def _save_image(
     picture: Image,
     file_path: Union[Path, io.BytesIO],
     quality: int,
-    image_format: str = "JPEG",
+    img_format: str = "JPEG",
     exif=None,
 ):
     """
@@ -198,7 +199,7 @@ def _save_image(
     :param picture: The image to save.
     :param file_path: The path to save it to.
     :param quality: The quality level to save at.
-    :param image_format: The file format to save in. Must be a format known to PILlow.
+    :param img_format: The file format to save in. Must be a format known to PILlow.
     :param exif: Any exif data to save to image in a format compatible with PILlow.
         If None, any existing exif data on the image will be used instead.
     """
@@ -207,9 +208,9 @@ def _save_image(
         exif = picture.info["exif"] if "exif" in picture.info else None
     try:
         if exif is None:
-            picture.save(fp=file_path, format=image_format, quality=quality)
+            picture.save(fp=file_path, format=img_format, quality=quality)
         else:
-            picture.save(fp=file_path, format=image_format, quality=quality, exif=exif)
+            picture.save(fp=file_path, format=img_format, quality=quality, exif=exif)
 
     except OSError:
         # one cause of potential errors is that a jpg file is truncated.
@@ -367,7 +368,7 @@ def compress_all_in_folder(
 
     cpus = max(int(os.cpu_count() * 0.5), 1)
 
-    with mp.Pool(processes=cpus) as p:
+    with multiprocessing.Pool(processes=cpus) as pool:
         total = len(files_to_resize)
 
         target_size_list = [target_size] * total
@@ -389,20 +390,30 @@ def compress_all_in_folder(
             missing_ok_list,
             verbose_list,
             ignore_errors_list,
+            strict=True,
         )
 
         if verbose:
-            with tqdm(total=total, unit="Images") as pbar:
-                for vals in p.imap_unordered(_help_resize, input_vals):
-                    new_files.append(vals)
-                    pbar.update()
-        else:
-            new_files = p.imap_unordered(_help_resize, input_vals)
+            with Progress(
+                SpinnerColumn(),
+                *Progress.get_default_columns(),
+                MofNCompleteColumn(),
+                TimeElapsedColumn(),
+            ) as progress:
+                progress_bar = progress.add_task("Resizing Images...", total=total)
 
-    for _, new_path, orig_size, fin_size, warn in new_files:
-        output_files = [new_path]
-        original_size += orig_size
-        final_size += fin_size
+                for vals in pool.imap_unordered(_help_resize, input_vals):
+                    new_files.append(vals)
+
+                    progress.advance(progress_bar, advance=1)
+
+        else:
+            new_files = pool.imap_unordered(_help_resize, input_vals)
+
+    for _op, new_path, o_size, f_size, warn in new_files:
+        output_files += [new_path]
+        original_size += o_size
+        final_size += f_size
 
         if warn is not None:
             warnings += [warn]
