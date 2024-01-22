@@ -6,7 +6,8 @@ It relies on the Pint units package.
 Also imports math & sets up pi
 """
 
-from math import acos, asin, atan, cos, degrees, pi, radians, sin, tan  # noqa: F401
+from math import radians  # noqa: F401
+from math import acos, asin, atan, cos, degrees, pi, sin, tan  # noqa: F401
 
 import pint
 
