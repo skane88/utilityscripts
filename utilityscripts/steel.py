@@ -172,7 +172,7 @@ def local_thickness_reqd(
     return 2 / (((phi * f_y / point_force) * (width_lever_ratio + 2)) ** 0.5)
 
 
-def make_i_section_geometry(
+def make_i_section(
     *, b_f, d, t_f, t_w, b_fb=None, t_fb=None, corner_radius=None, n_r=8, weld_size=None
 ) -> Geometry:
     """
