@@ -3,6 +3,7 @@ To contain some utilities for steel design
 """
 from math import pi
 
+import numpy as np
 from sectionproperties.analysis.section import Section
 from sectionproperties.pre.geometry import Geometry
 from sectionproperties.pre.library.primitive_sections import (
@@ -429,3 +430,77 @@ class Overplated_Section:
         lever_arm = self.combined_geometry.calculate_centroid()[1] - self.yc_op_bottom
         area = self.op_bottom.calculate_area()
         return area * lever_arm
+
+
+class BoltGroup:
+    def __init__(self, bolts: list[tuple[float, float]]):
+        x_bolts = np.asarray([b[0] for b in bolts])
+        y_bolts = np.asarray([b[1] for b in bolts])
+
+        x_c = np.average(x_bolts, axis=0)
+        y_c = np.average(y_bolts, axis=0)
+
+        x_bolts = x_bolts - x_c
+        y_bolts = y_bolts - y_c
+
+        self._x_bolts = x_bolts
+        self._y_bolts = y_bolts
+        self._x_offset = x_c
+        self._y_offset = y_c
+
+    @property
+    def bolts(self):
+        """
+        Return a list of the bolts that make up the section,
+        in the original co-ordinate system.
+        """
+
+        return list(zip(self._x_bolts + self._x_offset, self._y_bolts + self._y_offset))
+
+    @property
+    def x_bolts(self):
+        """
+        Return the x-coordinates of the bolts in the original system.
+        """
+
+        return self._x_bolts + self._x_offset
+
+    @property
+    def y_bolts(self):
+        """
+        Return the y-coordinates of the bolts in the original system.
+        """
+
+        return self._y_bolts + self._y_offset
+
+    @property
+    def x_bolts_c(self):
+        """
+        Return the x-coordinates of the bolts about the centroid.
+        """
+
+        return self._x_bolts
+
+    @property
+    def y_bolts_c(self):
+        """
+        Return the y-coordinates of the bolts about the centroid.
+        """
+
+        return self._y_bolts
+
+    @property
+    def r_bolts_c(self):
+        """
+        Return the radius of the bolts about the centroid.
+        """
+
+        return (self.x_bolts_c**2 + self.y_bolts_c**2) ** 0.5
+
+    @property
+    def i_bp_c(self):
+        """
+        Return the polar moment of inertia of the bolt group, about the centroid.
+        """
+
+        return np.sum(self.r_bolts_c**2)
