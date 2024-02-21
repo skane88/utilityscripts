@@ -455,7 +455,15 @@ class BoltGroup:
         in the original co-ordinate system.
         """
 
-        return list(zip(self._x_bolts + self._x_offset, self._y_bolts + self._y_offset))
+        return list(zip(self.x_bolts, self.y_bolts))
+
+    @property
+    def bolts_c(self):
+        """
+        Return a list of bolts that make up the section, about the centroid.
+        """
+
+        return list(zip(self.x_bolts_c, self.y_bolts_c))
 
     @property
     def x_bolts(self):
