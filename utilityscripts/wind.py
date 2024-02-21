@@ -7,7 +7,8 @@ from typing import List, Tuple, Union
 
 import numpy as np
 import toml
-from multiinterp import multi_interp
+
+from utilityscripts.multiinterp import multi_interp
 
 FILE_PATH = Path(__file__)
 DEFAULT_DATA_PATH = FILE_PATH.parent / Path("as1170_2.toml")
@@ -46,7 +47,7 @@ class WindSite:
         return V_R(wind_region=self.wind_region, R=R, ignore_M_c=ignore_F_x)
 
     def M_d(self, direction: Union[float, str]):
-        return M_d(direction=float, wind_region=self.wind_region)
+        return M_d(direction=direction, wind_region=self.wind_region)
 
     def M_z_cat(self, z):
         return M_zcat_basic(z=z, terrain_category=self.terrain_category)
@@ -103,12 +104,14 @@ def F_x(*, wind_region, R):
     :param R: The Average Recurrence Interval (ARI) of the windspeed.
     """
 
-    F_x_min_R = STANDARD_DATA["region_windspeed_parameters"][wind_region]["F_x_min_R"]
+    F_x_min_R = STANDARD_DATA["2011"]["region_windspeed_parameters"][wind_region][
+        "F_x_min_R"
+    ]
 
     if R < F_x_min_R:
         return 1.0
 
-    return STANDARD_DATA["region_windspeed_parameters"][wind_region]["F_x"]
+    return STANDARD_DATA["2011"]["region_windspeed_parameters"][wind_region]["F_x"]
 
 
 def M_c(*, wind_region, R, version: str = "2021"):
@@ -352,3 +355,30 @@ def q_basic(*, V: float, rho_air: float = 1.2):
     """
 
     return 0.5 * rho_air * V**2
+
+
+def pipe_loads(cd, qz, d_max, d_ave, n_pipes):
+    """
+    Calculate wind loads on pipes in pipe racks.
+
+    Based on Oil Search design criteria 100-SPE-K-0001.
+
+    :param cd: Drag coefficient for largest pipe in the group.
+    :param qz: The design wind pressure.
+    :param d_max: The maximum pipe diameter.
+    :param d_ave: The average pipe diameter.
+    :param n_pipes: The number of pipes in the tray.
+    """
+
+    shielding = np.asarray(
+        [0, 0.70, 1.19, 1.53, 1.77, 1.94, 2.06, 2.14, 2.20, 2.24, 2.27, 2.29, 2.30]
+    )
+
+    if n_pipes == 0:
+        return 0.0
+
+    n_pipes = max(n_pipes - 1, 12)
+
+    shielding_factor = shielding[n_pipes]
+
+    return qz * cd * (d_max + d_ave * shielding_factor)

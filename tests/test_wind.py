@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 import toml
-from as1170_2 import V_R, M_d
+from wind import V_R, M_d
 
 FILE_PATH = Path(__file__)
 TEST_DATA_PATH = FILE_PATH.parent / Path("test_as1170_2.toml")
@@ -37,7 +37,7 @@ def test_V_R_no_F_x(input_vals, expected):
     R = int(input_vals[1])
 
     V_R_calc = round(
-        V_R(wind_region=region, R=R, ignore_M_c=True)
+        V_R(wind_region=region, R=R, ignore_M_c=True, version="2011")
     )  # round because the data from AS1170 is rounded
 
     assert V_R_calc == expected
@@ -53,7 +53,7 @@ def test_V_R(input_vals, expected):
     region = input_vals[0]
     R = int(input_vals[1])
 
-    V_R_calc = V_R(wind_region=region, R=R, ignore_M_c=False)
+    V_R_calc = V_R(wind_region=region, R=R, ignore_M_c=False, version="2011")
 
     V_R_calc = round(V_R_calc)  # round because the data from AS1170 is rounded
 
@@ -93,7 +93,7 @@ def test_m_d(input_vals):
     direction = input_vals[0][1]
     expected = input_vals[1]
 
-    m_d_calc = M_d(wind_region=wind_region, direction=direction)
+    m_d_calc = M_d(wind_region=wind_region, direction=direction, version="2011")
 
     assert isclose(m_d_calc[0], expected[0])
     assert isclose(m_d_calc[1], expected[1])
