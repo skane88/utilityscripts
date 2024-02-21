@@ -12,6 +12,8 @@ from sectionproperties.pre.library.primitive_sections import (
 )
 from sectionproperties.pre.library.steel_sections import mono_i_section
 
+from utilityscripts.section_prop import build_circle
+
 
 def alpha_m(*, M_m, M_2, M_3, M_4):
     """
@@ -449,6 +451,10 @@ class BoltGroup:
         self._y_offset = y_c
 
     @property
+    def n_bolts(self):
+        return len(self.bolts)
+
+    @property
     def bolts(self):
         """
         Return a list of the bolts that make up the section,
@@ -512,3 +518,19 @@ class BoltGroup:
         """
 
         return np.sum(self.r_bolts_c**2)
+
+
+def make_circular_bolt_group(centroid, radius, no_bolts):
+    """
+    Build a BoltGroup made out of a circular bolt pattern.
+
+    :param centroid:
+    :param radius:
+    :param no_bolts:
+    """
+
+    return BoltGroup(
+        bolts=build_circle(centroid=centroid, radius=radius, no_points=no_bolts + 1)[
+            :-1
+        ]
+    )
