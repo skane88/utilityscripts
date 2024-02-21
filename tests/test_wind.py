@@ -10,12 +10,12 @@ import toml
 from wind import V_R, M_d
 
 FILE_PATH = Path(__file__)
-TEST_DATA_PATH = FILE_PATH.parent / Path("test_as1170_2.toml")
-TEST_DATA = toml.load(TEST_DATA_PATH)
+TEST_DATA_PATH_2011 = FILE_PATH.parent / Path("test_as1170_2_2011.toml")
+TEST_DATA_2011 = toml.load(TEST_DATA_PATH_2011)
 
 
 def build_V_R_pairs(V_R_data):
-    test_data = TEST_DATA[V_R_data]
+    test_data = TEST_DATA_2011[V_R_data]
 
     pairs = []
 
@@ -61,7 +61,7 @@ def test_V_R(input_vals, expected):
 
 
 def build_direction_pairs():
-    test_data = TEST_DATA["wind_direction_factor"]
+    test_data = TEST_DATA_2011["wind_direction_factor"]
 
     pairs = []
 
