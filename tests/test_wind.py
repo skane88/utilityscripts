@@ -14,7 +14,7 @@ TEST_DATA_PATH_2011 = FILE_PATH.parent / Path("test_as1170_2_2011.toml")
 TEST_DATA_2011 = toml.load(TEST_DATA_PATH_2011)
 
 
-def build_V_R_pairs(V_R_data):
+def build_V_R_pairs_2011(V_R_data):
     test_data = TEST_DATA_2011[V_R_data]
 
     pairs = []
@@ -25,7 +25,7 @@ def build_V_R_pairs(V_R_data):
 
 
 @pytest.mark.parametrize(
-    "input_vals, expected", build_V_R_pairs("regional_windspeeds_no_F_x")
+    "input_vals, expected", build_V_R_pairs_2011("regional_windspeeds_no_F_x")
 )
 def test_V_R_no_F_x(input_vals, expected):
     """
@@ -43,7 +43,9 @@ def test_V_R_no_F_x(input_vals, expected):
     assert V_R_calc == expected
 
 
-@pytest.mark.parametrize("input_vals, expected", build_V_R_pairs("regional_windspeeds"))
+@pytest.mark.parametrize(
+    "input_vals, expected", build_V_R_pairs_2011("regional_windspeeds")
+)
 def test_V_R(input_vals, expected):
     """
     Basic test of the V_R method.
@@ -60,7 +62,7 @@ def test_V_R(input_vals, expected):
     assert V_R_calc == expected
 
 
-def build_direction_pairs():
+def build_direction_pairs_2011():
     test_data = TEST_DATA_2011["wind_direction_factor"]
 
     pairs = []
@@ -87,7 +89,7 @@ def build_direction_pairs():
     return pairs
 
 
-@pytest.mark.parametrize("input_vals", build_direction_pairs())
+@pytest.mark.parametrize("input_vals", build_direction_pairs_2011())
 def test_m_d(input_vals):
     wind_region = input_vals[0][0]
     direction = input_vals[0][1]
