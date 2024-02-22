@@ -506,13 +506,61 @@ class BoltGroup:
     @property
     def r_bolts_c(self):
         """
-        Return the radius of the bolts about the centroid.
+        Return the radius of the bolts about the group centroid.
         """
 
         return (self.x_bolts_c**2 + self.y_bolts_c**2) ** 0.5
 
     @property
-    def i_bp_c(self):
+    def r_bolts(self):
+        """
+        Return the radius of the bolts about the x-y origin.
+        """
+
+        return (self.x_bolts**2 + self.y_bolts**2) ** 0.5
+
+    @property
+    def i_xx(self):
+        """
+        Return the moment of inertia about the x-x axis.
+        """
+
+        return np.sum(self.y_bolts**2)
+
+    @property
+    def i_yy(self):
+        """
+        Return the moment of inertia about the y-y axis.
+        """
+
+        return np.sum(self.x_bolts**2)
+
+    @property
+    def i_zz(self):
+        """
+        Return the polar moment of inertia of the bolt group, about the x-y origin.
+        """
+
+        return np.sum(self.r_bolts**2)
+
+    @property
+    def i_uu_c(self):
+        """
+        Return the moment of inertia about the u-u axis through the bolt group centroid.
+        """
+
+        return np.sum(self.y_bolts_c**2)
+
+    @property
+    def i_vv_c(self):
+        """
+        Return the moment of inertia about the v-v axis through the bolt group centroid.
+        """
+
+        return np.sum(self.x_bolts_c**2)
+
+    @property
+    def i_ww_c(self):
         """
         Return the polar moment of inertia of the bolt group, about the centroid.
         """
