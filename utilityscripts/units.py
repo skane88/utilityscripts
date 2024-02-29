@@ -85,7 +85,8 @@ kip = ureg.kip
 
 # units of moment
 Nm = N * m
-kNm = kN * m
+kNm = kN * m  # convenience definition
+MNm = MN * m  # convenience definition
 
 # units of pressure
 Pa = ureg.pascal
