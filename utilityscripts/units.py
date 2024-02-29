@@ -121,7 +121,7 @@ knot = ureg.knot
 
 # constants
 g_acc = ureg.standard_gravity
-gacc = g_acc
+gacc = g_acc  # convenience definition
 rho_air = 1.2 * kg / m**3  # see AS1170.2
 rho_water = 1000 * kg / m**3
 rho_seawater = 1025 * kg / m**3
