@@ -47,6 +47,7 @@ weeks = ureg.week
 
 # units of frequency
 Hz = ureg.Hz
+rpm = 1 / minute
 
 # units of mass
 g = ureg.gram
