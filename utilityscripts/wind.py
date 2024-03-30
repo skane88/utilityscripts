@@ -357,7 +357,7 @@ def q_basic(*, V: float, rho_air: float = 1.2):
     return 0.5 * rho_air * V**2
 
 
-def pipe_loads(cd, qz, d_max, d_ave, n_pipes):
+def pipe_wind_loads(cd, qz, d_max, d_ave, n_pipes):
     """
     Calculate wind loads on pipes in pipe racks.
 
