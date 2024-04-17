@@ -1,0 +1,46 @@
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+
+[lint]
+select = [
+    "F",
+    "B",
+    "E",
+    "W",
+    "I",
+    "N",
+    "S",
+    "SIM",
+    "BLE",
+    "FBT",
+    "A",
+    "C4",
+    "ICN",
+    "RET",
+    "PTH",
+    "PD",
+    "NPY",
+    "PERF",
+    "RUF",
+    "C90",
+    "PLR",
+]
+ignore = ["E501", "N816"]
+
+[lint.per-file-ignores]
+"**/{tests}/*" = ["S101"]
+
+[format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
