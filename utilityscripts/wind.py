@@ -3,7 +3,6 @@ File to contain some basic AS1170.2 helper methods for working with wind loads
 """
 
 from pathlib import Path
-from typing import List, Tuple, Union
 
 import numpy as np
 import toml
@@ -13,6 +12,9 @@ from utilityscripts.multiinterp import multi_interp
 FILE_PATH = Path(__file__)
 DEFAULT_DATA_PATH = FILE_PATH.parent / Path("as1170_2.toml")
 STANDARD_DATA = {}
+
+MIN_TERRAIN_CATEGORY = 1.0
+MAX_TERRAIN_CATEGORY = 4.0
 
 
 def init_standard_data(*, file_path=None):
@@ -33,7 +35,10 @@ class WindSite:
     def __init__(self, wind_region: str, terrain_category: float, shielding_data=None):
         self.wind_region = wind_region
 
-        if terrain_category < 1.0 or terrain_category > 4.0:
+        if (
+            terrain_category < MIN_TERRAIN_CATEGORY
+            or terrain_category > MAX_TERRAIN_CATEGORY
+        ):
             raise ValueError(
                 "Terrain Category expected to be between 1.0 and 4.0. "
                 + f"Received {terrain_category}"
@@ -43,16 +48,16 @@ class WindSite:
 
         self.shielding_data = shielding_data
 
-    def V_R(self, R: float, ignore_F_x: bool = False):
-        return V_R(wind_region=self.wind_region, R=R, ignore_M_c=ignore_F_x)
+    def v_r(self, *, r: float, ignore_f_x: bool = False):
+        return v_r(wind_region=self.wind_region, r=r, ignore_m_c=ignore_f_x)
 
-    def M_d(self, direction: Union[float, str]):
-        return M_d(direction=direction, wind_region=self.wind_region)
+    def m_d(self, direction: float | str):
+        return m_d(direction=direction, wind_region=self.wind_region)
 
-    def M_z_cat(self, z):
-        return M_zcat_basic(z=z, terrain_category=self.terrain_category)
+    def m_z_cat(self, z):
+        return m_zcat_basic(z=z, terrain_category=self.terrain_category)
 
-    def M_s(self):
+    def m_s(self):
         if self.shielding_data is None:
             # if there is no shielding data then we can't calculate the shielding
             # parameter. The shielding multiplier can conservatively be taken to be 1.0
@@ -61,85 +66,85 @@ class WindSite:
         # TODO: Complete calculation of shielding.
         raise NotImplementedError()
 
-    def M_t(self):
+    def m_t(self):
         # TODO: Add an M_t method
         return 1.0
 
-    def M_lee(self):
+    def m_lee(self):
         # TODO: Add an M_lee method
         return 1.0
 
-    def V_sit(
-        self, R: float, direction: Union[float, str], z: float, ignore_F_x: bool = False
+    def v_sit(
+        self, *, r: float, direction: float | str, z: float, ignore_f_x: bool = False
     ):
-        V_R = self.V_R(R=R, ignore_F_x=ignore_F_x)
-        M_d = self.M_d(direction=direction)
-        M_zcat = self.M_z_cat(z=z)
-        M_s = self.M_s()
-        M_t = self.M_t()
-        M_lee = self.M_lee()
+        v_r = self.v_r(r=r, ignore_f_x=ignore_f_x)
+        m_d = self.m_d(direction=direction)
+        m_zcat = self.m_z_cat(z=z)
+        m_s = self.m_s()
+        m_t = self.m_t()
+        m_lee = self.m_lee()
 
-        return V_R * M_d * M_zcat * M_s * M_t * M_lee
+        return v_r * m_d * m_zcat * m_s * m_t * m_lee
 
 
-def V_R_no_F_x(*, a, b, R, k):
+def v_r_no_f_x(*, a, b, r, k):
     """
     Calculate the basic windspeed for a wind region. Ignores parameters F_C or F_D,
     for those use method V_R
 
     :param a: Windspeed parameter 'a'
     :param b: Windspeed parameter 'b'
-    :param R: The Average Recurrence Interval (ARI) of the windspeed.
+    :param r: The Average Recurrence Interval (ARI) of the windspeed.
     :param k: Windspeed parameter 'k'
     """
 
-    return a - b * R**-k
+    return a - b * r**-k
 
 
-def F_x(*, wind_region, R):
+def f_x(*, wind_region, r):
     """
     Calculate the cyclonic region factor F_C or F_D.
 
     :param wind_region: The wind region.
-    :param R: The Average Recurrence Interval (ARI) of the windspeed.
+    :param r: The Average Recurrence Interval (ARI) of the windspeed.
     """
 
-    F_x_min_R = STANDARD_DATA["2011"]["region_windspeed_parameters"][wind_region][
+    f_x_min_r = STANDARD_DATA["2011"]["region_windspeed_parameters"][wind_region][
         "F_x_min_R"
     ]
 
-    if R < F_x_min_R:
+    if r < f_x_min_r:
         return 1.0
 
     return STANDARD_DATA["2011"]["region_windspeed_parameters"][wind_region]["F_x"]
 
 
-def M_c(*, wind_region, R, version: str = "2021"):
+def m_c(*, wind_region, r, version: str = "2021"):
     """
     Calculate the climate change factor M_C.
 
     :param wind_region: The wind region.
-    :param R: The Average Recurrence Interval (ARI) of the windspeed.
+    :param r: The Average Recurrence Interval (ARI) of the windspeed.
     :param version: The version of the standard to look up.
     """
 
-    M_c_min_R = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region][
+    m_c_min_r = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region][
         "M_c_min_R"
     ]
 
-    if R < M_c_min_R:
+    if r < m_c_min_r:
         return 1.0
 
     return STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["M_c"]
 
 
-def V_R(*, wind_region: str, R, version: str = "2021", ignore_M_c: bool = False):
+def v_r(*, wind_region: str, r, version: str = "2021", ignore_m_c: bool = False):
     """
     Calculate the regional windspeed V_R based on the region and return period.
 
     :param wind_region: The wind region where the structure is located.
-    :param R: The Average Recurrence Interval (ARI) of the windspeed.
-    :param ignore_M_c: Ignore the cyclonic region factor M_c, or for older standards
+    :param r: The Average Recurrence Interval (ARI) of the windspeed.
+    :param ignore_m_c: Ignore the cyclonic region factor M_c, or for older standards
         the uncertainty factor F_C or F_D?
     :return: The regional windspeed.
     """
@@ -147,26 +152,26 @@ def V_R(*, wind_region: str, R, version: str = "2021", ignore_M_c: bool = False)
     if len(STANDARD_DATA) == 0:
         init_standard_data()
 
-    if ignore_M_c:
-        F = 1.0
+    if ignore_m_c:
+        f = 1.0
     else:
-        F = (
-            M_c(wind_region=wind_region, R=R)
+        f = (
+            m_c(wind_region=wind_region, r=r)
             if version == "2021"
-            else F_x(wind_region=wind_region, R=R)
+            else f_x(wind_region=wind_region, r=r)
         )
 
     a = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["a"]
     b = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["b"]
     k = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["k"]
-    V_min = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["V_min"]
+    v_min = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["V_min"]
 
-    return max(V_min, F * V_R_no_F_x(a=a, b=b, R=R, k=k))
+    return max(v_min, f * v_r_no_f_x(a=a, b=b, r=r, k=k))
 
 
-def M_d(
+def m_d(
     *, wind_region: str, direction: float | str, version: str = "2021"
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """
     Return the wind direction multiplier for a given region and wind direction.
 
@@ -193,12 +198,12 @@ def M_d(
     ]
     wind_direction_defs = STANDARD_DATA["wind_direction_definitions"]
 
-    F_not_clad = region_m_d_parameters["F_not_clad"]
+    f_not_clad = region_m_d_parameters["F_not_clad"]
 
     # next bail out early if the direction doesn't matter
     if direction == "ANY":
         m_d_clad = region_m_d_parameters[direction]
-        m_d = m_d_clad * F_not_clad
+        m_d = m_d_clad * f_not_clad
         return m_d, m_d_clad
 
     # next if the user has provided a text direction (e.g. "NW") get the angle value.
@@ -209,10 +214,11 @@ def M_d(
     direction = direction % 360
 
     # now build a numpy array to use numpy's interp functions.
-    m_d_table = []
-    for d, angles in wind_direction_defs.items():
-        for a in angles:
-            m_d_table.append([a, region_m_d_parameters[d]])
+    m_d_table = [
+        [a, region_m_d_parameters[d]]
+        for d, angles in wind_direction_defs.items()
+        for a in angles
+    ]
 
     m_d_table = np.array(m_d_table)
     # make sure to sort it correctly
@@ -220,12 +226,12 @@ def M_d(
 
     # now interpolate the value
     m_d_clad = np.interp(direction, m_d_table[:, 0], m_d_table[:, 1])
-    m_d = m_d_clad * F_not_clad
+    m_d = m_d_clad * f_not_clad
 
     return m_d, m_d_clad
 
 
-def M_zcat_basic(*, z, terrain_category) -> float:
+def m_zcat_basic(*, z, terrain_category) -> float:
     """
     Determine the basic terrain category M_zcat at a given height and terrain.
 
@@ -243,9 +249,7 @@ def M_zcat_basic(*, z, terrain_category) -> float:
 
     # get the basic data into the function as np arrays as we will be interpolating
     heights = np.array(terrain_height_multipliers["heights"])
-    terrain_cats = np.array(
-        [float(k) for k in terrain_height_multipliers["data"].keys()]
-    )
+    terrain_cats = np.array([float(k) for k in terrain_height_multipliers["data"]])
 
     min_cat = min(terrain_cats)
     max_cat = max(terrain_cats)
@@ -265,21 +269,19 @@ def M_zcat_basic(*, z, terrain_category) -> float:
         )
 
     # load the M_zcat data for all terrain types
-    M_zcat_all = np.array(
-        [t for t in terrain_height_multipliers["data"].values()]
-    ).transpose()
+    m_zcat_all = np.array(list(terrain_height_multipliers["data"].values())).transpose()
 
     # interpolate for the case of a terrain category that is intermediate.
     # this returns a list of M_zcat at all input heights.
-    M_zcat_for_terrain = multi_interp(
-        x=terrain_category, xp=terrain_cats, fp=M_zcat_all
+    m_zcat_for_terrain = multi_interp(
+        x=terrain_category, xp=terrain_cats, fp=m_zcat_all
     ).flatten()
 
     # interpolate M_zcat for the specified height.
-    return np.interp(z, xp=heights, fp=M_zcat_for_terrain)
+    return np.interp(z, xp=heights, fp=m_zcat_for_terrain)
 
 
-def M_zcat_ave():
+def m_zcat_ave():
     """
     Calculate the terrain height factor M_zcat for the averaged case.
 
@@ -293,10 +295,10 @@ def M_zcat_ave():
 def shielding_parameter(
     *,
     h: float,
-    building_data: List[Tuple[float, float]] = None,
-    h_s: float = None,
-    b_s: float = None,
-    n_s: float = None,
+    building_data: list[tuple[float, float]] | None = None,
+    h_s: float | None = None,
+    b_s: float | None = None,
+    n_s: float | None = None,
 ):
     """
     Calculate the shielding parameter.
@@ -325,7 +327,7 @@ def shielding_parameter(
     return l_s / ((h_s * b_s) ** 0.5)
 
 
-def M_s(shielding_parameter):
+def m_s(shielding_parameter):
     """
     Determine the shielding multiplier.
 
@@ -339,22 +341,22 @@ def M_s(shielding_parameter):
 
     shielding_multiplier_data = STANDARD_DATA["shielding_multiplier"]
 
-    xp = np.array([float(x) for x in shielding_multiplier_data.keys()])
+    xp = np.array([float(x) for x in shielding_multiplier_data])
     fp = np.array([float(y) for y in shielding_multiplier_data.values()])
 
     return np.interp(shielding_parameter, xp, fp)
 
 
-def q_basic(*, V: float, rho_air: float = 1.2):
+def q_basic(*, v: float, rho_air: float = 1.2):
     """
     Calculate the basic wind pressure caused by a certain wind velocity.
 
     :param rho_air: The density of air. Must be in kg / m³.
-    :param V: The wind velocity. Must be in m/s.
+    :param v: The wind velocity. Must be in m/s.
     :return: The basic wind pressure in Pa.
     """
 
-    return 0.5 * rho_air * V**2
+    return 0.5 * rho_air * v**2
 
 
 def pipe_wind_loads(cd, qz, d_max, d_ave, n_pipes):
@@ -382,3 +384,17 @@ def pipe_wind_loads(cd, qz, d_max, d_ave, n_pipes):
     shielding_factor = shielding[n_pipes]
 
     return qz * cd * (d_max + d_ave * shielding_factor)
+
+
+def temp_windspeed(*, a, b, k, r_s, t):
+    """
+    Calculate a temporary design windspeed V_R, for structures with design lives of less than 1 year.
+
+    :param a: Windspeed parameter a.
+    :param b: Windspeed parameter b.
+    :param k: Windspeed parameter k.
+    :param r_s: The reference return period for a normal structure. Typ. taken from the Building Code.
+    :param t: The number of reference periods in a year.
+    """
+
+    return a - b * (1 - (1 - (1 / r_s)) ** t) ** k
