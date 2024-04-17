@@ -13,8 +13,8 @@ def multi_interp(
     x: Union[float, List[float], np.ndarray],
     xp: Union[List[float], np.ndarray],
     fp: Union[List[float], List[List[float]], np.ndarray],
-    left: float = None,
-    right: float = None,
+    left: float | None = None,
+    right: float | None = None,
 ) -> Union[float, np.ndarray]:
     """
     Implements an equivalent of np.interp that will interpolate through multiple
@@ -46,10 +46,8 @@ def multi_interp(
 
     if len(fp.shape) == 1:
         return np.interp(x=x, xp=xp, fp=fp, left=left, right=right)
-    else:
-        return np.vstack(
-            [np.interp(x=x, xp=xp, fp=f, left=left, right=right) for f in fp]
-        )
+
+    return np.vstack([np.interp(x=x, xp=xp, fp=f, left=left, right=right) for f in fp])
 
 
 if __name__ == "__main__":
