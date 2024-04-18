@@ -8,7 +8,7 @@ import matplotlib as mpl
 import numpy as np
 
 
-def make_cmap(colors, position=None, bit=False):
+def make_cmap(colors, *, position=None, bit=False):
     """
     make_cmap takes a list of tuples which contain RGB values. The RGB
     values may either be in 8-bit [0 to 255] (in which bit must be set to
@@ -26,11 +26,11 @@ def make_cmap(colors, position=None, bit=False):
     bit_rgb = np.linspace(0, 1, 256)
     if position is None:
         position = np.linspace(0, 1, len(colors))
-    else:
-        if len(position) != len(colors):
-            sys.exit("position length must be the same as colors")
-        elif position[0] != 0 or position[-1] != 1:
-            sys.exit("position must start with 0 and end with 1")
+    elif len(position) != len(colors):
+        sys.exit("position length must be the same as colors")
+    elif position[0] != 0 or position[-1] != 1:
+        sys.exit("position must start with 0 and end with 1")
+
     if bit:
         for i in range(len(colors)):
             colors[i] = (
@@ -44,8 +44,7 @@ def make_cmap(colors, position=None, bit=False):
         cdict["green"].append((pos, color[1], color[1]))
         cdict["blue"].append((pos, color[2], color[2]))
 
-    cmap = mpl.colors.LinearSegmentedColormap("my_colormap", cdict, 256)
-    return cmap
+    return mpl.colors.LinearSegmentedColormap("my_colormap", cdict, 256)
 
 
 def color_list(no_cols, cmap):
@@ -55,12 +54,8 @@ def color_list(no_cols, cmap):
     :param no_cols: The number of colours to return.
     :param cmap: The colourmap to return from.
     """
-    ret_list = []
 
-    for i in range(no_cols):
-        ret_list.append(cmap(i / (no_cols - 1)))
-
-    return ret_list
+    return [cmap(i / (no_cols - 1)) for i in range(no_cols)]
 
 
 BLOG_CMAP = make_cmap([(65, 131, 196), (206, 25, 13)], bit=True)
