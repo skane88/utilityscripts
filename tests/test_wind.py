@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 import toml
-from wind import V_R, M_d
+from wind import m_d, v_r
 
 FILE_PATH = Path(__file__)
 TEST_DATA_PATH_2011 = FILE_PATH.parent / Path("test_as1170_2_2011.toml")
@@ -17,8 +17,8 @@ TEST_DATA_PATH_2021 = FILE_PATH.parent / Path("test_as1170_2_2021.toml")
 TEST_DATA_2021 = toml.load(TEST_DATA_PATH_2021)
 
 
-def build_V_R_pairs_2011(V_R_data):
-    test_data = TEST_DATA_2011[V_R_data]
+def build_v_r_pairs_2011(v_r_data):
+    test_data = TEST_DATA_2011[v_r_data]
 
     pairs = []
 
@@ -28,45 +28,45 @@ def build_V_R_pairs_2011(V_R_data):
 
 
 @pytest.mark.parametrize(
-    "input_vals, expected", build_V_R_pairs_2011("regional_windspeeds_no_F_x")
+    "input_vals, expected", build_v_r_pairs_2011("regional_windspeeds_no_F_x")
 )
-def test_V_R_no_F_x_2011(input_vals, expected):
+def test_v_r_no_f_x_2011(input_vals, expected):
     """
     Basic test of the V_R method.
     Ignores F_x because that's how the data I have is formatted.
     """
 
     region = input_vals[0]
-    R = int(input_vals[1])
+    r = int(input_vals[1])
 
-    V_R_calc = round(
-        V_R(wind_region=region, R=R, ignore_M_c=True, version="2011")
+    v_r_calc = round(
+        v_r(wind_region=region, r=r, ignore_m_c=True, version="2011")
     )  # round because the data from AS1170 is rounded
 
-    assert V_R_calc == expected
+    assert v_r_calc == expected
 
 
 @pytest.mark.parametrize(
-    "input_vals, expected", build_V_R_pairs_2011("regional_windspeeds")
+    "input_vals, expected", build_v_r_pairs_2011("regional_windspeeds")
 )
-def test_V_R_2011(input_vals, expected):
+def test_v_r_2011(input_vals, expected):
     """
     Basic test of the V_R method.
     Ignores F_x because that's how the data I have is formatted.
     """
 
     region = input_vals[0]
-    R = int(input_vals[1])
+    r = int(input_vals[1])
 
-    V_R_calc = V_R(wind_region=region, R=R, ignore_M_c=False, version="2011")
+    v_r_calc = v_r(wind_region=region, r=r, ignore_m_c=False, version="2011")
 
-    V_R_calc = round(V_R_calc)  # round because the data from AS1170 is rounded
+    v_r_calc = round(v_r_calc)  # round because the data from AS1170 is rounded
 
-    assert V_R_calc == expected
+    assert v_r_calc == expected
 
 
-def build_V_R_pairs_2021(V_R_data):
-    test_data = TEST_DATA_2021[V_R_data]
+def build_v_r_pairs_2021(v_r_data):
+    test_data = TEST_DATA_2021[v_r_data]
 
     pairs = []
 
@@ -76,26 +76,26 @@ def build_V_R_pairs_2021(V_R_data):
 
 
 @pytest.mark.parametrize(
-    "input_vals, expected", build_V_R_pairs_2021("regional_windspeeds")
+    "input_vals, expected", build_v_r_pairs_2021("regional_windspeeds")
 )
-def test_V_R_2021(input_vals, expected):
+def test_v_r_2021(input_vals, expected):
     """
     Basic test of the V_R method.
     Ignores F_x because that's how the data I have is formatted.
     """
 
     region = input_vals[0]
-    R = int(input_vals[1])
+    r = int(input_vals[1])
 
-    V_R_calc = V_R(wind_region=region, R=R, ignore_M_c=False, version="2021")
+    v_r_calc = v_r(wind_region=region, r=r, ignore_m_c=False, version="2021")
 
-    V_R_calc = round(V_R_calc)  # round because the data from AS1170 is rounded
+    v_r_calc = round(v_r_calc)  # round because the data from AS1170 is rounded
 
     print(f"Input:{input_vals}")
     print(f"Expected: {expected}")
-    print(f"Calculated: {V_R_calc}")
+    print(f"Calculated: {v_r_calc}")
 
-    assert V_R_calc == expected
+    assert v_r_calc == expected
 
 
 def build_direction_pairs_2011():
@@ -131,7 +131,7 @@ def test_m_d_2011(input_vals):
     direction = input_vals[0][1]
     expected = input_vals[1]
 
-    m_d_calc = M_d(wind_region=wind_region, direction=direction, version="2011")
+    m_d_calc = m_d(wind_region=wind_region, direction=direction, version="2011")
 
     assert isclose(m_d_calc[0], expected[0])
     assert isclose(m_d_calc[1], expected[1])
@@ -170,19 +170,19 @@ def test_m_d_2021(input_vals):
     direction = input_vals[0][1]
     expected = input_vals[1]
 
-    m_d_calc = M_d(wind_region=wind_region, direction=direction, version="2021")
+    m_d_calc = m_d(wind_region=wind_region, direction=direction, version="2021")
 
     assert isclose(m_d_calc[0], expected[0])
     assert isclose(m_d_calc[1], expected[1])
 
 
-def test_M_zcat_basic():
-    assert False
+def test_m_zcat_basic():
+    raise AssertionError()
 
 
-def test_M_zcat_ave():
-    assert False
+def test_m_zcat_ave():
+    raise AssertionError()
 
 
-def test_M_s():
-    assert False
+def test_m_s():
+    raise AssertionError()

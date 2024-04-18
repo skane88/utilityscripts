@@ -22,7 +22,7 @@ def test_thickness_reqd():
 
     assert (
         local_thickness_reqd(point_force=force, f_y=f_y, phi=phi)
-        == 0.009428090415820633
+        == 0.009428090415820633  # noqa: PLR2004
     )
 
     width_lever = (0.022, 0.035)
@@ -31,5 +31,5 @@ def test_thickness_reqd():
         local_thickness_reqd(
             point_force=force, f_y=f_y, phi=phi, width_lever=width_lever
         )
-        == 0.008223919396586149
+        == 0.008223919396586149  # noqa: PLR2004
     )

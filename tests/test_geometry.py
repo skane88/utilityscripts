@@ -4,7 +4,7 @@ Contains some tests for the geometry module.
 
 from math import isclose, pi
 
-from geometry import Circle, Circular_Segment
+from geometry import Circle, CircularSegment
 
 
 def test_circle():
@@ -24,10 +24,10 @@ def test_circle():
 def test_segment():
     radius = 1.75
 
-    c1 = Circular_Segment(r=radius, y2=0.5)
+    c1 = CircularSegment(r=radius, y2=0.5)
 
-    c2 = Circular_Segment(r=radius, x=c1.x)
-    c3 = Circular_Segment(r=radius, theta=c1.theta)
+    c2 = CircularSegment(r=radius, x=c1.x)
+    c3 = CircularSegment(r=radius, theta=c1.theta)
 
     assert isclose(c1.area, 0.84309861652350)  # value calculated in Excel
 
@@ -55,8 +55,8 @@ def test_segment_2():
 
     tolerance = 0.00001
 
-    for test, vals in test_chords.items():
-        c = Circular_Segment(r=vals["r"], theta=vals["theta"])
+    for vals in test_chords.values():
+        c = CircularSegment(r=vals["r"], theta=vals["theta"])
 
         assert isclose(c.r, vals["r"], rel_tol=tolerance)
         assert isclose(c.theta, vals["theta"], rel_tol=tolerance)

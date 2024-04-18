@@ -12,8 +12,8 @@ from utilityscripts.section_prop import (
     GenericSection,
     Polygon,
     Rectangle,
-    make_I,
-    make_T,
+    make_i,
+    make_t,
 )
 
 AXIS_INDEPENDENT_PROPERTIES = [
@@ -87,14 +87,14 @@ ALL_PROPERTIES = (
 )
 
 
-def get_I_sections():
-    df = pd.read_excel("steel_sections.xlsx")
-    df = df[df["Section Type"] == "I"]  # filter for I sections
+def get_i_sections():
+    section_df = pd.read_excel("steel_sections.xlsx")
+    section_df = section_df[section_df["Section Type"] == "I"]  # filter for I sections
 
-    return df.to_dict("records")  # use to_dict() to get each row as a dict.
+    return section_df.to_dict("records")  # use to_dict() to get each row as a dict.
 
 
-def I_poly(b_f, d, t_f, t_w):
+def i_poly(b_f, d, t_f, t_w):
     """
     Make a polygon I section. Currently has equal flange thicknesses and widths.
 
@@ -132,23 +132,23 @@ def make_sections_for_combined_same_as_generic():
     )
     g = GenericSection(poly=p)
 
-    T = make_T(b_f=100, d=200, t_f=20, t_w=6)
-    T = T.move_to_point(origin="origin", end_point=(0, T.extreme_y_minus))
+    t = make_t(b_f=100, d=200, t_f=20, t_w=6)
+    t = t.move_to_point(origin="origin", end_point=(0, t.extreme_y_minus))
 
-    sections.append((g, T))
+    sections.append((g, t))
 
     # next make an I section and rotate it by 45deg
 
-    p = I_poly(b_f=100, d=200, t_f=20, t_w=6)
-    I1 = GenericSection(poly=p)
-    I2 = make_I(b_f=100, d=200, t_f=20, t_w=6)
+    p = i_poly(b_f=100, d=200, t_f=20, t_w=6)
+    i1 = GenericSection(poly=p)
+    i2 = make_i(b_f=100, d=200, t_f=20, t_w=6)
 
-    I1 = I1.rotate(angle=45, origin="origin", use_radians=False)
-    I2 = I2.rotate(angle=45, origin="origin", use_radians=False)
+    i1 = i1.rotate(angle=45, origin="origin", use_radians=False)
+    i2 = i2.rotate(angle=45, origin="origin", use_radians=False)
 
-    sections.append((I1, I2))
+    sections.append((i1, i2))
 
-    combined = make_I(b_f=311, d=327.2, t_f=25, t_w=15.7)
+    combined = make_i(b_f=311, d=327.2, t_f=25, t_w=15.7)
     from_p = GenericSection(poly=combined.polygon)
 
     sections.append((combined, from_p))
@@ -166,17 +166,17 @@ def test_combined_section_and_generic_centroid(sections):
 
 
 @pytest.mark.parametrize(
-    "property",
+    "sect_property",
     ALL_PROPERTIES,
 )
 @pytest.mark.parametrize("sections", make_sections_for_combined_same_as_generic())
-def test_combined_section_gives_same_as_generic(property, sections):
+def test_combined_section_gives_same_as_generic(sect_property, sections):
     """
     Test a test shape of a CombinedSection
     """
 
-    assert round(getattr(sections[0], property)) == round(
-        getattr(sections[1], property)
+    assert round(getattr(sections[0], sect_property)) == round(
+        getattr(sections[1], sect_property)
     )
 
 
@@ -189,7 +189,7 @@ def make_sections_for_combined_to_poly_is_correct():
     )
     from_poly = GenericSection(poly=p)
 
-    combined = make_T(b_f=100, d=200, t_f=20, t_w=6)
+    combined = make_t(b_f=100, d=200, t_f=20, t_w=6)
     combined = combined.move_to_point(
         origin="origin", end_point=(0, combined.extreme_y_minus)
     )
@@ -200,9 +200,9 @@ def make_sections_for_combined_to_poly_is_correct():
 
     # next make an I section and rotate it by 45deg
 
-    p = I_poly(b_f=100, d=200, t_f=20, t_w=6)
+    p = i_poly(b_f=100, d=200, t_f=20, t_w=6)
     from_poly = GenericSection(poly=p)
-    combined = make_I(b_f=100, d=200, t_f=20, t_w=6)
+    combined = make_i(b_f=100, d=200, t_f=20, t_w=6)
 
     from_poly = from_poly.rotate(angle=45, origin="origin", use_radians=False)
     combined = combined.rotate(angle=45, origin="origin", use_radians=False)
@@ -210,9 +210,9 @@ def make_sections_for_combined_to_poly_is_correct():
 
     sections.append((from_poly, combined))
 
-    p = I_poly(b_f=311, d=327.2, t_f=25, t_w=15.7)
+    p = i_poly(b_f=311, d=327.2, t_f=25, t_w=15.7)
     from_poly = GenericSection(poly=p)
-    combined = make_I(b_f=311, d=327.2, t_f=25, t_w=15.7)
+    combined = make_i(b_f=311, d=327.2, t_f=25, t_w=15.7)
     combined = GenericSection(poly=combined.polygon)
 
     sections.append((combined, from_poly))
@@ -221,33 +221,34 @@ def make_sections_for_combined_to_poly_is_correct():
 
 
 @pytest.mark.parametrize(
-    "property",
+    "sect_property",
     ALL_PROPERTIES,
 )
 @pytest.mark.parametrize("sections", make_sections_for_combined_to_poly_is_correct())
-def test_combined_section_to_poly_is_correct(property, sections):
+def test_combined_section_to_poly_is_correct(sect_property, sections):
     """
     Test that creating a polygon from a combined section gives the same properties.
     """
 
-    c = make_I(b_f=311, d=327.2, t_f=25, t_w=15.7)
+    c = make_i(b_f=311, d=327.2, t_f=25, t_w=15.7)
     from_p = GenericSection(poly=c.polygon)
 
-    assert round(getattr(c, property)) == round(getattr(from_p, property))
+    assert round(getattr(c, sect_property)) == round(getattr(from_p, sect_property))
 
 
 @pytest.mark.parametrize(
-    "property", ["d", "bf", "Ag", "Ix", "Zx", "Sx", "rx", "Iy", "Zy", "Sy", "ry", "J"]
+    "sect_property",
+    ["d", "bf", "Ag", "Ix", "Zx", "Sx", "rx", "Iy", "Zy", "Sy", "ry", "J"],
 )
-@pytest.mark.parametrize("data", get_I_sections(), ids=lambda x: x["Section"])
-def test_against_standard_sects(data, property):
+@pytest.mark.parametrize("data", get_i_sections(), ids=lambda x: x["Section"])
+def test_against_standard_sects(data, sect_property):
     """
     Compare the results of section_prop vs tabulated data for standard AS sections.
 
     Note that this ignores the radius / fillet welds in the web-flange intersection.
     """
 
-    MAP_SSHEET_TO_SECTION_PROP = {
+    map_ssheet_to_section_prop = {
         "d": ["depth"],
         "bf": ["width"],
         "Ag": ["area"],
@@ -276,27 +277,27 @@ def test_against_standard_sects(data, property):
         "J": ["J_approx"],
     }
 
-    i_sect = make_I(b_f=data["bf"], d=data["d"], t_f=data["tf"], t_w=data["tw"])
+    i_sect = make_i(b_f=data["bf"], d=data["d"], t_f=data["tf"], t_w=data["tw"])
 
-    attribute = MAP_SSHEET_TO_SECTION_PROP[property]
+    attribute = map_ssheet_to_section_prop[sect_property]
 
     for a in attribute:
         calculated = getattr(i_sect, a)
-        test = data[property]
+        test = data[sect_property]
 
         assert math.isclose(calculated, test, rel_tol=0.1)
 
 
 @pytest.mark.parametrize(
-    "property", ["d", "bf", "Ag", "Ix", "Zx", "Sx", "rx", "Iy", "Zy", "ry", "Sy"]
+    "sect_property", ["d", "bf", "Ag", "Ix", "Zx", "Sx", "rx", "Iy", "Zy", "ry", "Sy"]
 )
-@pytest.mark.parametrize("data", get_I_sections(), ids=lambda x: x["Section"])
-def test_against_standard_sects_with_radius(data, property):
+@pytest.mark.parametrize("data", get_i_sections(), ids=lambda x: x["Section"])
+def test_against_standard_sects_with_radius(data, sect_property):
     """
     Compare the results of section_prop vs tabulated data for standard AS sections.
     """
 
-    MAP_SSHEET_TO_SECTION_PROP = {
+    map_ssheet_to_section_prop = {
         "d": ["depth"],
         "bf": ["width"],
         "Ag": ["area"],
@@ -326,7 +327,7 @@ def test_against_standard_sects_with_radius(data, property):
     }
 
     if data["Fabrication Type"] == "Hot Rolled":
-        i_sect = make_I(
+        i_sect = make_i(
             b_f=data["bf"],
             d=data["d"],
             t_f=data["tf"],
@@ -335,7 +336,7 @@ def test_against_standard_sects_with_radius(data, property):
             radius_size=data["r1"],
         )
     else:
-        i_sect = make_I(
+        i_sect = make_i(
             b_f=data["bf"],
             d=data["d"],
             t_f=data["tf"],
@@ -344,11 +345,11 @@ def test_against_standard_sects_with_radius(data, property):
             weld_size=0.005,  # guestimated weld size
         )
 
-    attribute = MAP_SSHEET_TO_SECTION_PROP[property]
+    attribute = map_ssheet_to_section_prop[sect_property]
 
     for a in attribute:
         calculated = getattr(i_sect, a)
-        test = data[property]
+        test = data[sect_property]
 
         assert math.isclose(calculated, test, rel_tol=0.03)
 
@@ -361,8 +362,8 @@ def test_against_standard_sects_with_radius(data, property):
             0,
             12500,
         ),
-        (make_I(b_f=100, d=100, t_f=10, t_w=10), 0, 53000),
-        (make_I(b_f=100, d=100, t_f=10, t_w=10), 40, 45000),
+        (make_i(b_f=100, d=100, t_f=10, t_w=10), 0, 53000),
+        (make_i(b_f=100, d=100, t_f=10, t_w=10), 40, 45000),
     ],
 )
 def test_first_moment_uu(test_input, cut_height, expected):
@@ -382,8 +383,8 @@ def test_first_moment_uu(test_input, cut_height, expected):
             0,
             1250,
         ),
-        (make_I(b_f=100, d=100, t_f=10, t_w=10), 0, 26000),
-        (make_I(b_f=100, d=100, t_f=10, t_w=10), 40, 9000),
+        (make_i(b_f=100, d=100, t_f=10, t_w=10), 0, 26000),
+        (make_i(b_f=100, d=100, t_f=10, t_w=10), 40, 9000),
     ],
 )
 def test_first_moment_vv(test_input, cut_right, expected):
@@ -404,12 +405,12 @@ def test_first_moment_vv(test_input, cut_right, expected):
             12500,
         ),
         (
-            make_I(b_f=100, d=100, t_f=10, t_w=10).rotate(angle=45, use_radians=False),
+            make_i(b_f=100, d=100, t_f=10, t_w=10).rotate(angle=45, use_radians=False),
             0,
             53000,
         ),
         (
-            make_I(b_f=100, d=100, t_f=10, t_w=10).rotate(angle=45, use_radians=False),
+            make_i(b_f=100, d=100, t_f=10, t_w=10).rotate(angle=45, use_radians=False),
             40,
             45000,
         ),
@@ -433,12 +434,12 @@ def test_first_moment_11(test_input, cut_22, expected):
             1250,
         ),
         (
-            make_I(b_f=100, d=100, t_f=10, t_w=10).rotate(angle=45, use_radians=False),
+            make_i(b_f=100, d=100, t_f=10, t_w=10).rotate(angle=45, use_radians=False),
             0,
             26000,
         ),
         (
-            make_I(b_f=100, d=100, t_f=10, t_w=10).rotate(angle=45, use_radians=False),
+            make_i(b_f=100, d=100, t_f=10, t_w=10).rotate(angle=45, use_radians=False),
             40,
             9000,
         ),
@@ -457,7 +458,7 @@ def test_first_moment_22(test_input, cut_11, expected):
     "sect_a,sect_b",
     [
         (
-            make_I(b_f=100, d=100, t_f=10, t_w=10),
+            make_i(b_f=100, d=100, t_f=10, t_w=10),
             GenericSection(
                 [
                     (-50, -50),
@@ -528,7 +529,7 @@ def test_plastic_modulus_uuvv():
     based on the u-u / v-v axes or the x-x / y-y axes.
     """
 
-    sect = make_I(b_f=100, d=100, t_f=10, t_w=10).move(x=10, y=10)
+    sect = make_i(b_f=100, d=100, t_f=10, t_w=10).move(x=10, y=10)
 
     assert math.isclose(
         sect.first_moment_uu(cut_uu=15), sect.first_moment_uu(cut_xx=25)
@@ -539,7 +540,7 @@ def test_plastic_modulus_uuvv():
 
 
 def test_plastic_modulus_uuvv2():
-    i_sect = make_I(
+    i_sect = make_i(
         b_f=0.1905,
         d=0.6096,
         t_f=0.0256794,
@@ -557,7 +558,7 @@ def test_plastic_modulus_uuvv2():
 
 
 def test_plastic_modulus_uu3():
-    i_sect = make_I(
+    i_sect = make_i(
         b_f=0.1905,
         d=0.6096,
         t_f=0.0256794,
@@ -578,12 +579,12 @@ def test_plastic_modulus_11_rotated():
     Check that the plastic_modulus_11 / 22 functions work even if section is rotated
     """
 
-    T_start = make_T(b_f=100, d=100, t_f=10, t_w=10)
+    t_start = make_t(b_f=100, d=100, t_f=10, t_w=10)
 
-    t_expected_11 = T_start.plastic_modulus_uu
-    t_expected_22 = T_start.plastic_modulus_vv
+    t_expected_11 = t_start.plastic_modulus_uu
+    t_expected_22 = t_start.plastic_modulus_vv
 
-    T_end = T_start.rotate(angle=45, use_radians=False)
+    t_end = t_start.rotate(angle=45, use_radians=False)
 
-    assert math.isclose(T_end.plastic_modulus_11, t_expected_11, abs_tol=1e-6)
-    assert math.isclose(T_end.plastic_modulus_22, t_expected_22, abs_tol=1e-6)
+    assert math.isclose(t_end.plastic_modulus_11, t_expected_11, abs_tol=1e-6)
+    assert math.isclose(t_end.plastic_modulus_22, t_expected_22, abs_tol=1e-6)
