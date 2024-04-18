@@ -21,7 +21,7 @@ def get_nouns(no_rolls=5):
     for f in ["1syllablenouns.txt", "2syllablenouns.txt"]:
         word_file = noun_base / Path(f)
 
-        with open(word_file, "r") as file_handle:
+        with word_file.open("r") as file_handle:
             words = file_handle.read().splitlines()
 
         words = [w.strip() for w in words if w != ""]
@@ -52,7 +52,7 @@ def get_adjs(no_rolls=5):
     ]:
         word_file = adj_base / Path(f)
 
-        with open(word_file, "r") as file_handle:
+        with word_file.open("r") as file_handle:
             words = file_handle.read().splitlines()
 
         words = [w.strip() for w in words if w != ""]
@@ -71,11 +71,11 @@ def make_lists():
     noun_file = Path("nouns.txt")
     adj_file = Path("adjs.txt")
 
-    with open(noun_file, "w") as f:
+    with noun_file.open("w") as f:
         for n in nouns:
             f.write(f"{''.join(n[0])}: {n[1]}\n")
 
-    with open(adj_file, "w") as f:
+    with adj_file.open("w") as f:
         for a in adjs:
             f.write(f"{''.join(a[0])}: {a[1]}\n")
 
