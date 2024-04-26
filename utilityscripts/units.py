@@ -9,11 +9,15 @@ Also imports math & sets up pi
 from math import acos, asin, atan, cos, degrees, pi, radians, sin, tan  # noqa: F401
 
 import pint
+import pint_pandas  # noqa: F401
+
+from utilityscripts.steel import C_SECTIONS_DF, I_SECTIONS_DF
 
 # define a unicode pi value for pretty printing if req'd.
 π = pi
 
 ureg = pint.UnitRegistry()
+pint.set_application_registry(ureg)
 
 # units of length
 m = ureg.metre
@@ -131,3 +135,30 @@ rho_steel = 7850 * kg / m**3  # see AS4100
 
 # set default printing
 ureg.default_format = ".3f~P"
+
+I_SECTIONS_DF_UNITS = I_SECTIONS_DF.astype(
+    {
+        "mass": "pint[kg/m]",
+        "d": "pint[m]",
+        "b_f": "pint[m]",
+        "t_f": "pint[m]",
+        "t_w": "pint[m]",
+        "r_1": "pint[m]",
+        "w_1": "pint[m]",
+        "r1_or_w1": "pint[m]",
+        "a_g": "pint[m**2]",
+        "i_x": "pint[m**4]",
+        "z_x": "pint[m**3]",
+        "z_y": "pint[m**3]",
+    }
+)
+C_SECTIONS_DF_UNITS = C_SECTIONS_DF.astype(
+    {
+        "mass": "pint[kg/m]",
+        "d": "pint[m]",
+        "b_f": "pint[m]",
+        "t_f": "pint[m]",
+        "t_w": "pint[m]",
+        "r_1": "pint[m]",
+    }
+)

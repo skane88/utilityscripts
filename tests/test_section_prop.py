@@ -89,7 +89,7 @@ ALL_PROPERTIES = (
 
 def get_i_sections():
     section_df = pd.read_excel("..\\data\\steel_sections.xlsx", sheet_name="Is")
-    section_df = section_df[section_df["Section Type"] == "I"]  # filter for I sections
+    section_df = section_df[section_df["section_type"] == "I"]  # filter for I sections
 
     return section_df.to_dict("records")  # use to_dict() to get each row as a dict.
 
@@ -238,9 +238,9 @@ def test_combined_section_to_poly_is_correct(sect_property, sections):
 
 @pytest.mark.parametrize(
     "sect_property",
-    ["d", "bf", "Ag", "Ix", "Zx", "Sx", "rx", "Iy", "Zy", "Sy", "ry", "J"],
+    ["d", "b_f", "a_g", "i_x", "z_x", "s_x", "r_x", "i_y", "z_y", "s_y", "r_y", "j"],
 )
-@pytest.mark.parametrize("data", get_i_sections(), ids=lambda x: x["Section"])
+@pytest.mark.parametrize("data", get_i_sections(), ids=lambda x: x["section"])
 def test_against_standard_sects(data, sect_property):
     """
     Compare the results of section_prop vs tabulated data for standard AS sections.
@@ -250,10 +250,10 @@ def test_against_standard_sects(data, sect_property):
 
     map_ssheet_to_section_prop = {
         "d": ["depth"],
-        "bf": ["width"],
-        "Ag": ["area"],
-        "Ix": ["i_xx", "i_uu", "i_11"],
-        "Zx": [
+        "b_f": ["width"],
+        "a_g": ["area"],
+        "i_x": ["i_xx", "i_uu", "i_11"],
+        "z_x": [
             "elastic_modulus_uu_plus",
             "elastic_modulus_uu_minus",
             "elastic_modulus_uu",
@@ -261,10 +261,10 @@ def test_against_standard_sects(data, sect_property):
             "elastic_modulus_11_minus",
             "elastic_modulus_11",
         ],
-        "Sx": ["plastic_modulus_11"],
-        "rx": ["rxx", "ruu", "r11"],
-        "Iy": ["i_yy", "i_vv", "i_22"],
-        "Zy": [
+        "s_x": ["plastic_modulus_11"],
+        "r_x": ["rxx", "ruu", "r11"],
+        "i_y": ["i_yy", "i_vv", "i_22"],
+        "z_y": [
             "elastic_modulus_vv_plus",
             "elastic_modulus_vv_minus",
             "elastic_modulus_vv",
@@ -272,12 +272,12 @@ def test_against_standard_sects(data, sect_property):
             "elastic_modulus_22_minus",
             "elastic_modulus_22",
         ],
-        "Sy": ["plastic_modulus_22"],
-        "ry": ["ryy", "rvv", "r22"],
-        "J": ["j_approx"],
+        "s_y": ["plastic_modulus_22"],
+        "r_y": ["ryy", "rvv", "r22"],
+        "j": ["j_approx"],
     }
 
-    i_sect = make_i(b_f=data["bf"], d=data["d"], t_f=data["tf"], t_w=data["tw"])
+    i_sect = make_i(b_f=data["b_f"], d=data["d"], t_f=data["t_f"], t_w=data["t_w"])
 
     attribute = map_ssheet_to_section_prop[sect_property]
 
@@ -289,9 +289,10 @@ def test_against_standard_sects(data, sect_property):
 
 
 @pytest.mark.parametrize(
-    "sect_property", ["d", "bf", "Ag", "Ix", "Zx", "Sx", "rx", "Iy", "Zy", "ry", "Sy"]
+    "sect_property",
+    ["d", "b_f", "a_g", "i_x", "z_x", "s_x", "r_x", "i_y", "z_y", "r_y", "s_y"],
 )
-@pytest.mark.parametrize("data", get_i_sections(), ids=lambda x: x["Section"])
+@pytest.mark.parametrize("data", get_i_sections(), ids=lambda x: x["section"])
 def test_against_standard_sects_with_radius(data, sect_property):
     """
     Compare the results of section_prop vs tabulated data for standard AS sections.
@@ -299,10 +300,10 @@ def test_against_standard_sects_with_radius(data, sect_property):
 
     map_ssheet_to_section_prop = {
         "d": ["depth"],
-        "bf": ["width"],
-        "Ag": ["area"],
-        "Ix": ["i_xx", "i_uu", "i_11"],
-        "Zx": [
+        "b_f": ["width"],
+        "a_g": ["area"],
+        "i_x": ["i_xx", "i_uu", "i_11"],
+        "z_x": [
             "elastic_modulus_uu_plus",
             "elastic_modulus_uu_minus",
             "elastic_modulus_uu",
@@ -310,10 +311,10 @@ def test_against_standard_sects_with_radius(data, sect_property):
             "elastic_modulus_11_minus",
             "elastic_modulus_11",
         ],
-        "Sx": ["plastic_modulus_11"],
-        "rx": ["rxx", "ruu", "r11"],
-        "Iy": ["i_yy", "i_vv", "i_22"],
-        "Zy": [
+        "s_x": ["plastic_modulus_11"],
+        "r_x": ["rxx", "ruu", "r11"],
+        "i_y": ["i_yy", "i_vv", "i_22"],
+        "z_y": [
             "elastic_modulus_vv_plus",
             "elastic_modulus_vv_minus",
             "elastic_modulus_vv",
@@ -321,28 +322,28 @@ def test_against_standard_sects_with_radius(data, sect_property):
             "elastic_modulus_22_minus",
             "elastic_modulus_22",
         ],
-        "Sy": ["plastic_modulus_22"],
-        "ry": ["ryy", "rvv", "r22"],
-        "J": ["j_approx"],
+        "s_y": ["plastic_modulus_22"],
+        "r_y": ["ryy", "rvv", "r22"],
+        "j": ["j_approx"],
     }
 
-    if data["Fabrication Type"] == "Hot Rolled":
+    if data["fabrication_type"] == "Hot Rolled":
         i_sect = make_i(
-            b_f=data["bf"],
+            b_f=data["b_f"],
             d=data["d"],
-            t_f=data["tf"],
-            t_w=data["tw"],
+            t_f=data["t_f"],
+            t_w=data["t_w"],
             radius_or_weld="r",
-            radius_size=data["r1"],
+            radius_size=data["r_1"],
         )
     else:
         i_sect = make_i(
-            b_f=data["bf"],
+            b_f=data["b_f"],
             d=data["d"],
-            t_f=data["tf"],
-            t_w=data["tw"],
+            t_f=data["t_f"],
+            t_w=data["t_w"],
             radius_or_weld="w",
-            weld_size=0.005,  # guestimated weld size
+            weld_size=data["w_1"],
         )
 
     attribute = map_ssheet_to_section_prop[sect_property]

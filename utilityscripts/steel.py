@@ -2,6 +2,7 @@
 To contain some utilities for steel design
 """
 
+from dataclasses import dataclass
 from math import pi
 from pathlib import Path
 
@@ -19,8 +20,75 @@ from utilityscripts.section_prop import build_circle
 
 # All the standard I & C sections as dataframes
 _DATA_PATH = Path(Path(__file__).parent.parent) / Path("data")
-I_SECTIONS = pd.read_excel(_DATA_PATH / Path("steel_sections.xlsx"), sheet_name="Is")
-C_SECTIONS = pd.read_excel(_DATA_PATH / Path("steel_sections.xlsx"), sheet_name="Cs")
+I_SECTIONS_DF = pd.read_excel(
+    _DATA_PATH / Path("steel_sections.xlsx"), sheet_name="Is", index_col=[0]
+)
+C_SECTIONS_DF = pd.read_excel(
+    _DATA_PATH / Path("steel_sections.xlsx"), sheet_name="Cs", index_col=[0]
+)
+
+
+@dataclass
+class ISection:
+    section: str
+    designation: str
+    mass: float
+    section_type: float
+    fabrication_type: float
+    d: float
+    b_f: float
+    t_f: float
+    t_w: float
+    r_1: float
+    w_1: float
+    r1_or_w1: float
+    a_g: float
+    i_x: float
+    z_x: float
+    s_x: float
+    r_x: float
+    i_y: float
+    z_y: float
+    s_y: float
+    r_y: float
+    j: float
+    i_w: float
+
+
+@dataclass
+class CSection:
+    section: str
+    designation: str
+    mass: float
+    section_type: float
+    fabrication_type: float
+    d: float
+    b_f: float
+    t_f: float
+    t_w: float
+    r_1: float
+    a_g: float
+    i_x: float
+    z_x: float
+    s_x: float
+    r_x: float
+    i_y: float
+    z_yl: float
+    z_yr: float
+    s_y: float
+    r_y: float
+    j: float
+    i_w: float
+
+
+I_SECTIONS = {
+    i: ISection(section=i, **v)
+    for i, v in I_SECTIONS_DF.replace({np.nan: None}).to_dict("index").items()
+}
+C_SECTIONS = {
+    c: CSection(section=c, **v)
+    for c, v in C_SECTIONS_DF.replace({np.nan: None}).to_dict("index").items()
+}
 
 
 def alpha_m(*, m_m, m_2, m_3, m_4):
