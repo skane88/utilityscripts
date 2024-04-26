@@ -252,7 +252,7 @@ def test_against_standard_sects(data, sect_property):
         "d": ["depth"],
         "bf": ["width"],
         "Ag": ["area"],
-        "Ix": ["Ixx", "Iuu", "I11"],
+        "Ix": ["i_xx", "i_uu", "i_11"],
         "Zx": [
             "elastic_modulus_uu_plus",
             "elastic_modulus_uu_minus",
@@ -263,7 +263,7 @@ def test_against_standard_sects(data, sect_property):
         ],
         "Sx": ["plastic_modulus_11"],
         "rx": ["rxx", "ruu", "r11"],
-        "Iy": ["Iyy", "Ivv", "I22"],
+        "Iy": ["i_yy", "i_vv", "i_22"],
         "Zy": [
             "elastic_modulus_vv_plus",
             "elastic_modulus_vv_minus",
@@ -274,7 +274,7 @@ def test_against_standard_sects(data, sect_property):
         ],
         "Sy": ["plastic_modulus_22"],
         "ry": ["ryy", "rvv", "r22"],
-        "J": ["J_approx"],
+        "J": ["j_approx"],
     }
 
     i_sect = make_i(b_f=data["bf"], d=data["d"], t_f=data["tf"], t_w=data["tw"])
@@ -301,7 +301,7 @@ def test_against_standard_sects_with_radius(data, sect_property):
         "d": ["depth"],
         "bf": ["width"],
         "Ag": ["area"],
-        "Ix": ["Ixx", "Iuu", "I11"],
+        "Ix": ["i_xx", "i_uu", "i_11"],
         "Zx": [
             "elastic_modulus_uu_plus",
             "elastic_modulus_uu_minus",
@@ -312,7 +312,7 @@ def test_against_standard_sects_with_radius(data, sect_property):
         ],
         "Sx": ["plastic_modulus_11"],
         "rx": ["rxx", "ruu", "r11"],
-        "Iy": ["Iyy", "Ivv", "I22"],
+        "Iy": ["i_yy", "i_vv", "i_22"],
         "Zy": [
             "elastic_modulus_vv_plus",
             "elastic_modulus_vv_minus",
@@ -323,7 +323,7 @@ def test_against_standard_sects_with_radius(data, sect_property):
         ],
         "Sy": ["plastic_modulus_22"],
         "ry": ["ryy", "rvv", "r22"],
-        "J": ["J_approx"],
+        "J": ["j_approx"],
     }
 
     if data["Fabrication Type"] == "Hot Rolled":
