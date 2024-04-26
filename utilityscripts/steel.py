@@ -1,6 +1,7 @@
 """
 To contain some utilities for steel design
 """
+
 from math import pi
 
 import numpy as np
@@ -15,17 +16,17 @@ from sectionproperties.pre.library.steel_sections import mono_i_section
 from utilityscripts.section_prop import build_circle
 
 
-def alpha_m(*, M_m, M_2, M_3, M_4):
+def alpha_m(*, m_m, m_2, m_3, m_4):
     """
     Determines the moment modification factor as per AS4100 S5.6.1.1.a.iii
 
-    :param M_m: The maximum moment.
-    :param M_2: The moment at the 1st 1/4 point.
-    :param M_3: The moment at mid-span.
-    :param M_4: The moment at the 2nd 1/4 point.
+    :param m_m: The maximum moment.
+    :param m_2: The moment at the 1st 1/4 point.
+    :param m_3: The moment at mid-span.
+    :param m_4: The moment at the 2nd 1/4 point.
     """
 
-    return 1.7 * M_m / (M_2**2 + M_3**2 + M_4**2) ** 0.5
+    return 1.7 * m_m / (m_2**2 + m_3**2 + m_4**2) ** 0.5
 
 
 def alpha_v(*, d_p, t_w, f_y, s, f_y_ref=250.0):
@@ -67,7 +68,7 @@ def alpha_d(*, alpha_v, d_p, s):
     return 1 + ((1 - alpha_v) / (1.15 * alpha_v * (1 + (s / d_p) ** 2) ** 0.5))
 
 
-def as_s5_15_3(*, gamma, a_w, alpha_v, v_star, v_u, d_p, s, phi=0.9):
+def as_s5_15_3(*, gamma, a_w, alpha_v, v_star, v_u, d_p, s, phi=0.9):  # noqa: PLR0913
     """
     Calculate the minimum area of a transverse shear stiffener as per AS4100 S5.15.3
 
@@ -117,7 +118,9 @@ def v_bt(*, a_e, t_p, f_up):
     return a_e * t_p * f_up
 
 
-def jack_bolt_effort(*, load, p, r_effort, r_bolt, mu, against: bool = True):
+def jack_bolt_effort(  # noqa: PLR0913
+    *, load, p, r_effort, r_bolt, mu, against: bool = True
+):
     """
     Calculate the force required to turn a jacking bolt.
 
@@ -147,7 +150,7 @@ def jack_bolt_effort(*, load, p, r_effort, r_bolt, mu, against: bool = True):
 
 
 def local_thickness_reqd(
-    *, point_force, f_y, phi=0.9, width_lever: tuple[float, float] = None
+    *, point_force, f_y, phi=0.9, width_lever: tuple[float, float] | None = None
 ):
     """
     Calculate the local thickness of a plate required to transfer a load back to a support by local bending.
@@ -167,15 +170,12 @@ def local_thickness_reqd(
     lw = width_lever[0]
     lever = width_lever[1]
 
-    if lever == 0:
-        width_lever_ratio = 0
-    else:
-        width_lever_ratio = lw / lever
+    width_lever_ratio = 0 if lever == 0 else lw / lever
 
     return 2 / (((phi * f_y / point_force) * (width_lever_ratio + 2)) ** 0.5)
 
 
-def make_i_section(
+def make_i_section(  # noqa: PLR0913
     *, b_f, d, t_f, t_w, b_fb=None, t_fb=None, corner_radius=None, n_r=8, weld_size=None
 ) -> Geometry:
     """
@@ -238,7 +238,7 @@ def make_i_section(
 
 
 def make_section(
-    geometry: Geometry, alpha_mesh_size=200, calculate_properties: bool = True
+    *, geometry: Geometry, alpha_mesh_size=200, calculate_properties: bool = True
 ) -> Section:
     """
     Turn a sectionproperties Geometry object into a Section object.
@@ -260,7 +260,7 @@ def make_section(
     return sect
 
 
-class Overplated_Section:
+class OverplatedSection:
     """
     Creates an overplated section with an overplate on the top & bottom.
 
@@ -269,7 +269,7 @@ class Overplated_Section:
         with other sections your mileage may vary until I update it.
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         base_section,
         t_op_top=None,
