@@ -68,7 +68,7 @@ def alpha_d(*, alpha_v, d_p, s):
     return 1 + ((1 - alpha_v) / (1.15 * alpha_v * (1 + (s / d_p) ** 2) ** 0.5))
 
 
-def as_s5_15_3(*, gamma, a_w, alpha_v, v_star, v_u, d_p, s, phi=0.9):  # noqa: PLR0913
+def as_s5_15_3(*, gamma, a_w, alpha_v, v_star, v_u, d_p, s, phi=0.9):
     """
     Calculate the minimum area of a transverse shear stiffener as per AS4100 S5.15.3
 
@@ -118,9 +118,7 @@ def v_bt(*, a_e, t_p, f_up):
     return a_e * t_p * f_up
 
 
-def jack_bolt_effort(  # noqa: PLR0913
-    *, load, p, r_effort, r_bolt, mu, against: bool = True
-):
+def jack_bolt_effort(*, load, p, r_effort, r_bolt, mu, against: bool = True):
     """
     Calculate the force required to turn a jacking bolt.
 
@@ -175,7 +173,7 @@ def local_thickness_reqd(
     return 2 / (((phi * f_y / point_force) * (width_lever_ratio + 2)) ** 0.5)
 
 
-def make_i_section(  # noqa: PLR0913
+def make_i_section(
     *, b_f, d, t_f, t_w, b_fb=None, t_fb=None, corner_radius=None, n_r=8, weld_size=None
 ) -> Geometry:
     """
@@ -269,7 +267,7 @@ class OverplatedSection:
         with other sections your mileage may vary until I update it.
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         base_section,
         t_op_top=None,
