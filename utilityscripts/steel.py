@@ -3,8 +3,10 @@ To contain some utilities for steel design
 """
 
 from math import pi
+from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from sectionproperties.analysis.section import Section
 from sectionproperties.pre.geometry import Geometry
 from sectionproperties.pre.library.primitive_sections import (
@@ -14,6 +16,11 @@ from sectionproperties.pre.library.primitive_sections import (
 from sectionproperties.pre.library.steel_sections import mono_i_section
 
 from utilityscripts.section_prop import build_circle
+
+# All the standard I & C sections as dataframes
+_DATA_PATH = Path(Path(__file__).parent.parent) / Path("data")
+I_SECTIONS = pd.read_excel(_DATA_PATH / Path("steel_sections.xlsx"), sheet_name="Is")
+C_SECTIONS = pd.read_excel(_DATA_PATH / Path("steel_sections.xlsx"), sheet_name="Cs")
 
 
 def alpha_m(*, m_m, m_2, m_3, m_4):
