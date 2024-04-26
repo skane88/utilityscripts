@@ -23,10 +23,10 @@ AXIS_INDEPENDENT_PROPERTIES = [
 ]
 
 GLOBAL_AXIS_PROPERTIES = [
-    "Ixx",
-    "Iyy",
-    "Ixy",
-    "Izz",
+    "i_xx",
+    "i_yy",
+    "i_xy",
+    "i_zz",
     "rxx",
     "ryy",
     "rzz",
@@ -35,10 +35,10 @@ GLOBAL_AXIS_PROPERTIES = [
 ]
 
 LOCAL_AXIS_PROPERTIES = [
-    "Iuu",
-    "Ivv",
-    "Iww",
-    "Iuv",
+    "i_uu",
+    "i_vv",
+    "i_ww",
+    "i_uv",
     "ruu",
     "rvv",
     "rww",
@@ -57,11 +57,11 @@ LOCAL_AXIS_PROPERTIES = [
 ]
 
 PRINCIPAL_AXIS_PROPERTIES = [
-    "I11",
-    "I22",
-    "I33",
-    "I12",
-    "r11",
+    "i_11",
+    "i_22",
+    "i_33",
+    "i_12",
+    "i_11",
     "r22",
     "r33",
     "extreme_11_plus",
@@ -74,9 +74,9 @@ PRINCIPAL_AXIS_PROPERTIES = [
     "elastic_modulus_22_minus",
     "plastic_modulus_11",
     "plastic_modulus_22",
-    "J",
-    "J_approx",
-    "Iw",
+    "j",
+    "j_approx",
+    "i_w",
 ]
 
 ALL_PROPERTIES = (
@@ -88,7 +88,7 @@ ALL_PROPERTIES = (
 
 
 def get_i_sections():
-    section_df = pd.read_excel("steel_sections.xlsx")
+    section_df = pd.read_excel("steel_sections.xlsx", sheet_name="Is")
     section_df = section_df[section_df["Section Type"] == "I"]  # filter for I sections
 
     return section_df.to_dict("records")  # use to_dict() to get each row as a dict.
