@@ -148,8 +148,15 @@ I_SECTIONS_DF_UNITS = I_SECTIONS_DF.astype(
         "r1_or_w1": "pint[m]",
         "a_g": "pint[m**2]",
         "i_x": "pint[m**4]",
+        "i_y": "pint[m**4]",
         "z_x": "pint[m**3]",
         "z_y": "pint[m**3]",
+        "s_x": "pint[m**3]",
+        "s_y": "pint[m**3]",
+        "r_x": "pint[m]",
+        "r_y": "pint[m]",
+        "j": "pint[m**4]",
+        "i_w": "pint[m**6]",
     }
 )
 C_SECTIONS_DF_UNITS = C_SECTIONS_DF.astype(
@@ -160,5 +167,17 @@ C_SECTIONS_DF_UNITS = C_SECTIONS_DF.astype(
         "t_f": "pint[m]",
         "t_w": "pint[m]",
         "r_1": "pint[m]",
+        "a_g": "pint[m**2]",
+        "i_x": "pint[m**4]",
+        "i_y": "pint[m**4]",
+        "z_x": "pint[m**3]",
+        "z_yl": "pint[m**3]",
+        "z_yr": "pint[m**3]",
+        "s_x": "pint[m**3]",
+        "s_y": "pint[m**3]",
+        "r_x": "pint[m]",
+        "r_y": "pint[m]",
+        "j": "pint[m**4]",
+        "i_w": "pint[m**6]",
     }
 )
