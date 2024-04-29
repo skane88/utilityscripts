@@ -1,6 +1,7 @@
 """
 File to contain basic UI functions.
 """
+
 import contextlib
 from pathlib import Path
 from tkinter import Tk, filedialog
@@ -11,7 +12,7 @@ no_set = {"n", "N", "No", "NO", "no"}
 quit_set = {"quit", "q", "Q", "Quit"}
 
 
-class QuitToMain(Exception):
+class QuitToMain(Exception):  # noqa: N818
     """
     An exception to force the program to quit to the main menu.
     """
@@ -22,11 +23,11 @@ class QuitToMain(Exception):
 def get_true_false(
     *,
     prefix: str = "Enter a yes or no",
-    true_false_prompt: str = None,
-    true_set: Set[str] = None,
-    false_set: Set[str] = None,
+    true_false_prompt: str | None = None,
+    true_set: Set[str] | None = None,
+    false_set: Set[str] | None = None,
     allow_quit: bool = False,
-    exit_set: Set[str] = None,
+    exit_set: Set[str] | None = None,
 ) -> bool:
     """
     Gets a true or false answer from the user.
@@ -85,11 +86,11 @@ def get_true_false(
     if true_false_prompt is None:
         prompt_set = {c.lower() for c in true_set}
 
-        true_prompt = sorted(list(prompt_set))
+        true_prompt = sorted(prompt_set)
 
         prompt_set = {c.lower() for c in false_set}
 
-        false_prompt = sorted(list(prompt_set))
+        false_prompt = sorted(prompt_set)
 
         if len(true_prompt) == 1:
             true_false_prompt = f"Yes={true_prompt[0]}"
@@ -107,7 +108,7 @@ def get_true_false(
         true_false_prompt = true_false_prompt.lower()
 
     if allow_quit:
-        exit_set = sorted(list(exit_set))
+        exit_set = sorted(exit_set)
 
         quit_prompt = f"{exit_set[0]}" if len(exit_set) == 1 else f"{exit_set}"
 
