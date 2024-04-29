@@ -122,7 +122,7 @@ def file_lister(base_path: Path):
             file_exists = output_file.exists()
             start_int += 1
 
-        with open(output_file, "w") as file:
+        with output_file.open("w") as file:
             for line in text_to_save:
                 file.write(f"{line}\n")
 

@@ -4,14 +4,14 @@ Calculates basic section properties
 
 import itertools
 import math
-from typing import List, Tuple, TypeVar, Union
+from typing import TypeVar
 
 import matplotlib.pyplot as plt
 import numpy as np
 import shapely.affinity as aff
-import shapely.ops as ops
 from matplotlib.patches import PathPatch
 from matplotlib.path import Path
+from shapely import ops
 from shapely.coords import CoordinateSequence
 from shapely.geometry import LineString, Point, Polygon, polygon
 
@@ -53,7 +53,7 @@ class Section:
         raise NotImplementedError
 
     @property
-    def Ixx(self):
+    def i_xx(self):
         """
         The second moment of inertia about the GEOMETRIC x-x axis.
         """
@@ -61,7 +61,7 @@ class Section:
         raise NotImplementedError
 
     @property
-    def Iyy(self):
+    def i_yy(self):
         """
         The second moment of inertia about the GEOMETRIC y-y axis.
         """
@@ -69,15 +69,15 @@ class Section:
         raise NotImplementedError
 
     @property
-    def Izz(self):
+    def i_zz(self):
         """
         The polar second moment of inertia about the x-x and y-y axes.
         """
 
-        return self.Ixx + self.Iyy
+        return self.i_xx + self.i_yy
 
     @property
-    def Ixy(self):
+    def i_xy(self):
         """
         The product of inertia about the GEOMETRIC x, y axes.
         """
@@ -90,7 +90,7 @@ class Section:
         The radius of gyration about the x-x axis.
         """
 
-        return (self.Ixx / self.area) ** 0.5
+        return (self.i_xx / self.area) ** 0.5
 
     @property
     def ryy(self):
@@ -98,7 +98,7 @@ class Section:
         The radius of gyration about the y-y axis.
         """
 
-        return (self.Iyy / self.area) ** 0.5
+        return (self.i_yy / self.area) ** 0.5
 
     @property
     def rzz(self):
@@ -106,10 +106,10 @@ class Section:
         The polar radius of gyration about the x-x & y-y axes.
         """
 
-        return (self.Izz / self.area) ** 0.5
+        return (self.i_zz / self.area) ** 0.5
 
     @property
-    def Iuu(self):
+    def i_uu(self):
         """
         The moment of inertia about an axis parallel with the global x-x axis, but
         through the centroid of the section.
@@ -117,10 +117,10 @@ class Section:
 
         # note: could be sped up by using the relationship Iuu = Ixx + A*y**2
         # but this loses some accuracy due to floating point operations.
-        return self.move_to_centre().Ixx
+        return self.move_to_centre().i_xx
 
     @property
-    def Ivv(self):
+    def i_vv(self):
         """
         The moment of inertia about an axis parallel with the global y-y axis, but
         through the centroid of the section.
@@ -128,19 +128,19 @@ class Section:
 
         # note: could be sped up by using the relationship Iuu = Ixx + A*y**2
         # but this loses some accuracy due to floating point operations.
-        return self.move_to_centre().Iyy
+        return self.move_to_centre().i_yy
 
     @property
-    def Iww(self):
+    def i_ww(self):
         """
         The polar second moment of inertia about the x-x and y-y axes but through the
         centroid of the section.
         """
 
-        return self.Iuu + self.Ivv
+        return self.i_uu + self.i_vv
 
     @property
-    def Iuv(self):
+    def i_uv(self):
         """
         The product of inertia about the axes parallel with the GEOMETRIC x-x and y-y
         axes, but through the centroid of the section.
@@ -148,7 +148,7 @@ class Section:
 
         # note: could be sped up by using the relationship Iuv = Ixy + A*x*y
         # but this loses some accuracy due to floating point operations.
-        return self.move_to_centre().Ixy
+        return self.move_to_centre().i_xy
 
     @property
     def ruu(self):
@@ -157,7 +157,7 @@ class Section:
         section.
         """
 
-        return (self.Iuu / self.area) ** 0.5
+        return (self.i_uu / self.area) ** 0.5
 
     @property
     def rvv(self):
@@ -166,7 +166,7 @@ class Section:
         section.
         """
 
-        return (self.Ivv / self.area) ** 0.5
+        return (self.i_vv / self.area) ** 0.5
 
     @property
     def rww(self):
@@ -175,34 +175,34 @@ class Section:
         centroid of the section.
         """
 
-        return (self.Iww / self.area) ** 0.5
+        return (self.i_ww / self.area) ** 0.5
 
     @property
-    def I11(self):
+    def i_11(self):
         """
         The major principal moment of inertia.
         """
 
-        return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[0]
+        return calculate_principal_moments(self.i_uu, self.i_vv, self.i_uv)[0]
 
     @property
-    def I22(self):
+    def i_22(self):
         """
         The minor principal moment of inertia.
         """
 
-        return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[1]
+        return calculate_principal_moments(self.i_uu, self.i_vv, self.i_uv)[1]
 
     @property
-    def I33(self):
+    def i_33(self):
         """
         The polar moment of inertia about the principal axes.
         """
 
-        return self.I11 + self.I22
+        return self.i_11 + self.i_22
 
     @property
-    def I12(self):
+    def i_12(self):
         """
         The product moment of inertia about the principal axes. By definition this is
         always 0.
@@ -216,7 +216,7 @@ class Section:
         The radius of gyration about the 1-1 principal axis.
         """
 
-        return (self.I11 / self.area) ** 0.5
+        return (self.i_11 / self.area) ** 0.5
 
     @property
     def r22(self):
@@ -224,7 +224,7 @@ class Section:
         The radius of gyration about the 2-2 principal axis.
         """
 
-        return (self.I22 / self.area) ** 0.5
+        return (self.i_22 / self.area) ** 0.5
 
     @property
     def r33(self):
@@ -232,7 +232,7 @@ class Section:
         The polar radius of gyration about the major principal axes.
         """
 
-        return (self.I33 / self.area) ** 0.5
+        return (self.i_33 / self.area) ** 0.5
 
     @property
     def principal_angle(self):
@@ -240,7 +240,7 @@ class Section:
         The principal axis angle in radians.
         """
 
-        return calculate_principal_moments(self.Iuu, self.Ivv, self.Iuv)[2]
+        return calculate_principal_moments(self.i_uu, self.i_vv, self.i_uv)[2]
 
     @property
     def principal_angle_degrees(self):
@@ -251,7 +251,7 @@ class Section:
         return math.degrees(self.principal_angle)
 
     @property
-    def J(self):
+    def j(self):
         """
         The St-Venant's torsional constant of the section.
         """
@@ -259,7 +259,7 @@ class Section:
         raise NotImplementedError
 
     @property
-    def Iw(self):
+    def i_w(self):
         """
         The warping constant of the section.
         """
@@ -291,7 +291,7 @@ class Section:
         return self.centroid.y
 
     @property
-    def bounding_box(self) -> List[float]:
+    def bounding_box(self) -> list[float]:
         """
         The bounding box of the section:
 
@@ -447,7 +447,7 @@ class Section:
         Calculated at the most positive extreme y point.
         """
 
-        return self.Iuu / self.extreme_y_plus
+        return self.i_uu / self.extreme_y_plus
 
     @property
     def elastic_modulus_uu_minus(self):
@@ -457,7 +457,7 @@ class Section:
         Calculated at the most negative extreme y point.
         """
 
-        return self.Iuu / self.extreme_y_minus
+        return self.i_uu / self.extreme_y_minus
 
     @property
     def elastic_modulus_vv_plus(self):
@@ -467,7 +467,7 @@ class Section:
         Calculated at the most positive extreme x point.
         """
 
-        return self.Ivv / self.extreme_x_plus
+        return self.i_vv / self.extreme_x_plus
 
     @property
     def elastic_modulus_vv_minus(self):
@@ -477,7 +477,7 @@ class Section:
         Calculated at the most negative extreme x point.
         """
 
-        return self.Ivv / self.extreme_x_minus
+        return self.i_vv / self.extreme_x_minus
 
     @property
     def elastic_modulus_uu(self):
@@ -550,7 +550,7 @@ class Section:
         Calculated at the most positive extreme point.
         """
 
-        return self.I11 / self.extreme_22_plus
+        return self.i_11 / self.extreme_22_plus
 
     @property
     def elastic_modulus_11_minus(self):
@@ -560,7 +560,7 @@ class Section:
         Calculated at the most negative extreme point.
         """
 
-        return self.I11 / self.extreme_22_minus
+        return self.i_11 / self.extreme_22_minus
 
     @property
     def elastic_modulus_22_plus(self):
@@ -570,7 +570,7 @@ class Section:
         Calculated at the most positive extreme point.
         """
 
-        return self.I22 / self.extreme_11_plus
+        return self.i_22 / self.extreme_11_plus
 
     @property
     def elastic_modulus_22_minus(self):
@@ -580,7 +580,7 @@ class Section:
         Calculated at the most negative extreme point.
         """
 
-        return self.I22 / self.extreme_11_minus
+        return self.i_22 / self.extreme_11_minus
 
     @property
     def elastic_modulus_11(self):
@@ -710,8 +710,8 @@ class Section:
 
     def move_to_point(
         self,
-        end_point: Union[Point, Tuple[float, float]],
-        origin: Union[str, Point, Tuple[float, float]] = "origin",
+        end_point: Point | tuple[float, float],
+        origin: str | Point | tuple[float, float] = "origin",
     ) -> S:
         """
         Returns a copy of the object translated from the point ``origin`` to the point
@@ -738,8 +738,9 @@ class Section:
 
     def rotate(
         self,
+        *,
         angle: float,
-        origin: Union[str, Point, Tuple[float, float]] = "origin",
+        origin: str | Point | tuple[float, float] = "origin",
         use_radians: bool = True,
     ) -> S:
         """
@@ -814,7 +815,7 @@ class Section:
             )
         return origin
 
-    def split(self, line: LineString) -> List[S]:
+    def split(self, line: LineString) -> list[S]:
         """
         Split the section into two by a line. This method is intended to allow
         the following operations to be implemented:
@@ -844,7 +845,7 @@ class Section:
 
         return [GenericSection(p) for p in results]
 
-    def split_horizontal(self, y_val) -> List[S]:
+    def split_horizontal(self, y_val) -> list[S]:
         """
         Split the section into two at a given y co-ordinate.
         This method is intended to allow the following operations to be implemented:
@@ -869,7 +870,7 @@ class Section:
 
         return self.split(line=line)
 
-    def split_vertical(self, x_val) -> List[S]:
+    def split_vertical(self, x_val) -> list[S]:
         """
         Split the section into two at a given x co-ordinate.
         This method is intended to allow the following operations to be implemented:
@@ -894,7 +895,7 @@ class Section:
 
         return self.split(line=line)
 
-    def _generic_first_moment(self, cut_height, above: bool = True):
+    def _generic_first_moment(self, *, cut_height, above: bool = True):
         """
         Calculate the generic first moment of a portion of the section above a given cut
         line about the X-X axis
@@ -916,7 +917,7 @@ class Section:
 
         return abs(first_moment)
 
-    def first_moment_xx(self, cut_height, above: bool = False):
+    def first_moment_xx(self, *, cut_height, above: bool = False):
         """
         Calculate the first moment of a portion of the section about the X-X axis.
 
@@ -927,7 +928,7 @@ class Section:
 
         return self._generic_first_moment(cut_height=cut_height, above=above)
 
-    def first_moment_yy(self, cut_right, right: bool = True):
+    def first_moment_yy(self, *, cut_right, right: bool = True):
         """
         Calculate the generic first moment of a portion of the section to the right of a
         given cut line about the y-y axis
@@ -943,7 +944,7 @@ class Section:
         # now return the first moment about u-u.
         return s._generic_first_moment(cut_height=cut_right, above=right)
 
-    def first_moment_uu(self, cut_uu=None, cut_xx=None, above: bool = True):
+    def first_moment_uu(self, *, cut_uu=None, cut_xx=None, above: bool = True):
         """
         Calculate the generic first moment of a portion of the section above a given cut
         line about the u-u axis. Either of the following cut distances can be provided:
@@ -976,7 +977,7 @@ class Section:
         # now we calculate the first moment
         return s._generic_first_moment(cut_height=cut_height, above=above)
 
-    def first_moment_vv(self, cut_vv=None, cut_yy=None, right: bool = True):
+    def first_moment_vv(self, *, cut_vv=None, cut_yy=None, right: bool = True):
         """
         Calculate the generic first moment of a portion of the section to the right of a
         given cut line about the
@@ -1010,7 +1011,7 @@ class Section:
         # now return the first moment about u-u.
         return s._generic_first_moment(cut_height=cut_right, above=right)
 
-    def first_moment_11(self, cut_22, above: bool = True):
+    def first_moment_11(self, *, cut_22, above: bool = True):
         """
         Calculate the generic first moment of a portion of the section above a given cut
         line about the 1-1 axis
@@ -1026,7 +1027,7 @@ class Section:
         # now calculate the first moment
         return s._generic_first_moment(cut_height=cut_22, above=above)
 
-    def first_moment_22(self, cut_11, right: bool = True):
+    def first_moment_22(self, *, cut_11, right: bool = True):
         """
         Calculate the generic first moment of a portion of the section above a given cut
         line about the 2-2 axis
@@ -1066,7 +1067,7 @@ class GenericSection(Section):
 
     def __init__(
         self,
-        poly: Union[List[Tuple[float, float]], Polygon],
+        poly: list[tuple[float, float]] | Polygon,
     ):
         """
         Initialise a generic section based on an input polygon.
@@ -1098,23 +1099,23 @@ class GenericSection(Section):
         ]
 
     @property
-    def Ixx(self):
-        return sum(Ixx_from_coords(r) for r in self.coords)
+    def i_xx(self):
+        return sum(i_xx_from_coords(r) for r in self.coords)
 
     @property
-    def Iyy(self):
-        return sum(Iyy_from_coords(r) for r in self.coords)
+    def i_yy(self):
+        return sum(i_yy_from_coords(r) for r in self.coords)
 
     @property
-    def Ixy(self):
-        return sum(Ixy_from_coords(r) for r in self.coords)
+    def i_xy(self):
+        return sum(i_xy_from_coords(r) for r in self.coords)
 
     @property
     def centroid(self):
         return self.polygon.centroid
 
     @property
-    def bounding_box(self) -> List[float]:
+    def bounding_box(self) -> list[float]:
         return list(self.polygon.bounds)
 
     def move(self, x: float, y: float):
@@ -1122,8 +1123,9 @@ class GenericSection(Section):
 
     def rotate(
         self,
+        *,
         angle: float,
-        origin: Union[str, Point, Tuple[float, float]] = "origin",
+        origin: str | Point | tuple[float, float] = "origin",
         use_radians: bool = True,
     ):
         origin = self._make_origin_tuple(origin)
@@ -1134,7 +1136,7 @@ class GenericSection(Section):
             )
         )
 
-    def _split_poly(self, line: LineString) -> List[Polygon]:
+    def _split_poly(self, line: LineString) -> list[Polygon]:
         """
         A helper function for the split method. This splits the shape up into a number
         of Polygons based on a given split line.
@@ -1150,7 +1152,7 @@ class GenericSection(Section):
 
         return ops.split(self.polygon, line)
 
-    def split(self, line: LineString) -> List[S]:
+    def split(self, line: LineString) -> list[S]:
         return [GenericSection(p) for p in self._split_poly(line=line)]
 
 
@@ -1162,7 +1164,7 @@ class Rectangle(GenericSection):
         thickness,
         rotation_angle: float = 0,
         use_radians: bool = True,
-        translation: Tuple[float, float] = None,
+        translation: tuple[float, float] | None = None,
     ):
         """
         A rectangular section. Implemented as a subclass of GenericSection to allow the
@@ -1204,7 +1206,7 @@ class Rectangle(GenericSection):
         super().__init__(p)
 
     @property
-    def J_approx(self):
+    def j_approx(self):
         """
         St Venant's torsional constant calculated using an approximate method based on
         Roark's stress and Strain, Table 10.7 Section 4.
@@ -1237,8 +1239,9 @@ class Rectangle(GenericSection):
 
     def rotate(
         self,
+        *,
         angle: float,
-        origin: Union[str, Point, Tuple[float, float]] = "origin",
+        origin: str | Point | tuple[float, float] = "origin",
         use_radians: bool = True,
     ):
         # to maintain the length & thickness properties through the rotation some
@@ -1252,18 +1255,16 @@ class Rectangle(GenericSection):
 
 
 class CombinedSection(Section):
-    sections: List[Tuple[Section, Point]]
+    sections: list[tuple[Section, Point]]
 
-    def __init__(
-        self, sections: List[Tuple[Section, Union[Point, Tuple[float, float]]]]
-    ):
+    def __init__(self, sections: list[tuple[Section, Point | tuple[float, float]]]):
         """
         :param sections: A list of sections & centroids
         """
 
         all_sections = []
         for s, n in sections:
-            if isinstance(n, Tuple):
+            if isinstance(n, tuple):
                 # convert tuples into points
                 n = Point(n[0], n[1])
 
@@ -1327,23 +1328,23 @@ class CombinedSection(Section):
         return Point(mx / self.area, my / self.area)
 
     @property
-    def Ixx(self):
-        return sum(s.Iuu + s.area * n.y**2 for s, n in self.sections)
+    def i_xx(self):
+        return sum(s.i_uu + s.area * n.y**2 for s, n in self.sections)
 
     @property
-    def Iyy(self):
-        return sum(s.Iyy + s.area * n.x**2 for s, n in self.sections)
+    def i_yy(self):
+        return sum(s.i_yy + s.area * n.x**2 for s, n in self.sections)
 
     @property
-    def Ixy(self):
-        return sum(s.Ixy + s.area * n.x * n.y for s, n in self.sections)
+    def i_xy(self):
+        return sum(s.i_xy + s.area * n.x * n.y for s, n in self.sections)
 
     @property
-    def J_approx(self):
-        return sum(s.J_approx for s, n in self.sections)
+    def j_approx(self):
+        return sum(s.j_approx for s, n in self.sections)
 
     @property
-    def bounding_box(self) -> List[float]:
+    def bounding_box(self) -> list[float]:
         for section, node in self.sections:
             bbox = section.bounding_box
             bbox[0] += node.x
@@ -1409,8 +1410,9 @@ class CombinedSection(Section):
 
     def rotate(
         self,
+        *,
         angle: float,
-        origin: Union[str, Point, Tuple[float, float]] = "origin",
+        origin: str | Point | tuple[float, float] = "origin",
         use_radians: bool = True,
     ):
         sections = []
@@ -1445,12 +1447,13 @@ def make_square(side):
     return Rectangle(length=side, thickness=side)
 
 
-def make_I(
+def make_i(
+    *,
     b_f,
     d,
     t_f,
     t_w,
-    radius_or_weld: str = None,
+    radius_or_weld: str | None = None,
     radius_size=None,
     weld_size=None,
     box_in: bool = False,
@@ -1486,14 +1489,14 @@ def make_I(
         t_f_bottom = t_f
     d_w = d - (t_f_top + t_f_bottom)
     if radius_or_weld is None:
-        i_sections = _make_I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w)
+        i_sections = _make_i_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w)
     elif radius_or_weld in {"r", "w"}:
         i_sections = (
-            _make_I_radius(
+            _make_i_radius(
                 b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
             )
             if radius_or_weld == "r"
-            else _make_I_weld(
+            else _make_i_weld(
                 b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size
             )
         )
@@ -1513,7 +1516,7 @@ def make_I(
     return CombinedSection(sections=i_sections).move_to_centre()
 
 
-def _make_I_weld(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size):
+def _make_i_weld(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size):
     """
     Make an I section with welds between web and flange.
 
@@ -1587,7 +1590,7 @@ def _make_I_weld(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w, weld_size):
     return [(i_section, Point(0, abs(i_section.y_min)))]
 
 
-def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w):
+def _make_i_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w):
     """
     Make an I section with a radius between web and flange.
 
@@ -1694,7 +1697,7 @@ def _make_I_radius(b_f_bottom, b_f_top, d, radius_size, t_f_bottom, t_f_top, t_w
     return [(i, Point(0, abs(i.y_min)))]
 
 
-def _make_I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w):
+def _make_i_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w):
     """
     Make a simple I section out of 3x rectangular sections.
 
@@ -1722,7 +1725,7 @@ def _make_I_simple(b_f_bottom, b_f_top, d, t_f_bottom, t_f_top, t_w):
     return [(top_flange, n_tf), (bottom_flange, n_bf), (web, n_w)]
 
 
-def make_T(b_f, d, t_f, t_w, stem_up: bool = True) -> CombinedSection:
+def make_t(*, b_f, d, t_f, t_w, stem_up: bool = True) -> CombinedSection:
     """
     A helper method to make a T section.
 
@@ -1736,7 +1739,7 @@ def make_T(b_f, d, t_f, t_w, stem_up: bool = True) -> CombinedSection:
         GenericSection
     """
 
-    t = _make_T_simple(b_f, d, t_f, t_w)
+    t = _make_t_simple(b_f, d, t_f, t_w)
 
     if not stem_up:
         t = t.rotate(angle=180, origin="origin", use_radians=False)
@@ -1744,7 +1747,7 @@ def make_T(b_f, d, t_f, t_w, stem_up: bool = True) -> CombinedSection:
     return t
 
 
-def _make_T_simple(b_f, d, t_f, t_w):
+def _make_t_simple(b_f, d, t_f, t_w):
     """
     Make a simple T-section from Rectangle objects. T stem faces up.
 
@@ -1768,7 +1771,7 @@ def _make_T_simple(b_f, d, t_f, t_w):
     return CombinedSection(sections=[(flange, n_f), (web, n_w)]).move_to_centre()
 
 
-def make_C(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSection:
+def make_c(*, b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSection:
     """
     Make a C section. By default it is orientated with its toes to the right.
 
@@ -1824,8 +1827,8 @@ def make_C(b_f, d, t_f, t_w, box_in: bool = False, t_box=None) -> CombinedSectio
 
 
 def _prepare_coords_for_green(
-    coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray],
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    coords: CoordinateSequence | list[tuple[float, float]] | np.ndarray,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Prepares a set of co-ordinates for use in Green's integration algorithms.
     :param coords: The coordinates of the object as a Shapely CoordinateSequence or
@@ -1857,8 +1860,8 @@ def _prepare_coords_for_green(
     return xi, xj, yi, yj
 
 
-def Ixx_from_coords(
-    coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray],
+def i_xx_from_coords(
+    coords: CoordinateSequence | list[tuple[float, float]] | np.ndarray,
 ) -> float:
     """
     Calculate the moment of inertia about the global x axis by Green's theorem.
@@ -1881,8 +1884,8 @@ def Ixx_from_coords(
     return np.sum((yj**2 + yj * yi + yi**2) * (xi * yj - xj * yi)) / 12
 
 
-def Iyy_from_coords(
-    coords: Union[CoordinateSequence, List[Tuple[float, float]], np.ndarray],
+def i_yy_from_coords(
+    coords: CoordinateSequence | list[tuple[float, float]] | np.ndarray,
 ) -> float:
     """
     Calculate the moment of inertia about the global y axis by Green's theorem
@@ -1904,7 +1907,7 @@ def Iyy_from_coords(
     return np.sum((xj**2 + xj * xi + xi**2) * (xi * yj - xj * yi)) / 12
 
 
-def Ixy_from_coords(coords):
+def i_xy_from_coords(coords):
     """
     Calculate the product of inertia about the global x-x and y-y axes by
     Green's theorem
@@ -1929,8 +1932,8 @@ def Ixy_from_coords(coords):
 
 
 def calculate_principal_moments(
-    Iuu: float, Ivv: float, Iuv: float
-) -> Tuple[float, float, float]:
+    i_uu: float, i_vv: float, i_uv: float
+) -> tuple[float, float, float]:
     """
     Calculates the principal moments of inertia and their axis given the moments of
     inertia about 2x other axes and the product of inertia.
@@ -1944,21 +1947,21 @@ def calculate_principal_moments(
 
     https://leancrew.com/all-this/2018/01/transforming-section-properties-and-principal-directions/
 
-    :param Iuu: The moment of inertia about axis uu.
-    :param Ivv: The moment of inertia about axis vv.
-    :param Iuv: The product of inertia.
+    :param i_uu: The moment of inertia about axis uu.
+    :param i_vv: The moment of inertia about axis vv.
+    :param i_uv: The product of inertia.
     :return: A tuple containing the principal axes and the angle between uu and I11:
 
         (I11, I22, alpha)
     """
 
-    avg = (Iuu + Ivv) / 2
-    diff = (Iuu - Ivv) / 2  # Note that this is signed
-    I11 = avg + math.sqrt(diff**2 + Iuv**2)
-    I22 = avg - math.sqrt(diff**2 + Iuv**2)
-    alpha = math.atan2(-Iuv, diff) / 2
+    avg = (i_uu + i_vv) / 2
+    diff = (i_uu - i_vv) / 2  # Note that this is signed
+    i11 = avg + math.sqrt(diff**2 + i_uv**2)
+    i22 = avg - math.sqrt(diff**2 + i_uv**2)
+    alpha = math.atan2(-i_uv, diff) / 2
 
-    return I11, I22, alpha
+    return i11, i22, alpha
 
 
 def build_path(poly: Polygon) -> Path:
@@ -2023,12 +2026,12 @@ def build_patch(poly: Polygon, **kwargs):
 
 def build_circle(
     *,
-    centroid=Union[Point, Tuple[float, float]],
+    centroid=Point | tuple[float, float],
     radius,
     no_points: int = 64,
-    limit_angles: Tuple[float, float] = None,
+    limit_angles: tuple[float, float] | None = None,
     use_radians: bool = True,
-) -> List[Tuple[float, float]]:
+) -> list[tuple[float, float]]:
     """
     Build a list of points that approximate a circle or circular arc.
 

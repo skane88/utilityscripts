@@ -12,7 +12,7 @@ def bisection(
     x_low: float = -float_info.max,
     x_high: float = float_info.max,
     tol: float = 1e-9,
-    max_its: int = 20000,
+    max_iterations: int = 20000,
     fail_on_max_its: bool = True,
     **kwargs,
 ):
@@ -29,7 +29,7 @@ def bisection(
         smaller values may cause trouble with convergence, possibly due to floating
         point issues.
         NOTE: this is an absolute, not a relative, tolerance.
-    :param max_its: A maximum number of iterations to perform. If convergence is not
+    :param max_iterations: A maximum number of iterations to perform. If convergence is not
         achieved within tol when max_its is reached, an error is raised.
 
         If ``None``, the solver will continue until convergence is reached (potentially
@@ -53,7 +53,7 @@ def bisection(
             + f"x_low={x_low}, x_high={x_high}"
         )
 
-    if max_its is not None and max_its <= 1:
+    if max_iterations is not None and max_iterations <= 1:
         raise ValueError("Maximum no. of iterations should be > 1")
 
     i = 0
@@ -101,14 +101,14 @@ def bisection(
         else:
             x_high = x_mid
 
-        if max_its is not None and i >= max_its:
+        if max_iterations is not None and i >= max_iterations:
             if fail_on_max_its:
                 raise ValueError(
                     "Exceeded maximum number of iterations. "
                     + f"Current root approximation is {x_mid}."
                 )
-            else:
-                break
+
+            break
 
     return (x_low + x_high) / 2, i
 
@@ -227,7 +227,7 @@ def secant(
         if max_its is not None and i >= max_its:
             if fallback:
                 x, i = bisection(
-                    func=func, x_low=x_low, x_high=x_high, tol=tol, *args, **kwargs
+                    *args, func=func, x_low=x_low, x_high=x_high, tol=tol, **kwargs
                 )
                 return x, i, True
 

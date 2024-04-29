@@ -69,7 +69,7 @@ class Circle:
         return self.d * pi
 
 
-class Circular_Segment:
+class CircularSegment:
     """
     A class to calculate the properties of a Segment of a Circle.
     """
@@ -129,33 +129,30 @@ class Circular_Segment:
         if self._theta is not None:
             return self._theta
 
-        elif self._y2 is None:
+        if self._y2 is None:
             return 2 * asin(self.x / (2 * self.r))
 
-        else:
-            return 4 * asin(sqrt(self.y2 / (2 * self.r)))
+        return 4 * asin(sqrt(self.y2 / (2 * self.r)))
 
     @property
     def y2(self):
         if self._y2 is not None:
             return self._y2
 
-        elif self._theta is not None:
+        if self._theta is not None:
             return self.r - self.r * cos(self.theta / 2)
 
-        else:
-            return self.r * (1 - cos(asin(self.x / (2 * self.r))))
+        return self.r * (1 - cos(asin(self.x / (2 * self.r))))
 
     @property
     def x(self):
         if self._x is not None:
             return self._x
 
-        elif self._y2 is not None:
+        if self._y2 is not None:
             return 2 * self.r * sin(2 * asin(sqrt(self.y2 / (2 * self.r))))
 
-        else:
-            return 2 * self.r * sin(self.theta / 2) if self._x is None else self._x
+        return 2 * self.r * sin(self.theta / 2) if self._x is None else self._x
 
     @property
     def area(self):
@@ -198,30 +195,30 @@ class Circular_Segment:
 
         theta = 2 * pi - self.theta
 
-        return Circular_Segment(r=self.r, theta=theta)
+        return CircularSegment(r=self.r, theta=theta)
 
 
 if __name__ == "__main__":
-    c1 = Circular_Segment(r=1.888, y2=0.1)
+    c1 = CircularSegment(r=1.888, y2=0.1)
     print("Chord c1")
     print(c1.theta)
     print(c1.y2)
     print(c1.x)
     print()
 
-    c2 = Circular_Segment(r=1.888, theta=c1.theta)
+    c2 = CircularSegment(r=1.888, theta=c1.theta)
     print("Chord c2")
     print(c2.y2)
     print()
 
-    c3 = Circular_Segment(r=1.888, theta=2 * pi)
+    c3 = CircularSegment(r=1.888, theta=2 * pi)
     print("Chord c3")
     print(c3.theta)
     print(c3.y2)
     print(c3.x)
     print()
 
-    c4 = Circular_Segment(r=1.888, y2=2 * 1.888 - 0.1)
+    c4 = CircularSegment(r=1.888, y2=2 * 1.888 - 0.1)
     print("Chord c4")
     print(c4.theta)
     print(c4.y2)

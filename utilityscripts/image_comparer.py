@@ -14,7 +14,7 @@ DIFFERENCE_THRESHOLD = 20  # how similar should images be?
 
 
 def get_file_to_open(
-    *, type_prompt: str, filetypes: List[Tuple[str, str]] = None
+    *, type_prompt: str, filetypes: List[Tuple[str, str]] | None = None
 ) -> Path:
     """
     Gets a file to open.

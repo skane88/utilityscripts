@@ -19,7 +19,7 @@ register_heif_opener()
 VALID_EXTENSIONS = [".jpg", ".jpeg", ".bmp", ".png", ".heic"]
 
 
-class ImageResizeException(Exception):
+class ImageResizeError(Exception):
     """Exception raised when errors occur in this module"""
 
 
@@ -131,7 +131,7 @@ def compress_image(
                 quality_max = quality_average - 1
 
         if quality_acceptable <= -1:
-            raise ImageResizeException("No valid quality level found")
+            raise ImageResizeError("No valid quality level found")
 
         size = _get_size(picture_to_size=picture, quality=quality_acceptable)
 
@@ -139,7 +139,7 @@ def compress_image(
 
     if quality_acceptable >= quality_min_orig:
         if size > target_size and not save_larger_than_target:
-            raise ImageResizeException("No valid quality level found, not saving.")
+            raise ImageResizeError("No valid quality level found, not saving.")
 
         # get a new file path in case the old was not a jpg
         new_file_path = file_path.with_suffix(".jpg")
@@ -157,7 +157,7 @@ def compress_image(
 
     else:
         # if we get to here, we seem to have an error.
-        raise ImageResizeException(
+        raise ImageResizeError(
             (
                 "Expected quality level to be => than minimum allowable. "
                 + f"Values were: calculated quality ={quality_acceptable}, "
