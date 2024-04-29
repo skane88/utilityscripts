@@ -299,22 +299,22 @@ def generate_rectilinear_block(*, f_c, max_compression_strain: float = 0.003):
     ]
 
 
-def M_uo_min(*, Z, f_ct_f, P_e=0, A_g=0, e=0):
+def m_uo_min(*, z, f_ct_f, p_e=0, a_g=0, e=0):
     """
     Calculate the minimum required moment capacity.
 
-    :param Z: the uncracked section modulus, taken at the face of the section at which
+    :param z: the uncracked section modulus, taken at the face of the section at which
         cracking occurs.
     :param f_ct_f: the characteristic flexural strength of the concrete.
-    :param P_e: effective prestress force, accounting for losses.
-    :param A_g: gross area.
+    :param p_e: effective prestress force, accounting for losses.
+    :param a_g: gross area.
     :param e: prestress eccentricity from the centroid of the uncracked section.
     """
 
-    return 1.2 * (Z * (f_ct_f + P_e / A_g) + P_e * e)
+    return 1.2 * (z * (f_ct_f + p_e / a_g) + p_e * e)
 
 
-def M_uo():
+def m_uo():
     """
     Method to calculate the concrete capacity of a rectangular beam as per AS3600.
     """
@@ -322,7 +322,7 @@ def M_uo():
     pass
 
 
-def V_uo(*, f_c, u, d_om, beta_h=1.0):
+def v_uo(*, f_c, u, d_om, beta_h=1.0):
     """
     Calculate the punching shear capacity.
 
@@ -444,7 +444,7 @@ class PadFooting:
 
         return self.soil_level - self.washout_depth
 
-    def vol_soil_vertical(self, washout: bool = True):
+    def vol_soil_vertical(self, *, washout: bool = True):
         """
         Return the volume of soil immediately above the footing.
 
