@@ -139,10 +139,17 @@ class SteelGrade:
         """
 
         if strength != "f_y":
-            plt.plot(self.thickness, self.f_u)
+            plt.plot(self.thickness, self.f_u, label="f_y")
 
         if strength != "f_u":
-            plt.plot(self.thickness, self.f_y)
+            plt.plot(self.thickness, self.f_y, label="f_u")
+
+        plt.legend()
+        plt.title("Steel Strength vs Thickness")
+        plt.xlabel("Thickness")
+        plt.ylabel("Steel Strength")
+        plt.ylim(bottom=0)
+        plt.xlim(left=0)
 
         plt.show()
 
