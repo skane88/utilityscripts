@@ -5,7 +5,9 @@ To contain some utilities for steel design
 from dataclasses import dataclass
 from math import pi
 from pathlib import Path
+from typing import Iterable
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sectionproperties.analysis.section import Section
@@ -22,6 +24,9 @@ from utilityscripts.section_prop import build_circle
 _DATA_PATH = Path(Path(__file__).parent.parent) / Path("data")
 I_SECTIONS_DF = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="Is")
 C_SECTIONS_DF = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="Cs")
+STEEL_GRADES_DF = pd.read_excel(
+    _DATA_PATH / Path("steel_data.xlsx"), sheet_name="grades"
+)
 
 
 @dataclass
@@ -85,6 +90,64 @@ C_SECTIONS = {
     c: CSection(**v)
     for c, v in C_SECTIONS_DF.replace({np.nan: None}).to_dict("index").items()
 }
+
+
+class SteelGrade:
+    def __init__(
+        self,
+        *,
+        standard: str,
+        current: bool,
+        grade: str,
+        thickness: Iterable[float],
+        f_y: Iterable[float],
+        f_u: Iterable[float],
+    ):
+        """
+
+        :param standard: The standard the steel is made to.
+        :param current: Is the steel a currently prodcued steel?
+        :param grade: The grade designation.
+        :param thickness: An array of thicknesses.
+            Must be sorted smallest to largest.
+            Typ. should start at 0 thick, or whatever minimum thickness
+            the steel is produced in.
+        :param f_y: An array of yield strengths.
+            Should be sorted to match thickness.
+        :param f_u: An array of ultimate strengths.
+            Should be sorted to match thickness.
+        """
+
+        self.standard = standard
+        self.current = current
+        self.grade = grade
+        self.thickness = np.asarray(thickness)
+        self.f_y = np.asarray(f_y)
+        self.f_u = np.asarray(f_u)
+
+    def get_f_y(self, *, thickness):
+        pass
+
+    def get_f_u(self, *, thickness):
+        pass
+
+    def plot_grade(self, *, strength: str = "both"):
+        """
+        Plot the strength of the steel vs thickness.
+
+        :param strength: Either 'f_y' or 'f_u' or 'both'
+        """
+
+        if strength != "f_y":
+            plt.plot(self.thickness, self.f_u)
+
+        if strength != "f_u":
+            plt.plot(self.thickness, self.f_y)
+
+        plt.show()
+
+    def __repr__(self):
+        return f"SteelGrade: {self.standard}-{self.grade}"
 
 
 def alpha_m(*, m_m, m_2, m_3, m_4):
