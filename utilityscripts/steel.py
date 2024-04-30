@@ -97,6 +97,7 @@ class SteelGrade:
         *,
         standard: str,
         current: bool,
+        form: str,
         grade: str,
         thickness: list[float] | np.ndarray,
         f_y: list[float] | np.ndarray,
@@ -105,7 +106,8 @@ class SteelGrade:
         """
 
         :param standard: The standard the steel is made to.
-        :param current: Is the steel a currently prodcued steel?
+        :param current: Is the steel a currently produced steel?
+        :param form: The form of the steel (e.g. plate, section etc.).
         :param grade: The grade designation.
         :param thickness: An array of thicknesses.
             Must be sorted smallest to largest.
@@ -122,6 +124,7 @@ class SteelGrade:
 
         self.standard = standard
         self.current = current
+        self.form = form
         self.grade = grade
         self.thickness = np.asarray(thickness)
         self.f_y = np.asarray(f_y)
@@ -168,7 +171,42 @@ class SteelGrade:
         plt.show()
 
     def __repr__(self):
-        return f"SteelGrade: {self.standard}-{self.grade}"
+        return f"SteelGrade: {self.standard}:{self.grade}"
+
+
+def _build_grades():
+    sg_df = STEEL_GRADES_DF.sort_values(["standard", "grade", "t"])
+
+    unique_grades = sg_df.drop_duplicates(subset=["standard", "grade"])
+
+    grades = {}
+
+    for _, standard, current, form, grade, *_ in unique_grades.itertuples():
+        t = sg_df[(sg_df.standard == standard) & (sg_df.grade == grade)].t.to_numpy()
+        f_y = sg_df[
+            (sg_df.standard == standard) & (sg_df.grade == grade)
+        ].f_y.to_numpy()
+        f_u = sg_df[
+            (sg_df.standard == standard) & (sg_df.grade == grade)
+        ].f_u.to_numpy()
+
+        current = current == "yes"
+        grade = str(grade)
+
+        grades[standard + ":" + grade] = SteelGrade(
+            standard=standard,
+            current=current,
+            form=form,
+            grade=grade,
+            thickness=t,
+            f_y=f_y,
+            f_u=f_u,
+        )
+
+    return grades
+
+
+STEEL_GRADES = _build_grades()
 
 
 def alpha_m(*, m_m, m_2, m_3, m_4):
