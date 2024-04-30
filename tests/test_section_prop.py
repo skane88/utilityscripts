@@ -88,7 +88,7 @@ ALL_PROPERTIES = (
 
 
 def get_i_sections():
-    section_df = pd.read_excel("..\\data\\steel_sections.xlsx", sheet_name="Is")
+    section_df = pd.read_excel("..\\data\\steel_data.xlsx", sheet_name="Is")
     section_df = section_df[section_df["section_type"] == "I"]  # filter for I sections
 
     return section_df.to_dict("records")  # use to_dict() to get each row as a dict.

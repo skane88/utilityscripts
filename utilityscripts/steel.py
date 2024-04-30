@@ -20,12 +20,8 @@ from utilityscripts.section_prop import build_circle
 
 # All the standard I & C sections as dataframes
 _DATA_PATH = Path(Path(__file__).parent.parent) / Path("data")
-I_SECTIONS_DF = pd.read_excel(
-    _DATA_PATH / Path("steel_sections.xlsx"), sheet_name="Is", index_col=[0]
-)
-C_SECTIONS_DF = pd.read_excel(
-    _DATA_PATH / Path("steel_sections.xlsx"), sheet_name="Cs", index_col=[0]
-)
+I_SECTIONS_DF = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="Is")
+C_SECTIONS_DF = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="Cs")
 
 
 @dataclass
@@ -82,11 +78,11 @@ class CSection:
 
 
 I_SECTIONS = {
-    i: ISection(section=i, **v)
+    i: ISection(**v)
     for i, v in I_SECTIONS_DF.replace({np.nan: None}).to_dict("index").items()
 }
 C_SECTIONS = {
-    c: CSection(section=c, **v)
+    c: CSection(**v)
     for c, v in C_SECTIONS_DF.replace({np.nan: None}).to_dict("index").items()
 }
 
