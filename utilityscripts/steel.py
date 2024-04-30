@@ -2,6 +2,9 @@
 To contain some utilities for steel design
 """
 
+from __future__ import annotations
+
+import copy
 from dataclasses import dataclass
 from math import pi
 from pathlib import Path
@@ -21,74 +24,15 @@ from utilityscripts.section_prop import build_circle
 
 # All the standard I & C sections as dataframes
 _DATA_PATH = Path(Path(__file__).parent.parent) / Path("data")
-I_SECTIONS_DF = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="Is")
-C_SECTIONS_DF = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="Cs")
+I_SECTIONS_DF = pd.read_excel(
+    _DATA_PATH / Path("steel_data.xlsx"), sheet_name="Is"
+).replace({np.nan: None})
+C_SECTIONS_DF = pd.read_excel(
+    _DATA_PATH / Path("steel_data.xlsx"), sheet_name="Cs"
+).replace({np.nan: None})
 STEEL_GRADES_DF = pd.read_excel(
     _DATA_PATH / Path("steel_data.xlsx"), sheet_name="grades"
 )
-
-
-@dataclass
-class ISection:
-    section: str
-    designation: str
-    mass: float
-    section_type: float
-    fabrication_type: float
-    d: float
-    b_f: float
-    t_f: float
-    t_w: float
-    r_1: float
-    w_1: float
-    r1_or_w1: float
-    a_g: float
-    i_x: float
-    z_x: float
-    s_x: float
-    r_x: float
-    i_y: float
-    z_y: float
-    s_y: float
-    r_y: float
-    j: float
-    i_w: float
-
-
-@dataclass
-class CSection:
-    section: str
-    designation: str
-    mass: float
-    section_type: float
-    fabrication_type: float
-    d: float
-    b_f: float
-    t_f: float
-    t_w: float
-    r_1: float
-    a_g: float
-    i_x: float
-    z_x: float
-    s_x: float
-    r_x: float
-    i_y: float
-    z_yl: float
-    z_yr: float
-    s_y: float
-    r_y: float
-    j: float
-    i_w: float
-
-
-I_SECTIONS = {
-    i: ISection(**v)
-    for i, v in I_SECTIONS_DF.replace({np.nan: None}).to_dict("index").items()
-}
-C_SECTIONS = {
-    c: CSection(**v)
-    for c, v in C_SECTIONS_DF.replace({np.nan: None}).to_dict("index").items()
-}
 
 
 class SteelGrade:
@@ -211,6 +155,113 @@ def steel_grades() -> dict[str, SteelGrade]:
 
 
 STEEL_GRADES = steel_grades()
+
+
+class SteelSection:
+    def __init__(self, *, section: str, grade: None | SteelGrade = None):
+        self.section = section
+        self._grade = grade
+
+    @property
+    def grade(self):
+        return self._grade
+
+    def set_grade(self, grade: SteelGrade) -> SteelSection:
+        section_copy = copy.deepcopy(self)
+        section_copy._grade = grade
+
+        return section_copy
+
+    def __repr__(self):
+
+        grade = "no steel assigned" if self.grade is None else repr(self.grade)
+
+        return f"{type(self).__name__}: {self.section}, " + f"{grade}."
+
+
+class ISection(SteelSection):
+    def __init__(
+        self,
+        *,
+        section: str,
+        designation: str,
+        mass: float,
+        section_shape: float,
+        fabrication_type: float,
+        d: float,
+        b_f: float,
+        t_f: float,
+        t_w: float,
+        r_1: float,
+        w_1: float,
+        r1_or_w1: float,
+        a_g: float,
+        i_x: float,
+        z_x: float,
+        s_x: float,
+        r_x: float,
+        i_y: float,
+        z_y: float,
+        s_y: float,
+        r_y: float,
+        j: float,
+        i_w: float,
+        grade: None | SteelGrade = None,
+    ):
+        super().__init__(section=section, grade=grade)
+
+        self.designation = designation
+        self.mass = mass
+        self.section_shape = section_shape
+        self.fabrication_type = fabrication_type
+        self.d = d
+        self.b_f = b_f
+        self.t_f = t_f
+        self.t_w = t_w
+        self.r_1 = r_1
+        self.w_1 = w_1
+        self.r1_or_w1 = r1_or_w1
+        self.a_g = a_g
+        self.i_x = i_x
+        self.z_x = z_x
+        self.s_x = s_x
+        self.r_x = r_x
+        self.i_y = i_y
+        self.z_y = z_y
+        self.s_y = s_y
+        self.r_y = r_y
+        self.j = j
+        self.i_w = i_w
+
+
+@dataclass
+class CSection(SteelSection):
+    section: str
+    designation: str
+    mass: float
+    section_shape: float
+    fabrication_type: float
+    d: float
+    b_f: float
+    t_f: float
+    t_w: float
+    r_1: float
+    a_g: float
+    i_x: float
+    z_x: float
+    s_x: float
+    r_x: float
+    i_y: float
+    z_yl: float
+    z_yr: float
+    s_y: float
+    r_y: float
+    j: float
+    i_w: float
+
+
+I_SECTIONS = {i: ISection(**v) for i, v in I_SECTIONS_DF.to_dict("index").items()}
+C_SECTIONS = {c: CSection(**v) for c, v in C_SECTIONS_DF.to_dict("index").items()}
 
 
 def alpha_m(*, m_m, m_2, m_3, m_4):
