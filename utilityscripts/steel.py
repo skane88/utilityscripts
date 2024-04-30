@@ -5,7 +5,6 @@ To contain some utilities for steel design
 from dataclasses import dataclass
 from math import pi
 from pathlib import Path
-from typing import Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -99,9 +98,9 @@ class SteelGrade:
         standard: str,
         current: bool,
         grade: str,
-        thickness: Iterable[float],
-        f_y: Iterable[float],
-        f_u: Iterable[float],
+        thickness: list[float] | np.ndarray,
+        f_y: list[float] | np.ndarray,
+        f_u: list[float] | np.ndarray,
     ):
         """
 
