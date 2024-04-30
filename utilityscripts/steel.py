@@ -118,6 +118,9 @@ class SteelGrade:
             Should be sorted to match thickness.
         """
 
+        if len(thickness) != len(f_y) or len(thickness) != len(f_u):
+            raise ValueError("Lengths of thickness, f_y and f_u need to be the same.")
+
         self.standard = standard
         self.current = current
         self.grade = grade
@@ -125,11 +128,23 @@ class SteelGrade:
         self.f_y = np.asarray(f_y)
         self.f_u = np.asarray(f_u)
 
-    def get_f_y(self, *, thickness):
-        pass
+    def get_f_y(self, thickness):
+        """
+        Get the yield strength at a given thickness.
 
-    def get_f_u(self, *, thickness):
-        pass
+        :param thickness: The thickness to test.
+        """
+
+        return np.interp(x=thickness, xp=self.thickness, fp=self.f_y)
+
+    def get_f_u(self, thickness):
+        """
+        Get the ultimate strength at a given thickness.
+
+        :param thickness: The thickness to test.
+        """
+
+        return np.interp(x=thickness, xp=self.thickness, fp=self.f_y)
 
     def plot_grade(self, *, strength: str = "both"):
         """
