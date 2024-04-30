@@ -171,10 +171,14 @@ class SteelGrade:
         plt.show()
 
     def __repr__(self):
-        return f"SteelGrade: {self.standard}:{self.grade}"
+        return f"{type(self).__name__}: {self.standard}:{self.grade}"
 
 
-def _build_grades():
+def steel_grades() -> dict[str, SteelGrade]:
+    """
+    Build a dictionary of steel grades out of the steel data spreadsheet.
+    """
+
     sg_df = STEEL_GRADES_DF.sort_values(["standard", "grade", "t"])
 
     unique_grades = sg_df.drop_duplicates(subset=["standard", "grade"])
@@ -206,7 +210,7 @@ def _build_grades():
     return grades
 
 
-STEEL_GRADES = _build_grades()
+STEEL_GRADES = steel_grades()
 
 
 def alpha_m(*, m_m, m_2, m_3, m_4):
