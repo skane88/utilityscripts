@@ -154,8 +154,16 @@ def steel_grades() -> dict[str, SteelGrade]:
 
 
 class SteelSection:
-    def __init__(self, *, section: str, grade: None | SteelGrade = None):
+    def __init__(self, *, section: str, current: bool, grade: None | SteelGrade = None):
+        """
+
+        :param section: The section name.
+        :param current: Is the section a currently produced section?
+        :param grade: A steel grade to attach to the section, or None.
+        """
+
         self.section = section
+        self.current = current
         self._grade = grade
 
     @property
@@ -163,6 +171,13 @@ class SteelSection:
         return self._grade
 
     def set_grade(self, grade: SteelGrade) -> SteelSection:
+        """
+        Add a steel grade to the object.
+
+        :param grade: The SteelGrade to apply.
+        :return: Returns a copy of the object.
+        """
+
         section_copy = copy.deepcopy(self)
         section_copy._grade = grade
 
@@ -171,7 +186,11 @@ class SteelSection:
     def __repr__(self):
         grade = "no steel assigned" if self.grade is None else repr(self.grade)
 
-        return f"{type(self).__name__}: {self.section}, " + f"{grade}."
+        return (
+            f"{type(self).__name__}: {self.section}, "
+            + f"{grade}."
+            + f" Current section: {self.current}"
+        )
 
 
 class ISection(SteelSection):
@@ -183,6 +202,7 @@ class ISection(SteelSection):
         self,
         *,
         section: str,
+        current: bool,
         designation: str,
         mass: float,
         section_shape: float,
@@ -207,7 +227,7 @@ class ISection(SteelSection):
         i_w: float,
         grade: None | SteelGrade = None,
     ):
-        super().__init__(section=section, grade=grade)
+        super().__init__(section=section, current=current, grade=grade)
 
         self.designation = designation
         self.mass = mass
@@ -242,6 +262,7 @@ class CSection(SteelSection):
         self,
         *,
         section: str,
+        current: bool,
         designation: str,
         mass: float,
         section_shape: float,
@@ -265,8 +286,9 @@ class CSection(SteelSection):
         i_w: float,
         grade: None | SteelGrade = None,
     ):
-        super().__init__(section=section, grade=grade)
+        super().__init__(section=section, current=current, grade=grade)
 
+        self.designation = designation
         self.mass = (mass,)
         self.section_shape = section_shape
         self.fabrication_type = fabrication_type
@@ -288,11 +310,6 @@ class CSection(SteelSection):
         self.j = j
         self.i_w = i_w
 
-    def __repr__(self):
-        grade = "no steel assigned" if self.grade is None else repr(self.grade)
-
-        return f"{type(self).__name__}: {self.section}, " + f"{grade}."
-
 
 def i_sections(
     grade: None | SteelGrade | dict[str, SteelGrade] = None,
@@ -313,6 +330,7 @@ def i_sections(
         obj = v[0].to_dict()
 
         sg = grade
+        obj["current"] = obj["current"] == "yes"
 
         if isinstance(sg, dict):
             sg = grade.get(obj["designation"])
@@ -340,6 +358,7 @@ def c_sections(grade: None | SteelGrade = None) -> dict[str, CSection]:
         obj = v[0].to_dict()
 
         sg = grade
+        obj["current"] = obj["current"] == "yes"
 
         if isinstance(sg, dict):
             sg = grade.get(obj["designation"])
