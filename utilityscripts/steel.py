@@ -23,15 +23,14 @@ from utilityscripts.section_prop import build_circle
 
 # All the standard I & C sections as dataframes
 _DATA_PATH = Path(Path(__file__).parent.parent) / Path("data")
-I_SECTIONS_DF = pd.read_excel(
-    _DATA_PATH / Path("steel_data.xlsx"), sheet_name="Is"
-).replace({np.nan: None})
-C_SECTIONS_DF = pd.read_excel(
-    _DATA_PATH / Path("steel_data.xlsx"), sheet_name="Cs"
-).replace({np.nan: None})
-STEEL_GRADES_DF = pd.read_excel(
-    _DATA_PATH / Path("steel_data.xlsx"), sheet_name="grades"
-)
+
+
+def steel_grade_df() -> pd.DataFrame:
+    """
+    Get a Pandas Dataframe with all the Australian Standard steel grades.
+    """
+
+    return pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="grades")
 
 
 class SteelGrade:
@@ -122,7 +121,7 @@ def steel_grades() -> dict[str, SteelGrade]:
     Build a dictionary of steel grades out of the steel data spreadsheet.
     """
 
-    sg_df = STEEL_GRADES_DF.sort_values(["standard", "grade", "t"])
+    sg_df = steel_grade_df().sort_values(["standard", "grade", "t"])
 
     unique_grades = sg_df.drop_duplicates(subset=["standard", "grade"])
 
@@ -419,6 +418,16 @@ class CSection(SteelSection):
         return self.grade.get_f_u(self.t_w)
 
 
+def i_section_df() -> pd.DataFrame:
+    """
+    Get a Pandas Dataframe with all the Australian Standard I sections.
+    """
+
+    return pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="Is").replace(
+        {np.nan: None}
+    )
+
+
 def i_sections(
     grade: None | SteelGrade | dict[str, SteelGrade] = None,
 ) -> dict[str, ISection]:
@@ -434,7 +443,7 @@ def i_sections(
 
     i_sects = {}
 
-    for _, *v in I_SECTIONS_DF.iterrows():
+    for _, *v in i_section_df().iterrows():
         obj = v[0].to_dict()
 
         sg = grade
@@ -446,6 +455,16 @@ def i_sections(
         i_sects[obj["section"]] = ISection(**obj, grade=sg)
 
     return i_sects
+
+
+def c_section_df() -> pd.DataFrame:
+    """
+    Get a Pandas Dataframe with all the Australian Standard C sections.
+    """
+
+    return pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="Cs").replace(
+        {np.nan: None}
+    )
 
 
 def c_sections(grade: None | SteelGrade = None) -> dict[str, CSection]:
@@ -462,7 +481,7 @@ def c_sections(grade: None | SteelGrade = None) -> dict[str, CSection]:
 
     c_sects = {}
 
-    for _, *v in C_SECTIONS_DF.iterrows():
+    for _, *v in c_section_df().iterrows():
         obj = v[0].to_dict()
 
         sg = grade
