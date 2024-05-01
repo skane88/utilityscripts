@@ -154,9 +154,6 @@ def steel_grades() -> dict[str, SteelGrade]:
     return grades
 
 
-STEEL_GRADES = steel_grades()
-
-
 class SteelSection:
     def __init__(self, *, section: str, grade: None | SteelGrade = None):
         self.section = section
@@ -173,7 +170,6 @@ class SteelSection:
         return section_copy
 
     def __repr__(self):
-
         grade = "no steel assigned" if self.grade is None else repr(self.grade)
 
         return f"{type(self).__name__}: {self.section}, " + f"{grade}."
@@ -260,8 +256,59 @@ class CSection(SteelSection):
     i_w: float
 
 
-I_SECTIONS = {i: ISection(**v) for i, v in I_SECTIONS_DF.to_dict("index").items()}
-C_SECTIONS = {c: CSection(**v) for c, v in C_SECTIONS_DF.to_dict("index").items()}
+def i_sections(
+    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+) -> dict[str, ISection]:
+    """
+    Build a dictionary of all the standard Australian I sections.
+
+    :param grade: An optional SteelGrade object or dictionary to assign
+        to the sections. For different section types (e.g. WB vs UB),
+        specify the grade as a dictionary: {designation: SteelGrade}.
+        If a designation is missed, sections will be assigned a grade
+        of None.
+    """
+
+    i_sects = {}
+
+    for _, *v in I_SECTIONS_DF.iterrows():
+        obj = v[0].to_dict()
+
+        sg = grade
+
+        if isinstance(sg, dict):
+            sg = grade.get(obj["designation"])
+
+        i_sects[obj["section"]] = ISection(**obj, grade=sg)
+
+    return i_sects
+
+
+def c_sections(grade: None | SteelGrade = None) -> dict[str, CSection]:
+    """
+    Build a dictionary of the standard Australian C sections.
+    :param grade: An optional SteelGrade object or dictionary to assign
+        to the sections. For different section types (e.g. WB vs UB),
+        specify the grade as a dictionary: {designation: SteelGrade}.
+        If a designation is missed, sections will be assigned a grade
+        of None.
+        Note that currently Australian channels only come in one
+        designation ("PFC") so typically a pure grade object would be passed in.
+    """
+
+    c_sects = {}
+
+    for _, *v in C_SECTIONS_DF.iterrows():
+        obj = v[0].to_dict()
+
+        sg = grade
+
+        if isinstance(sg, dict):
+            sg = grade.get(obj["designation"])
+
+        c_sects[obj["section"]] = CSection(**obj, grade=sg)
+
+    return c_sects
 
 
 def alpha_m(*, m_m, m_2, m_3, m_4):
