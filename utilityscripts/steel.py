@@ -176,6 +176,10 @@ class SteelSection:
 
 
 class ISection(SteelSection):
+    """
+    A class to store I-section properties.
+    """
+
     def __init__(
         self,
         *,
