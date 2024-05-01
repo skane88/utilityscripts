@@ -89,7 +89,7 @@ class SteelGrade:
         :param thickness: The thickness to test.
         """
 
-        return np.interp(x=thickness, xp=self.thickness, fp=self.f_y)
+        return np.interp(x=thickness, xp=self.thickness, fp=self.f_u)
 
     def plot_grade(self, *, strength: str = "both"):
         """
@@ -252,6 +252,50 @@ class ISection(SteelSection):
         self.j = j
         self.i_w = i_w
 
+    @property
+    def f_yf(self):
+        """
+        Get the flange yield stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_y(self.t_f)
+
+    @property
+    def f_yw(self):
+        """
+        Get the web yield stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_y(self.t_w)
+
+    @property
+    def f_uf(self):
+        """
+        Get the flange ultimate stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_u(self.t_f)
+
+    @property
+    def f_uw(self):
+        """
+        Get the web ultimate stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_u(self.t_w)
+
 
 class CSection(SteelSection):
     """
@@ -309,6 +353,50 @@ class CSection(SteelSection):
         self.r_y = r_y
         self.j = j
         self.i_w = i_w
+
+    @property
+    def f_yf(self):
+        """
+        Get the flange yield stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_y(self.t_f)
+
+    @property
+    def f_yw(self):
+        """
+        Get the web yield stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_y(self.t_w)
+
+    @property
+    def f_uf(self):
+        """
+        Get the flange ultimate stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_u(self.t_f)
+
+    @property
+    def f_uw(self):
+        """
+        Get the web ultimate stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_u(self.t_w)
 
 
 def i_sections(
