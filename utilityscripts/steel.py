@@ -153,6 +153,26 @@ def steel_grades() -> dict[str, SteelGrade]:
     return grades
 
 
+def standard_grades() -> dict[str, SteelGrade]:
+    """
+    Return the standard steel grades for current sections.
+    """
+
+    sg = steel_grades()
+
+    sg300 = sg["AS/NZS3679.1:300"]
+    sg300_w = sg["AS/NZS3678:300"]
+
+    return {
+        "UB": sg300,
+        "UC": sg300,
+        "UBP": sg300,
+        "PFC": sg300,
+        "WB": sg300_w,
+        "WC": sg300_w,
+    }
+
+
 class SteelSection:
     def __init__(self, *, section: str, current: bool, grade: None | SteelGrade = None):
         """
