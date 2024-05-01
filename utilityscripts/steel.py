@@ -5,7 +5,6 @@ To contain some utilities for steel design
 from __future__ import annotations
 
 import copy
-from dataclasses import dataclass
 from math import pi
 from pathlib import Path
 
@@ -234,30 +233,65 @@ class ISection(SteelSection):
         self.i_w = i_w
 
 
-@dataclass
 class CSection(SteelSection):
-    section: str
-    designation: str
-    mass: float
-    section_shape: float
-    fabrication_type: float
-    d: float
-    b_f: float
-    t_f: float
-    t_w: float
-    r_1: float
-    a_g: float
-    i_x: float
-    z_x: float
-    s_x: float
-    r_x: float
-    i_y: float
-    z_yl: float
-    z_yr: float
-    s_y: float
-    r_y: float
-    j: float
-    i_w: float
+    """
+    A class to store C section properties.
+    """
+
+    def __init__(
+        self,
+        *,
+        section: str,
+        designation: str,
+        mass: float,
+        section_shape: float,
+        fabrication_type: float,
+        d: float,
+        b_f: float,
+        t_f: float,
+        t_w: float,
+        r_1: float,
+        a_g: float,
+        i_x: float,
+        z_x: float,
+        s_x: float,
+        r_x: float,
+        i_y: float,
+        z_yl: float,
+        z_yr: float,
+        s_y: float,
+        r_y: float,
+        j: float,
+        i_w: float,
+        grade: None | SteelGrade = None,
+    ):
+        super().__init__(section=section, grade=grade)
+
+        self.mass = (mass,)
+        self.section_shape = section_shape
+        self.fabrication_type = fabrication_type
+        self.d = d
+        self.b_f = b_f
+        self.t_f = t_f
+        self.t_w = t_w
+        self.r_1 = r_1
+        self.a_g = a_g
+        self.i_x = i_x
+        self.z_x = z_x
+        self.s_x = s_x
+        self.r_x = r_x
+        self.i_y = i_y
+        self.z_yl = z_yl
+        self.z_yr = z_yr
+        self.s_y = s_y
+        self.r_y = r_y
+        self.j = j
+        self.i_w = i_w
+
+    def __repr__(self):
+        grade = "no steel assigned" if self.grade is None else repr(self.grade)
+
+        return f"{type(self).__name__}: {self.section}, " + f"{grade}."
 
 
 def i_sections(
