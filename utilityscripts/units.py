@@ -157,6 +157,10 @@ I_SECTION_DF_UNITS = i_section_df().astype(
         "r_y": "pint[m]",
         "j": "pint[m**4]",
         "i_w": "pint[m**6]",
+        "f_yf": "pint[MPa]",
+        "f_yw": "pint[MPa]",
+        "f_uf": "pint[MPa]",
+        "f_uw": "pint[MPa]",
     }
 )
 C_SECTION_DF_UNITS = c_section_df().astype(
@@ -179,5 +183,9 @@ C_SECTION_DF_UNITS = c_section_df().astype(
         "r_y": "pint[m]",
         "j": "pint[m**4]",
         "i_w": "pint[m**6]",
+        "f_yf": "pint[MPa]",
+        "f_yw": "pint[MPa]",
+        "f_uf": "pint[MPa]",
+        "f_uw": "pint[MPa]",
     }
 )
