@@ -11,7 +11,7 @@ from math import acos, asin, atan, cos, degrees, pi, radians, sin, tan  # noqa: 
 import pint
 import pint_pandas  # noqa: F401
 
-from utilityscripts.steel import c_sections_df, i_sections_df
+from utilityscripts.steel import c_section_df, i_section_df
 
 # define a unicode pi value for pretty printing if req'd.
 π = pi
@@ -136,7 +136,7 @@ rho_steel = 7850 * kg / m**3  # see AS4100
 # set default printing
 ureg.default_format = ".3f~P"
 
-I_SECTIONS_DF_UNITS = i_sections_df().astype(
+I_SECTION_DF_UNITS = i_section_df().astype(
     {
         "mass": "pint[kg/m]",
         "d": "pint[m]",
@@ -159,7 +159,7 @@ I_SECTIONS_DF_UNITS = i_sections_df().astype(
         "i_w": "pint[m**6]",
     }
 )
-C_SECTIONS_DF_UNITS = c_sections_df().astype(
+C_SECTION_DF_UNITS = c_section_df().astype(
     {
         "mass": "pint[kg/m]",
         "d": "pint[m]",
