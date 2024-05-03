@@ -11,7 +11,7 @@ from math import acos, asin, atan, cos, degrees, pi, radians, sin, tan  # noqa: 
 import pint
 import pint_pandas  # noqa: F401
 
-from utilityscripts.steel import SteelGrade, c_section_df, i_section_df
+from utilityscripts.steel import SteelGrade, c_section_df, i_section_df, steel_grade_df
 
 # define a unicode pi value for pretty printing if req'd.
 π = pi
@@ -135,6 +135,16 @@ rho_steel = 7850 * kg / m**3  # see AS4100
 
 # set default printing
 ureg.default_format = ".3f~P"
+
+
+def steel_grade_df_units():
+    """
+    Creates a dataframe of standard Australian steel grades, with Pint units.
+    """
+
+    grade_df = steel_grade_df()
+
+    return grade_df.astype({"t": "pint[m]", "f_y": "pint[MPa]", "f_u": "pint[MPa]"})
 
 
 def i_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
