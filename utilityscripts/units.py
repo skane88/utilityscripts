@@ -11,7 +11,7 @@ from math import acos, asin, atan, cos, degrees, pi, radians, sin, tan  # noqa: 
 import pint
 import pint_pandas  # noqa: F401
 
-from utilityscripts.steel import c_section_df, i_section_df
+from utilityscripts.steel import SteelGrade, c_section_df, i_section_df
 
 # define a unicode pi value for pretty printing if req'd.
 π = pi
@@ -137,56 +137,86 @@ rho_steel = 7850 * kg / m**3  # see AS4100
 ureg.default_format = ".3f~P"
 
 
-I_SECTION_DF_UNITS = i_section_df().astype(
-    {
-        "mass": "pint[kg/m]",
-        "d": "pint[m]",
-        "b_f": "pint[m]",
-        "t_f": "pint[m]",
-        "t_w": "pint[m]",
-        "r_1": "pint[m]",
-        "w_1": "pint[m]",
-        "r1_or_w1": "pint[m]",
-        "a_g": "pint[m**2]",
-        "i_x": "pint[m**4]",
-        "i_y": "pint[m**4]",
-        "z_x": "pint[m**3]",
-        "z_y": "pint[m**3]",
-        "s_x": "pint[m**3]",
-        "s_y": "pint[m**3]",
-        "r_x": "pint[m]",
-        "r_y": "pint[m]",
-        "j": "pint[m**4]",
-        "i_w": "pint[m**6]",
-        "f_yf": "pint[MPa]",
-        "f_yw": "pint[MPa]",
-        "f_uf": "pint[MPa]",
-        "f_uw": "pint[MPa]",
-    }
-)
-C_SECTION_DF_UNITS = c_section_df().astype(
-    {
-        "mass": "pint[kg/m]",
-        "d": "pint[m]",
-        "b_f": "pint[m]",
-        "t_f": "pint[m]",
-        "t_w": "pint[m]",
-        "r_1": "pint[m]",
-        "a_g": "pint[m**2]",
-        "i_x": "pint[m**4]",
-        "i_y": "pint[m**4]",
-        "z_x": "pint[m**3]",
-        "z_yl": "pint[m**3]",
-        "z_yr": "pint[m**3]",
-        "s_x": "pint[m**3]",
-        "s_y": "pint[m**3]",
-        "r_x": "pint[m]",
-        "r_y": "pint[m]",
-        "j": "pint[m**4]",
-        "i_w": "pint[m**6]",
-        "f_yf": "pint[MPa]",
-        "f_yw": "pint[MPa]",
-        "f_uf": "pint[MPa]",
-        "f_uw": "pint[MPa]",
-    }
-)
+def i_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
+    """
+    Creates a dataframe of standard Australian I sections, with Pint units.
+
+    :param grade: An optional SteelGrade object or dictionary to assign
+        to the sections. For different section types (e.g. WB vs UB),
+        specify the grade as a dictionary: {designation: SteelGrade}.
+        If a designation is missed, sections will be assigned a grade
+        of None.
+        NOTE: the grade should not already have units on it.
+    """
+
+    section_df = i_section_df(grade=grade)
+
+    return section_df.astype(
+        {
+            "mass": "pint[kg/m]",
+            "d": "pint[m]",
+            "b_f": "pint[m]",
+            "t_f": "pint[m]",
+            "t_w": "pint[m]",
+            "r_1": "pint[m]",
+            "w_1": "pint[m]",
+            "r1_or_w1": "pint[m]",
+            "a_g": "pint[m**2]",
+            "i_x": "pint[m**4]",
+            "i_y": "pint[m**4]",
+            "z_x": "pint[m**3]",
+            "z_y": "pint[m**3]",
+            "s_x": "pint[m**3]",
+            "s_y": "pint[m**3]",
+            "r_x": "pint[m]",
+            "r_y": "pint[m]",
+            "j": "pint[m**4]",
+            "i_w": "pint[m**6]",
+            "f_yf": "pint[MPa]",
+            "f_yw": "pint[MPa]",
+            "f_uf": "pint[MPa]",
+            "f_uw": "pint[MPa]",
+        }
+    )
+
+
+def c_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
+    """
+    Creates a dataframe of standard Australian C sections, with Pint units.
+
+    :param grade: An optional SteelGrade object or dictionary to assign
+        to the sections. For different section types (e.g. WB vs UB),
+        specify the grade as a dictionary: {designation: SteelGrade}.
+        If a designation is missed, sections will be assigned a grade
+        of None.
+        NOTE: the grade should not already have units on it.
+    """
+
+    section_df = c_section_df(grade=grade)
+
+    return section_df.astype(
+        {
+            "mass": "pint[kg/m]",
+            "d": "pint[m]",
+            "b_f": "pint[m]",
+            "t_f": "pint[m]",
+            "t_w": "pint[m]",
+            "r_1": "pint[m]",
+            "a_g": "pint[m**2]",
+            "i_x": "pint[m**4]",
+            "i_y": "pint[m**4]",
+            "z_x": "pint[m**3]",
+            "z_yl": "pint[m**3]",
+            "z_yr": "pint[m**3]",
+            "s_x": "pint[m**3]",
+            "s_y": "pint[m**3]",
+            "r_x": "pint[m]",
+            "r_y": "pint[m]",
+            "j": "pint[m**4]",
+            "i_w": "pint[m**6]",
+            "f_yf": "pint[MPa]",
+            "f_yw": "pint[MPa]",
+            "f_uf": "pint[MPa]",
+            "f_uw": "pint[MPa]",
+        }
+    )
