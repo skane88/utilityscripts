@@ -6,11 +6,20 @@ It relies on the Pint units package.
 Also imports math & sets up pi
 """
 
-from math import acos, asin, atan, cos, degrees, pi, radians, sin, tan  # noqa: F401
+from math import acos  # noqa: F401
+from math import asin  # noqa: F401
+from math import atan  # noqa: F401
+from math import cos  # noqa: F401
+from math import degrees  # noqa: F401
+from math import radians  # noqa: F401
+from math import sin  # noqa: F401
+from math import tan  # noqa: F401
+from math import pi
 
 import pint
 import pint_pandas  # noqa: F401
 
+from utilityscripts.steel import standard_grades  # noqa: F401
 from utilityscripts.steel import SteelGrade, c_section_df, i_section_df, steel_grade_df
 
 # define a unicode pi value for pretty printing if req'd.
