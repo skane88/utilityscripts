@@ -41,20 +41,9 @@ def bisection(
     :returns: Returns a tuple: (root, no. of iterations)
     """
 
-    if isinf(x_low) or isinf(x_high):
-        raise ValueError(f"Guesses should not be inf: x_low={x_low}, x_high={x_high}")
-
-    if isnan(x_low) or isnan(x_high):
-        raise ValueError(f"Guesses should not be nan: x_low={x_low}, x_high={x_high}")
-
-    if isclose(x_high, x_low, abs_tol=tol):
-        raise ValueError(
-            "Expected guesses to be different. Current guesses: "
-            + f"x_low={x_low}, x_high={x_high}"
-        )
-
-    if max_iterations is not None and max_iterations <= 1:
-        raise ValueError("Maximum no. of iterations should be > 1")
+    _check_bisection_input(
+        max_iterations=max_iterations, tol=tol, x_low=x_low, x_high=x_high
+    )
 
     i = 0
 
@@ -74,7 +63,7 @@ def bisection(
             raise ValueError(
                 "Either x_low or x_high result in infinity. No valid solution can be "
                 + "found. Current guesses: "
-                + f"(x_low, y_low)=({x_low},{y_low}), "
+                + f"(x_low, y_low)=({x_low}, {y_low}), "
                 + f"(x_high, y_high)=({x_high}, {y_high})"
             )
 
@@ -111,6 +100,32 @@ def bisection(
             break
 
     return (x_low + x_high) / 2, i
+
+
+def _check_bisection_input(*, max_iterations, tol, x_high, x_low):
+    """
+    Helper fuction. Checks that bisection input is acceptable.
+
+    :param max_iterations: The maximum no. of iterations.
+    :param tol: The solution tolerance. A default value of 1e-9 is provided. Note that
+        smaller values may cause trouble with convergence, possibly due to floating
+        point issues.
+        NOTE: this is an absolute, not a relative, tolerance.
+    :param x_low: The lower bounds of the range to check.
+    :param x_high: The upper bounds of the range to check.
+    """
+
+    if isinf(x_low) or isinf(x_high):
+        raise ValueError(f"Guesses should not be inf: x_low={x_low}, x_high={x_high}")
+    if isnan(x_low) or isnan(x_high):
+        raise ValueError(f"Guesses should not be nan: x_low={x_low}, x_high={x_high}")
+    if isclose(x_high, x_low, abs_tol=tol):
+        raise ValueError(
+            "Expected guesses to be different. Current guesses: "
+            + f"x_low={x_low}, x_high={x_high}"
+        )
+    if max_iterations is not None and max_iterations <= 1:
+        raise ValueError("Maximum no. of iterations should be > 1")
 
 
 def secant(
