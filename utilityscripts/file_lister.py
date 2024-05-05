@@ -5,7 +5,8 @@ to save the list to a text file.
 
 from pathlib import Path
 
-from ui_funcs import get_folder, get_true_false
+from rich.prompt import Confirm
+from ui_funcs import get_folder
 
 
 def main():
@@ -39,64 +40,46 @@ def file_lister(base_path: Path):
 
     filter_val = "*"
     different_folder: bool = None
-    recursive = get_true_false(prefix="Do you want to search subfolders")
-    report_folders = get_true_false(prefix="Do you want to report folders")
-    incl_full_path = get_true_false(prefix="Do you want to include the full path")
+    recursive = Confirm.ask(prompt="Do you want to search subfolders")
+    report_folders = Confirm.ask(prompt="Do you want to report folders")
+    incl_full_path = Confirm.ask(prompt="Do you want to include the full path")
 
     incl_relative_path = (
-        False if incl_full_path else get_true_false(prefix="Relative paths")
+        False if incl_full_path else Confirm.ask(prompt="Relative paths")
     )
 
-    incl_extension = get_true_false(prefix="Do you want to include the extension")
+    incl_extension = Confirm.ask(prompt="Do you want to include the extension")
 
-    if get_true_false(prefix="Do you want to filter by file type"):
+    if Confirm.ask(prompt="Do you want to filter by file type"):
         filter_val = input(
             "Input a valid 'glob' type filter (i.e. '*', '*.' or '*.pdf'): "
         )
 
-    save_to_file = get_true_false(prefix="Do you want to save to a file")
+    save_to_file = Confirm.ask(prompt="Do you want to save to a file")
     if save_to_file:
-        different_folder = get_true_false(
-            prefix="Do you want to save the list to a different location?",
-            allow_quit=False,
+        different_folder = Confirm.ask(
+            prompt="Do you want to save the list to a different location?",
         )
     if different_folder:
         save_folder = get_folder(type_prompt="Output Folder")
     else:
         save_folder = base_path
-    all_lower_case = get_true_false(
-        prefix="Do you want to convert file names to lower case"
+    all_lower_case = Confirm.ask(
+        prompt="Do you want to convert file names to lower case"
     )
-    sort_file = get_true_false(prefix="Do you want to sort the file names")
+    sort_file = Confirm.ask(prompt="Do you want to sort the file names")
     # now we've got input, now do the actual finding of files
-    if recursive:
-        # if subfolders are required, use rglob
-        f_iterator = base_path.rglob(filter_val)
-    else:
-        # if only the local folder, just use iterdir
-        f_iterator = base_path.glob(filter_val)
-    print()
-    text_to_save = []
-    for file in f_iterator:
-        file: Path
 
-        if not report_folders and file.is_dir():
-            continue
-
-        text = ""
-
-        if incl_full_path:
-            text = str(file)
-        else:
-            text = str(file.relative_to(base_path)) if incl_relative_path else file.name
-
-        if not incl_extension:
-            text = text.replace(file.suffix, "")
-
-        if save_to_file:
-            text_to_save += [text]
-        else:
-            print(text)
+    text_to_save = _file_finder(
+        base_path=base_path,
+        recursive=recursive,
+        filter_val=filter_val,
+        incl_extension=incl_extension,
+        incl_full_path=incl_full_path,
+        incl_relative_path=incl_relative_path,
+        report_folders=report_folders,
+        save_to_file=save_to_file,
+    )
     # now save to file if necessary
     if save_to_file:
         # lower case everything if required
@@ -125,6 +108,62 @@ def file_lister(base_path: Path):
         with output_file.open("w") as file:
             for line in text_to_save:
                 file.write(f"{line}\n")
+
+
+def _file_finder(
+    *,
+    base_path,
+    recursive: bool,
+    filter_val,
+    incl_extension: bool,
+    incl_full_path: bool,
+    incl_relative_path: bool,
+    report_folders: bool,
+    save_to_file: bool,
+):
+    """
+    Helper function to extract out a list of files.
+
+    :param base_path: The path to search.
+    :param recursive: Should subfolders be included.
+    :param filter_val: A valid 'glob' type filter (i.e. '*', '*.' or '*.pdf')
+    :param incl_extension: Should the extension be included in the results.
+    :param incl_full_path: Should the full path be included?
+    :param incl_relative_path: Should the relative path be included?
+        Only used if incl_full_path is false.
+    :param report_folders: Should folders be included in the result?
+    :param save_to_file: Will this be saved to a file?
+    """
+
+    if recursive:
+        # if subfolders are required, use rglob
+        f_iterator = base_path.rglob(filter_val)
+    else:
+        # if only the local folder, just use iterdir
+        f_iterator = base_path.glob(filter_val)
+    print()
+
+    text_to_save = []
+    for file in f_iterator:
+        file: Path
+
+        if not report_folders and file.is_dir():
+            continue
+
+        if incl_full_path:
+            text = str(file)
+        else:
+            text = str(file.relative_to(base_path)) if incl_relative_path else file.name
+
+        if not incl_extension:
+            text = text.replace(file.suffix, "")
+
+        if save_to_file:
+            text_to_save += [text]
+        else:
+            print(text)
+
+    return text_to_save
 
 
 if __name__ == "__main__":
