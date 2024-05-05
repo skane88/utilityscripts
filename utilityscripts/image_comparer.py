@@ -9,6 +9,7 @@ from typing import List, Tuple
 import imagehash
 from imagehash import ImageHash
 from PIL import Image, ImageFile
+from ui_funcs import get_number_input
 
 DIFFERENCE_THRESHOLD = 20  # how similar should images be?
 
@@ -48,96 +49,6 @@ def get_file_to_open(
     root.destroy()
 
     return Path(file)
-
-
-def get_number(
-    number_type=int,
-    *,
-    prefix: str = "What number do you want",
-    allow_none: bool = False,
-    default_val=None,
-    min_val=None,
-    max_val=None,
-):
-    """
-    A helper function to ask the user for a number value.
-
-    :param number_type: The type of number to return. Use python's built in ``int``
-        or ``float`` functions.
-    :param prefix: The question to ask the user.
-    :param allow_none: Is None a valid return type?
-    :param default_val: Optional parameter to provide if ``allow_none`` is ``True``.
-        Ignored if ``allow_none`` is ``False``.
-    :param min_val: The smallest allowable value (inclusive). If None, this is ignored.
-    :param max_val: The largest allowable value (inclusive). If None, this is ignored.
-    :return: A number, or if allowed, None.
-    """
-
-    prefix = prefix.strip()
-    number = None
-    acceptable = False
-
-    allow_none_string = ""
-
-    if allow_none:
-        if default_val is None:
-            default_on_none = "None"
-        else:
-            if not isinstance(default_val, number_type):
-                raise ValueError(f"Default value is not the same type as {number_type}")
-
-            default_on_none = f"Default={default_val}"
-
-        allow_none_string = " (Use 'None', 'none' or '' for " + f"{default_on_none})"
-
-    if min_val is None and max_val is None:
-        limit_string = ""
-    elif max_val is None:
-        limit_string = f", number must be >={min_val}"
-    elif min_val is None:
-        limit_string = f", number must be <={max_val}"
-    else:
-        limit_string = f", number must satisfy {min_val}<=number<={max_val}"
-
-    while not acceptable:
-        number = input(prefix + limit_string + allow_none_string + ": ")
-
-        if number is None:
-            if allow_none:
-                acceptable = True
-        elif number == "" or number.lower() == "none":
-            number = default_val
-
-            if allow_none:
-                acceptable = True
-
-        else:
-            try:
-                number = number_type(number)
-
-                if min_val is None and max_val is None:
-                    acceptable = True
-                    continue
-
-                if max_val is None:
-                    if number >= min_val:
-                        acceptable = True
-
-                    continue
-
-                if min_val is None:
-                    if number <= max_val:
-                        acceptable = True
-
-                    continue
-
-                if min_val <= number <= max_val:
-                    acceptable = True
-
-            except ValueError:
-                pass
-
-    return number
 
 
 def get_hash(*, image: Path, hash_size: int = 8) -> ImageHash:
@@ -223,7 +134,7 @@ def main():
         ],
     )
 
-    hash_size = get_number(
+    hash_size = get_number_input(
         prefix="Do you wish to choose a different hash size for the comparison",
         default_val=8,
         min_val=8,
