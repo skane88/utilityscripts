@@ -6,15 +6,17 @@ It relies on the Pint units package.
 Also imports math & sets up pi
 """
 
-from math import acos  # noqa: F401
-from math import asin  # noqa: F401
-from math import atan  # noqa: F401
-from math import cos  # noqa: F401
-from math import degrees  # noqa: F401
-from math import radians  # noqa: F401
-from math import sin  # noqa: F401
-from math import tan  # noqa: F401
-from math import pi
+from math import (  # noqa: I001
+    acos,  # noqa: F401
+    asin,  # noqa: F401
+    atan,  # noqa: F401
+    cos,  # noqa: F401
+    degrees,  # noqa: F401
+    pi,
+    radians,  # noqa: F401
+    sin,  # noqa: F401
+    tan,  # noqa: F401
+)
 
 import pint
 import pint_pandas  # noqa: F401
