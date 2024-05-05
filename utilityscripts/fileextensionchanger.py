@@ -4,23 +4,15 @@ This file changes files of one extension type to another extension type.
 
 from pathlib import Path
 
+from rich.prompt import Confirm
 from tqdm import tqdm
 
 
 def re_extension():
-    true_dict = {"n": False, "no": False, "y": True, "yes": True}
-
     print()
     print("This will rename the extension on files, and cannot be reversed.")
 
-    while True:
-        keep_going = input("Do you wish to continue (y or n)? ")
-
-        keep_going = keep_going.lower()
-
-        if keep_going in true_dict:
-            keep_going = true_dict[keep_going]
-            break
+    keep_going = Confirm.ask(prompt="Do you wish to continue")
 
     if not keep_going:
         return
@@ -31,14 +23,8 @@ def re_extension():
     warnings = []
 
     if base_path.is_dir():
-        recursive: bool = None
+        recursive = Confirm.ask(prompt="Do you want to search subfolders")
         filter_val = "*"
-
-        print()
-        while recursive is None:
-            r = input("Do you want to search subfolders (Y or N)? ")
-
-            recursive = true_dict.get(r.lower(), None)
 
         print()
         old_ext = input("Input the starting extension type (e.g. '.jpeg'): ").lower()
@@ -60,7 +46,7 @@ def re_extension():
         changed = 0
 
         for f in tqdm(f_iterator, desc="Renaming Extensions", unit="Files"):
-            f: Path()
+            f: Path
 
             if f.is_dir():
                 continue
