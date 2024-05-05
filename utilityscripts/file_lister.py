@@ -78,7 +78,6 @@ def file_lister(base_path: Path):
         incl_full_path=incl_full_path,
         incl_relative_path=incl_relative_path,
         report_folders=report_folders,
-        save_to_file=save_to_file,
     )
     # now save to file if necessary
     if save_to_file:
@@ -109,6 +108,10 @@ def file_lister(base_path: Path):
             for line in text_to_save:
                 file.write(f"{line}\n")
 
+    else:
+        for f in text_to_save:
+            print(f)
+
 
 def _file_finder(
     *,
@@ -119,7 +122,6 @@ def _file_finder(
     incl_full_path: bool,
     incl_relative_path: bool,
     report_folders: bool,
-    save_to_file: bool,
 ):
     """
     Helper function to extract out a list of files.
@@ -132,7 +134,6 @@ def _file_finder(
     :param incl_relative_path: Should the relative path be included?
         Only used if incl_full_path is false.
     :param report_folders: Should folders be included in the result?
-    :param save_to_file: Will this be saved to a file?
     """
 
     if recursive:
@@ -141,7 +142,6 @@ def _file_finder(
     else:
         # if only the local folder, just use iterdir
         f_iterator = base_path.glob(filter_val)
-    print()
 
     text_to_save = []
     for file in f_iterator:
@@ -158,10 +158,7 @@ def _file_finder(
         if not incl_extension:
             text = text.replace(file.suffix, "")
 
-        if save_to_file:
-            text_to_save += [text]
-        else:
-            print(text)
+        text_to_save += [text]
 
     return text_to_save
 
