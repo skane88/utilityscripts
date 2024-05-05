@@ -5,130 +5,13 @@ File to contain basic UI functions.
 import contextlib
 from pathlib import Path
 from tkinter import Tk, filedialog
-from typing import Optional, Set
 
 yes_set = {"y", "Y", "Yes", "YES", "yes"}
 no_set = {"n", "N", "No", "NO", "no"}
 quit_set = {"quit", "q", "Q", "Quit"}
 
 
-class QuitToMain(Exception):  # noqa: N818
-    """
-    An exception to force the program to quit to the main menu.
-    """
-
-    pass
-
-
-def get_true_false(
-    *,
-    prefix: str = "Enter a yes or no",
-    true_false_prompt: str | None = None,
-    true_set: Set[str] | None = None,
-    false_set: Set[str] | None = None,
-    allow_quit: bool = False,
-    exit_set: Set[str] | None = None,
-) -> bool:
-    """
-    Gets a true or false answer from the user.
-    Note that it is case insensitive - lower and upper characters are treated alike.
-    :param prefix: The message to ask the user about.
-    :param true_false_prompt: An optional prompt to describe yes or no. No need to
-        provide brackets or question marks.
-        For example: "y or n" or "Yes=y, No=n"
-        If None, uses the lower case versions of the yes & no chars.
-    :param true_set: The characters / words for Yes.
-        If None, use the global no_set variable.
-    :param false_set: The characters / words for No.
-        If None, use the global yes_set variable.
-    :param allow_quit: If TRUE, the user can quit by typing quit.
-    :param exit_set: the characters / words that cause the program to quit.
-    :return:
-    """
-
-    prefix = prefix.strip()
-
-    if true_set is None:
-        true_set = yes_set
-
-    # make sure there are lower case versions of each char in the set.
-    intermediate_set = set()
-
-    for c in true_set:
-        intermediate_set.add(c)
-        intermediate_set.add(c.lower())
-
-    true_set = intermediate_set
-
-    if false_set is None:
-        false_set = no_set
-
-    # make sure there are lower case versions of each char in the set.
-    intermediate_set = set()
-
-    for c in false_set:
-        intermediate_set.add(c)
-        intermediate_set.add(c.lower())
-
-    false_set = intermediate_set
-
-    if allow_quit:
-        if exit_set is None:
-            exit_set = quit_set
-
-        for e in exit_set:
-            if e in true_set:
-                raise ValueError(f"quit keyword {e} was in the set of True responses.")
-            if e in false_set:
-                raise ValueError(f"quit keyword {e} was in the set of False responses.")
-
-    # next build a prompt for the user if none is provided.
-    if true_false_prompt is None:
-        prompt_set = {c.lower() for c in true_set}
-
-        true_prompt = sorted(prompt_set)
-
-        prompt_set = {c.lower() for c in false_set}
-
-        false_prompt = sorted(prompt_set)
-
-        if len(true_prompt) == 1:
-            true_false_prompt = f"Yes={true_prompt[0]}"
-        else:
-            true_false_prompt = f"Yes={true_prompt}"
-
-        true_false_prompt += ", "
-
-        if len(false_prompt) == 1:
-            true_false_prompt += f"No={false_prompt[0]}"
-        else:
-            true_false_prompt += f"No={false_prompt}"
-    else:
-        true_false_prompt = true_false_prompt.strip()
-        true_false_prompt = true_false_prompt.lower()
-
-    if allow_quit:
-        exit_set = sorted(exit_set)
-
-        quit_prompt = f"{exit_set[0]}" if len(exit_set) == 1 else f"{exit_set}"
-
-        question = f"{prefix} ({true_false_prompt}" + f" or {quit_prompt} to quit)? "
-    else:
-        question = f"{prefix} ({true_false_prompt})? "
-
-    while True:
-        print()
-        yes_no = input(question)
-
-        if yes_no in true_set:
-            return True
-        if yes_no in false_set:
-            return False
-        if allow_quit and yes_no in exit_set:
-            raise QuitToMain()
-
-
-def get_folder(*, save: bool = True, type_prompt: str) -> Optional[Path]:
+def get_folder(*, save: bool = True, type_prompt: str) -> Path | None:
     """
     Gets a folder location.
     :param save: if True, the strings etc. will be for a save operation, if False for a
@@ -152,7 +35,7 @@ def get_folder(*, save: bool = True, type_prompt: str) -> Optional[Path]:
     return None if folder == "" else Path(folder)
 
 
-def get_number(
+def get_number_input(
     number_type=int,
     *,
     prefix: str = "What number do you want",
@@ -163,6 +46,8 @@ def get_number(
 ):
     """
     A helper function to ask the user for a number value.
+    Also does some validation and allows for default input etc.
+
     :param number_type: The type of number to return. Use python's built in ``int``
         or ``float`` functions.
     :param prefix: The question to ask the user.
@@ -174,9 +59,55 @@ def get_number(
     :return: A number, or if allowed, None.
     """
 
-    prefix = prefix.strip()
     number = None
     ok = False
+    prefix = prefix.strip()
+
+    input_prompt = _input_prompt(
+        allow_none, default_val, max_val, min_val, number_type, prefix
+    )
+
+    while not ok:
+        number = input(input_prompt)
+
+        if number is None and allow_none:
+            break
+
+        if number == "" or number.lower() == "none" and allow_none:
+            number = default_val
+            break
+
+        with contextlib.suppress(ValueError):
+            number = number_type(number)
+
+            if min_val is None and max_val is None:
+                break
+
+            if max_val is None:
+                if number >= min_val:
+                    break
+                continue
+            if min_val is None:
+                if number <= max_val:
+                    break
+                continue
+            if number >= min_val and number <= max_val:
+                break
+
+    return number
+
+
+def _input_prompt(allow_none, default_val, max_val, min_val, number_type, prefix):
+    """
+    Helper method to build the input prompt for the get_number_input function.
+
+    :param allow_none: Are None values allowed?
+    :param default_val: Default value to use if None entered.
+    :param max_val: The maximum value.
+    :param min_val: The minimum value.
+    :param number_type: The type of number expected (float, int).
+    :param prefix: The prefix to put before the prompt.
+    """
 
     allow_none_string = ""
 
@@ -200,35 +131,4 @@ def get_number(
     else:
         limit_string = f", number must satisfy {min_val}<=number<={max_val}"
 
-    while not ok:
-        number = input(prefix + limit_string + allow_none_string + ": ")
-
-        if number is None:
-            if allow_none:
-                ok = True
-        elif number == "" or number.lower() == "none":
-            number = default_val
-
-            if allow_none:
-                ok = True
-
-        else:
-            with contextlib.suppress(ValueError):
-                number = number_type(number)
-
-                if min_val is None and max_val is None:
-                    ok = True
-                    continue
-
-                if max_val is None:
-                    if number >= min_val:
-                        ok = True
-                    continue
-                if min_val is None:
-                    if number <= max_val:
-                        ok = True
-                    continue
-                if number >= min_val and number <= max_val:
-                    ok = True
-
-    return number
+    return prefix + limit_string + allow_none_string + ": "
