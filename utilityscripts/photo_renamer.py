@@ -4,6 +4,7 @@ This file renumbers photos in a folder to integer numbers starting at 0001.
 
 from pathlib import Path
 
+from rich.prompt import Confirm
 from tqdm import tqdm
 
 
@@ -33,19 +34,10 @@ def rename_photos():
     This file renumbers photos in a folder to integer numbers starting at 0001.
     """
 
-    true_dict = {"n": False, "no": False, "y": True, "yes": True}
-
     print()
     print("This will rename the files, and cannot be reversed.")
 
-    while True:
-        keep_going = input("Do you wish to continue (y or n)? ")
-
-        keep_going = keep_going.lower()
-
-        if keep_going in true_dict:
-            keep_going = true_dict[keep_going]
-            break
+    keep_going = Confirm.ask(prompt="Do you wish to continue?")
 
     if not keep_going:
         return
@@ -54,12 +46,7 @@ def rename_photos():
     base_path = Path(input("Provide the base path: "))
 
     if base_path.is_dir():
-        recursive: bool = None
-        print()
-        while recursive is None:
-            recursive = input("Do you want to search subfolders (Y or N)? ")
-
-            recursive = true_dict.get(recursive.lower())
+        recursive = Confirm.ask("Do you want to search subfolders")
 
         file_types = [".jpg", ".png", ".bmp", ".jpeg"]
 
