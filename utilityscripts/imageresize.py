@@ -365,7 +365,6 @@ def compress_all_in_folder(
     save_larger_than_target: bool = False,
     delete_orig: bool = True,
     missing_ok: bool = True,
-    verbose: bool = True,
     ignore_errors: bool = True,
 ) -> Tuple[List[Optional[Path]], List[str]]:
     """
@@ -388,13 +387,11 @@ def compress_all_in_folder(
 
     warnings: List[str] = []
     output_files: List[Path] = []
-
-    f_iterator = folder.rglob("*") if incl_subfolders else folder.glob("*")
     files_to_resize = []
 
-    if verbose:
-        print()
-        print(f"Finding files to compress in {folder}.")
+    print(f"Finding files to compress in {folder}.")
+
+    f_iterator = folder.rglob("*") if incl_subfolders else folder.glob("*")
 
     for f in f_iterator:
         # to avoid any potential issues about modifying folders / files in a path while
@@ -410,11 +407,10 @@ def compress_all_in_folder(
 
         files_to_resize.append(f)
 
-    if verbose:
-        print()
-        print("Done")
-        print()
-        print("Compressing files:")
+    print()
+    print("Done")
+    print()
+    print("Compressing files:")
 
     # now walk the files and resize.
     files_to_resize.sort()
@@ -434,7 +430,7 @@ def compress_all_in_folder(
         save_larger_list = [save_larger_than_target] * total
         delete_orig_list = [delete_orig] * total
         missing_ok_list = [missing_ok] * total
-        verbose_list = [verbose] * total
+        verbose_list = [True] * total
         ignore_errors_list = [ignore_errors] * total
 
         input_vals = zip(
@@ -450,22 +446,18 @@ def compress_all_in_folder(
             strict=True,
         )
 
-        if verbose:
-            with Progress(
-                SpinnerColumn(),
-                *Progress.get_default_columns(),
-                MofNCompleteColumn(),
-                TimeElapsedColumn(),
-            ) as progress:
-                progress_bar = progress.add_task("Resizing Images...", total=total)
+        with Progress(
+            SpinnerColumn(),
+            *Progress.get_default_columns(),
+            MofNCompleteColumn(),
+            TimeElapsedColumn(),
+        ) as progress:
+            progress_bar = progress.add_task("Resizing Images...", total=total)
 
-                for vals in pool.imap_unordered(_help_resize, input_vals):
-                    new_files.append(vals)
+            for vals in pool.imap_unordered(_help_resize, input_vals):
+                new_files.append(vals)
 
-                    progress.advance(progress_bar, advance=1)
-
-        else:
-            new_files = pool.imap_unordered(_help_resize, input_vals)
+                progress.advance(progress_bar, advance=1)
 
     for _op, new_path, o_size, f_size, warn in new_files:
         output_files += [new_path]
@@ -475,27 +467,26 @@ def compress_all_in_folder(
         if warn is not None:
             warnings += [warn]
 
-    if verbose:
-        if files_to_resize:
-            print()
+    if files_to_resize:
+        print()
 
-            if original_size > 1024**3:
-                divisor = 1024**3
-                unit = "Gb"
-            elif original_size > 1024**2:
-                divisor = 1024**2
-                unit = "Mb"
-            else:
-                divisor = 1024
-                unit = "kb"
-
-            print(
-                f"Original size: {original_size / divisor:.2f}{unit}, "
-                + f"final size: {final_size / divisor:.2f}{unit} "
-                + f"({final_size / original_size:.2%})"
-            )
+        if original_size > 1024**3:
+            divisor = 1024**3
+            unit = "Gb"
+        elif original_size > 1024**2:
+            divisor = 1024**2
+            unit = "Mb"
         else:
-            print("No files found to compress.")
+            divisor = 1024
+            unit = "kb"
+
+        print(
+            f"Original size: {original_size / divisor:.2f}{unit}, "
+            + f"final size: {final_size / divisor:.2f}{unit} "
+            + f"({final_size / original_size:.2%})"
+        )
+    else:
+        print("No files found to compress.")
 
     return output_files, warnings
 
