@@ -129,7 +129,7 @@ def compress_image(
 
         return file_path
 
-    quality_min_orig = quality_min  # keep a record of the original minimum quality
+    original_quality_min = quality_min  # keep a record of the original minimum quality
 
     image = _open_image(file_path)
 
@@ -172,7 +172,7 @@ def compress_image(
 
     # now we have figured out the level of quality required, resize the image.
 
-    if final_quality >= quality_min_orig:
+    if final_quality >= original_quality_min:
         if size > target_size and not save_larger_than_target:
             raise ImageResizeError("No valid quality level found, not saving.")
 
@@ -196,7 +196,7 @@ def compress_image(
             (
                 "Expected quality level to be => than minimum allowable. "
                 + f"Values were: calculated quality ={final_quality}, "
-                + f"minimum allowable = {quality_min_orig}"
+                + f"minimum allowable = {original_quality_min}"
             )
         )
 
