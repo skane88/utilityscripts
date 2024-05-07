@@ -106,17 +106,20 @@ class CircularSegment:
         self._y2 = None
 
         if theta is not None:
-            assert theta <= 2 * pi
+            if theta > 2 * pi:
+                raise ValueError(f"theta must be <= 2 * pi. Was {theta}")
 
             self._theta = theta
 
         elif x is not None:
-            assert x <= 2 * r
+            if x > 2 * r:
+                raise ValueError(f"x must be <= 2*r. Was {x}")
 
             self._x = x
 
         else:
-            assert y2 <= 2 * r
+            if y2 > 2 * r:
+                raise ValueError(f"y2 must be <= 2*r. Was {y2}")
 
             self._y2 = y2
 
