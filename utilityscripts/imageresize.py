@@ -355,6 +355,35 @@ def _help_resize(input_vals):
     return original_path, new_file_path, original_size, final_size, warning
 
 
+def _find_files(*, folder, incl_subfolders: bool) -> list[Path]:
+    """
+    Helper function to find files to resize.
+
+    :param folder: The folder to search.
+    :param incl_subfolders: Should subfolders be included?
+    """
+
+    files_to_resize = []
+
+    f_iterator = folder.rglob("*") if incl_subfolders else folder.glob("*")
+    for f in f_iterator:
+        # to avoid any potential issues about modifying folders / files in a path while
+        # we are in it, first just walk the path to find potential candidates for
+        # resizing
+
+        if f.is_dir():
+            # skip directories
+            continue
+        if f.suffix.lower() not in VALID_EXTENSIONS:
+            # skip any files that are not valid
+            continue
+
+        files_to_resize.append(f)
+        files_to_resize.sort()
+
+    return files_to_resize
+
+
 def compress_all_in_folder(
     *,
     folder: Path,
@@ -387,33 +416,15 @@ def compress_all_in_folder(
 
     warnings: List[str] = []
     output_files: List[Path] = []
-    files_to_resize = []
 
     print(f"Finding files to compress in {folder}.")
 
-    f_iterator = folder.rglob("*") if incl_subfolders else folder.glob("*")
+    files_to_resize = _find_files(folder, incl_subfolders)
 
-    for f in f_iterator:
-        # to avoid any potential issues about modifying folders / files in a path while
-        # we are in it, first just walk the path to find potential candidates for
-        # resizing
-
-        if f.is_dir():
-            # skip directories
-            continue
-        if f.suffix.lower() not in VALID_EXTENSIONS:
-            # skip any files that are not valid
-            continue
-
-        files_to_resize.append(f)
-
-    print()
     print("Done")
-    print()
     print("Compressing files:")
 
     # now walk the files and resize.
-    files_to_resize.sort()
 
     original_size = 0
     final_size = 0
