@@ -176,6 +176,7 @@ def i_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
         {
             "mass": "pint[kg/m]",
             "d": "pint[m]",
+            "d_1": "pint[m]",
             "b_f": "pint[m]",
             "t_f": "pint[m]",
             "t_w": "pint[m]",
@@ -219,6 +220,7 @@ def c_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
         {
             "mass": "pint[kg/m]",
             "d": "pint[m]",
+            "d_1": "pint[m]",
             "b_f": "pint[m]",
             "t_f": "pint[m]",
             "t_w": "pint[m]",
