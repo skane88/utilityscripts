@@ -25,6 +25,29 @@ class ImageResizeError(Exception):
     """Exception raised when errors occur in this module"""
 
 
+def _validate_file(*, file_path: Path, missing_ok: bool):
+    """
+    Helper function to validate an image.
+
+    :param file_path: The file path to the image.
+    :param missing_ok: Is it ok for an image to be missing,
+        or should the function raise an error.
+    :return: True if the image exists and is of the correct extension.
+        Otherwise, False. Raises an error if it is not OK for the image
+        to be missing.
+    """
+    if not file_path.exists:
+        if not missing_ok:
+            raise FileNotFoundError(f"Could not find file at {file_path}")
+
+        return False
+
+    if file_path.suffix.lower() not in VALID_EXTENSIONS:
+        return False
+
+    return True
+
+
 def compress_image(
     *,
     file_path: Path,
@@ -56,14 +79,7 @@ def compress_image(
     :returns: The resulting file path.
     """
 
-    if not file_path.exists():
-        if missing_ok:
-            return None
-
-        raise FileNotFoundError(f"Could not find file at {file_path}")
-
-    if file_path.suffix.lower() not in VALID_EXTENSIONS:
-        # if file path is not a valid image, just bail out.
+    if not _validate_file(file_path=file_path):
         return None
 
     current_size = file_path.stat().st_size  # file size in bytes
@@ -198,7 +214,7 @@ def _save_image(
 ):
     """
     Save an image file to the provided path, at the provided quality.
-    
+
     :param image: The image to save.
     :param file_path: The path to save it to.
     :param quality: The quality level to save at.
