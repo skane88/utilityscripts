@@ -543,7 +543,6 @@ def main():
             incl_subfolders=subfolders,
             target_size=max_size,
             save_larger_than_target=True,
-            verbose=True,
             ignore_errors=True,
             quality_min=min_quality,
         )
