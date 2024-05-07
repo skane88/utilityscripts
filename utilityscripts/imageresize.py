@@ -146,12 +146,12 @@ def compress_image(
     if min_size >= target_size:
         # if the minimum size based on minimum quality is greater than the target size
         # there is no point doing binary search, just choose minimum size.
-        quality_acceptable = quality_min
+        final_quality = quality_min
         size = min_size
 
     else:
         # else the target size will be achieved with a quality between max and min.
-        quality_acceptable = -1
+        final_quality = -1
 
         while quality_min <= quality_max:
             # use binary search to quickly converge on an acceptable level of quality.
@@ -160,19 +160,19 @@ def compress_image(
             size = _get_size(picture_to_size=image, quality=quality_average)
 
             if size <= target_size:
-                quality_acceptable = quality_average
+                final_quality = quality_average
                 quality_min = quality_average + 1
             else:
                 quality_max = quality_average - 1
 
-        if quality_acceptable <= -1:
+        if final_quality <= -1:
             raise ImageResizeError("No valid quality level found")
 
-        size = _get_size(picture_to_size=image, quality=quality_acceptable)
+        size = _get_size(picture_to_size=image, quality=final_quality)
 
     # now we have figured out the level of quality required, resize the image.
 
-    if quality_acceptable >= quality_min_orig:
+    if final_quality >= quality_min_orig:
         if size > target_size and not save_larger_than_target:
             raise ImageResizeError("No valid quality level found, not saving.")
 
@@ -182,7 +182,7 @@ def compress_image(
         _save_image(
             image=image,
             file_path=new_file_path,
-            quality=quality_acceptable,
+            quality=final_quality,
             img_format="JPEG",
         )
 
@@ -195,7 +195,7 @@ def compress_image(
         raise ImageResizeError(
             (
                 "Expected quality level to be => than minimum allowable. "
-                + f"Values were: calculated quality ={quality_acceptable}, "
+                + f"Values were: calculated quality ={final_quality}, "
                 + f"minimum allowable = {quality_min_orig}"
             )
         )
