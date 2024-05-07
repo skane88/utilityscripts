@@ -21,7 +21,11 @@ from math import (  # noqa: I001
 import pint
 import pint_pandas  # noqa: F401
 
-from utilityscripts.steel import standard_grades, standard_plate_df  # noqa: F401
+from utilityscripts.steel import (
+    nearest_standard_plate,  # noqa: F401
+    standard_grades,  # noqa: F401
+    standard_plate_df,
+)
 from utilityscripts.steel import SteelGrade, c_section_df, i_section_df, steel_grade_df
 
 # define a unicode pi value for pretty printing if req'd.
