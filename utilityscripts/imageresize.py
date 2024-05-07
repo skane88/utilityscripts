@@ -12,7 +12,7 @@ from typing import List, Optional, Tuple, Union
 from PIL import Image, ImageFile, UnidentifiedImageError
 from pillow_heif import register_heif_opener
 from rich.progress import MofNCompleteColumn, Progress, SpinnerColumn, TimeElapsedColumn
-from ui_funcs import get_folder, get_number, get_true_false
+from ui_funcs import get_folder, get_number_input, get_true_false
 
 register_heif_opener()
 
@@ -205,7 +205,7 @@ def _save_image(
     """
 
     if exif is None:
-        exif = picture.info["exif"] if "exif" in picture.info else None
+        exif = picture.info.get("exif", None)
     try:
         if exif is None:
             picture.save(fp=file_path, format=img_format, quality=quality)
@@ -463,7 +463,7 @@ def main():
     subfolders = get_true_false(prefix="Do you want to resize images in subfolders")
 
     print()
-    max_size = get_number(
+    max_size = get_number_input(
         int,
         prefix="What maximum file size do you want, in kb",
         allow_none=True,
@@ -473,7 +473,7 @@ def main():
     max_size = max_size * 1024
 
     print()
-    min_quality = get_number(
+    min_quality = get_number_input(
         int,
         prefix="What minimum quality level do you want",
         min_val=0,
