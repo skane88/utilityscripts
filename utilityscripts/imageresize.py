@@ -147,7 +147,7 @@ def compress_image(
         new_file_path = file_path.with_suffix(".jpg")
 
         _save_image(
-            picture=picture,
+            image=picture,
             file_path=new_file_path,
             quality=quality_acceptable,
             img_format="JPEG",
@@ -180,7 +180,7 @@ def _get_size(*, picture_to_size, quality) -> int:
     buffer = io.BytesIO()
     # create a new buffer every time to prevent saving into the same buffer
 
-    _save_image(picture=picture_to_size, file_path=buffer, quality=quality)
+    _save_image(image=picture_to_size, file_path=buffer, quality=quality)
 
     size = buffer.getbuffer().nbytes
     buffer.close()
@@ -190,7 +190,7 @@ def _get_size(*, picture_to_size, quality) -> int:
 
 def _save_image(
     *,
-    picture: Image,
+    image: Image,
     file_path: Union[Path, io.BytesIO],
     quality: int,
     img_format: str = "JPEG",
@@ -198,7 +198,8 @@ def _save_image(
 ):
     """
     Save an image file to the provided path, at the provided quality.
-    :param picture: The image to save.
+    
+    :param image: The image to save.
     :param file_path: The path to save it to.
     :param quality: The quality level to save at.
     :param img_format: The file format to save in. Must be a format known to PILlow.
@@ -207,12 +208,12 @@ def _save_image(
     """
 
     if exif is None:
-        exif = picture.info.get("exif", None)
+        exif = image.info.get("exif", None)
     try:
         if exif is None:
-            picture.save(fp=file_path, format=img_format, quality=quality)
+            image.save(fp=file_path, format=img_format, quality=quality)
         else:
-            picture.save(fp=file_path, format=img_format, quality=quality, exif=exif)
+            image.save(fp=file_path, format=img_format, quality=quality, exif=exif)
 
     except OSError:
         # one cause of potential errors is that a jpg file is truncated.
@@ -224,9 +225,9 @@ def _save_image(
         ImageFile.LOAD_TRUNCATED_IMAGES = True
 
         if exif is None:
-            picture.save(fp=file_path, format="JPEG", quality=quality)
+            image.save(fp=file_path, format="JPEG", quality=quality)
         else:
-            picture.save(fp=file_path, format="JPEG", quality=quality, exif=exif)
+            image.save(fp=file_path, format="JPEG", quality=quality, exif=exif)
 
         ImageFile.LOAD_TRUNCATED_IMAGES = False
 
