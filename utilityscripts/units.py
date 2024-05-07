@@ -21,7 +21,7 @@ from math import (  # noqa: I001
 import pint
 import pint_pandas  # noqa: F401
 
-from utilityscripts.steel import standard_grades  # noqa: F401
+from utilityscripts.steel import standard_grades, standard_plate_df  # noqa: F401
 from utilityscripts.steel import SteelGrade, c_section_df, i_section_df, steel_grade_df
 
 # define a unicode pi value for pretty printing if req'd.
@@ -243,3 +243,9 @@ def c_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
             "f_uw": "pint[MPa]",
         }
     )
+
+
+def standard_plate_df_units():
+    plate_df = standard_plate_df()
+
+    return plate_df.astype({"thickness": "pint[m]"})

@@ -598,6 +598,16 @@ def c_sections(grade: None | SteelGrade = None) -> dict[str, CSection]:
     return c_sects
 
 
+def standard_plate_df():
+    """
+    Load a dataframe of standard plate thicknesses.
+    """
+
+    return pd.read_excel(
+        _DATA_PATH / Path("steel_data.xlsx"), sheet_name="standard_plate"
+    )
+
+
 def alpha_m(*, m_m, m_2, m_3, m_4):
     """
     Determines the moment modification factor as per AS4100 S5.6.1.1.a.iii
