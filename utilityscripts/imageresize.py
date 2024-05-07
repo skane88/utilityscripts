@@ -12,7 +12,9 @@ from typing import List, Optional, Tuple, Union
 from PIL import Image, ImageFile, UnidentifiedImageError
 from pillow_heif import register_heif_opener
 from rich.progress import MofNCompleteColumn, Progress, SpinnerColumn, TimeElapsedColumn
-from ui_funcs import get_folder, get_number_input, get_true_false
+from rich.prompt import Confirm
+
+from utilityscripts.ui_funcs import get_folder, get_number_input
 
 register_heif_opener()
 
@@ -460,7 +462,7 @@ def main():
         print()
         return
 
-    subfolders = get_true_false(prefix="Do you want to resize images in subfolders")
+    subfolders = Confirm.ask(prompt="Do you want to resize images in subfolders")
 
     print()
     max_size = get_number_input(
@@ -489,7 +491,7 @@ def main():
         + f"{folder}{subfolder_text}"
     )
 
-    if get_true_false(prefix="Do you wish to continue"):
+    if Confirm.ask(prompt="Do you wish to continue"):
         _, warnings = compress_all_in_folder(
             folder=folder,
             incl_subfolders=subfolders,
