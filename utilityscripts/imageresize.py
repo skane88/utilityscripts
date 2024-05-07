@@ -48,6 +48,46 @@ def _validate_file(*, file_path: Path, missing_ok: bool):
     return True
 
 
+def _open_image(file_path: Path) -> Image:
+    """
+    Helper function to open an image and retry on one cause of failure.
+    :param file_path: The image to open.
+    """
+
+    def open_jpeg(file_path: Path) -> Image:
+        """
+        Helper function to open as a JPEG.
+
+        :param file_path: The image to open.
+        """
+
+        p: Image = Image.open(file_path)
+
+        if p.format != "JPEG":
+            p = p.convert("RGB")
+
+        return p
+
+    try:
+        image = open_jpeg(file_path=file_path)
+
+    except OSError:
+        # one cause of potential errors is that a jpg file is truncated.
+        # therefore try allowing PILlow to open truncated images.
+        # we could leave this on be default (set .LOAD_TRUNCATED_IMAGES = True
+        # in the import section of the module) but it appears to dramatically
+        # slow down PILlow so we will try and leave it as False where possible.
+
+        ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+        print(f"Warning: image {file_path} is a truncated image.")
+        image = open_jpeg(file_path=file_path)
+
+        ImageFile.LOAD_TRUNCATED_IMAGES = False
+
+    return image
+
+
 def compress_image(
     *,
     file_path: Path,
@@ -91,30 +131,7 @@ def compress_image(
 
     quality_min_orig = quality_min  # keep a record of the original minimum quality
 
-    def open_image(file_path: Path) -> Image:
-        p: Image = Image.open(file_path)
-
-        if p.format != "JPEG":
-            p = p.convert("RGB")
-
-        return p
-
-    try:
-        image = open_image(file_path=file_path)
-
-    except OSError:
-        # one cause of potential errors is that a jpg file is truncated.
-        # therefore try allowing PILlow to open truncated images.
-        # we could leave this on be default (set .LOAD_TRUNCATED_IMAGES = True
-        # in the import section of the module) but it appears to dramatically
-        # slow down PILlow so we will try and leave it as False where possible.
-
-        ImageFile.LOAD_TRUNCATED_IMAGES = True
-
-        print(f"Warning: image {file_path} is a truncated image.")
-        image = open_image(file_path=file_path)
-
-        ImageFile.LOAD_TRUNCATED_IMAGES = False
+    image = _open_image(file_path)
 
     # first do a check that at the minimum compression we will be smaller than the
     # target file size
