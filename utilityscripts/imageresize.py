@@ -84,7 +84,7 @@ def compress_image(
         return p
 
     try:
-        picture = open_image(file_path=file_path)
+        image = open_image(file_path=file_path)
 
     except OSError:
         # one cause of potential errors is that a jpg file is truncated.
@@ -96,14 +96,14 @@ def compress_image(
         ImageFile.LOAD_TRUNCATED_IMAGES = True
 
         print(f"Warning: image {file_path} is a truncated image.")
-        picture = open_image(file_path=file_path)
+        image = open_image(file_path=file_path)
 
         ImageFile.LOAD_TRUNCATED_IMAGES = False
 
     # first do a check that at the minimum compression we will be smaller than the
     # target file size
 
-    min_size = _get_size(picture_to_size=picture, quality=quality_min)
+    min_size = _get_size(picture_to_size=image, quality=quality_min)
 
     if min_size >= current_size:
         # we have specified not to save if larger than the original, so bail out
@@ -124,7 +124,7 @@ def compress_image(
             # use binary search to quickly converge on an acceptable level of quality.
 
             quality_average = math.floor((quality_min + quality_max) / 2)
-            size = _get_size(picture_to_size=picture, quality=quality_average)
+            size = _get_size(picture_to_size=image, quality=quality_average)
 
             if size <= target_size:
                 quality_acceptable = quality_average
@@ -135,7 +135,7 @@ def compress_image(
         if quality_acceptable <= -1:
             raise ImageResizeError("No valid quality level found")
 
-        size = _get_size(picture_to_size=picture, quality=quality_acceptable)
+        size = _get_size(picture_to_size=image, quality=quality_acceptable)
 
     # now we have figured out the level of quality required, resize the image.
 
@@ -147,7 +147,7 @@ def compress_image(
         new_file_path = file_path.with_suffix(".jpg")
 
         _save_image(
-            image=picture,
+            image=image,
             file_path=new_file_path,
             quality=quality_acceptable,
             img_format="JPEG",
