@@ -88,6 +88,37 @@ def _open_image(file_path: Path) -> Image:
     return image
 
 
+def _find_quality(
+    *, image: Image, quality_min: int, quality_max: int, target_size: int
+) -> int:
+    """
+    Helper method that uses binary search to find a target quality level that meets the size requirements.
+
+    :param image: The image to compress.
+    :param quality_min: The minimum acceptable quality level.
+    :param quality_max: The maximum quality level.
+    :param target_size: The target file size.
+    """
+
+    final_quality = -1
+    while quality_min <= quality_max:
+        # use binary search to quickly converge on an acceptable level of quality.
+
+        quality_average = math.floor((quality_min + quality_max) / 2)
+        size = _get_size(picture_to_size=image, quality=quality_average)
+
+        if size <= target_size:
+            final_quality = quality_average
+            quality_min = quality_average + 1
+        else:
+            quality_max = quality_average - 1
+
+    if final_quality <= -1:
+        raise ImageResizeError("No valid quality level found")
+
+    return final_quality
+
+
 def compress_image(
     *,
     file_path: Path,
@@ -151,22 +182,12 @@ def compress_image(
 
     else:
         # else the target size will be achieved with a quality between max and min.
-        final_quality = -1
-
-        while quality_min <= quality_max:
-            # use binary search to quickly converge on an acceptable level of quality.
-
-            quality_average = math.floor((quality_min + quality_max) / 2)
-            size = _get_size(picture_to_size=image, quality=quality_average)
-
-            if size <= target_size:
-                final_quality = quality_average
-                quality_min = quality_average + 1
-            else:
-                quality_max = quality_average - 1
-
-        if final_quality <= -1:
-            raise ImageResizeError("No valid quality level found")
+        final_quality = _find_quality(
+            image=image,
+            quality_min=quality_min,
+            quality_max=quality_max,
+            target_size=target_size,
+        )
 
         size = _get_size(picture_to_size=image, quality=final_quality)
 
