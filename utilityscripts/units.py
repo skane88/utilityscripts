@@ -23,8 +23,10 @@ import pint_pandas  # noqa: F401
 
 from utilityscripts.steel import (
     nearest_standard_plate,  # noqa: F401
+    nearest_standard_weld,  # noqa: F401
     standard_grades,  # noqa: F401
     standard_plate_df,
+    standard_weld_df,
 )
 from utilityscripts.steel import SteelGrade, c_section_df, i_section_df, steel_grade_df
 
@@ -250,6 +252,20 @@ def c_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
 
 
 def standard_plate_df_units():
+    """
+    Get a DataFrame of standard Australian plate thicknesses, with assigned units.
+    """
+
     plate_df = standard_plate_df()
 
     return plate_df.astype({"thickness": "pint[m]"})
+
+
+def standard_weld_df_units():
+    """
+    Get a DataFrame of standard Australian weld sizes, with assigned units.
+    """
+
+    weld_df = standard_weld_df()
+
+    return weld_df.astype({"leg_size": "pint[m]"})
