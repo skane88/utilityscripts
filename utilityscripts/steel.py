@@ -772,6 +772,23 @@ def v_bt(*, a_e, t_p, f_up):
     return a_e * t_p * f_up
 
 
+def v_w(size, f_uw, k_r=1.0, phi_weld=0.8):
+    """
+    Calculate the capacity of a fillet weld as per AS4100-2020
+
+    :param size: The leg length of the weld.
+        Future versions of this function may be extended to
+        allow for uneven legs.
+    :param f_uw: The ultimate strength of the weld metal.
+    :param k_r: The weld length parameter. For welds less than
+        1.7m long (almost all welds) this is 1.00.
+    :param phi_weld: The capacity reduction factor.
+    """
+
+    t_t = size / (2**0.5)
+    return phi_weld * 0.60 * t_t * k_r * f_uw
+
+
 def jack_bolt_effort(*, load, p, r_effort, r_bolt, mu, against: bool = True):
     """
     Calculate the force required to turn a jacking bolt.
