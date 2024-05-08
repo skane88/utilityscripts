@@ -6,12 +6,15 @@ It relies on the Pint units package.
 Also imports math & sets up pi
 """
 
-from math import (  # noqa: I001
+import copy
+from math import (
     acos,  # noqa: F401
     asin,  # noqa: F401
     atan,  # noqa: F401
+    ceil,
     cos,  # noqa: F401
     degrees,  # noqa: F401
+    floor,
     pi,
     radians,  # noqa: F401
     sin,  # noqa: F401
@@ -22,13 +25,16 @@ import pint
 import pint_pandas  # noqa: F401
 
 from utilityscripts.steel import (
+    SteelGrade,
+    c_section_df,
+    i_section_df,
     nearest_standard_plate,  # noqa: F401
     nearest_standard_weld,  # noqa: F401
     standard_grades,  # noqa: F401
     standard_plate_df,
     standard_weld_df,
+    steel_grade_df,
 )
-from utilityscripts.steel import SteelGrade, c_section_df, i_section_df, steel_grade_df
 
 # define a unicode pi value for pretty printing if req'd.
 π = pi
@@ -269,3 +275,41 @@ def standard_weld_df_units():
     weld_df = standard_weld_df()
 
     return weld_df.astype({"leg_size": "pint[m]"})
+
+
+def mround(x, base, floor_val: bool | None = None):
+    """
+    Custom rounding function that works with units,
+    and can round to the nearest multiple.
+
+    :param x: The number to round.
+    :param base: Round to multiples of?
+    :param floor_val: If true, round by flooring.
+      If False, round by ceiling.
+      If None, use standard rounding.
+    """
+
+    units = None
+
+    if isinstance(x, pint.Quantity):
+        units = x.units
+        x = copy.deepcopy(x)
+        x.ito_base_units()
+
+    if isinstance(base, pint.Quantity):
+        base = copy.deepcopy(base)
+        base.ito_base_units()
+
+    if floor_val is None:
+        round_func = round
+    elif floor_val:
+        round_func = floor
+    else:
+        round_func = ceil
+
+    val = base * round_func(x / base)
+
+    if units is not None:
+        val.ito(units)
+
+    return val
