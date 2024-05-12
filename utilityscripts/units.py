@@ -277,7 +277,7 @@ def standard_weld_df_units():
     return weld_df.astype({"leg_size": "pint[m]"})
 
 
-def mround(x, base, floor_val: bool | None = None):
+def m_round(x, base, floor_val: bool | None = None):
     """
     Custom rounding function that works with units,
     and can round to the nearest multiple.
