@@ -43,7 +43,7 @@ FEET_AND_INCHES = (
 )
 
 
-def ft_in_to_m(feet: float = 0, inches: float = 0) -> float:
+def imp_to_m(feet: float = 0, inches: float = 0) -> float:
     """
     Converts ft and inches into metres.
 
@@ -54,7 +54,7 @@ def ft_in_to_m(feet: float = 0, inches: float = 0) -> float:
     return (feet * FEET_TO_INCHES + inches) * INCHES_TO_M
 
 
-def ft_in_str_to_m(imperial: str) -> float:
+def imp_str_to_m(imperial: str) -> float:
     """
     Convert a text string of feet & inches (e.g. 6' or 32" or 1' 1 1/4") into m.
 
@@ -101,4 +101,4 @@ def ft_in_str_to_m(imperial: str) -> float:
     else:
         inches = 0
 
-    return ft_in_to_m(feet=feet, inches=inches)
+    return imp_to_m(feet=feet, inches=inches)

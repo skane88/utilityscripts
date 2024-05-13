@@ -6,7 +6,7 @@ from math import isclose
 
 import pytest
 
-from utilityscripts.imperial_to_metric import ft_in_str_to_m
+from utilityscripts.imp_to_si import imp_str_to_m
 
 
 @pytest.mark.parametrize(
@@ -31,7 +31,7 @@ from utilityscripts.imperial_to_metric import ft_in_str_to_m
     ],
 )
 def test_convert_to_metric(example, expected):
-    assert isclose(ft_in_str_to_m(example), expected)
+    assert isclose(imp_str_to_m(example), expected)
 
 
 @pytest.mark.parametrize(
@@ -52,4 +52,4 @@ def test_convert_to_metric_errors(example, expected):
     """
 
     with pytest.raises(ValueError):
-        assert isclose(ft_in_str_to_m(example), expected)
+        assert isclose(imp_str_to_m(example), expected)
