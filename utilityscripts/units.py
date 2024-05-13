@@ -11,10 +11,8 @@ from math import (
     acos,  # noqa: F401
     asin,  # noqa: F401
     atan,  # noqa: F401
-    ceil,
     cos,  # noqa: F401
     degrees,  # noqa: F401
-    floor,
     pi,
     radians,  # noqa: F401
     sin,  # noqa: F401
@@ -24,6 +22,7 @@ from math import (
 import pint
 import pint_pandas  # noqa: F401
 
+from utilityscripts.math_utils import m_ceil, m_floor, m_round
 from utilityscripts.steel import (
     SteelGrade,
     c_section_df,
@@ -277,39 +276,119 @@ def standard_weld_df_units():
     return weld_df.astype({"leg_size": "pint[m]"})
 
 
-def m_round(x, base, floor_val: bool | None = None):
+def _prep_round(x, base):
+    """
+    Helper method to prepare for the m_round, m_floor and m_ceil methods.
+
+    :param x: The number to round.
+    :param base: Round to multiples of?
+    :return: A tuple containing:
+        (x, base, units, si_units)
+        where units is the units of x, or None, and si_units is the base units of x.
+    """
+
+    if not isinstance(x, pint.Quantity):
+        raise ValueError(f"x must be an instance of pint.Quantity. {x=}")
+
+    if (
+        isinstance(x, pint.Quantity)
+        and isinstance(base, pint.Quantity)
+        and x.to_base_units().units != base.to_base_units().units
+    ):
+        raise ValueError(
+            "Both x and base must be units of the same type (e.g. both length, or both mass)."
+            + f"{x=}, {base=}"
+        )
+
+    units = None
+    si_units = None
+
+    if isinstance(x, pint.Quantity):
+        x = copy.deepcopy(x)
+        units = x.units
+        x.ito_base_units()
+        si_units = x.units
+        x = x.magnitude
+
+    if isinstance(base, pint.Quantity):
+        base = copy.deepcopy(base)
+        base.ito_base_units()
+        base = base.magnitude
+    else:
+        base = base * units
+        base.ito_base_units()
+        base = base.magnitude
+
+    return x, base, units, si_units
+
+
+def m_round_units(x, base, floor_val: bool | None = None):
     """
     Custom rounding function that works with units,
     and can round to the nearest multiple.
 
     :param x: The number to round.
     :param base: Round to multiples of?
-    :param floor_val: If true, round by flooring.
-      If False, round by ceiling.
-      If None, use standard rounding.
     """
 
-    units = None
+    (
+        x,
+        base,
+        units,
+        si_units,
+    ) = _prep_round(x, base)
 
-    if isinstance(x, pint.Quantity):
-        units = x.units
-        x = copy.deepcopy(x)
-        x.ito_base_units()
-
-    if isinstance(base, pint.Quantity):
-        base = copy.deepcopy(base)
-        base.ito_base_units()
-
-    if floor_val is None:
-        round_func = round
-    elif floor_val:
-        round_func = floor
-    else:
-        round_func = ceil
-
-    val = base * round_func(x / base)
+    val = m_round(x, base)
 
     if units is not None:
-        val.ito(units)
+        val = (val * si_units).to(units)
+
+    return val
+
+
+def m_floor_units(x, base):
+    """
+    Custom rounding function that works with units,
+    and can round to the nearest multiple.
+
+    :param x: The number to round.
+    :param base: Round to multiples of?
+    """
+
+    (
+        x,
+        base,
+        units,
+        si_units,
+    ) = _prep_round(x, base)
+
+    val = m_floor(x, base)
+
+    if units is not None:
+        val = (val * si_units).to(units)
+
+    return val
+
+
+def m_ceil_units(x, base):
+    """
+    Custom rounding function that works with units,
+    and can round to the nearest multiple.
+
+    :param x: The number to round.
+    :param base: Round to multiples of?
+    """
+
+    (
+        x,
+        base,
+        units,
+        si_units,
+    ) = _prep_round(x, base)
+
+    val = m_ceil(x, base)
+
+    if units is not None:
+        val = (val * si_units).to(units)
 
     return val
