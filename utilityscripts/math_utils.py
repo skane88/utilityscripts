@@ -52,6 +52,11 @@ def m_floor(x, base):
     """
     Floor a number to the nearest multiple.
 
+    Note: due to floating point math, it is necessary to
+    convert the numbers to Decimals first. This
+    will incur a performance overhead so only use this
+    method if there is no better way to do this function.
+
     :param x: the number to round.
     :param base: the multiple to round to.
     """
