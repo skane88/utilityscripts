@@ -6,7 +6,6 @@ It relies on the Pint units package.
 Also imports math & sets up pi
 """
 
-import copy
 from math import (
     acos,  # noqa: F401
     asin,  # noqa: F401
@@ -304,31 +303,30 @@ def _prep_round(x, base):
     si_units = None
 
     if isinstance(x, pint.Quantity):
-        x = copy.deepcopy(x)
         units = x.units
-        x.ito_base_units()
+        x = x.to_base_units()
         si_units = x.units
         x = x.magnitude
 
     if isinstance(base, pint.Quantity):
-        base = copy.deepcopy(base)
-        base.ito_base_units()
-        base = base.magnitude
+        base = base.to_base_units().magnitude
     else:
-        base = base * units
-        base.ito_base_units()
-        base = base.magnitude
+        base = (base * units).to_base_units().magnitude
 
     return x, base, units, si_units
 
 
-def m_round_units(x, base, floor_val: bool | None = None):
+def m_round_units(x: pint.Quantity, base: pint.Quantity | float):
     """
     Custom rounding function that works with units,
     and can round to the nearest multiple.
+    Number is returned in the units of x.
 
     :param x: The number to round.
     :param base: Round to multiples of?
+        If unitless (float, int etc.) then only the magnitude of x will be rounded.
+        If a Quantity, then x will be rounded in correct units, but will be
+        converted back to the original units before the result is returned.
     """
 
     (
@@ -346,13 +344,17 @@ def m_round_units(x, base, floor_val: bool | None = None):
     return val
 
 
-def m_floor_units(x, base):
+def m_floor_units(x: pint.Quantity, base: pint.Quantity | float):
     """
     Custom rounding function that works with units,
     and can round to the nearest multiple.
+    Number is returned in the units of x.
 
     :param x: The number to round.
     :param base: Round to multiples of?
+        If unitless (float, int etc.) then only the magnitude of x will be rounded.
+        If a Quantity, then x will be rounded in correct units, but will be
+        converted back to the original units before the result is returned.
     """
 
     (
@@ -370,13 +372,17 @@ def m_floor_units(x, base):
     return val
 
 
-def m_ceil_units(x, base):
+def m_ceil_units(x: pint.Quantity, base: pint.Quantity | float):
     """
     Custom rounding function that works with units,
     and can round to the nearest multiple.
+    Number is returned in the units of x.
 
     :param x: The number to round.
     :param base: Round to multiples of?
+        If unitless (float, int etc.) then only the magnitude of x will be rounded.
+        If a Quantity, then x will be rounded in correct units, but will be
+        converted back to the original units before the result is returned.
     """
 
     (

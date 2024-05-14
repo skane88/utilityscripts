@@ -2,8 +2,10 @@
 File to test functions in the units module.
 """
 
+import copy
 from math import isclose
 
+import pint
 import pytest
 
 from utilityscripts.units import inch, kg, m, m_ceil_units, m_floor_units, m_round_units
@@ -27,8 +29,19 @@ from utilityscripts.units import inch, kg, m, m_ceil_units, m_floor_units, m_rou
     ],
 )
 def test_m_round_units(x, base, expected):
+    x_orig = copy.deepcopy(x)
+    base_orig = copy.deepcopy(base)
+
     assert isclose(m_round_units(x, base).magnitude, expected.magnitude)
     assert m_round_units(x, base).units == expected.units
+
+    # added in case any of the operations affect the units of x or base
+    assert x_orig == x
+    assert x_orig.units == x.units
+    assert base_orig == base
+
+    if isinstance(base, pint.Quantity):
+        assert base_orig.units == base.units
 
 
 @pytest.mark.parametrize(
@@ -58,8 +71,19 @@ def test_m_round_units_error(x, base, expected, error):
     ],
 )
 def test_m_floor_units(x, base, expected):
+    x_orig = copy.deepcopy(x)
+    base_orig = copy.deepcopy(base)
+
     assert isclose(m_floor_units(x, base).magnitude, expected.magnitude)
     assert m_floor_units(x, base).units == expected.units
+
+    # added in case any of the operations affect the units of x or base
+    assert x_orig == x
+    assert x_orig.units == x.units
+    assert base_orig == base
+
+    if isinstance(base, pint.Quantity):
+        assert base_orig.units == base.units
 
 
 @pytest.mark.parametrize(
@@ -80,5 +104,16 @@ def test_m_floor_units(x, base, expected):
     ],
 )
 def test_m_ceil_units(x, base, expected):
+    x_orig = copy.deepcopy(x)
+    base_orig = copy.deepcopy(base)
+
     assert isclose(m_ceil_units(x, base).magnitude, expected.magnitude)
     assert m_ceil_units(x, base).units == expected.units
+
+    # added in case any of the operations affect the units of x or base
+    assert x_orig == x
+    assert x_orig.units == x.units
+    assert base_orig == base
+
+    if isinstance(base, pint.Quantity):
+        assert base_orig.units == base.units
