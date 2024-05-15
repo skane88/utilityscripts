@@ -250,6 +250,7 @@ class ISection(SteelSection):
         j: float,
         i_w: float,
         grade: None | SteelGrade = None,
+        **kwargs,
     ):
         super().__init__(section=section, current=current, grade=grade)
 
@@ -320,6 +321,10 @@ class ISection(SteelSection):
 
         return self.grade.get_f_u(self.t_w)
 
+    @property
+    def d_1(self):
+        return self.d - 2 * self.t_f
+
 
 class CSection(SteelSection):
     """
@@ -353,6 +358,7 @@ class CSection(SteelSection):
         j: float,
         i_w: float,
         grade: None | SteelGrade = None,
+        **kwargs,
     ):
         super().__init__(section=section, current=current, grade=grade)
 
@@ -421,6 +427,10 @@ class CSection(SteelSection):
             return None
 
         return self.grade.get_f_u(self.t_w)
+
+    @property
+    def d_1(self):
+        return self.d - 2 * self.t_f
 
 
 def i_section_df(
