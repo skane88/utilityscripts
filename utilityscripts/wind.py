@@ -166,7 +166,7 @@ def v_r(*, wind_region: str, r, version: str = "2021", ignore_m_c: bool = False)
     k = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["k"]
     v_min = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["V_min"]
 
-    return max(v_min, f * v_r_no_f_x(a=a, b=b, r=r, k=k))
+    return max(f * v_min, f * v_r_no_f_x(a=a, b=b, r=r, k=k))
 
 
 def m_d(
