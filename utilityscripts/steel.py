@@ -438,8 +438,6 @@ def i_section_df(
 
     section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="Is")
 
-    section_df["d_1"] = section_df.d - 2 * section_df.t_f
-
     section_df["f_yf"] = np.NAN
     section_df["f_yw"] = np.NAN
     section_df["f_uf"] = np.NAN
@@ -525,8 +523,6 @@ def c_section_df(
     """
 
     section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="Cs")
-
-    section_df["d_1"] = section_df.d - 2 * section_df.t_f
 
     section_df["f_yf"] = np.NAN
     section_df["f_yw"] = np.NAN
