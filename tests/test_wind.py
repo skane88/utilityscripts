@@ -20,82 +20,82 @@ TEST_DATA_2021 = toml.load(TEST_DATA_PATH_2021)
 def build_v_r_pairs_2011(v_r_data):
     test_data = TEST_DATA_2011[v_r_data]
 
-    pairs = []
-
-    for region, v in test_data.items():
-        pairs.extend([(region, r), v_r] for r, v_r in v.items())
-    return pairs
+    return [
+        (region, r, v_r_exp)
+        for region, v in test_data.items()
+        for r, v_r_exp in v.items()
+    ]
 
 
 @pytest.mark.parametrize(
-    "input_vals, expected", build_v_r_pairs_2011("regional_windspeeds_no_F_x")
+    "region, r, v_r_exp", build_v_r_pairs_2011("regional_windspeeds_no_F_x")
 )
-def test_v_r_no_f_x_2011(input_vals, expected):
+def test_v_r_no_f_x_2011(region, r, v_r_exp):
     """
     Basic test of the V_R method.
     Ignores F_x because that's how the data I have is formatted.
     """
-
-    region = input_vals[0]
-    r = int(input_vals[1])
 
     v_r_calc = round(
-        v_r(wind_region=region, r=r, ignore_m_c=True, version="2011")
+        v_r(wind_region=region, r=int(r), ignore_m_c=True, version="2011")
     )  # round because the data from AS1170 is rounded
 
-    assert v_r_calc == expected
+    assert v_r_calc == v_r_exp
 
 
 @pytest.mark.parametrize(
-    "input_vals, expected", build_v_r_pairs_2011("regional_windspeeds")
+    "region, r, v_r_exp", build_v_r_pairs_2011("regional_windspeeds")
 )
-def test_v_r_2011(input_vals, expected):
+def test_v_r_2011(region, r, v_r_exp):
     """
     Basic test of the V_R method.
-    Ignores F_x because that's how the data I have is formatted.
     """
 
-    region = input_vals[0]
-    r = int(input_vals[1])
-
-    v_r_calc = v_r(wind_region=region, r=r, ignore_m_c=False, version="2011")
+    v_r_calc = v_r(wind_region=region, r=int(r), ignore_m_c=False, version="2011")
 
     v_r_calc = round(v_r_calc)  # round because the data from AS1170 is rounded
 
-    assert v_r_calc == expected
+    assert v_r_calc == v_r_exp
 
 
 def build_v_r_pairs_2021(v_r_data):
     test_data = TEST_DATA_2021[v_r_data]
 
-    pairs = []
-
-    for region, v in test_data.items():
-        pairs.extend([(region, r), v_r] for r, v_r in v.items())
-    return pairs
+    return [
+        (region, r, v_r_exp)
+        for region, v in test_data.items()
+        for r, v_r_exp in v.items()
+    ]
 
 
 @pytest.mark.parametrize(
-    "input_vals, expected", build_v_r_pairs_2021("regional_windspeeds")
+    "region, r, v_r_expected", build_v_r_pairs_2021("regional_windspeeds_no_mc")
 )
-def test_v_r_2021(input_vals, expected):
+def test_v_r_2021_no_mc(region, r, v_r_expected):
     """
     Basic test of the V_R method.
-    Ignores F_x because that's how the data I have is formatted.
     """
 
-    region = input_vals[0]
-    r = int(input_vals[1])
-
-    v_r_calc = v_r(wind_region=region, r=r, ignore_m_c=False, version="2021")
+    v_r_calc = v_r(wind_region=region, r=int(r), ignore_m_c=True, version="2021")
 
     v_r_calc = round(v_r_calc)  # round because the data from AS1170 is rounded
 
-    print(f"Input:{input_vals}")
-    print(f"Expected: {expected}")
-    print(f"Calculated: {v_r_calc}")
+    assert v_r_calc == v_r_expected
 
-    assert v_r_calc == expected
+
+@pytest.mark.parametrize(
+    "region, r, v_r_expected", build_v_r_pairs_2021("regional_windspeeds")
+)
+def test_v_r_2021(region, r, v_r_expected):
+    """
+    Basic test of the V_R method.
+    """
+
+    v_r_calc = v_r(wind_region=region, r=int(r), ignore_m_c=False, version="2021")
+
+    v_r_calc = round(v_r_calc)  # round because the data from AS1170 is rounded
+
+    assert v_r_calc == v_r_expected
 
 
 def build_direction_pairs_2011():
