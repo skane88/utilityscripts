@@ -609,7 +609,11 @@ def standard_plate_df():
 
 
 def nearest_standard_plate(
-    thickness, *, greater_than: bool = True, plate_df: pd.DataFrame | None = None
+    thickness,
+    *,
+    min_thickness: float | None = None,
+    greater_than: bool = True,
+    plate_df: pd.DataFrame | None = None,
 ):
     """
     Return the nearest standard plate to the specified thickness.
@@ -622,6 +626,9 @@ def nearest_standard_plate(
         The intent is to allow a DF with units attached to be passed in
         as well if required.
     """
+
+    if min_thickness is not None:
+        thickness = max(thickness, min_thickness)
 
     if plate_df is None:
         plate_df = standard_plate_df()
