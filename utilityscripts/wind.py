@@ -347,7 +347,7 @@ def m_s(shielding_parameter):
     return np.interp(shielding_parameter, xp, fp)
 
 
-def q_basic(*, v: float, rho_air: float = 1.2):
+def q_basic(v: float, *, rho_air: float = 1.2):
     """
     Calculate the basic wind pressure caused by a certain wind velocity.
 
