@@ -5,7 +5,7 @@ To contain some utilities for steel design
 from __future__ import annotations
 
 import copy
-from math import pi
+from math import cos, degrees, pi, radians, sin
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -681,6 +681,27 @@ def nearest_standard_weld(
 
     mask = weld_df.leg_size.ge(size)
     return weld_df.loc[mask, "leg_size"].min()
+
+
+def t_tp_chamfer(*, t_w, alpha, t_l=0, use_radians: bool = True):
+    """
+    Calculate the effective throat thickness of a chamfered plate.
+
+    :param t_w: The size of the weld leg welded to the plate.
+    :param alpha: The angle of the plate chamfer.
+    :param t_l: The size of any landing on the chamfer.
+    :param use_radians: Is alpha in radians or degrees.
+    """
+
+    if not use_radians:
+        alpha = radians(alpha)
+
+    if alpha < 0 or alpha > pi / 2:
+        raise ValueError(
+            f"alpha should be within the range of 0-90 degrees. alpha={degrees(alpha)}"
+        )
+
+    return t_w * sin(alpha) + t_l * cos(alpha)
 
 
 def alpha_m(*, m_m, m_2, m_3, m_4):
