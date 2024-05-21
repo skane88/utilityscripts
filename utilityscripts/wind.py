@@ -231,7 +231,7 @@ def m_d(
     return m_d, m_d_clad
 
 
-def m_zcat_basic(*, z, terrain_category) -> float:
+def m_zcat_basic(*, z, terrain_category, version="2011") -> float:
     """
     Determine the basic terrain category M_zcat at a given height and terrain.
 
@@ -245,7 +245,7 @@ def m_zcat_basic(*, z, terrain_category) -> float:
     # first load some required data
     if len(STANDARD_DATA) == 0:
         init_standard_data()
-    terrain_height_multipliers = STANDARD_DATA["terrain_height_multipliers"]
+    terrain_height_multipliers = STANDARD_DATA[version]["terrain_height_multipliers"]
 
     # get the basic data into the function as np arrays as we will be interpolating
     heights = np.array(terrain_height_multipliers["heights"])
