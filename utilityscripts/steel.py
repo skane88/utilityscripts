@@ -878,7 +878,7 @@ def local_thickness_reqd(
     return 2 / (((phi * f_y / point_force) * (width_lever_ratio + 2)) ** 0.5)
 
 
-def make_i_section(
+def make_i_geometry(
     *, b_f, d, t_f, t_w, b_fb=None, t_fb=None, corner_radius=None, n_r=8, weld_size=None
 ) -> Geometry:
     """
@@ -941,19 +941,19 @@ def make_i_section(
 
 
 def make_section(
-    *, geometry: Geometry, alpha_mesh_size=200, calculate_properties: bool = True
+    *, geometry: Geometry, alpha_mesh=100, calculate_properties: bool = True
 ) -> Section:
     """
     Turn a sectionproperties Geometry object into a Section object.
 
     :param geometry: The Geometry object to turn into the Section object.
-    :param alpha_mesh_size: The area of the largest mesh element,
+    :param alpha_mesh: The area of the largest mesh element,
         as a fraction of the overall area of the section.
     :param calculate_properties: Calculate the properties?
     """
 
     area = geometry.calculate_area()
-    sect = Section(geometry.create_mesh(mesh_sizes=area / alpha_mesh_size))
+    sect = Section(geometry.create_mesh(mesh_sizes=area / alpha_mesh))
 
     if calculate_properties:
         sect.calculate_geometric_properties()
@@ -961,6 +961,64 @@ def make_section(
         sect.calculate_plastic_properties()
 
     return sect
+
+
+def make_i_section(
+    *,
+    b_f,
+    d,
+    t_f,
+    t_w,
+    b_fb=None,
+    t_fb=None,
+    corner_radius=None,
+    n_r=8,
+    weld_size=None,
+    alpha_mesh=100,
+    calculate_properties=True,
+) -> Section:
+    """
+    Generate an I Section using the section-properties library.
+
+    :param b_f: The width of the top flange.
+    :param d: The section depth.
+    :param t_f: The top flange thickness.
+    :param t_w: The web thickness.
+    :param b_fb: The width of the bottom section.
+        Provide None for a symmetric section.
+    :param t_fb: The bottom flange thickness.
+        Provide None if both flanges the same.
+    :param corner_radius: The corner radius of the i-section.
+        NOTE: If both a corner radius and a weld size are defined,
+        priority is given to corner radii.
+        If a weld is present, set corner_radius = None.
+    :param n_r: The no. of points used to model the corner.
+    :param weld_size: The corner fillet weld (if any).
+        NOTE: If both a corner radius and a weld size are defined,
+        priority is given to corner radii.
+        If a weld is present, set corner_radius = None.
+    :param alpha_mesh: The area of the largest mesh element,
+        as a fraction of the overall area of the section.
+    :param calculate_properties: Calculate the properties?
+    """
+
+    geometry = make_i_geometry(
+        b_f=b_f,
+        d=d,
+        t_f=t_f,
+        t_w=t_w,
+        b_fb=b_fb,
+        t_fb=t_fb,
+        corner_radius=corner_radius,
+        n_r=n_r,
+        weld_size=weld_size,
+    )
+
+    return make_section(
+        geometry=geometry,
+        alpha_mesh=alpha_mesh,
+        calculate_properties=calculate_properties,
+    )
 
 
 class OverplatedSection:
