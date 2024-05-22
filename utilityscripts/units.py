@@ -24,6 +24,7 @@ import pint_pandas  # noqa: F401
 from utilityscripts.math_utils import m_ceil, m_floor, m_round
 from utilityscripts.steel import (
     SteelGrade,
+    angle_section_df,
     c_section_df,
     i_section_df,
     nearest_standard_plate,  # noqa: F401
@@ -265,7 +266,7 @@ def angle_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = No
         NOTE: the grade should not already have units on it.
     """
 
-    section_df = c_section_df(grade=grade)
+    section_df = angle_section_df(grade=grade)
 
     return section_df.astype(
         {
@@ -310,8 +311,8 @@ def angle_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = No
             "s_p": "pint[m**3]",
             "r_p": "pint[m]",
             "i_np": "pint[m**4]",
-            "f_yw": "pint[MPa]",
-            "f_uf": "pint[MPa]",
+            "f_y": "pint[MPa]",
+            "f_u": "pint[MPa]",
         }
     )
 
