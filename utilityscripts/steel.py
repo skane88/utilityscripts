@@ -435,12 +435,12 @@ class CSection(SteelSection):
         return self.d - 2 * self.t_f
 
 
-def _apply_grade(
-    section_df: pd.DataFrame,
-    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+def _grade_funcs(
+    grade: SteelGrade | dict[str, SteelGrade] = None,
 ):
     """
-    Helper function to apply steel grades to steel section dataframes.
+    Helper function to create the functions that apply steel grades
+    to steel section dataframes.
 
     :param section_df: The section dataframe to apply the grade properties to.
     :param grade: An optional SteelGrade object or dictionary to assign
@@ -450,25 +450,17 @@ def _apply_grade(
         of None.
     """
 
-    section_df["f_yf"] = np.NAN
-    section_df["f_yw"] = np.NAN
-    section_df["f_uf"] = np.NAN
-    section_df["f_uw"] = np.NAN
-
-    if grade is None:
-        return
-
     if isinstance(grade, SteelGrade):
 
-        def fy_func(row, col):
+        def fy_func(row, col: str):
             return grade.get_f_y(row[col])
 
-        def fu_func(row, col):
+        def fu_func(row, col: str):
             return grade.get_f_u(row[col])
 
     else:
 
-        def fy_func(row, col):
+        def fy_func(row, col: str):
             sg = grade.get(row.designation)
 
             if sg is None:
@@ -476,7 +468,7 @@ def _apply_grade(
 
             return sg.get_f_y(row[col])
 
-        def fu_func(row, col):
+        def fu_func(row, col: str):
             sg = grade.get(row.designation)
 
             if sg is None:
@@ -484,10 +476,7 @@ def _apply_grade(
 
             return sg.get_f_u(row[col])
 
-    section_df.f_yf = section_df.apply(fy_func, axis=1, col="t_f")
-    section_df.f_yw = section_df.apply(fy_func, axis=1, col="t_w")
-    section_df.f_uf = section_df.apply(fu_func, axis=1, col="t_f")
-    section_df.f_uw = section_df.apply(fu_func, axis=1, col="t_w")
+    return fy_func, fu_func
 
 
 def i_section_df(
@@ -505,7 +494,20 @@ def i_section_df(
 
     section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="is")
 
-    _apply_grade(section_df=section_df, grade=grade)
+    section_df["f_yf"] = np.NAN
+    section_df["f_yw"] = np.NAN
+    section_df["f_uf"] = np.NAN
+    section_df["f_uw"] = np.NAN
+
+    if grade is None:
+        return section_df
+
+    fy_func, fu_func = _grade_funcs(grade=grade)
+
+    section_df.f_yf = section_df.apply(fy_func, axis=1, col="t_f")
+    section_df.f_yw = section_df.apply(fy_func, axis=1, col="t_w")
+    section_df.f_uf = section_df.apply(fu_func, axis=1, col="t_f")
+    section_df.f_uw = section_df.apply(fu_func, axis=1, col="t_w")
 
     return section_df
 
@@ -554,7 +556,20 @@ def c_section_df(
 
     section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="cs")
 
-    _apply_grade(section_df=section_df, grade=grade)
+    section_df["f_yf"] = np.NAN
+    section_df["f_yw"] = np.NAN
+    section_df["f_uf"] = np.NAN
+    section_df["f_uw"] = np.NAN
+
+    if grade is None:
+        return section_df
+
+    fy_func, fu_func = _grade_funcs(grade=grade)
+
+    section_df.f_yf = section_df.apply(fy_func, axis=1, col="t_f")
+    section_df.f_yw = section_df.apply(fy_func, axis=1, col="t_w")
+    section_df.f_uf = section_df.apply(fu_func, axis=1, col="t_f")
+    section_df.f_uw = section_df.apply(fu_func, axis=1, col="t_w")
 
     return section_df
 
