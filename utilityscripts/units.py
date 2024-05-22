@@ -253,6 +253,69 @@ def c_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
     )
 
 
+def angle_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
+    """
+    Creates a dataframe of standard Australian Angle sections, with Pint units.
+
+    :param grade: An optional SteelGrade object or dictionary to assign
+        to the sections. For different section types (e.g. WB vs UB),
+        specify the grade as a dictionary: {designation: SteelGrade}.
+        If a designation is missed, sections will be assigned a grade
+        of None.
+        NOTE: the grade should not already have units on it.
+    """
+
+    section_df = c_section_df(grade=grade)
+
+    return section_df.astype(
+        {
+            "mass": "pint[kg/m]",
+            "b_1": "pint[m]",
+            "b_2": "pint[m]",
+            "t": "pint[m]",
+            "r_1": "pint[m]",
+            "r_2": "pint[m]",
+            "a_g": "pint[m**2]",
+            "n_l": "pint[m]",
+            "n_r": "pint[m]",
+            "p_b": "pint[m]",
+            "p_t": "pint[m]",
+            "i_x": "pint[m**4]",
+            "y_1": "pint[m]",
+            "z_x1": "pint[m**3]",
+            "y_4": "pint[m]",
+            "z_x4": "pint[m**3]",
+            "y_5": "pint[m]",
+            "z_x5": "pint[m**3]",
+            "s_x": "pint[m**3]",
+            "r_x": "pint[m]",
+            "i_y": "pint[m**4]",
+            "x_5": "pint[m]",
+            "z_y5": "pint[m**3]",
+            "x_3": "pint[m]",
+            "z_y3": "pint[m**3]",
+            "x_2": "pint[m]",
+            "z_y2": "pint[m**3]",
+            "s_y": "pint[m**3]",
+            "r_y": "pint[m]",
+            "j": "pint[m**4]",
+            "i_n": "pint[m**4]",
+            "z_nb": "pint[m**3]",
+            "z_nt": "pint[m**3]",
+            "s_n": "pint[m**3]",
+            "r_n": "pint[m]",
+            "i_p": "pint[m**4]",
+            "z_pl": "pint[m**3]",
+            "z_pr": "pint[m**3]",
+            "s_p": "pint[m**3]",
+            "r_p": "pint[m]",
+            "i_np": "pint[m**4]",
+            "f_yw": "pint[MPa]",
+            "f_uf": "pint[MPa]",
+        }
+    )
+
+
 def standard_plate_df_units():
     """
     Get a DataFrame of standard Australian plate thicknesses, with assigned units.
