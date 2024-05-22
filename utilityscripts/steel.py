@@ -174,6 +174,8 @@ def standard_grades() -> dict[str, SteelGrade]:
         "PFC": sg300,
         "WB": sg300_w,
         "WC": sg300_w,
+        "EA": sg300,
+        "UA": sg300,
     }
 
 
