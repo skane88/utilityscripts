@@ -656,6 +656,68 @@ def c_sections(
     return c_sects
 
 
+def angle_section_df(
+    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+) -> pd.DataFrame:
+    """
+    Get a Pandas Dataframe with all the Australian Standard Angle sections.
+
+    :param grade: An optional SteelGrade object or dictionary to assign
+        to the sections. For different section types (e.g. WB vs UB),
+        specify the grade as a dictionary: {designation: SteelGrade}.
+        If a designation is missed, sections will be assigned a grade
+        of None.
+    """
+
+    section_df = pd.read_excel(
+        _DATA_PATH / Path("steel_data.xlsx"), sheet_name="angles"
+    )
+
+    section_df["f_y"] = np.NAN
+    section_df["f_u"] = np.NAN
+
+    if grade is None:
+        return section_df
+
+    fy_func, fu_func = _grade_funcs(grade=grade)
+
+    section_df.f_y = section_df.apply(fy_func, axis=1, col="t")
+    section_df.f_u = section_df.apply(fu_func, axis=1, col="t")
+
+    return section_df
+
+
+def angle_sections(
+    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+) -> dict[str, AngleSection]:
+    """
+    Build a dictionary of the standard Australian angle sections.
+
+    :param grade: An optional SteelGrade object or dictionary to assign
+        to the sections. For different section types (e.g. WB vs UB),
+        specify the grade as a dictionary: {designation: SteelGrade}.
+        If a designation is missed, sections will be assigned a grade
+        of None.
+        Note that currently Australian channels only come in one
+        designation ("PFC") so typically a pure grade object would be passed in.
+    """
+
+    angle_sects = {}
+
+    for _, *v in angle_section_df().iterrows():
+        obj = v[0].to_dict()
+
+        sg = grade
+        obj["current"] = obj["current"] == "yes"
+
+        if isinstance(sg, dict):
+            sg = grade.get(obj["designation"])
+
+        angle_sects[obj["section"]] = AngleSection(**obj, grade=sg)
+
+    return angle_sects
+
+
 def standard_plate_df():
     """
     Load a dataframe of standard plate thicknesses.
