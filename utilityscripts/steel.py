@@ -435,6 +435,58 @@ class CSection(SteelSection):
         return self.d - 2 * self.t_f
 
 
+class AngleSection(SteelSection):
+    """
+    Class to map to an angle section.
+    """
+
+    # TODO: fill out class.
+
+    def __init__(
+        self,
+        *,
+        section: str,
+        current: bool,
+        designation: str,
+        mass: float,
+        section_shape: float,
+        fabrication_type: float,
+        t: float,
+        grade: None | SteelGrade = None,
+        **kwargs,
+    ):
+        super().__init__(section=section, current=current, grade=grade)
+
+        self.designation = designation
+        self.mass = (mass,)
+        self.section_shape = section_shape
+        self.fabrication_type = fabrication_type
+
+        self.t = t
+
+    @property
+    def f_y(self):
+        """
+        Get the yield stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_y(self.t)
+
+    @property
+    def f_u(self):
+        """
+        Get the ultimate stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_u(self.t)
+
+
 def _grade_funcs(
     grade: SteelGrade | dict[str, SteelGrade] = None,
 ):
