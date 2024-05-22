@@ -557,7 +557,9 @@ def c_section_df(
     return section_df
 
 
-def c_sections(grade: None | SteelGrade = None) -> dict[str, CSection]:
+def c_sections(
+    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+) -> dict[str, CSection]:
     """
     Build a dictionary of the standard Australian C sections.
     :param grade: An optional SteelGrade object or dictionary to assign
