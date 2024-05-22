@@ -433,12 +433,14 @@ class CSection(SteelSection):
         return self.d - 2 * self.t_f
 
 
-def i_section_df(
+def _apply_grade(
+    section_df: pd.DataFrame,
     grade: None | SteelGrade | dict[str, SteelGrade] = None,
-) -> pd.DataFrame:
+):
     """
-    Get a Pandas Dataframe with all the Australian Standard I sections.
+    Helper function to apply steel grades to steel section dataframes.
 
+    :param section_df: The section dataframe to apply the grade properties to.
     :param grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
@@ -446,15 +448,13 @@ def i_section_df(
         of None.
     """
 
-    section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="Is")
-
     section_df["f_yf"] = np.NAN
     section_df["f_yw"] = np.NAN
     section_df["f_uf"] = np.NAN
     section_df["f_uw"] = np.NAN
 
     if grade is None:
-        return section_df
+        return
 
     if isinstance(grade, SteelGrade):
 
@@ -486,6 +486,24 @@ def i_section_df(
     section_df.f_yw = section_df.apply(fy_func, axis=1, col="t_w")
     section_df.f_uf = section_df.apply(fu_func, axis=1, col="t_f")
     section_df.f_uw = section_df.apply(fu_func, axis=1, col="t_w")
+
+
+def i_section_df(
+    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+) -> pd.DataFrame:
+    """
+    Get a Pandas Dataframe with all the Australian Standard I sections.
+
+    :param grade: An optional SteelGrade object or dictionary to assign
+        to the sections. For different section types (e.g. WB vs UB),
+        specify the grade as a dictionary: {designation: SteelGrade}.
+        If a designation is missed, sections will be assigned a grade
+        of None.
+    """
+
+    section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="is")
+
+    _apply_grade(section_df=section_df, grade=grade)
 
     return section_df
 
@@ -532,46 +550,9 @@ def c_section_df(
         of None.
     """
 
-    section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="Cs")
+    section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="cs")
 
-    section_df["f_yf"] = np.NAN
-    section_df["f_yw"] = np.NAN
-    section_df["f_uf"] = np.NAN
-    section_df["f_uw"] = np.NAN
-
-    if grade is None:
-        return section_df
-
-    if isinstance(grade, SteelGrade):
-
-        def fy_func(row, col):
-            return grade.get_f_y(row[col])
-
-        def fu_func(row, col):
-            return grade.get_f_u(row[col])
-
-    else:
-
-        def fy_func(row, col):
-            sg = grade.get(row.designation)
-
-            if sg is None:
-                return None
-
-            return sg.get_f_y(row[col])
-
-        def fu_func(row, col):
-            sg = grade.get(row.designation)
-
-            if sg is None:
-                return None
-
-            return sg.get_f_u(row[col])
-
-    section_df.f_yf = section_df.apply(fy_func, axis=1, col="t_f")
-    section_df.f_yw = section_df.apply(fy_func, axis=1, col="t_w")
-    section_df.f_uf = section_df.apply(fu_func, axis=1, col="t_f")
-    section_df.f_uw = section_df.apply(fu_func, axis=1, col="t_w")
+    _apply_grade(section_df=section_df, grade=grade)
 
     return section_df
 
