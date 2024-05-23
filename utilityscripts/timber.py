@@ -2,6 +2,7 @@
 Python module to contain functions for working with timber.
 """
 
+from math import pi
 from pathlib import Path
 
 import numpy as np
@@ -146,6 +147,70 @@ def rho_b(elastic_modulus, f_b, load_ratio, *, seasoned: bool = True):
         return 14.71 * ((elastic_modulus / f_b) ** -0.480) * (load_ratio**-0.061)
 
     return 11.63 * ((elastic_modulus / f_b) ** -0.435) * (load_ratio**-0.110)
+
+
+def s_1_rect(
+    *,
+    d,
+    b,
+    l_a: float | str,
+    load_on_c: bool = True,
+    torsional_restraints: bool = False,
+):
+    """
+    Calculate the parameter S1 for the simplifed case of rectangular beams.
+
+    NOTE: If d < b, bending is about the minor axis, and S2 = 0.0 is returned.
+
+    :param d: The depth of the section in the direction of bending.
+    :param b: The width of the section.
+    :param l_a: The distance between restraints.
+        If continuously restrained, provide the str "clr".
+        If torsional_restraints == False, this is L_ay.
+        If torsional_restraints == True, this is L_aφ
+    :param load_on_c: Is the load on the compression edge?
+    :param torsional_restraints: Are there torsional restraints?
+        Torsional restraints are only valid if load_on_c == False.
+    :raises: Raises an error if torsional_restraints == True and
+        load_on_c == True.
+    """
+
+    if d < b:
+        # bending is actually about the minor axis.
+        return 0.0
+
+    if isinstance(l_a, str):
+        if l_a != "clr":
+            raise ValueError(
+                "The only valid string is 'clr' for continuous lateral restraints."
+                + " Otherwise provide a number."
+                + f" Received: {l_a=}"
+            )
+
+        if torsional_restraints:
+            raise ValueError(
+                "No case where torsional restrains are considered"
+                + " combined with Continuous Lateral Restraints."
+            )
+
+        if load_on_c:
+            return 0.0
+
+        return 2.25 * d / b
+
+    if load_on_c:
+        if torsional_restraints:
+            raise ValueError(
+                "No case where torsional restraints are considered"
+                + " when load is on the compression edge."
+            )
+
+        return 1.25 * (d / b) * ((l_a / d) ** 0.5)
+
+    if torsional_restraints:
+        return (1.5 * (d / b)) / ((((pi * d) / l_a) ** 2 + 0.4) ** 0.5)
+
+    return ((d / b) ** 1.35) * ((l_a / d) ** 0.25)
 
 
 def m_d(*, phi, k_1, k_4, k_9, k_12, f_b, z, k_6=0.9):
