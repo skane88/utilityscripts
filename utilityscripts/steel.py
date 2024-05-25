@@ -166,6 +166,7 @@ def standard_grades() -> dict[str, SteelGrade]:
 
     sg300 = sg["AS/NZS3679.1:300"]
     sg300_w = sg["AS/NZS3678:300"]
+    c350 = sg["AS/NZS1163:C350"]
 
     return {
         "UB": sg300,
@@ -176,6 +177,9 @@ def standard_grades() -> dict[str, SteelGrade]:
         "WC": sg300_w,
         "EA": sg300,
         "UA": sg300,
+        "RHS": c350,
+        "SHS": c350,
+        "CHS": c350,
     }
 
 
@@ -796,6 +800,35 @@ def angle_sections(
         angle_sects[obj["section"]] = AngleSection(**obj, grade=sg)
 
     return angle_sects
+
+
+def rhs_section_df(grade=None):
+    """
+    Build a dictionary of the standard Australian RHS & SHS sections.
+
+    :param grade: An optional SteelGrade object or dictionary to assign
+        to the sections. For different section types (e.g. WB vs UB),
+        specify the grade as a dictionary: {designation: SteelGrade}.
+        If a designation is missed, sections will be assigned a grade
+        of None.
+        Note that currently Australian channels only come in one
+        designation ("PFC") so typically a pure grade object would be passed in.
+    """
+
+    section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="rhs")
+
+    section_df["f_y"] = np.NAN
+    section_df["f_u"] = np.NAN
+
+    if grade is None:
+        return section_df
+
+    fy_func, fu_func = _grade_funcs(grade=grade)
+
+    section_df.f_y = section_df.apply(fy_func, axis=1, col="t")
+    section_df.f_u = section_df.apply(fu_func, axis=1, col="t")
+
+    return section_df
 
 
 def standard_plate_df():
