@@ -5,7 +5,7 @@ To contain some utilities for steel design
 from __future__ import annotations
 
 import copy
-from math import cos, degrees, pi, radians, sin
+from math import atan, cos, degrees, pi, radians, sin
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -451,18 +451,98 @@ class AngleSection(SteelSection):
         mass: float,
         section_shape: float,
         fabrication_type: float,
+        b_1: float,
+        b_2: float,
         t: float,
+        r_1: float,
+        r_2: float,
+        a_g: float,
+        n_l: float,
+        n_r: float,
+        p_b: float,
+        p_t: float,
+        i_x: float,
+        y_1: float,
+        z_x1: float,
+        y_4: float,
+        z_x4: float,
+        y_5: float,
+        z_x5: float,
+        s_x: float,
+        r_x: float,
+        i_y: float,
+        x_5: float,
+        z_y5: float,
+        x_3: float,
+        z_y3: float,
+        x_2: float,
+        z_y2: float,
+        s_y: float,
+        r_y: float,
+        j: float,
+        tan_alpha: float,
+        i_n: float,
+        z_nb: float,
+        z_nt: float,
+        s_n: float,
+        r_n: float,
+        i_p: float,
+        z_pl: float,
+        z_pr: float,
+        s_p: float,
+        r_p: float,
+        i_np: float,
         grade: None | SteelGrade = None,
         **kwargs,
     ):
         super().__init__(section=section, current=current, grade=grade)
 
         self.designation = designation
-        self.mass = (mass,)
+        self.mass = mass
         self.section_shape = section_shape
         self.fabrication_type = fabrication_type
 
+        self.b_1 = b_1
+        self.b_2 = b_2
         self.t = t
+        self.r_1 = r_1
+        self.r_2 = r_2
+        self.a_g = a_g
+        self.n_l = n_l
+        self.n_r = n_r
+        self.p_b = p_b
+        self.p_t = p_t
+        self.i_x = i_x
+        self.y_1 = y_1
+        self.z_x1 = z_x1
+        self.y_4 = y_4
+        self.z_x4 = z_x4
+        self.y_5 = y_5
+        self.z_x5 = z_x5
+        self.s_x = s_x
+        self.r_x = r_x
+        self.i_y = i_y
+        self.x_5 = x_5
+        self.z_y5 = z_y5
+        self.x_3 = x_3
+        self.z_y3 = z_y3
+        self.x_2 = x_2
+        self.z_y2 = z_y2
+        self.s_y = s_y
+        self.r_y = r_y
+        self.j = j
+        self.alpha = atan(tan_alpha)
+        self.i_n = i_n
+        self.z_nb = z_nb
+        self.z_nt = z_nt
+        self.s_n = s_n
+        self.r_n = r_n
+        self.i_p = i_p
+        self.z_pl = z_pl
+        self.z_pr = z_pr
+        self.s_p = s_p
+        self.r_p = r_p
+        self.i_np = i_np
 
     @property
     def f_y(self):
