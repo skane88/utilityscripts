@@ -571,6 +571,86 @@ class AngleSection(SteelSection):
         return self.grade.get_f_u(self.t)
 
 
+class RhsSection(SteelSection):
+    """
+    Class to map to an angle section.
+    """
+
+    # TODO: fill out class.
+
+    def __init__(
+        self,
+        *,
+        section: str,
+        current: bool,
+        designation: str,
+        mass: float,
+        section_shape: float,
+        fabrication_type: float,
+        b: float,
+        d: float,
+        t: float,
+        r_ext: float,
+        a_g: float,
+        i_x: float,
+        z_x: float,
+        s_x: float,
+        r_x: float,
+        i_y: float,
+        z_y: float,
+        s_y: float,
+        r_y: float,
+        j: float,
+        c: float,
+        grade: None | SteelGrade = None,
+        **kwargs,
+    ):
+        super().__init__(section=section, current=current, grade=grade)
+
+        self.designation = designation
+        self.mass = mass
+        self.section_shape = section_shape
+        self.fabrication_type = fabrication_type
+
+        self.b = b
+        self.d = d
+        self.t = t
+        self.r_ext = r_ext
+        self.a_g = a_g
+        self.i_x = i_x
+        self.z_x = z_x
+        self.s_x = s_x
+        self.r_x = r_x
+        self.i_y = i_y
+        self.z_y = z_y
+        self.s_y = s_y
+        self.r_y = r_y
+        self.j = j
+        self.c = c
+
+    @property
+    def f_y(self):
+        """
+        Get the yield stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_y(self.t)
+
+    @property
+    def f_u(self):
+        """
+        Get the ultimate stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_u(self.t)
+
+
 def _grade_funcs(
     grade: SteelGrade | dict[str, SteelGrade] = None,
 ):
@@ -829,6 +909,37 @@ def rhs_section_df(grade=None):
     section_df.f_u = section_df.apply(fu_func, axis=1, col="t")
 
     return section_df
+
+
+def rhs_sections(
+    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+) -> dict[str, RhsSection]:
+    """
+    Build a dictionary of the standard Australian angle sections.
+
+    :param grade: An optional SteelGrade object or dictionary to assign
+        to the sections. For different section types (e.g. WB vs UB),
+        specify the grade as a dictionary: {designation: SteelGrade}.
+        If a designation is missed, sections will be assigned a grade
+        of None.
+        Note that currently Australian channels only come in one
+        designation ("PFC") so typically a pure grade object would be passed in.
+    """
+
+    rhs_sects = {}
+
+    for _, *v in rhs_section_df().iterrows():
+        obj = v[0].to_dict()
+
+        sg = grade
+        obj["current"] = obj["current"] == "yes"
+
+        if isinstance(sg, dict):
+            sg = grade.get(obj["designation"])
+
+        rhs_sects[obj["section"]] = RhsSection(**obj, grade=sg)
+
+    return rhs_sects
 
 
 def standard_plate_df():
