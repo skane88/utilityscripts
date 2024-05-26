@@ -575,7 +575,7 @@ class AngleSection(SteelSection):
 
 class RhsSection(SteelSection):
     """
-    Class to map to an angle section.
+    Class to map to an RHS / SHS section.
     """
 
     # TODO: fill out class.
