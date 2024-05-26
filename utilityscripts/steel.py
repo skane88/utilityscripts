@@ -651,8 +651,8 @@ class RhsSection(SteelSection):
         return self.grade.get_f_u(self.t)
 
 
-def _grade_funcs(
-    grade: SteelGrade | dict[str, SteelGrade] = None,
+def _grade_funcs(  # noqa: C901
+    grade: SteelGrade | dict[str, SteelGrade] | None = None,
 ):
     """
     Helper function to create the functions that apply steel grades
@@ -666,7 +666,27 @@ def _grade_funcs(
         of None.
     """
 
-    if isinstance(grade, SteelGrade):
+    if grade is None:
+        grades = steel_grades()
+
+        def fy_func(row, col: str, grade_col="grade"):
+            if grade_col in row:
+                grade_designation = row[grade_col]
+                grade = grades[grade_designation]
+                return grade.get_f_y(row[col])
+
+            return np.nan
+
+        def fu_func(row, col: str, grade_col="grade"):
+            if grade_col in row:
+                grade_designation = row[grade_col]
+                grade = grades[grade_designation]
+                return grade.get_f_u(row[col])
+
+            return np.nan
+
+    elif isinstance(grade, SteelGrade):
+        # if so, choose f_y and f_u based on thickness in the appropriate column.
 
         def fy_func(row, col: str):
             return grade.get_f_y(row[col])
@@ -675,6 +695,7 @@ def _grade_funcs(
             return grade.get_f_u(row[col])
 
     else:
+        # in this case, grade is a dictionary of steel grades.
 
         def fy_func(row, col: str):
             sg = grade.get(row.designation)
@@ -899,9 +920,6 @@ def rhs_section_df(grade=None):
 
     section_df["f_y"] = np.NAN
     section_df["f_u"] = np.NAN
-
-    if grade is None:
-        return section_df
 
     fy_func, fu_func = _grade_funcs(grade=grade)
 
