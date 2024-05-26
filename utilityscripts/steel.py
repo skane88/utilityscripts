@@ -184,17 +184,19 @@ def standard_grades() -> dict[str, SteelGrade]:
 
 
 class SteelSection:
-    def __init__(self, *, section: str, current: bool, grade: None | SteelGrade = None):
+    def __init__(
+        self, *, section: str, current: bool, steel_grade: None | SteelGrade = None
+    ):
         """
 
         :param section: The section name.
         :param current: Is the section a currently produced section?
-        :param grade: A steel grade to attach to the section, or None.
+        :param steel_grade: A steel grade to attach to the section, or None.
         """
 
         self.section = section
         self.current = current
-        self._grade = grade
+        self._grade = steel_grade
 
     @property
     def grade(self):
@@ -255,10 +257,10 @@ class ISection(SteelSection):
         r_y: float,
         j: float,
         i_w: float,
-        grade: None | SteelGrade = None,
+        steel_grade: None | SteelGrade = None,
         **kwargs,
     ):
-        super().__init__(section=section, current=current, grade=grade)
+        super().__init__(section=section, current=current, steel_grade=steel_grade)
 
         self.designation = designation
         self.mass = mass
@@ -363,10 +365,10 @@ class CSection(SteelSection):
         r_y: float,
         j: float,
         i_w: float,
-        grade: None | SteelGrade = None,
+        steel_grade: None | SteelGrade = None,
         **kwargs,
     ):
-        super().__init__(section=section, current=current, grade=grade)
+        super().__init__(section=section, current=current, steel_grade=steel_grade)
 
         self.designation = designation
         self.mass = (mass,)
@@ -496,10 +498,10 @@ class AngleSection(SteelSection):
         s_p: float,
         r_p: float,
         i_np: float,
-        grade: None | SteelGrade = None,
+        steel_grade: None | SteelGrade = None,
         **kwargs,
     ):
-        super().__init__(section=section, current=current, grade=grade)
+        super().__init__(section=section, current=current, steel_grade=steel_grade)
 
         self.designation = designation
         self.mass = mass
@@ -602,10 +604,10 @@ class RhsSection(SteelSection):
         r_y: float,
         j: float,
         c: float,
-        grade: None | SteelGrade = None,
+        steel_grade: None | SteelGrade = None,
         **kwargs,
     ):
-        super().__init__(section=section, current=current, grade=grade)
+        super().__init__(section=section, current=current, steel_grade=steel_grade)
 
         self.designation = designation
         self.mass = mass
@@ -652,21 +654,21 @@ class RhsSection(SteelSection):
 
 
 def _grade_funcs(  # noqa: C901
-    grade: SteelGrade | dict[str, SteelGrade] | None = None,
+    steel_grade: SteelGrade | dict[str, SteelGrade] | None = None,
 ):
     """
     Helper function to create the functions that apply steel grades
     to steel section dataframes.
 
     :param section_df: The section dataframe to apply the grade properties to.
-    :param grade: An optional SteelGrade object or dictionary to assign
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
         of None.
     """
 
-    if grade is None:
+    if steel_grade is None:
         grades = steel_grades()
 
         def fy_func(row, col: str, grade_col="grade"):
@@ -685,20 +687,20 @@ def _grade_funcs(  # noqa: C901
 
             return np.nan
 
-    elif isinstance(grade, SteelGrade):
+    elif isinstance(steel_grade, SteelGrade):
         # if so, choose f_y and f_u based on thickness in the appropriate column.
 
         def fy_func(row, col: str):
-            return grade.get_f_y(row[col])
+            return steel_grade.get_f_y(row[col])
 
         def fu_func(row, col: str):
-            return grade.get_f_u(row[col])
+            return steel_grade.get_f_u(row[col])
 
     else:
         # in this case, grade is a dictionary of steel grades.
 
         def fy_func(row, col: str):
-            sg = grade.get(row.designation)
+            sg = steel_grade.get(row.designation)
 
             if sg is None:
                 return None
@@ -706,7 +708,7 @@ def _grade_funcs(  # noqa: C901
             return sg.get_f_y(row[col])
 
         def fu_func(row, col: str):
-            sg = grade.get(row.designation)
+            sg = steel_grade.get(row.designation)
 
             if sg is None:
                 return None
@@ -717,12 +719,12 @@ def _grade_funcs(  # noqa: C901
 
 
 def i_section_df(
-    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+    steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
 ) -> pd.DataFrame:
     """
     Get a Pandas Dataframe with all the Australian Standard I sections.
 
-    :param grade: An optional SteelGrade object or dictionary to assign
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -736,10 +738,10 @@ def i_section_df(
     section_df["f_uf"] = np.NAN
     section_df["f_uw"] = np.NAN
 
-    if grade is None:
+    if steel_grade is None:
         return section_df
 
-    fy_func, fu_func = _grade_funcs(grade=grade)
+    fy_func, fu_func = _grade_funcs(steel_grade=steel_grade)
 
     section_df.f_yf = section_df.apply(fy_func, axis=1, col="t_f")
     section_df.f_yw = section_df.apply(fy_func, axis=1, col="t_w")
@@ -750,12 +752,12 @@ def i_section_df(
 
 
 def i_sections(
-    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+    steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
 ) -> dict[str, ISection]:
     """
     Build a dictionary of all the standard Australian I sections.
 
-    :param grade: An optional SteelGrade object or dictionary to assign
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -767,24 +769,24 @@ def i_sections(
     for _, *v in i_section_df().iterrows():
         obj = v[0].to_dict()
 
-        sg = grade
+        sg = steel_grade
         obj["current"] = obj["current"] == "yes"
 
         if isinstance(sg, dict):
-            sg = grade.get(obj["designation"])
+            sg = steel_grade.get(obj["designation"])
 
-        i_sects[obj["section"]] = ISection(**obj, grade=sg)
+        i_sects[obj["section"]] = ISection(**obj, steel_grade=sg)
 
     return i_sects
 
 
 def c_section_df(
-    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+    steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
 ) -> pd.DataFrame:
     """
     Get a Pandas Dataframe with all the Australian Standard C sections.
 
-    :param grade: An optional SteelGrade object or dictionary to assign
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -798,10 +800,10 @@ def c_section_df(
     section_df["f_uf"] = np.NAN
     section_df["f_uw"] = np.NAN
 
-    if grade is None:
+    if steel_grade is None:
         return section_df
 
-    fy_func, fu_func = _grade_funcs(grade=grade)
+    fy_func, fu_func = _grade_funcs(steel_grade=steel_grade)
 
     section_df.f_yf = section_df.apply(fy_func, axis=1, col="t_f")
     section_df.f_yw = section_df.apply(fy_func, axis=1, col="t_w")
@@ -812,11 +814,11 @@ def c_section_df(
 
 
 def c_sections(
-    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+    steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
 ) -> dict[str, CSection]:
     """
     Build a dictionary of the standard Australian C sections.
-    :param grade: An optional SteelGrade object or dictionary to assign
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -830,24 +832,24 @@ def c_sections(
     for _, *v in c_section_df().iterrows():
         obj = v[0].to_dict()
 
-        sg = grade
+        sg = steel_grade
         obj["current"] = obj["current"] == "yes"
 
         if isinstance(sg, dict):
-            sg = grade.get(obj["designation"])
+            sg = steel_grade.get(obj["designation"])
 
-        c_sects[obj["section"]] = CSection(**obj, grade=sg)
+        c_sects[obj["section"]] = CSection(**obj, steel_grade=sg)
 
     return c_sects
 
 
 def angle_section_df(
-    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+    steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
 ) -> pd.DataFrame:
     """
     Get a Pandas Dataframe with all the Australian Standard Angle sections.
 
-    :param grade: An optional SteelGrade object or dictionary to assign
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -861,10 +863,10 @@ def angle_section_df(
     section_df["f_y"] = np.NAN
     section_df["f_u"] = np.NAN
 
-    if grade is None:
+    if steel_grade is None:
         return section_df
 
-    fy_func, fu_func = _grade_funcs(grade=grade)
+    fy_func, fu_func = _grade_funcs(steel_grade=steel_grade)
 
     section_df.f_y = section_df.apply(fy_func, axis=1, col="t")
     section_df.f_u = section_df.apply(fu_func, axis=1, col="t")
@@ -873,12 +875,12 @@ def angle_section_df(
 
 
 def angle_sections(
-    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+    steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
 ) -> dict[str, AngleSection]:
     """
     Build a dictionary of the standard Australian angle sections.
 
-    :param grade: An optional SteelGrade object or dictionary to assign
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -892,22 +894,22 @@ def angle_sections(
     for _, *v in angle_section_df().iterrows():
         obj = v[0].to_dict()
 
-        sg = grade
+        sg = steel_grade
         obj["current"] = obj["current"] == "yes"
 
         if isinstance(sg, dict):
-            sg = grade.get(obj["designation"])
+            sg = steel_grade.get(obj["designation"])
 
-        angle_sects[obj["section"]] = AngleSection(**obj, grade=sg)
+        angle_sects[obj["section"]] = AngleSection(**obj, steel_grade=sg)
 
     return angle_sects
 
 
-def rhs_section_df(grade=None):
+def rhs_section_df(steel_grade: None | SteelGrade | dict[str, SteelGrade] = None):
     """
     Build a dictionary of the standard Australian RHS & SHS sections.
 
-    :param grade: An optional SteelGrade object or dictionary to assign
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -921,7 +923,7 @@ def rhs_section_df(grade=None):
     section_df["f_y"] = np.NAN
     section_df["f_u"] = np.NAN
 
-    fy_func, fu_func = _grade_funcs(grade=grade)
+    fy_func, fu_func = _grade_funcs(steel_grade=steel_grade)
 
     section_df.f_y = section_df.apply(fy_func, axis=1, col="t")
     section_df.f_u = section_df.apply(fu_func, axis=1, col="t")
@@ -930,12 +932,12 @@ def rhs_section_df(grade=None):
 
 
 def rhs_sections(
-    grade: None | SteelGrade | dict[str, SteelGrade] = None,
+    steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
 ) -> dict[str, RhsSection]:
     """
     Build a dictionary of the standard Australian angle sections.
 
-    :param grade: An optional SteelGrade object or dictionary to assign
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -949,13 +951,15 @@ def rhs_sections(
     for _, *v in rhs_section_df().iterrows():
         obj = v[0].to_dict()
 
-        sg = grade
+        sg = steel_grade
         obj["current"] = obj["current"] == "yes"
 
         if isinstance(sg, dict):
-            sg = grade.get(obj["designation"])
+            sg = steel_grade.get(obj["designation"])
 
-        rhs_sects[obj["section"]] = RhsSection(**obj, grade=sg)
+        rhs_sects[obj["section"] + ":[" + obj["grade"] + "]"] = RhsSection(
+            **obj, steel_grade=sg
+        )
 
     return rhs_sects
 

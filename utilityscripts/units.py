@@ -170,11 +170,11 @@ def steel_grade_df_units():
     return grade_df.astype({"t": "pint[m]", "f_y": "pint[MPa]", "f_u": "pint[MPa]"})
 
 
-def i_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
+def i_section_df_units(steel_grade: None | SteelGrade | dict[str, SteelGrade] = None):
     """
     Creates a dataframe of standard Australian I sections, with Pint units.
 
-    :param grade: An optional SteelGrade object or dictionary to assign
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -182,7 +182,7 @@ def i_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
         NOTE: the grade should not already have units on it.
     """
 
-    section_df = i_section_df(grade=grade)
+    section_df = i_section_df(steel_grade=steel_grade)
 
     return section_df.astype(
         {
@@ -213,11 +213,11 @@ def i_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
     )
 
 
-def c_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
+def c_section_df_units(steel_grade: None | SteelGrade | dict[str, SteelGrade] = None):
     """
     Creates a dataframe of standard Australian C sections, with Pint units.
 
-    :param grade: An optional SteelGrade object or dictionary to assign
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -225,7 +225,7 @@ def c_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
         NOTE: the grade should not already have units on it.
     """
 
-    section_df = c_section_df(grade=grade)
+    section_df = c_section_df(steel_grade=steel_grade)
 
     return section_df.astype(
         {
@@ -255,11 +255,13 @@ def c_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
     )
 
 
-def angle_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = None):
+def angle_section_df_units(
+    steel_grade: None | SteelGrade | dict[str, SteelGrade] = None
+):
     """
     Creates a dataframe of standard Australian Angle sections, with Pint units.
 
-    :param grade: An optional SteelGrade object or dictionary to assign
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -267,7 +269,7 @@ def angle_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = No
         NOTE: the grade should not already have units on it.
     """
 
-    section_df = angle_section_df(grade=grade)
+    section_df = angle_section_df(steel_grade=steel_grade)
 
     return section_df.astype(
         {
@@ -318,12 +320,12 @@ def angle_section_df_units(grade: None | SteelGrade | dict[str, SteelGrade] = No
     )
 
 
-def rhs_section_df_units(grade=None):
+def rhs_section_df_units(steel_grade=None):
     """
     Creates a dataframe of standard Australian RHS & SHS sections,
     with Pint units.
 
-    :param grade: An optional SteelGrade object or dictionary to assign
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -331,7 +333,7 @@ def rhs_section_df_units(grade=None):
         NOTE: the grade should not already have units on it.
     """
 
-    section_df = rhs_section_df(grade=grade)
+    section_df = rhs_section_df(steel_grade=steel_grade)
 
     return section_df.astype(
         {
