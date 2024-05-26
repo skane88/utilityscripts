@@ -653,6 +653,76 @@ class RhsSection(SteelSection):
         return self.grade.get_f_u(self.t)
 
 
+class ChsSection(SteelSection):
+    """
+    Class to map to a CHS section.
+    """
+
+    # TODO: fill out class.
+
+    def __init__(
+        self,
+        *,
+        section: str,
+        current: bool,
+        designation: str,
+        mass: float,
+        section_shape: float,
+        fabrication_type: float,
+        standard: str,
+        d: float,
+        t: float,
+        a_g: float,
+        i: float,
+        z: float,
+        s: float,
+        r: float,
+        j: float,
+        c: float,
+        steel_grade: None | SteelGrade = None,
+        **kwargs,
+    ):
+        super().__init__(section=section, current=current, steel_grade=steel_grade)
+
+        self.designation = designation
+        self.mass = mass
+        self.section_shape = section_shape
+        self.fabrication_type = fabrication_type
+        self.standard = standard
+
+        self.d = d
+        self.t = t
+        self.a_g = a_g
+        self.i = i
+        self.z = z
+        self.s = s
+        self.r = r
+        self.j = j
+        self.c = c
+
+    @property
+    def f_y(self):
+        """
+        Get the yield stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_y(self.t)
+
+    @property
+    def f_u(self):
+        """
+        Get the ultimate stress from the steel grade.
+        """
+
+        if self.grade is None:
+            return None
+
+        return self.grade.get_f_u(self.t)
+
+
 def _grade_funcs(  # noqa: C901
     steel_grade: SteelGrade | dict[str, SteelGrade] | None = None,
 ):
@@ -962,6 +1032,65 @@ def rhs_sections(
         )
 
     return rhs_sects
+
+
+def chs_section_df(steel_grade: None | SteelGrade | dict[str, SteelGrade] = None):
+    """
+    Build a dictionary of the standard Australian CHS sections.
+
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
+        to the sections. For different section types (e.g. WB vs UB),
+        specify the grade as a dictionary: {designation: SteelGrade}.
+        If a designation is missed, sections will be assigned a grade
+        of None.
+        Note that currently Australian channels only come in one
+        designation ("PFC") so typically a pure grade object would be passed in.
+    """
+
+    section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="chs")
+
+    section_df["f_y"] = np.NAN
+    section_df["f_u"] = np.NAN
+
+    fy_func, fu_func = _grade_funcs(steel_grade=steel_grade)
+
+    section_df.f_y = section_df.apply(fy_func, axis=1, col="t")
+    section_df.f_u = section_df.apply(fu_func, axis=1, col="t")
+
+    return section_df
+
+
+def chs_sections(
+    steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
+) -> dict[str, ChsSection]:
+    """
+    Build a dictionary of the standard Australian CHS sections.
+
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
+        to the sections. For different section types (e.g. WB vs UB),
+        specify the grade as a dictionary: {designation: SteelGrade}.
+        If a designation is missed, sections will be assigned a grade
+        of None.
+        Note that currently Australian channels only come in one
+        designation ("PFC") so typically a pure grade object would be passed in.
+    """
+
+    chs_sects = {}
+
+    for _, *v in chs_section_df().iterrows():
+        obj = v[0].to_dict()
+
+        sg = steel_grade
+        obj["current"] = obj["current"] == "yes"
+
+        if isinstance(sg, dict):
+            sg = steel_grade.get(obj["designation"])
+
+        chs_sects[obj["section"] + ":[" + obj["grade"] + "]"] = ChsSection(
+            **obj, steel_grade=sg
+        )
+
+    return chs_sects
 
 
 def standard_plate_df():
