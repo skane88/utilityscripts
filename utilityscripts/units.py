@@ -26,6 +26,7 @@ from utilityscripts.steel import (
     SteelGrade,
     angle_section_df,
     c_section_df,
+    chs_section_df,
     i_section_df,
     nearest_standard_plate,  # noqa: F401
     nearest_standard_weld,  # noqa: F401
@@ -351,6 +352,39 @@ def rhs_section_df_units(steel_grade=None):
             "z_y": "pint[m**3]",
             "s_y": "pint[m**3]",
             "r_y": "pint[m]",
+            "j": "pint[m**4]",
+            "c": "pint[m**3]",
+            "f_y": "pint[MPa]",
+            "f_u": "pint[MPa]",
+        }
+    )
+
+
+def chs_section_df_units(steel_grade=None):
+    """
+    Creates a dataframe of standard Australian RHS & SHS sections,
+    with Pint units.
+
+    :param steel_grade: An optional SteelGrade object or dictionary to assign
+        to the sections. For different section types (e.g. WB vs UB),
+        specify the grade as a dictionary: {designation: SteelGrade}.
+        If a designation is missed, sections will be assigned a grade
+        of None.
+        NOTE: the grade should not already have units on it.
+    """
+
+    section_df = chs_section_df(steel_grade=steel_grade)
+
+    return section_df.astype(
+        {
+            "mass": "pint[kg/m]",
+            "d": "pint[m]",
+            "t": "pint[m]",
+            "a_g": "pint[m**2]",
+            "i": "pint[m**4]",
+            "z": "pint[m**3]",
+            "s": "pint[m**3]",
+            "r": "pint[m]",
             "j": "pint[m**4]",
             "c": "pint[m**3]",
             "f_y": "pint[MPa]",
