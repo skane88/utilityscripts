@@ -589,6 +589,7 @@ class RhsSection(SteelSection):
         mass: float,
         section_shape: float,
         fabrication_type: float,
+        standard: str,
         b: float,
         d: float,
         t: float,
@@ -613,6 +614,7 @@ class RhsSection(SteelSection):
         self.mass = mass
         self.section_shape = section_shape
         self.fabrication_type = fabrication_type
+        self.standard = standard
 
         self.b = b
         self.d = d
