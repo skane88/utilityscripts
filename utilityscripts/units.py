@@ -35,6 +35,7 @@ from utilityscripts.steel import (
     standard_plate_df,
     standard_weld_df,
     steel_grade_df,
+    steel_grades,  # noqa: F401
 )
 
 # define a unicode pi value for pretty printing if req'd.
