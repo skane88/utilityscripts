@@ -295,10 +295,7 @@ def m_zcat_ave():
 def shielding_parameter(
     *,
     h: float,
-    building_data: list[tuple[float, float]] | None = None,
-    h_s: float | None = None,
-    b_s: float | None = None,
-    n_s: float | None = None,
+    building_data: list[tuple[float, float]],
 ):
     """
     Calculate the shielding parameter.
@@ -308,19 +305,13 @@ def shielding_parameter(
         in the sector that are shielding the design building.
         If None, h_s, b_s and n_s must be explicitly specified.
     :param h_s: The average height of shielding buildings.
-    :param b_s: The average width of shielding buildings.
-    :param n_s: The no. of shielding buildings.
     :return: The shielding parameter s.
     """
 
-    if building_data is not None:
-        n_s = len(building_data)
+    n_s = len([b for b in building_data if b[0] >= h])
 
-        heights = [x[0] for x in building_data]
-        widths = [x[1] for x in building_data]
-
-        h_s = sum(heights) / n_s
-        b_s = sum(widths) / n_s
+    h_s = sum([b[0] for b in building_data if b[0] >= h]) / n_s
+    b_s = sum([b[1] for b in building_data if b[0] >= h]) / n_s
 
     l_s = h * ((10 / n_s) + 5)
 
