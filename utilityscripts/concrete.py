@@ -349,6 +349,67 @@ def v_uo(*, f_c, u, d_om, beta_h=1.0):
     return f_cv(f_c, beta_h) * u * d_om * 1000  # *1000 to convert to kN.
 
 
+def c_d(*, bar_spacing, cover, bar_type: str = "straight", narrow_element: bool = True):
+    """
+    Calculate the cover & spacing parameter c_d as per AS3600 S13.1.2
+
+    :param bar_spacing: The spacing between bars.
+    :param cover: The cover to the bars.
+        See figure 13.1.2.2 to determine which cover is appropriate.
+    :param bar_type: The type of bar, either "straight", "hooked" or "looped"
+    :param narrow_element: Is the element narrow (e.g. beam web, column)
+        or wide (e.g. slab, inner bars of a band beam etc.)
+    """
+
+    if bar_type not in ["straight", "hooked", "looped"]:
+        raise ValueError("Incorrect bar_type.")
+
+    if narrow_element:
+        if bar_type in ["straight", "hooked"]:
+            return min(bar_spacing / 2, cover)
+        return cover
+
+    if bar_type == "straight":
+        return min(bar_spacing / 2, cover)
+    if bar_type == "hooked":
+        return bar_spacing / 2
+    return cover
+
+
+def k_3(
+    *, d_b, bar_spacing, cover, bar_type: str = "straight", narrow_element: bool = True
+):
+    """
+    Calculate parameter k_3 as per AS3600 S13.1.2.2
+
+    :param d_b: bar diamter.
+        Units should be consistent with bar_spacing and cover.
+    :param bar_spacing: The spacing between bars.
+    :param cover: The cover to the bars.
+        See figure 13.1.2.2 to determine which cover is appropriate.
+    :param bar_type: The type of bar, either "straight", "hooked" or "looped"
+    :param narrow_element: Is the element narrow (e.g. beam web, column)
+        or wide (e.g. slab, inner bars of a band beam etc.)
+    """
+
+    c_d_calc = c_d(
+        bar_spacing=bar_spacing,
+        cover=cover,
+        bar_type=bar_type,
+        narrow_element=narrow_element,
+    )
+
+    k_3_calc = 1 - 0.15 * (c_d_calc - d_b) / d_b
+
+    return max(
+        min(
+            k_3_calc,
+            1.0,
+        ),
+        0.7,
+    )
+
+
 def l_syt(*, f_c, f_sy, d_b, k_1=1.0, k_3=1.0, k_4=1.0, k_5=1.0):
     """
     Calculate the development length of a bar as per AS3600 S13.1.2.3
