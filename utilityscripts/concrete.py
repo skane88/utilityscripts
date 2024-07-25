@@ -85,7 +85,7 @@ def is_bar(bar_spec: str) -> bool:
     Determine if a bar specification matches a standard bar code.
     """
 
-    return reo_properties(bar_spec).is_bar
+    return reo_prop(bar_spec).is_bar
 
 
 def is_mesh(bar_spec: str) -> bool:
@@ -93,10 +93,10 @@ def is_mesh(bar_spec: str) -> bool:
     Determine if a bar specification matches a standard mesh code.
     """
 
-    return reo_properties(bar_spec).is_mesh
+    return reo_prop(bar_spec).is_mesh
 
 
-def reo_properties(bar_spec: str, *, main_width=1000.0, secondary_width=1000.0):
+def reo_prop(bar_spec: str, *, main_width=1000.0, secondary_width=1000.0):
     """
     Returns a dictionary with a number of properties from a standard bar specification.
 

@@ -6,7 +6,7 @@ from math import isclose
 
 import pytest
 
-from utilityscripts.concrete import reo_properties
+from utilityscripts.concrete import reo_prop
 
 REL_TOL = 0.01
 
@@ -26,7 +26,7 @@ REL_TOL = 0.01
     ],
 )
 def test_bar_area(bar_spec, area):
-    assert isclose(reo_properties(bar_spec).main_area_total, area, rel_tol=REL_TOL)
+    assert isclose(reo_prop(bar_spec).main_area_total, area, rel_tol=REL_TOL)
 
 
 @pytest.mark.parametrize(
@@ -42,9 +42,11 @@ def test_bar_area(bar_spec, area):
 )
 def test_bar_area_mesh(bar_spec, area, main_direction):
     assert isclose(
-        reo_properties(bar_spec).main_area_total
-        if main_direction
-        else reo_properties(bar_spec).secondary_area_total,
+        (
+            reo_prop(bar_spec).main_area_total
+            if main_direction
+            else reo_prop(bar_spec).secondary_area_total
+        ),
         area,
         rel_tol=REL_TOL,
     )
@@ -80,7 +82,7 @@ def test_bar_area_mesh(bar_spec, area, main_direction):
     ],
 )
 def test_bar_area_full(bar_spec, width, main_direction, expected):
-    return_vals = reo_properties(
+    return_vals = reo_prop(
         bar_spec=bar_spec,
         main_width=width if main_direction else 1000.0,
         secondary_width=1000.0 if main_direction else width,
@@ -92,16 +94,20 @@ def test_bar_area_full(bar_spec, width, main_direction, expected):
         rel_tol=REL_TOL,
     )
     assert isclose(
-        return_vals.main_area_total
-        if main_direction
-        else return_vals.secondary_area_total,
+        (
+            return_vals.main_area_total
+            if main_direction
+            else return_vals.secondary_area_total
+        ),
         expected["total_area"],
         rel_tol=REL_TOL,
     )
     assert isclose(
-        return_vals.main_area_unit
-        if main_direction
-        else return_vals.secondary_area_unit,
+        (
+            return_vals.main_area_unit
+            if main_direction
+            else return_vals.secondary_area_unit
+        ),
         expected["area_unit_width"],
         rel_tol=REL_TOL,
     )
