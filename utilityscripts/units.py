@@ -258,7 +258,7 @@ def c_section_df_units(steel_grade: None | SteelGrade | dict[str, SteelGrade] = 
 
 
 def angle_section_df_units(
-    steel_grade: None | SteelGrade | dict[str, SteelGrade] = None
+    steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
 ):
     """
     Creates a dataframe of standard Australian Angle sections, with Pint units.
