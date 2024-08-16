@@ -805,10 +805,10 @@ def i_section_df(
 
     section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="is")
 
-    section_df["f_yf"] = np.NAN
-    section_df["f_yw"] = np.NAN
-    section_df["f_uf"] = np.NAN
-    section_df["f_uw"] = np.NAN
+    section_df["f_yf"] = np.nan
+    section_df["f_yw"] = np.nan
+    section_df["f_uf"] = np.nan
+    section_df["f_uw"] = np.nan
 
     if steel_grade is None:
         return section_df
@@ -867,10 +867,10 @@ def c_section_df(
 
     section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="cs")
 
-    section_df["f_yf"] = np.NAN
-    section_df["f_yw"] = np.NAN
-    section_df["f_uf"] = np.NAN
-    section_df["f_uw"] = np.NAN
+    section_df["f_yf"] = np.nan
+    section_df["f_yw"] = np.nan
+    section_df["f_uf"] = np.nan
+    section_df["f_uw"] = np.nan
 
     if steel_grade is None:
         return section_df
@@ -932,8 +932,8 @@ def angle_section_df(
         _DATA_PATH / Path("steel_data.xlsx"), sheet_name="angles"
     )
 
-    section_df["f_y"] = np.NAN
-    section_df["f_u"] = np.NAN
+    section_df["f_y"] = np.nan
+    section_df["f_u"] = np.nan
 
     if steel_grade is None:
         return section_df
@@ -992,8 +992,8 @@ def rhs_section_df(steel_grade: None | SteelGrade | dict[str, SteelGrade] = None
 
     section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="rhs")
 
-    section_df["f_y"] = np.NAN
-    section_df["f_u"] = np.NAN
+    section_df["f_y"] = np.nan
+    section_df["f_u"] = np.nan
 
     fy_func, fu_func = _grade_funcs(steel_grade=steel_grade)
 
@@ -1051,8 +1051,8 @@ def chs_section_df(steel_grade: None | SteelGrade | dict[str, SteelGrade] = None
 
     section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="chs")
 
-    section_df["f_y"] = np.NAN
-    section_df["f_u"] = np.NAN
+    section_df["f_y"] = np.nan
+    section_df["f_u"] = np.nan
 
     fy_func, fu_func = _grade_funcs(steel_grade=steel_grade)
 
