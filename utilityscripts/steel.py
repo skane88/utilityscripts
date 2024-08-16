@@ -1512,6 +1512,32 @@ def make_i_section(
     )
 
 
+def eff_length(
+    *,
+    elastic_modulus,
+    second_moment,
+    buckling_load,
+    k_e: bool = False,
+    actual_length=None,
+):
+    """
+    Calculate the effective length back-calculated from the buckling load.
+
+    :param elastic_modulus: The elastic modulus of the section.
+    :param second_moment: The second moment of area about the axis which is buckling.
+    :param buckling_load: The buckling load.
+    :param k_e: Calculate the length factor k_e rather than the buckling length.
+    :param actual_length: The actual length of the section. Only used if k_e=True.
+    """
+
+    kel = (((pi**2) * elastic_modulus * second_moment) / buckling_load) ** 0.5
+
+    if k_e:
+        return kel / actual_length
+
+    return kel
+
+
 class OverplatedSection:
     """
     Creates an overplated section with an overplate on the top & bottom.
