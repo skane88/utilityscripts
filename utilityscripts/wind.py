@@ -2,6 +2,7 @@
 File to contain some basic AS1170.2 helper methods for working with wind loads
 """
 
+from math import log10
 from pathlib import Path
 
 import numpy as np
@@ -389,3 +390,22 @@ def temp_windspeed(*, a, b, k, r_s, t):
     """
 
     return a - b * (1 - (1 - (1 / r_s)) ** t) ** k
+
+
+def k_v(*, open_area, volume):
+    """
+    Calculate the volume coefficient K_v as per AS1170.2
+
+    :param open_area: The open area on the critical face.
+    :param volume: The volume of the enclosed space.
+    """
+
+    alpha = 100 * (open_area ** (3 / 2)) / volume
+
+    if alpha < 0.09:  # noqa: PLR2004
+        return 0.85
+
+    if alpha > 3:  # noqa: PLR2004
+        return 1.085
+
+    return 1.01 + 0.15 * log10(alpha)

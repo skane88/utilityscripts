@@ -2,12 +2,12 @@
 Contains some tests for the AS1170.2 module.
 """
 
-from math import isclose
+from math import isclose, log10
 from pathlib import Path
 
 import pytest
 import toml
-from wind import m_d, v_r
+from wind import k_v, m_d, v_r
 
 FILE_PATH = Path(__file__)
 TEST_DATA_PATH_2011 = FILE_PATH.parent / Path("test_as1170_2_2011.toml")
@@ -186,3 +186,31 @@ def test_m_zcat_ave():
 
 def test_m_s():
     raise AssertionError()
+
+
+def k_v_calc(area, volume):
+    """
+    Helper function to calculate k_v independently of the main code.
+    """
+    alpha = 100 * (area ** (3 / 2)) / volume
+    return 1.01 + 0.15 * log10(alpha)
+
+
+@pytest.mark.parametrize(
+    "area, vol, expected",
+    [
+        (100, 33_333, 1.085),
+        (209, 100_000, 1.085),
+        (100, 1, 1.085),
+        (100, 1_111_112, 0.85),
+        (1, 1_111_112, 0.85),
+        (20, 100_000, 0.85),
+        (100, 33_334, k_v_calc(100, 33_334)),
+        (100, 50_000, k_v_calc(100, 50_000)),
+        (100, 100_000, k_v_calc(100, 100_000)),
+        (100, 500_000, k_v_calc(100, 500_000)),
+        (100, 1_111_111, k_v_calc(100, 1_111_111)),
+    ],
+)
+def test_k_v(area, vol, expected):
+    assert isclose(k_v(open_area=area, volume=vol), expected)
