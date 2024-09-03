@@ -1572,7 +1572,7 @@ class OverplatedSection:
             as a fraction of the total area of the shape?
         """
 
-        self.base_section = base_section
+        self.base_section = base_section.align_center(align_to=(0, 0))
         self.t_op_top = t_op_top
         self.b_op_top = b_op_top
         self.t_op_bottom = t_op_bottom
@@ -1710,6 +1710,15 @@ class OverplatedSection:
         lever_arm = self.combined_geometry.calculate_centroid()[1] - self.yc_op_bottom
         area = self.op_bottom.calculate_area()
         return area * lever_arm
+
+    def plot_geometry(self):
+        """
+        Plot the geometry of the overplated section.
+
+        Simply passes through to the plot_geometry() method of the combined_geometry.
+        """
+
+        self.combined_geometry.plot_geometry()
 
 
 class BoltGroup:
