@@ -42,10 +42,7 @@ def _validate_file(*, file_path: Path, missing_ok: bool):
 
         return False
 
-    if file_path.suffix.lower() not in VALID_EXTENSIONS:
-        return False
-
-    return True
+    return file_path.suffix.lower() in VALID_EXTENSIONS
 
 
 def _open_image(file_path: Path) -> Image:
@@ -150,7 +147,7 @@ def compress_image(
     :returns: The resulting file path.
     """
 
-    if not _validate_file(file_path=file_path):
+    if not _validate_file(file_path=file_path, missing_ok=False):
         return None
 
     current_size = file_path.stat().st_size  # file size in bytes
@@ -419,7 +416,7 @@ def compress_all_in_folder(
 
     print(f"Finding files to compress in {folder}.")
 
-    files_to_resize = _find_files(folder, incl_subfolders)
+    files_to_resize = _find_files(folder=folder, incl_subfolders=incl_subfolders)
 
     print("Done")
     print("Compressing files:")
