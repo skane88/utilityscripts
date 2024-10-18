@@ -11,6 +11,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import polars as pl
 from sectionproperties.analysis.section import Section
 from sectionproperties.pre.geometry import Geometry
 from sectionproperties.pre.library.primitive_sections import (
@@ -725,7 +726,9 @@ class ChsSection(SteelSection):
         return self.grade.get_f_u(self.t)
 
 
-def _grade_funcs(  # noqa: C901
+def _grade_funcs(
+    thickness_col: str,
+    designation_col: str,
     steel_grade: SteelGrade | dict[str, SteelGrade] | None = None,
 ):
     """
@@ -740,52 +743,41 @@ def _grade_funcs(  # noqa: C901
         of None.
     """
 
-    if steel_grade is None:
-        grades = steel_grades()
+    if isinstance(steel_grade, SteelGrade):
+        # if provided a SteelGrade, choose f_y and f_u based on
+        # thickness in the appropriate column.
 
-        def fy_func(row, col: str, grade_col="grade"):
-            if grade_col in row:
-                grade_designation = row[grade_col]
-                grade = grades[grade_designation]
-                return grade.get_f_y(row[col])
+        def fy_func(row):
+            return steel_grade.get_f_y(row[thickness_col])
 
-            return np.nan
-
-        def fu_func(row, col: str, grade_col="grade"):
-            if grade_col in row:
-                grade_designation = row[grade_col]
-                grade = grades[grade_designation]
-                return grade.get_f_u(row[col])
-
-            return np.nan
-
-    elif isinstance(steel_grade, SteelGrade):
-        # if so, choose f_y and f_u based on thickness in the appropriate column.
-
-        def fy_func(row, col: str):
-            return steel_grade.get_f_y(row[col])
-
-        def fu_func(row, col: str):
-            return steel_grade.get_f_u(row[col])
+        def fu_func(row):
+            return steel_grade.get_f_u(row[thickness_col])
 
     else:
-        # in this case, grade is a dictionary of steel grades.
+        # if steel_grade is None, attempt to get the grade
+        # from grade information in the dataframe.
+        if steel_grade is None:
+            steel_grade = steel_grades()
 
-        def fy_func(row, col: str):
-            sg = steel_grade.get(row.designation)
+        def fy_func(row):
+            designation = row[designation_col]
 
-            if sg is None:
+            if designation is None:
                 return None
 
-            return sg.get_f_y(row[col])
+            grade_obj = steel_grade[designation]
 
-        def fu_func(row, col: str):
-            sg = steel_grade.get(row.designation)
+            return grade_obj.get_f_y(row[thickness_col])
 
-            if sg is None:
+        def fu_func(row):
+            designation = row[designation_col]
+
+            if designation is None:
                 return None
 
-            return sg.get_f_u(row[col])
+            grade_obj = steel_grade[designation]
+
+            return grade_obj.get_f_u(row[thickness_col])
 
     return fy_func, fu_func
 
@@ -803,24 +795,41 @@ def i_section_df(
         of None.
     """
 
-    section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="is")
-
-    section_df["f_yf"] = np.nan
-    section_df["f_yw"] = np.nan
-    section_df["f_uf"] = np.nan
-    section_df["f_uw"] = np.nan
+    section_df = pl.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="is")
 
     if steel_grade is None:
-        return section_df
+        return section_df.with_columns(
+            [
+                pl.lit(None).cast(pl.Float64).alias("f_yf"),
+                pl.lit(None).cast(pl.Float64).alias("f_yw"),
+                pl.lit(None).cast(pl.Float64).alias("f_uf"),
+                pl.lit(None).cast(pl.Float64).alias("f_uw"),
+            ]
+        )
 
-    fy_func, fu_func = _grade_funcs(steel_grade=steel_grade)
+    fyf, fuf = _grade_funcs(
+        thickness_col="t_f", designation_col="designation", steel_grade=steel_grade
+    )
+    fyw, fuw = _grade_funcs(
+        thickness_col="t_w", designation_col="designation", steel_grade=steel_grade
+    )
 
-    section_df.f_yf = section_df.apply(fy_func, axis=1, col="t_f")
-    section_df.f_yw = section_df.apply(fy_func, axis=1, col="t_w")
-    section_df.f_uf = section_df.apply(fu_func, axis=1, col="t_f")
-    section_df.f_uw = section_df.apply(fu_func, axis=1, col="t_w")
-
-    return section_df
+    return section_df.with_columns(
+        [
+            pl.struct(["designation", "t_f"])
+            .map_elements(fyf, return_dtype=pl.Float64)
+            .alias("f_yf"),
+            pl.struct(["designation", "t_w"])
+            .map_elements(fyw, return_dtype=pl.Float64)
+            .alias("f_yw"),
+            pl.struct(["designation", "t_f"])
+            .map_elements(fuf, return_dtype=pl.Float64)
+            .alias("f_uf"),
+            pl.struct(["designation", "t_w"])
+            .map_elements(fuw, return_dtype=pl.Float64)
+            .alias("f_uw"),
+        ]
+    )
 
 
 def i_sections(
