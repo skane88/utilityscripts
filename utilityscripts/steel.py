@@ -14,11 +14,7 @@ import pandas as pd
 import polars as pl
 from sectionproperties.analysis.section import Section
 from sectionproperties.pre.geometry import Geometry
-from sectionproperties.pre.library.primitive_sections import (
-    rectangular_section,
-    triangular_section,
-)
-from sectionproperties.pre.library.steel_sections import mono_i_section
+from sectionproperties.pre.library.primitive_sections import rectangular_section
 
 from utilityscripts.section_prop import build_circle
 
@@ -863,9 +859,9 @@ def i_sections(
 
 def c_section_df(
     steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
-) -> pd.DataFrame:
+) -> pl.DataFrame:
     """
-    Get a Pandas Dataframe with all the Australian Standard C sections.
+    Get a Polars DataFrame with all the Australian Standard C sections.
 
     :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
@@ -874,24 +870,41 @@ def c_section_df(
         of None.
     """
 
-    section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="cs")
-
-    section_df["f_yf"] = np.nan
-    section_df["f_yw"] = np.nan
-    section_df["f_uf"] = np.nan
-    section_df["f_uw"] = np.nan
+    section_df = pl.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="cs")
 
     if steel_grade is None:
-        return section_df
+        return section_df.with_columns(
+            [
+                pl.lit(None).cast(pl.Float64).alias("f_yf"),
+                pl.lit(None).cast(pl.Float64).alias("f_yw"),
+                pl.lit(None).cast(pl.Float64).alias("f_uf"),
+                pl.lit(None).cast(pl.Float64).alias("f_uw"),
+            ]
+        )
 
-    fy_func, fu_func = _grade_funcs(steel_grade=steel_grade)
+    fyf, fuf = _grade_funcs(
+        thickness_col="t_f", designation_col="designation", steel_grade=steel_grade
+    )
+    fyw, fuw = _grade_funcs(
+        thickness_col="t_w", designation_col="designation", steel_grade=steel_grade
+    )
 
-    section_df.f_yf = section_df.apply(fy_func, axis=1, col="t_f")
-    section_df.f_yw = section_df.apply(fy_func, axis=1, col="t_w")
-    section_df.f_uf = section_df.apply(fu_func, axis=1, col="t_f")
-    section_df.f_uw = section_df.apply(fu_func, axis=1, col="t_w")
-
-    return section_df
+    return section_df.with_columns(
+        [
+            pl.struct(["designation", "t_f"])
+            .map_elements(fyf, return_dtype=pl.Float64)
+            .alias("f_yf"),
+            pl.struct(["designation", "t_w"])
+            .map_elements(fyw, return_dtype=pl.Float64)
+            .alias("f_yw"),
+            pl.struct(["designation", "t_f"])
+            .map_elements(fuf, return_dtype=pl.Float64)
+            .alias("f_uf"),
+            pl.struct(["designation", "t_w"])
+            .map_elements(fuw, return_dtype=pl.Float64)
+            .alias("f_uw"),
+        ]
+    )
 
 
 def c_sections(
@@ -926,9 +939,9 @@ def c_sections(
 
 def angle_section_df(
     steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
-) -> pd.DataFrame:
+) -> pl.DataFrame:
     """
-    Get a Pandas Dataframe with all the Australian Standard Angle sections.
+    Get a Polars DataFrame with all the Australian Standard Angle sections.
 
     :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
@@ -937,22 +950,32 @@ def angle_section_df(
         of None.
     """
 
-    section_df = pd.read_excel(
+    section_df = pl.read_excel(
         _DATA_PATH / Path("steel_data.xlsx"), sheet_name="angles"
     )
 
-    section_df["f_y"] = np.nan
-    section_df["f_u"] = np.nan
-
     if steel_grade is None:
-        return section_df
+        return section_df.with_columns(
+            [
+                pl.lit(None).cast(pl.Float64).alias("f_y"),
+                pl.lit(None).cast(pl.Float64).alias("f_u"),
+            ]
+        )
 
-    fy_func, fu_func = _grade_funcs(steel_grade=steel_grade)
+    fy_func, fu_func = _grade_funcs(
+        thickness_col="t", designation_col="designation", steel_grade=steel_grade
+    )
 
-    section_df.f_y = section_df.apply(fy_func, axis=1, col="t")
-    section_df.f_u = section_df.apply(fu_func, axis=1, col="t")
-
-    return section_df
+    return section_df.with_columns(
+        [
+            pl.struct(["designation", "t"])
+            .map_elements(fy_func, return_dtype=pl.Float64)
+            .alias("f_y"),
+            pl.struct(["designation", "t"])
+            .map_elements(fu_func, return_dtype=pl.Float64)
+            .alias("f_u"),
+        ]
+    )
 
 
 def angle_sections(
@@ -986,30 +1009,43 @@ def angle_sections(
     return angle_sects
 
 
-def rhs_section_df(steel_grade: None | SteelGrade | dict[str, SteelGrade] = None):
+def rhs_section_df(
+    steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
+) -> pl.DataFrame:
     """
-    Build a dictionary of the standard Australian RHS & SHS sections.
+    Get a Polars DataFrame with all the Australian Standard RHS & SHS sections.
 
     :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
         of None.
-        Note that currently Australian channels only come in one
-        designation ("PFC") so typically a pure grade object would be passed in.
     """
 
-    section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="rhs")
+    section_df = pl.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="rhs")
 
-    section_df["f_y"] = np.nan
-    section_df["f_u"] = np.nan
+    if steel_grade is None:
+        return section_df.with_columns(
+            [
+                pl.lit(None).cast(pl.Float64).alias("f_y"),
+                pl.lit(None).cast(pl.Float64).alias("f_u"),
+            ]
+        )
 
-    fy_func, fu_func = _grade_funcs(steel_grade=steel_grade)
+    fy_func, fu_func = _grade_funcs(
+        thickness_col="t", designation_col="designation", steel_grade=steel_grade
+    )
 
-    section_df.f_y = section_df.apply(fy_func, axis=1, col="t")
-    section_df.f_u = section_df.apply(fu_func, axis=1, col="t")
-
-    return section_df
+    return section_df.with_columns(
+        [
+            pl.struct(["designation", "t"])
+            .map_elements(fy_func, return_dtype=pl.Float64)
+            .alias("f_y"),
+            pl.struct(["designation", "t"])
+            .map_elements(fu_func, return_dtype=pl.Float64)
+            .alias("f_u"),
+        ]
+    )
 
 
 def rhs_sections(
@@ -1045,30 +1081,43 @@ def rhs_sections(
     return rhs_sects
 
 
-def chs_section_df(steel_grade: None | SteelGrade | dict[str, SteelGrade] = None):
+def chs_section_df(
+    steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
+) -> pl.DataFrame:
     """
-    Build a dictionary of the standard Australian CHS sections.
+    Get a Polars DataFrame with all the Australian Standard CHS sections.
 
     :param steel_grade: An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
         of None.
-        Note that currently Australian channels only come in one
-        designation ("PFC") so typically a pure grade object would be passed in.
     """
 
-    section_df = pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="chs")
+    section_df = pl.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="chs")
 
-    section_df["f_y"] = np.nan
-    section_df["f_u"] = np.nan
+    if steel_grade is None:
+        return section_df.with_columns(
+            [
+                pl.lit(None).cast(pl.Float64).alias("f_y"),
+                pl.lit(None).cast(pl.Float64).alias("f_u"),
+            ]
+        )
 
-    fy_func, fu_func = _grade_funcs(steel_grade=steel_grade)
+    fy_func, fu_func = _grade_funcs(
+        thickness_col="t", designation_col="designation", steel_grade=steel_grade
+    )
 
-    section_df.f_y = section_df.apply(fy_func, axis=1, col="t")
-    section_df.f_u = section_df.apply(fu_func, axis=1, col="t")
-
-    return section_df
+    return section_df.with_columns(
+        [
+            pl.struct(["designation", "t"])
+            .map_elements(fy_func, return_dtype=pl.Float64)
+            .alias("f_y"),
+            pl.struct(["designation", "t"])
+            .map_elements(fu_func, return_dtype=pl.Float64)
+            .alias("f_u"),
+        ]
+    )
 
 
 def chs_sections(
@@ -1378,70 +1427,8 @@ def local_thickness_reqd(
     return 2 / (((phi * f_y / point_force) * (width_lever_ratio + 2)) ** 0.5)
 
 
-def make_i_geometry(
-    *, b_f, d, t_f, t_w, b_fb=None, t_fb=None, corner_radius=None, n_r=8, weld_size=None
-) -> Geometry:
-    """
-    Make the geometry for an I section.
-
-    A thin wrapper around section-properties' mono_i_section.
-
-    :param b_f: The width of the top flange.
-    :param d: The section depth.
-    :param t_f: The top flange thickness.
-    :param t_w: The web thickness.
-    :param b_fb: The width of the bottom section.
-        Provide None for a symmetric section.
-    :param t_fb: The bottom flange thickness.
-        Provide None if both flanges the same.
-    :param corner_radius: The corner radius of the i-section.
-        NOTE: If both a corner radius and a weld size are defined,
-        priority is given to corner radii.
-        If a weld is present, set corner_radius = None.
-    :param n_r: The no. of points used to model the corner.
-    :param weld_size: The corner fillet weld (if any).
-        NOTE: If both a corner radius and a weld size are defined,
-        priority is given to corner radii.
-        If a weld is present, set corner_radius = None.
-    """
-
-    if b_fb is None:
-        b_fb = b_f
-
-    if t_fb is None:
-        t_fb = t_f
-
-    i_sect = mono_i_section(
-        b_t=b_f,
-        b_b=b_fb,
-        d=d,
-        t_ft=t_f,
-        t_fb=t_fb,
-        t_w=t_w,
-        r=corner_radius if corner_radius is not None else 0,
-        n_r=n_r,
-    ).align_center(align_to=(0, 0))
-
-    if corner_radius is None and weld_size is not None:
-        i_sect = i_sect.align_to(other=(0, 0), on="top")
-
-        weld_br = triangular_section(b=weld_size, h=weld_size)
-        weld_bl = weld_br.mirror_section(axis="y", mirror_point=(0, 0))
-        weld_tr = weld_br.mirror_section(axis="x", mirror_point=(0, 0))
-        weld_tl = weld_bl.mirror_section(axis="x", mirror_point=(0, 0))
-
-        i_sect = i_sect + weld_br.shift_section(x_offset=t_w / 2, y_offset=t_fb)
-        i_sect = i_sect + weld_bl.shift_section(x_offset=-t_w / 2, y_offset=t_fb)
-        i_sect = i_sect + weld_tr.shift_section(x_offset=t_w / 2, y_offset=d - t_f)
-        i_sect = i_sect + weld_tl.shift_section(x_offset=-t_w / 2, y_offset=d - t_f)
-
-        i_sect.align_center(align_to=(0, 0))
-
-    return i_sect
-
-
 def make_section(
-    *, geometry: Geometry, alpha_mesh=100, calculate_properties: bool = True
+    *, geometry: Geometry, alpha_mesh: float = 100, calculate_properties: bool = True
 ) -> Section:
     """
     Turn a sectionproperties Geometry object into a Section object.
@@ -1502,7 +1489,7 @@ def make_i_section(
     :param calculate_properties: Calculate the properties?
     """
 
-    geometry = make_i_geometry(
+    geometry = make_i_geometry(  # noqa: F821
         b_f=b_f,
         d=d,
         t_f=t_f,
