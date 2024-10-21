@@ -14,7 +14,11 @@ import pandas as pd
 import polars as pl
 from sectionproperties.analysis.section import Section
 from sectionproperties.pre.geometry import Geometry
-from sectionproperties.pre.library.primitive_sections import rectangular_section
+from sectionproperties.pre.library.primitive_sections import (
+    rectangular_section,
+    triangular_section,
+)
+from sectionproperties.pre.library.steel_sections import mono_i_section
 
 from utilityscripts.section_prop import build_circle
 
@@ -1459,13 +1463,14 @@ def make_i_section(
     b_fb=None,
     t_fb=None,
     corner_radius=None,
-    n_r=8,
     weld_size=None,
+    n_r=8,
     alpha_mesh=100,
     calculate_properties=True,
 ) -> Section:
     """
     Generate an I Section using the section-properties library.
+    A helper wrapper around the exist. i section functions.
 
     :param b_f: The width of the top flange.
     :param d: The section depth.
@@ -1479,26 +1484,18 @@ def make_i_section(
         NOTE: If both a corner radius and a weld size are defined,
         priority is given to corner radii.
         If a weld is present, set corner_radius = None.
-    :param n_r: The no. of points used to model the corner.
     :param weld_size: The corner fillet weld (if any).
         NOTE: If both a corner radius and a weld size are defined,
         priority is given to corner radii.
         If a weld is present, set corner_radius = None.
+    :param n_r: The no. of points used to model the corner.
     :param alpha_mesh: The area of the largest mesh element,
         as a fraction of the overall area of the section.
     :param calculate_properties: Calculate the properties?
     """
 
-    geometry = make_i_geometry(  # noqa: F821
-        b_f=b_f,
-        d=d,
-        t_f=t_f,
-        t_w=t_w,
-        b_fb=b_fb,
-        t_fb=t_fb,
-        corner_radius=corner_radius,
-        n_r=n_r,
-        weld_size=weld_size,
+    geometry = make_i_geometry(
+        b_f, b_fb, corner_radius, d, n_r, t_f, t_fb, t_w, weld_size
     )
 
     return make_section(
@@ -1506,6 +1503,82 @@ def make_i_section(
         alpha_mesh=alpha_mesh,
         calculate_properties=calculate_properties,
     )
+
+
+def make_i_geometry(
+    b_f, d, t_f, t_w, b_fb=None, t_fb=None, corner_radius=None, weld_size=None, n_r=8
+):
+    """
+    Generate an I Section using the section-properties library.
+    A helper wrapper around the exist. i section functions.
+
+    :param b_f: The width of the top flange.
+    :param d: The section depth.
+    :param t_f: The top flange thickness.
+    :param t_w: The web thickness.
+    :param b_fb: The width of the bottom section.
+        Provide None for a symmetric section.
+    :param t_fb: The bottom flange thickness.
+        Provide None if both flanges the same.
+    :param corner_radius: The corner radius of the i-section.
+        NOTE: If both a corner radius and a weld size are defined,
+        priority is given to corner radii.
+        If a weld is present, set corner_radius = None.
+    :param weld_size: The corner fillet weld (if any).
+        NOTE: If both a corner radius and a weld size are defined,
+        priority is given to corner radii.
+        If a weld is present, set corner_radius = None.
+    """
+
+    b_ft = b_f
+    t_ft = t_f
+
+    if b_fb is None:
+        b_fb = b_f
+    if t_fb is None:
+        t_fb = t_f
+
+    if corner_radius is None:
+        corner_radius = 0
+
+        weld = triangular_section(b=weld_size, h=weld_size)
+        bottom_right = weld
+        bottom_left = weld.mirror_section(axis="y").shift_section(
+            x_offset=-weld_size, y_offset=0
+        )
+        top_right = bottom_right.mirror_section().shift_section(
+            x_offset=0, y_offset=-weld_size
+        )
+        top_left = bottom_left.mirror_section().shift_section(
+            x_offset=0, y_offset=-weld_size
+        )
+
+    geometry = mono_i_section(
+        d=d,
+        b_t=b_ft,
+        b_b=b_fb,
+        t_ft=t_ft,
+        t_fb=t_fb,
+        t_w=t_w,
+        r=corner_radius,
+        n_r=n_r,
+    )
+
+    if weld_size is None:
+        return geometry
+
+    xc, yc = geometry.calculate_centroid()
+
+    bottom_right = bottom_right.shift_section(x_offset=t_w / 2, y_offset=t_fb)
+    bottom_left = bottom_left.shift_section(x_offset=-t_w / 2, y_offset=t_fb)
+    top_right = top_right.shift_section(x_offset=t_w / 2, y_offset=d - t_ft)
+    top_left = top_left.shift_section(x_offset=-t_w / 2, y_offset=d - t_ft)
+
+    geometry = geometry.shift_section(x_offset=-xc, y_offset=0)
+    geometry = (geometry - bottom_right) + bottom_right
+    geometry = (geometry - bottom_left) + bottom_left
+    geometry = (geometry - top_right) + top_right
+    return (geometry - top_left) + top_left
 
 
 def eff_length(
