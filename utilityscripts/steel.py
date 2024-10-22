@@ -1495,7 +1495,15 @@ def make_i_section(
     """
 
     geometry = make_i_geometry(
-        b_f, b_fb, corner_radius, d, n_r, t_f, t_fb, t_w, weld_size
+        b_f=b_f,
+        d=d,
+        t_f=t_f,
+        t_w=t_w,
+        b_fb=b_fb,
+        t_fb=t_fb,
+        corner_radius=corner_radius,
+        weld_size=weld_size,
+        n_r=n_r,
     )
 
     return make_section(
@@ -1506,7 +1514,7 @@ def make_i_section(
 
 
 def make_i_geometry(
-    b_f, d, t_f, t_w, b_fb=None, t_fb=None, corner_radius=None, weld_size=None, n_r=8
+    *, b_f, d, t_f, t_w, b_fb=None, t_fb=None, corner_radius=None, weld_size=None, n_r=8
 ):
     """
     Generate an I Section using the section-properties library.
