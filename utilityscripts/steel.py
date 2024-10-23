@@ -1610,6 +1610,11 @@ def eff_length(
     kel = (((pi**2) * elastic_modulus * second_moment) / buckling_load) ** 0.5
 
     if k_e:
+        if actual_length is None:
+            raise ValueError(
+                f"To calculate k_e the actual length is required. {actual_length=}"
+            )
+
         return kel / actual_length
 
     return kel
