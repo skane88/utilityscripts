@@ -6,7 +6,7 @@ from math import isclose
 
 import pytest
 
-from utilityscripts.concrete import reo_prop
+from utilityscripts.concrete import mesh_mass, reo_prop
 
 REL_TOL = 0.01
 
@@ -121,3 +121,24 @@ def test_bar_area_full(bar_spec, width, main_direction, expected):
         expected["width"],
         rel_tol=REL_TOL,
     )
+
+
+@pytest.mark.parametrize(
+    "main_diameter,secondary_diameter,main_spacing,secondary_spacing,expected",
+    [
+        (0.0095, 0.0095, 0.200, 0.200, 5.6),  # SL102
+        (0.0119, 0.0076, 0.100, 0.200, 10.5),  # RL1218
+        (0.0076, 0.0076, 0.100, 0.200, 5.3),  # RL818
+    ],
+)
+def test_mesh_mass(
+    main_diameter, secondary_diameter, main_spacing, secondary_spacing, expected
+):
+    mass = mesh_mass(
+        main_diameter=main_diameter,
+        secondary_diameter=secondary_diameter,
+        main_spacing=main_spacing,
+        secondary_spacing=secondary_spacing,
+    )
+
+    assert isclose(mass, expected, rel_tol=REL_TOL)

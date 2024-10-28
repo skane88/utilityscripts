@@ -259,6 +259,74 @@ def reo_prop(bar_spec: str, *, main_width=1000.0, secondary_width=1000.0):
     return ret_val
 
 
+def mesh_mass(
+    main_diameter: float,
+    main_spacing: float,
+    *,
+    secondary_diameter: float | None = None,
+    secondary_spacing: float | None = None,
+    steel_density: float = 7850,
+    main_width: float | None = None,
+    secondary_width: float | None = None,
+):
+    """
+    Calculate the mass of steel mesh.
+
+    Parameters
+    ----------
+    main_diameter : float
+        Diameter of the main bars (in meters).
+    main_spacing : float
+        Spacing of the main bars (in meters).
+    secondary_diameter : float, optional
+        Diameter of the secondary bars (in meters), by default None (will use main_diameter).
+    secondary_spacing : float, optional
+        Spacing of the secondary bars (in meters), by default None (will use main_spacing).
+    steel_density : float
+        Density of the steel (in kg/m^3), by default 7850.
+    main_width : float, optional
+        Width of the main mesh (in meters), by default 1.
+    secondary_width : float, optional
+        Width of the secondary mesh (in meters), by default 1.
+
+    Returns
+    -------
+    float
+        The mass of the steel mesh (in kg).
+
+    Notes
+    -----
+    - `circle_area` is a helper function that calculates the area of a circle given its diameter.
+
+    Examples
+    --------
+    >>> mesh_mass(0.0095, 0.200)
+    5.6
+
+    >>> mesh_mass(0.01, 0.1, secondary_diameter=0.005, secondary_spacing=0.2)
+    92.508
+    """
+
+    if secondary_diameter is None:
+        secondary_diameter = main_diameter
+
+    if secondary_spacing is None:
+        secondary_spacing = main_spacing
+
+    if main_width is None:
+        main_width = 1.0
+
+    if secondary_width is None:
+        secondary_width = 1.0
+
+    main_volume = circle_area(diameter=main_diameter) * main_width / main_spacing
+    secondary_volume = (
+        circle_area(diameter=secondary_diameter) * secondary_width / secondary_spacing
+    )
+
+    return steel_density * (main_volume + secondary_volume)
+
+
 def alpha_2(f_c):
     """
     Calculate parameter alpha_2 as per AS3600-2018.
