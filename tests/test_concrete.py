@@ -127,6 +127,9 @@ def test_bar_area_full(bar_spec, width, main_direction, expected):
     "main_diameter,secondary_diameter,main_spacing,secondary_spacing,expected",
     [
         (0.0095, 0.0095, 0.200, 0.200, 5.6),  # SL102
+        (0.0095, None, 0.200, None, 5.6),  # SL102, test default parameters
+        (0.0095, 0.0095, 0.200, None, 5.6),
+        (0.0095, None, 0.200, 0.200, 5.6),
         (0.0119, 0.0076, 0.100, 0.200, 10.5),  # RL1218
         (0.0076, 0.0076, 0.100, 0.200, 5.3),  # RL818
     ],
