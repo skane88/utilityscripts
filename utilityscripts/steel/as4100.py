@@ -7,12 +7,23 @@ from __future__ import annotations
 
 def alpha_m(*, m_m, m_2, m_3, m_4):
     """
-    Determines the moment modification factor as per AS4100 S5.6.1.1.a.iii
+    Determines the moment modification factor as per AS4100 S5.6.1.1.a.iii.
 
-    :param m_m: The maximum moment.
-    :param m_2: The moment at the 1st 1/4 point.
-    :param m_3: The moment at mid-span.
-    :param m_4: The moment at the 2nd 1/4 point.
+    Parameters
+    ----------
+    m_m : float
+        The maximum moment.
+    m_2 : float
+        The moment at the 1st 1/4 point.
+    m_3 : float
+        The moment at mid-span.
+    m_4 : float
+        The moment at the 2nd 1/4 point.
+
+    Returns
+    -------
+    float
+        The moment modification factor.
     """
 
     return 1.7 * m_m / (m_2**2 + m_3**2 + m_4**2) ** 0.5
