@@ -18,6 +18,56 @@ def alpha_m(*, m_m, m_2, m_3, m_4):
     return 1.7 * m_m / (m_2**2 + m_3**2 + m_4**2) ** 0.5
 
 
+def k_t(
+    *,
+    restraint_code: str,
+    d_1: float,
+    length: float,
+    t_f: float,
+    t_w: float,
+    n_w: float = 1,
+):
+    """
+    Compute the twist restraint factor based on AS4100 Table 5.6.3(a)
+
+    Parameters
+    ----------
+    restraint_code : str
+        Code representing the type of restraint.
+    d_1 : float
+        The clear web depth.
+    length : float
+        The length between restraints.
+    t_f : float
+        The flange thickness.
+    t_w : float
+        The web thickness.
+    n_w : float, optional
+        THe number of webs of the beam section.
+
+    Returns
+    -------
+    float
+        Computed twist restraint factor.
+
+    Examples
+    --------
+    >>> k_t(restraint_code="PP", d_1=0.206, length=4.0, t_f=0.012, t_w=0.0065)
+    1.08101
+
+    >>> k_t(restraint_code="FF", d_1=0.206, length=4.0, t_f=0.012, t_w=0.0065)
+    1.00000
+    """
+
+    if restraint_code in ["FF", "FL", "LF", "LL", "FU", "UF"]:
+        return 1.0
+
+    if restraint_code in ["FP", "PF", "PL", "LP", "PU", "UP"]:
+        return 1 + ((d_1 / length) * (t_f / (2 * t_w)) ** 3) / n_w
+
+    return 1 + (2.0 * (d_1 / length) * (t_f / (2 * t_w)) ** 3) / n_w
+
+
 def alpha_v(*, d_p, t_w, f_y, s, f_y_ref=250.0):
     """
     Calculate the stiffened web shear buckling parameter alpha_v as per
