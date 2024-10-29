@@ -226,9 +226,9 @@ class SteelSection:
         )
 
 
-class ISection(SteelSection):
+class ISectionData(SteelSection):
     """
-    A class to store I-section properties.
+    A class to store I-section properties taken directly from standard tables.
     """
 
     def __init__(
@@ -335,7 +335,7 @@ class ISection(SteelSection):
         return self.d - 2 * self.t_f
 
 
-class CSection(SteelSection):
+class CSectionData(SteelSection):
     """
     A class to store C section properties.
     """
@@ -442,7 +442,7 @@ class CSection(SteelSection):
         return self.d - 2 * self.t_f
 
 
-class AngleSection(SteelSection):
+class AngleSectionData(SteelSection):
     """
     Class to map to an angle section.
     """
@@ -574,7 +574,7 @@ class AngleSection(SteelSection):
         return self.grade.get_f_u(self.t)
 
 
-class RhsSection(SteelSection):
+class RhsSectionData(SteelSection):
     """
     Class to map to an RHS / SHS section.
     """
@@ -656,7 +656,7 @@ class RhsSection(SteelSection):
         return self.grade.get_f_u(self.t)
 
 
-class ChsSection(SteelSection):
+class ChsSectionData(SteelSection):
     """
     Class to map to a CHS section.
     """
@@ -834,7 +834,7 @@ def i_section_df(
 
 def i_sections(
     steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
-) -> dict[str, ISection]:
+) -> dict[str, ISectionData]:
     """
     Build a dictionary of all the standard Australian I sections.
 
@@ -856,7 +856,7 @@ def i_sections(
         if isinstance(sg, dict):
             sg = steel_grade.get(obj["designation"])
 
-        i_sects[obj["section"]] = ISection(**obj, steel_grade=sg)
+        i_sects[obj["section"]] = ISectionData(**obj, steel_grade=sg)
 
     return i_sects
 
@@ -913,7 +913,7 @@ def c_section_df(
 
 def c_sections(
     steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
-) -> dict[str, CSection]:
+) -> dict[str, CSectionData]:
     """
     Build a dictionary of the standard Australian C sections.
     :param steel_grade: An optional SteelGrade object or dictionary to assign
@@ -936,7 +936,7 @@ def c_sections(
         if isinstance(sg, dict):
             sg = steel_grade.get(obj["designation"])
 
-        c_sects[obj["section"]] = CSection(**obj, steel_grade=sg)
+        c_sects[obj["section"]] = CSectionData(**obj, steel_grade=sg)
 
     return c_sects
 
@@ -984,7 +984,7 @@ def angle_section_df(
 
 def angle_sections(
     steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
-) -> dict[str, AngleSection]:
+) -> dict[str, AngleSectionData]:
     """
     Build a dictionary of the standard Australian angle sections.
 
@@ -1008,7 +1008,7 @@ def angle_sections(
         if isinstance(sg, dict):
             sg = steel_grade.get(obj["designation"])
 
-        angle_sects[obj["section"]] = AngleSection(**obj, steel_grade=sg)
+        angle_sects[obj["section"]] = AngleSectionData(**obj, steel_grade=sg)
 
     return angle_sects
 
@@ -1054,7 +1054,7 @@ def rhs_section_df(
 
 def rhs_sections(
     steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
-) -> dict[str, RhsSection]:
+) -> dict[str, RhsSectionData]:
     """
     Build a dictionary of the standard Australian angle sections.
 
@@ -1078,7 +1078,7 @@ def rhs_sections(
         if isinstance(sg, dict):
             sg = steel_grade.get(obj["designation"])
 
-        rhs_sects[obj["section"] + ":[" + obj["grade"] + "]"] = RhsSection(
+        rhs_sects[obj["section"] + ":[" + obj["grade"] + "]"] = RhsSectionData(
             **obj, steel_grade=sg
         )
 
@@ -1126,7 +1126,7 @@ def chs_section_df(
 
 def chs_sections(
     steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
-) -> dict[str, ChsSection]:
+) -> dict[str, ChsSectionData]:
     """
     Build a dictionary of the standard Australian CHS sections.
 
@@ -1150,7 +1150,7 @@ def chs_sections(
         if isinstance(sg, dict):
             sg = steel_grade.get(obj["designation"])
 
-        chs_sects[obj["section"] + ":[" + obj["grade"] + "]"] = ChsSection(
+        chs_sects[obj["section"] + ":[" + obj["grade"] + "]"] = ChsSectionData(
             **obj, steel_grade=sg
         )
 
