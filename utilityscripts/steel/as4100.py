@@ -84,12 +84,41 @@ def alpha_v(*, d_p, t_w, f_y, s, f_y_ref=250.0):
     Calculate the stiffened web shear buckling parameter alpha_v as per
     AS4100 S5.11.5.2.
 
-    :param d_p: The depth of the web panel.
-    :param t_w: The thickness of the web.
-    :param f_y: The yield strength of the web panel.
-    :param s: The length of the web or spacing of vertical stiffeners that meet the
-        requirement of AS4100.
-    :param f_y_ref: The reference yield stress, nominally 250.
+    Parameters
+    ----------
+    d_p : float
+        The depth of the web panel.
+    t_w : float
+        The thickness of the web.
+    f_y : float
+        The yield strength of the web panel in MPa.
+        If different units are used, make sure to update f_y_ref accordingly.
+    s : float
+        The length of the web or spacing between vertical stiffeners
+        that meet the requirements of AS4100.
+    f_y_ref : float, optional
+        The reference yield stress, nominally 250.0.
+        Default is 250.0MPa.
+
+    Returns
+    -------
+    float
+        The stiffened web shear buckling parameter alpha_v.
+
+    Notes
+    --------
+    Units should be consistent across the inputs.
+    E.g. all length units should be the same, and f_y and f_y_ref should match.
+    If you
+
+    Examples
+    --------
+    >>> d_p = 1.000  # Depth of the web panel
+    >>> t_w = 0.008    # Thickness of the web
+    >>> f_y = 300.0   # Yield strength of the web panel in MPa
+    >>> s = 0.800     # Length of the web or spacing of vertical stiffeners
+    >>> alpha_v(d_p=d_p, t_w=t_w, f_y=f_y, s=s)
+    0.918947
     """
 
     a1 = (82 / ((d_p / t_w) * (f_y / f_y_ref) ** 0.5)) ** 2
