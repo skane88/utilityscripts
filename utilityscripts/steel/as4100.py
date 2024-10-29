@@ -84,6 +84,8 @@ def alpha_v(*, d_p, t_w, f_y, s, f_y_ref=250.0):
     Calculate the stiffened web shear buckling parameter alpha_v as per
     AS4100 S5.11.5.2.
 
+    This is used to reduce the shear capacity of a web when it is prone to buckling.
+
     Parameters
     ----------
     d_p : float
@@ -92,7 +94,7 @@ def alpha_v(*, d_p, t_w, f_y, s, f_y_ref=250.0):
         The thickness of the web.
     f_y : float
         The yield strength of the web panel in MPa.
-        If different units are used, make sure to update f_y_ref accordingly.
+        If different units are used, make sure to update `f_y_ref` accordingly.
     s : float
         The length of the web or spacing between vertical stiffeners
         that meet the requirements of AS4100.
@@ -110,6 +112,11 @@ def alpha_v(*, d_p, t_w, f_y, s, f_y_ref=250.0):
     Units should be consistent across the inputs.
     E.g. all length units should be the same, and f_y and f_y_ref should match.
     If you
+
+    References
+    --------
+    ..
+    [1] Standards Australia, AS4100-2020+A2 (2024) Steel Structures
 
     Examples
     --------
