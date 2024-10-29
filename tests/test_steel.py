@@ -2,7 +2,7 @@
 Module to contain tests for code in steel.py
 """
 
-from utilityscripts.steel import local_thickness_reqd
+from utilityscripts.steel.steel import local_thickness_reqd
 
 
 def test_thickness_reqd():
