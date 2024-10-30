@@ -4,6 +4,93 @@ File to contain functions based on Australian Standard AS4100.
 
 from __future__ import annotations
 
+from abc import ABC
+
+
+class AS4100Section(ABC):  # noqa: B024
+    """
+    Store a cross section that provides AS4100 compatible section properties.
+
+    This is an abstract class,
+    and requires implementation for each section type, e.g. I, C, SHS etc.
+    """
+
+    # TODO: remove noqa at top of class.
+
+    def __init__(self, *, section_name):
+        self._section_name = section_name
+
+    @property
+    def section_name(self):
+        return self._section_name
+
+
+class ISection(AS4100Section):
+    pass
+
+
+class AS4100Member:
+    def __init__(self, section, length, restraints):
+        self._section = section
+        self._length = length
+        self._restraints = restraints
+
+    @property
+    def section(self):
+        """
+        The cross section of the member.
+
+        Returns
+        -------
+        _any
+            The current assigned cross section object.
+
+        Notes
+        -------
+        In future it is expected
+        that this may be extended to handle multiple different cross sections.
+        """
+        return self._section
+
+    @property
+    def length(self):
+        return self._length
+
+    @property
+    def restraints(self):
+        return self._restraints
+
+
+class AS4100Design:
+    def __init__(self, member, loads):
+        self._member = member
+        self._loads = loads
+
+    @property
+    def member(self):
+        """
+
+        Returns
+        -------
+
+            The design member.
+
+        """
+
+        return self._member
+
+    @property
+    def loads(self):
+        """
+
+        Returns
+        -------
+
+            The loads on the member.
+
+        """
+        return self._loads
+
 
 def alpha_m(*, m_m, m_2, m_3, m_4):
     """
