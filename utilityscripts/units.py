@@ -19,7 +19,6 @@ from math import (
 )
 
 import pint
-import pint_pandas  # noqa: F401
 
 from utilityscripts.math_utils import m_ceil, m_floor, m_round
 
