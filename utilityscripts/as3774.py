@@ -269,3 +269,43 @@ def k_lateral(phi_i, mu):
     ) / (4 * mu**2 + cos(phi_i) ** 2)
 
     return max(k_calc, 0.35)
+
+
+def p_ni_6_2_1_2(z, z_o, h_o, gamma, r_c, mu):
+    """
+    Computes a modified initial normal pressures for squat containers.
+
+    This function calculates the pressure p_ni for normal pressures in squat containers
+    as modified by AS3774 S6.2.1.2.
+    This only applies above z = 1.5 * h_o.
+
+    Parameters
+    ----------
+    z : float
+        The depth at which the value is calculated.
+    z_o : float
+        The characteristic depth of the hopper.
+    h_o : float
+        Height of the reference surface above the wall contact.
+    gamma : float
+        The density of the material.
+    r_c : float
+        The characteristic radius of the container.
+    mu : float
+        The coefficient of wall friction (tan(phi_w)).
+
+    Returns
+    -------
+    float
+    """
+
+    if z < h_o:
+        return 0
+
+    if z < 1.5 * h_o:
+        c_1 = c_z(z=1.5 * h_o, z_o=z_o)
+        p_1 = p_ni(gamma=gamma, r_c=r_c, c_z=c_1, mu=mu)
+
+        return ((z - h_o) / (0.5 * h_o)) * p_1
+
+    return p_ni(gamma=gamma, r_c=r_c, c_z=c_z(z=z, z_o=z_o), mu=mu)
