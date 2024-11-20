@@ -309,3 +309,28 @@ def p_ni_6_2_1_2(z, z_o, h_o, gamma, r_c, mu):
         return ((z - h_o) / (0.5 * h_o)) * p_1
 
     return p_ni(gamma=gamma, r_c=r_c, c_z=c_z(z=z, z_o=z_o), mu=mu)
+
+
+def psi(e_s, e_w, d_c, t):
+    """
+    Calculate the flexibility reduction factor for very flexible containers,
+    as per AS3774 S6.2.1.8.
+
+    Parameters
+    ----------
+    e_s : float
+        The elastic modulus of the stored material.
+    e_w : float
+        The elastic modulus of the wall.
+    d_c : float
+        The diameter of the container (cylinders)
+        or the largest inscribed diameter for other shapes.
+    t : float
+        The wall thickness.
+
+    Returns
+    -------
+    float
+    """
+
+    return max(0.85, 1 - (e_s * d_c / 2) / (e_w * t))
