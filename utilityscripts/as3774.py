@@ -273,7 +273,7 @@ def k_lateral(phi_i, mu):
 
 def p_ni_6_2_1_2(z, z_o, h_o, gamma, r_c, mu):
     """
-    Computes a modified initial normal pressures for squat containers.
+    Computes modified initial normal pressures for squat containers.
 
     This function calculates the pressure p_ni for normal pressures in squat containers
     as modified by AS3774 S6.2.1.2.
