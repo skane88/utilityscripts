@@ -2,7 +2,13 @@
 Functions for working with material loads in bins to AS3774.
 """
 
+from enum import Enum
 from math import cos, exp, radians, sin
+
+
+class MaterialFlow(Enum):
+    COHESIVE = "cohesive"
+    FREE_FLOW = "free_flowing"
 
 
 class Material:
@@ -14,6 +20,7 @@ class Material:
         phi_i: tuple[float, float] | float,
         phi_r: float,
         use_radians: bool = True,
+        material_flowability: MaterialFlow = MaterialFlow.FREE_FLOW,
         material_name: str | None = None,
     ):
         """
@@ -44,6 +51,7 @@ class Material:
 
         self._material_name = material_name
         self._unit_weight = unit_weight
+        self._material_flowability = material_flowability
 
         if isinstance(phi_w, float):
             phi_w = (phi_w, phi_w)
@@ -81,6 +89,20 @@ class Material:
         float
         """
         return self._unit_weight
+
+    @property
+    def material_flowability(self):
+        """
+        Property that returns the material flowability as either:
+
+        FREE_FLOW or
+        COHESIVE
+
+        Returns
+        -------
+        MaterialFlow (Enum)
+        """
+        return self._material_flowability
 
     @property
     def phi_w(self):
