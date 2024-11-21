@@ -360,3 +360,37 @@ def psi(e_s, e_w, d_c, t):
     """
 
     return max(0.85, 1 - (e_s * d_c / 2) / (e_w * t))
+
+
+def p_ni_min(
+    *, gamma: float, r_c: float, c_z: float, mu: float, material_flow: MaterialFlow
+):
+    """
+    Calculate the minimum initial wall pressure as per AS3774 6.2.1.9
+
+    This may be required to calculate maximum vertical wall forces.
+
+    Parameters
+    ----------
+    gamma : float
+        The density of the material.
+    r_c : float
+        The characteristic radius of the container.
+    c_z : float
+        The Janssen depth function.
+    mu : float
+        The coefficient of wall friction (tan(phi_w)).
+    material_flow : MaterialFlow
+        The flow type of the material (free flowing or cohesive).
+
+    Returns
+    -------
+    pressure : float
+        The calculated minimum required ni pressure.
+    """
+    pressure = gamma * r_c * c_z / mu
+
+    if material_flow == MaterialFlow.FREE_FLOWING:
+        return 0.8 * pressure
+
+    return 0.5 * pressure
