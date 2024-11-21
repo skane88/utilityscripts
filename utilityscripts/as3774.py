@@ -299,6 +299,10 @@ def p_ni_6_2_1_2(z, z_o, h_o, gamma, r_c, mu):
     float
     """
 
+    # TODO: figure out if possible to rewrite this for consistency with
+    # clause AS3774 6.2.2.2 which has an almost identical formula for
+    # frictional traction.
+
     if z < h_o:
         return 0
 
