@@ -5,6 +5,12 @@ File to contain functions based on Australian Standard AS4100.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from enum import Enum
+
+
+class CornerDetail(Enum):
+    WELD = "weld"
+    RADIUS = "radius"
 
 
 class AS4100Section(ABC):
@@ -36,7 +42,172 @@ class AS4100Section(ABC):
 
 
 class ISection(AS4100Section):
-    pass
+    def __init__(
+        self,
+        *,
+        section_name,
+        b_f: float | tuple[float, float],
+        d: float,
+        t_f: float | tuple[float, float],
+        t_w: float,
+        corner_detail: CornerDetail | None = None,
+        corner_size: float = 0.0,
+    ):
+        """
+        Initialize an ISection object.
+
+        Parameters
+        ----------
+        section_name : str
+            The name of the section.
+        b_f : float | tuple[float, float]
+            Width of the flange. For monosymmetric I sections,
+            a tuple of the top & bottom flanges can be provided.
+        d : float
+            Total depth of the section.
+        t_f : float | tuple[float, float]
+            Thickness of the flange. For monosymmetric I sections
+            a tuple of the top & bottom flanges can be provided.
+        t_w : float
+            Thickness of the web.
+        corner_detail: CornerDetail | None
+            What is the web-flange interface detail?
+            A CornerDetail Enum or None.
+            If None it is assumed there is a sharp 90deg angle.
+        corner_size: float:
+            What size is the corner detail? Ignored if corner_detail is None.
+        """
+
+        super().__init__(section_name=section_name)
+
+        if isinstance(b_f, float):
+            b_f = (b_f, b_f)
+
+        if isinstance(t_f, float):
+            t_f = (t_f, t_f)
+
+        self._b_f = b_f
+        self._d = d
+        self._t_f = t_f
+        self._t_w = t_w
+
+        self._corner_detail = corner_detail
+
+        if corner_detail is None:
+            corner_size = None
+        elif corner_size is None:
+            corner_size = 0.0
+
+        self._corner_size = corner_size
+
+    @property
+    def b_f(self) -> tuple[float, float]:
+        """
+        Returns the flange widths as a tuple of (top, bottom)
+
+        Returns
+        -------
+        tuple of float
+            A tuple consisting of (b_ft, b_fb)
+        """
+        return self._b_f
+
+    @property
+    def b_ft(self) -> float:
+        """
+        The top flange width.
+
+        Returns
+        -------
+        float
+        """
+        return self._b_f[0]
+
+    @property
+    def b_fb(self) -> float:
+        """
+        The bottom flange width.
+
+        Returns
+        -------
+        float
+        """
+        return self._b_f[1]
+
+    @property
+    def d(self):
+        return self._d
+
+    @property
+    def t_f(self) -> tuple[float, float]:
+        """
+        Returns the flange thicknesses as a tuple of (top, bottom)
+
+        Returns
+        -------
+        tuple of float
+            A tuple consisting of (t_ft, t_fb)
+        """
+        return self._t_f
+
+    @property
+    def t_ft(self) -> float:
+        """
+        The top flange thickness.
+
+        Returns
+        -------
+        float
+        """
+        return self._t_f[0]
+
+    @property
+    def t_fb(self) -> float:
+        """
+        The bottom flange thickness.
+
+        Returns
+        -------
+        float
+        """
+        return self._t_f[1]
+
+    @property
+    def t_w(self) -> float:
+        """
+        The web thickness.
+
+        Returns
+        -------
+        float
+        """
+        return self._t_w
+
+    @property
+    def corner_detail(self):
+        """
+        The corner detail used for the I-section.
+        If None, this assumes a sharp 90deg junction.
+        Otherwise use a CornerDetail Enum to specify a weld
+        or a radius.
+
+        Returns
+        -------
+        CornerDetail | None
+        """
+        return self._corner_detail
+
+    @property
+    def corner_size(self):
+        """
+        The size of the corner detail (if any).
+
+        Returns
+        -------
+        float | None
+        """
+
+        return self._corner_size
 
 
 class AS4100Member:
