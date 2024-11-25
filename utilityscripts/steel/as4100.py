@@ -4,10 +4,10 @@ File to contain functions based on Australian Standard AS4100.
 
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 
 
-class AS4100Section(ABC):  # noqa: B024
+class AS4100Section(ABC):
     """
     Store a cross section that provides AS4100 compatible section properties.
 
@@ -15,14 +15,24 @@ class AS4100Section(ABC):  # noqa: B024
     and requires implementation for each section type, e.g. I, C, SHS etc.
     """
 
-    # TODO: remove noqa at top of class.
-
     def __init__(self, *, section_name):
         self._section_name = section_name
 
     @property
     def section_name(self):
+        """
+        The section name.
+
+        Returns
+        -------
+        str
+        """
         return self._section_name
+
+    @property
+    @abstractmethod
+    def gross_area(self):
+        pass
 
 
 class ISection(AS4100Section):
