@@ -37,7 +37,12 @@ class AS4100Section(ABC):
 
     @property
     @abstractmethod
-    def gross_area(self):
+    def area_gross(self):
+        pass
+
+    @property
+    @abstractmethod
+    def area_net(self):
         pass
 
 
