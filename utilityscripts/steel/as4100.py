@@ -40,25 +40,25 @@ class ISection(AS4100Section):
 
 
 class AS4100Member:
-    def __init__(self, section, length, restraints):
+    def __init__(self, section: AS4100Section, length, restraints):
         self._section = section
         self._length = length
         self._restraints = restraints
 
     @property
-    def section(self):
+    def section(self) -> AS4100Section:
         """
-        The cross section of the member.
+        The cross-section of the member.
 
         Returns
         -------
         _any
-            The current assigned cross section object.
+            The current assigned cross-section object.
 
         Notes
         -------
-        In future it is expected
-        that this may be extended to handle multiple different cross sections.
+        In future it is expected that this may be extended to handle
+        multiple different cross-sections along the length of a member.
         """
         return self._section
 
