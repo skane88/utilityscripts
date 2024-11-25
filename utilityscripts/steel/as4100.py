@@ -189,6 +189,17 @@ class ISection(AS4100Section):
         return self._t_w
 
     @property
+    def d_w(self) -> float:
+        """
+        Returns the clear web depth of the section.
+
+        Returns
+        -------
+        float
+        """
+        return self.d - self.t_ft - self.t_fb
+
+    @property
     def corner_detail(self):
         """
         The corner detail used for the I-section.
