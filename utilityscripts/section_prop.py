@@ -912,7 +912,7 @@ class Section:
         first_moment = 0.0
 
         for s in broken_section:
-            if above and s.y_c > cut_height or not above and s.y_c < cut_height:
+            if (above and s.y_c > cut_height) or (not above and s.y_c < cut_height):
                 first_moment += s.area * s.y_c
 
         return abs(first_moment)

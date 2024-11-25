@@ -73,7 +73,7 @@ def get_number_input(
         if number is None and allow_none:
             break
 
-        if number == "" or number.lower() == "none" and allow_none:
+        if ((number == "") or (number.lower() == "none")) and allow_none:
             number = default_val
             break
 
