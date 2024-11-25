@@ -37,7 +37,8 @@ m = ureg.metre
 um = ureg.micrometre
 μm = ureg.micrometre
 inch = ureg.inch
-ft = ureg.foot
+foot = ureg.foot
+ft = foot
 yd = ureg.yard
 mi = ureg.mile
 
