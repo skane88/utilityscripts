@@ -7,6 +7,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Enum
 
+from sectionproperties.pre.geometry import Geometry
+
 
 class CornerDetail(Enum):
     WELD = "weld"
@@ -34,6 +36,20 @@ class AS4100Section(ABC):
         str
         """
         return self._section_name
+
+    @property
+    @abstractmethod
+    def polygon(self) -> Geometry:
+        """
+        A sectionproperties Geometry object describing the shape.
+        For complex sections can be a CompoundGeometry object
+        as this is a sub-class of Geometry.
+
+        Returns
+        -------
+        Geometry
+        """
+        pass
 
     @property
     @abstractmethod
