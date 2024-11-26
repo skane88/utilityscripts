@@ -50,7 +50,7 @@ class AS4100Section(ABC):
         Geometry
         """
         pass
-        
+
     @property
     def geometry_net(self) -> Geometry:
         """
@@ -62,7 +62,6 @@ class AS4100Section(ABC):
         -------
         Geometry
         """
-        
         raise NotImplementedError()
 
     @property
@@ -298,37 +297,6 @@ class AS4100Member:
     @property
     def restraints(self):
         return self._restraints
-
-
-class AS4100Design:
-    def __init__(self, member, loads):
-        self._member = member
-        self._loads = loads
-
-    @property
-    def member(self):
-        """
-
-        Returns
-        -------
-
-            The design member.
-
-        """
-
-        return self._member
-
-    @property
-    def loads(self):
-        """
-
-        Returns
-        -------
-
-            The loads on the member.
-
-        """
-        return self._loads
 
 
 def alpha_m(*, m_m, m_2, m_3, m_4):
