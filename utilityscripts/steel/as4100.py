@@ -50,6 +50,20 @@ class AS4100Section(ABC):
         Geometry
         """
         pass
+        
+    @property
+    def geometry_net(self) -> Geometry:
+        """
+        A sectionproperties Geometry object describing the shape
+        along with any holes. This is optional for
+        derived classes to implement.
+
+        Returns
+        -------
+        Geometry
+        """
+        
+        raise NotImplementedError()
 
     @property
     @abstractmethod
