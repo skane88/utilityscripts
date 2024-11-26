@@ -39,7 +39,7 @@ class AS4100Section(ABC):
 
     @property
     @abstractmethod
-    def polygon(self) -> Geometry:
+    def geometry(self) -> Geometry:
         """
         A sectionproperties Geometry object describing the shape.
         For complex sections can be a CompoundGeometry object
@@ -240,6 +240,18 @@ class ISection(AS4100Section):
         """
 
         return self._corner_size
+
+    @property
+    def geometry(self) -> Geometry:
+        raise NotImplementedError()
+
+    @property
+    def area_gross(self) -> float:
+        return self.geometry.calculate_area()
+
+    @property
+    def area_net(self) -> float:
+        raise NotImplementedError()
 
 
 class AS4100Member:
