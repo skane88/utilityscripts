@@ -20,7 +20,7 @@ class CornerDetail(Enum):
 
 class AS4100Section(ABC):
     """
-    Store a cross section that provides AS4100 compatible section properties.
+    Store a cross-section that provides AS4100 compatible section properties.
 
     This is an abstract class,
     and requires implementation for each section type, e.g. I, C, SHS etc.
