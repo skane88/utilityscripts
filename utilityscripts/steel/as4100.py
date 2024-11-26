@@ -26,8 +26,11 @@ class AS4100Section(ABC):
     and requires implementation for each section type, e.g. I, C, SHS etc.
     """
 
-    def __init__(self, *, section_name):
+    def __init__(self, *, section_name, phi_steel: float = 0.9, f_y: float, f_u: float):
         self._section_name = section_name
+        self._phi_steel = phi_steel
+        self._f_y = f_y
+        self._f_u = f_u
 
     @property
     def section_name(self):
@@ -39,6 +42,39 @@ class AS4100Section(ABC):
         str
         """
         return self._section_name
+
+    @property
+    def phi_steel(self):
+        """
+        Returns the capacity reduction factor used for the section.
+
+        Returns
+        -------
+        float
+        """
+        return self._phi_steel
+
+    @property
+    def f_y(self):
+        """
+        The yield strength of the section.
+
+        Returns
+        _______
+        float
+        """
+        return self._f_y
+
+    @property
+    def f_u(self):
+        """
+        The ultimate strength of the section.
+
+        Returns
+        -------
+        float
+        """
+        return self._f_u
 
     @property
     @abstractmethod
@@ -83,10 +119,13 @@ class ISection(AS4100Section):
         self,
         *,
         section_name,
+        f_y: float,
+        f_u: float,
         b_f: float | tuple[float, float],
         d: float,
         t_f: float | tuple[float, float],
         t_w: float,
+        phi_steel: float = 0.9,
         corner_detail: CornerDetail | None = None,
         corner_size: float = 0.0,
         n_r: int = 8,
@@ -119,7 +158,9 @@ class ISection(AS4100Section):
             Only used if a corner radius is specified.
         """
 
-        super().__init__(section_name=section_name)
+        super().__init__(
+            section_name=section_name, f_y=f_y, f_u=f_u, phi_steel=phi_steel
+        )
 
         if isinstance(b_f, float):
             b_f = (b_f, b_f)
