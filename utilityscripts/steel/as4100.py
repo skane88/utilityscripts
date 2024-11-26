@@ -4,10 +4,13 @@ File to contain functions based on Australian Standard AS4100.
 
 from __future__ import annotations
 
+import math
 from abc import ABC, abstractmethod
 from enum import Enum
 
+import numpy as np
 from sectionproperties.pre.geometry import Geometry
+from shapely import Polygon
 
 
 class CornerDetail(Enum):
@@ -86,6 +89,7 @@ class ISection(AS4100Section):
         t_w: float,
         corner_detail: CornerDetail | None = None,
         corner_size: float = 0.0,
+        n_r: int = 8,
     ):
         """
         Initialize an ISection object.
@@ -110,6 +114,9 @@ class ISection(AS4100Section):
             If None it is assumed there is a sharp 90deg angle.
         corner_size: float:
             What size is the corner detail? Ignored if corner_detail is None.
+        n_r: int:
+            The number of points used to make a corner radius.
+            Only used if a corner radius is specified.
         """
 
         super().__init__(section_name=section_name)
@@ -133,6 +140,9 @@ class ISection(AS4100Section):
             corner_size = 0.0
 
         self._corner_size = corner_size
+        self._n_r = n_r
+
+        self._geometry = None
 
     @property
     def b_f(self) -> tuple[float, float]:
@@ -255,8 +265,74 @@ class ISection(AS4100Section):
         return self._corner_size
 
     @property
+    def n_r(self):
+        """
+        The number of points used to make a corner radius.
+        Only used if a radius is specified.
+
+        Returns
+        -------
+        int
+        """
+        return self._n_r
+
+    @property
     def geometry(self) -> Geometry:
-        raise NotImplementedError()
+        if self._geometry is not None:
+            return self._geometry
+
+        points_a = [(self.b_fb / 2, 0), (self.b_fb / 2, self.t_fb)]
+
+        cnr_btm_right = _make_corner(
+            corner_point=(self.t_w / 2, self.t_fb),
+            corner_size=self.corner_size,
+            right=True,
+            top=False,
+            corner_detail=self.corner_detail,
+            n_r=self.n_r,
+        )
+        cnr_top_right = _make_corner(
+            corner_point=(self.t_w / 2, self.d - self.t_fb),
+            corner_size=self.corner_size,
+            right=True,
+            top=True,
+            corner_detail=self.corner_detail,
+            n_r=self.n_r,
+        )
+        points_b = cnr_btm_right + cnr_top_right
+
+        points_c = [
+            (self.b_ft / 2, self.d - self.t_ft),
+            (self.b_ft / 2, self.d),
+            (-self.b_ft / 2, self.d),
+            (-self.b_ft / 2, self.d - self.t_ft),
+        ]
+
+        cnr_top_left = _make_corner(
+            corner_point=(-self.t_w / 2, self.d - self.t_ft),
+            corner_size=self.corner_size,
+            right=False,
+            top=True,
+            corner_detail=self.corner_detail,
+            n_r=self.n_r,
+        )
+        cnr_bottom_left = _make_corner(
+            corner_point=(-self.t_w / 2, self.t_fb),
+            corner_size=self.corner_size,
+            right=False,
+            top=False,
+            corner_detail=self.corner_detail,
+            n_r=self.n_r,
+        )
+        points_d = cnr_top_left + cnr_bottom_left
+
+        points_e = [(-self.b_fb / 2, self.t_fb), (-self.b_fb / 2, 0)]
+
+        all_points = points_a + points_b + points_c + points_d + points_e
+        poly = Polygon(all_points)
+        self._geometry = Geometry(geom=poly)
+
+        return self._geometry
 
     @property
     def area_gross(self) -> float:
@@ -513,3 +589,228 @@ def v_w(size, f_uw, k_r=1.0, phi_weld=0.8):
 
     t_t = size / (2**0.5)
     return phi_weld * 0.60 * t_t * k_r * f_uw
+
+
+def build_circle(
+    *,
+    centroid: tuple[float, float],
+    radius: float,
+    no_points: int = 64,
+    limit_angles: tuple[float, float] | None = None,
+    use_radians: bool = True,
+) -> list[tuple[float, float]]:
+    """
+    Build a list of points that approximate a circle or circular arc.
+    Typically used to create web-flange radii.
+
+    centroid: tuple[float, float]
+        The centroid of the circle.
+    radius: float
+        The radius of the circle.
+    no_points: int
+        The no. of points to include in the definition of the circle.
+    limit_angles: tuple[float, float] | None
+     Angles to limit the circular arc. Should be of the format
+        (min, max).
+        Angles to be taken CCW.
+    use_radians: bool
+        Use radians for angles?
+
+    Returns
+    -------
+    list[tuple[float, float]]
+        A circle, or part thereof, as a list of lists defining the points:
+        [[x1, y1], [x2, y2], ..., [xn, yn]]
+    """
+
+    full_circle = math.radians(360)
+
+    if limit_angles is not None:
+        min_angle = limit_angles[0]
+        max_angle = limit_angles[1]
+
+        if not use_radians:
+            min_angle = math.radians(min_angle)
+            max_angle = math.radians(max_angle)
+
+    else:
+        min_angle = 0
+        max_angle = full_circle
+
+    angle_range = np.linspace(start=min_angle, stop=max_angle, num=no_points)
+    x_points_orig = np.full(no_points, radius)
+
+    x_points = x_points_orig * np.cos(angle_range)  # - y_points * np.sin(angle_range)
+    y_points = x_points_orig * np.sin(angle_range)  # + y_points * np.cos(angle_range)
+    # can neglect the 2nd half of the formula because the y-points are just zeroes
+
+    x_points = x_points + centroid[0]
+    y_points = y_points + centroid[1]
+
+    all_points = np.transpose(np.stack((x_points, y_points)))
+
+    return [(p[0], p[1]) for p in all_points.tolist()]
+
+
+def _make_corner(
+    *,
+    corner_point: tuple[float, float],
+    corner_size: float,
+    right: bool,
+    top: bool,
+    corner_detail: CornerDetail | None = None,
+    n_r: int = 8,
+):
+    """
+    Generate points for the corners of the section based on the corner detail & size.
+
+    Parameters
+    ----------
+    corner_point : tuple of float
+        The original corner point coordinates as a tuple (x, y).
+    corner_size : float
+        The radius size or weld leg length.
+    right : bool
+        Direction flag indicating whether the corner is at the right.
+    top : bool
+        Direction flag indicating whether the corner is at the top
+    corner_detail : CornerDetail | None
+        The detail used in the corner.
+        If None a sharp 90deg corner is assumed.
+    n_r : int
+        The number of points around a radius.
+
+    Returns
+    -------
+    list[tuple[float, float]]
+        A list containing the new corner point coordinates.
+    """
+    if corner_detail is None:
+        return [corner_point]
+
+    if corner_size is None or corner_size == 0:
+        return [corner_point]
+
+    if corner_detail == CornerDetail.WELD:
+        return _make_weld(
+            corner_point=corner_point, corner_size=corner_size, right=right, top=top
+        )
+
+    return _make_radius(
+        corner_point=corner_point,
+        corner_size=corner_size,
+        n_r=n_r,
+        right=right,
+        top=top,
+    )
+
+
+def _make_weld(
+    *, corner_point: tuple[float, float], corner_size: float, right: bool, top: bool
+):
+    """
+    Create coordinates for a corner weld.
+
+    Parameters
+    ----------
+    corner_point : tuple
+        The original corner point (x, y).
+    corner_size : float
+        The leg length of the weld.
+    right : bool
+        Is the weld on the RHS of the web?
+    top : bool
+        Is the weld at the top of the section.
+
+    Returns
+    -------
+    list[tuple[float, float]]
+        A list containing the new corner point coordinates.
+    """
+    if right and top:
+        return [
+            (corner_point[0], corner_point[1] - corner_size),
+            (corner_point[0] + corner_size, corner_point[1]),
+        ]
+    if right:
+        return [
+            (corner_point[0] + corner_size, corner_point[1]),
+            (corner_point[0], corner_point[1] + corner_size),
+        ]
+    if not right and top:
+        return [
+            (corner_point[0] - corner_size, corner_point[1]),
+            (corner_point[0], corner_point[1] - corner_size),
+        ]
+
+    return [
+        (corner_point[0], corner_point[1] + corner_size),
+        (corner_point[0] - corner_size, corner_point[1]),
+    ]
+
+
+def _make_radius(
+    *,
+    corner_point: tuple[float, float],
+    corner_size: float,
+    right: bool,
+    top: bool,
+    n_r: int = 8,
+):
+    """
+    Generate a list of points representing a circle segment radius for a given
+    corner based on the specified position (right, top).
+
+    Parameters
+    ----------
+    corner_point :
+        The original corner point.
+    corner_size : float
+        The size of the radius
+    right : bool
+        Indicates if the corner is on the right side.
+    top : bool
+        Indicates if the corner is on the top side.
+    n_r : int
+        The number of points around the radius
+
+    Returns
+    -------
+    list[tuple[float, float]]
+        A list containing the new corner point coordinates.
+    """
+
+    if right and top:
+        corner_point = (
+            corner_point[0] + corner_size,
+            corner_point[1] - corner_size,
+        )
+        limit_angles = (90, 180)
+    elif right and not top:
+        corner_point = (
+            corner_point[0] + corner_size,
+            corner_point[1] + corner_size,
+        )
+        limit_angles = (180, 270)
+    elif not right and top:
+        corner_point = (
+            corner_point[0] - corner_size,
+            corner_point[1] - corner_size,
+        )
+        limit_angles = (0, 90)
+    else:
+        corner_point = (
+            corner_point[0] - corner_size,
+            corner_point[1] + corner_size,
+        )
+        limit_angles = (270, 360)
+
+    radius = build_circle(
+        centroid=corner_point,
+        radius=corner_size,
+        no_points=n_r,
+        limit_angles=limit_angles,
+        use_radians=False,
+    )
+
+    return list(reversed(radius))
