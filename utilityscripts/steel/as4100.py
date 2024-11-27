@@ -27,6 +27,23 @@ class AS4100Section(ABC):
     """
 
     def __init__(self, *, section_name, phi_steel: float = 0.9, f_y: float, f_u: float):
+        """
+
+        Parameters
+        ----------
+        section_name : str
+            A name to give the section.
+        phi_steel : float
+            The capacity reduction factor.
+        f_y : float
+            The section's yield strength.
+        f_u : float
+            The section's ultimate strength.
+        """
+
+        if phi_steel < 0.0 or phi_steel > 1.0:
+            raise ValueError("phi_steel must be between 0.0 and 1.0")
+
         self._section_name = section_name
         self._phi_steel = phi_steel
         self._f_y = f_y
@@ -105,12 +122,26 @@ class AS4100Section(ABC):
 
     @property
     @abstractmethod
-    def area_gross(self):
+    def area_gross(self) -> float:
+        """
+        The gross area of the section.
+
+        Returns
+        -------
+        float
+        """
         pass
 
     @property
     @abstractmethod
-    def area_net(self):
+    def area_net(self) -> float:
+        """
+        The net area of the section.
+
+        Returns
+        -------
+        float
+        """
         pass
 
 
