@@ -55,17 +55,6 @@ class AS4100Section(ABC):
         return self._section_name
 
     @property
-    def phi_steel(self):
-        """
-        Returns the capacity reduction factor used for the section.
-
-        Returns
-        -------
-        float
-        """
-        return self._phi_steel
-
-    @property
     def f_y(self):
         """
         The yield strength of the section.
