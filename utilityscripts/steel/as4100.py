@@ -26,26 +26,20 @@ class AS4100Section(ABC):
     and requires implementation for each section type, e.g. I, C, SHS etc.
     """
 
-    def __init__(self, *, section_name, phi_steel: float = 0.9, f_y: float, f_u: float):
+    def __init__(self, *, section_name, f_y: float, f_u: float):
         """
 
         Parameters
         ----------
         section_name : str
             A name to give the section.
-        phi_steel : float
-            The capacity reduction factor.
         f_y : float
             The section's yield strength.
         f_u : float
             The section's ultimate strength.
         """
 
-        if phi_steel < 0.0 or phi_steel > 1.0:
-            raise ValueError("phi_steel must be between 0.0 and 1.0")
-
         self._section_name = section_name
-        self._phi_steel = phi_steel
         self._f_y = f_y
         self._f_u = f_u
 
@@ -155,10 +149,14 @@ class AS4100Section(ABC):
         """
         return self.area_gross * self.f_y
 
-    @property
-    def phi_n_ty(self) -> float:
+    def phi_n_ty(self, phi_steel: float = 0.9) -> float:
         """
-        The design tension yield capacity.
+        Calculate the design tension yield capacity (φN_ty).
+
+        Parameters
+        ----------
+        phi_steel : float, optional
+            The capacity reduction factor for steel in tension, default is 0.9.
 
         Returns
         -------
@@ -178,7 +176,6 @@ class ISection(AS4100Section):
         d: float,
         t_f: float | tuple[float, float],
         t_w: float,
-        phi_steel: float = 0.9,
         corner_detail: CornerDetail | None = None,
         corner_size: float = 0.0,
         n_r: int = 8,
@@ -211,9 +208,7 @@ class ISection(AS4100Section):
             Only used if a corner radius is specified.
         """
 
-        super().__init__(
-            section_name=section_name, f_y=f_y, f_u=f_u, phi_steel=phi_steel
-        )
+        super().__init__(section_name=section_name, f_y=f_y, f_u=f_u)
 
         if isinstance(b_f, float):
             b_f = (b_f, b_f)
