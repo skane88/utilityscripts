@@ -144,6 +144,28 @@ class AS4100Section(ABC):
         """
         pass
 
+    @property
+    def n_ty(self) -> float:
+        """
+        The tension yield capacity.
+
+        Returns
+        -------
+        float
+        """
+        return self.area_gross * self.f_y
+
+    @property
+    def phi_n_ty(self) -> float:
+        """
+        The design tension yield capacity.
+
+        Returns
+        -------
+        float
+        """
+        return self.n_ty * self.phi_steel
+
 
 class ISection(AS4100Section):
     def __init__(
