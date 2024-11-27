@@ -127,7 +127,6 @@ class AS4100Section(ABC):
         """
         pass
 
-    @property
     def n_ty(self) -> float:
         """
         The tension yield capacity.
@@ -151,7 +150,40 @@ class AS4100Section(ABC):
         -------
         float
         """
-        return self.n_ty * self.phi_steel
+        return self.n_ty() * phi_steel
+
+    def n_tu(self, fracture_modifier: float = 0.85):
+        """
+        Calculate the net tensile strength at fracture.
+
+        Parameters
+        ----------
+        fracture_modifier : float, optional
+            A modifier representing the impact of fractures or imperfections.
+            Default value is 0.85.
+
+        Returns
+        -------
+        float
+        """
+        return self.area_net * self.f_u * fracture_modifier
+
+    def phi_n_tu(self, fracture_modifier: float = 0.85, phi_steel: float = 0.9):
+        """
+        Calculate the design fracture capacity.
+
+        Parameters
+        ----------
+        fracture_modifier : float
+            Modifier applied to the ultimate capacity factor (default is 0.85).
+        phi_steel : float
+            Capacity reduction factor for steel (default is 0.9).
+
+        Returns
+        -------
+        float
+        """
+        return self.n_tu(fracture_modifier=fracture_modifier) * phi_steel
 
 
 class ISection(AS4100Section):
