@@ -4,6 +4,7 @@ File to contain functions based on Australian Standard AS4100.
 
 from __future__ import annotations
 
+import copy
 import math
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -43,6 +44,23 @@ class AS4100Section(ABC):
         self._f_y = f_y
         self._f_u = f_u
         self._geometry = None
+
+    def _copy_with_new(self, **new_attributes) -> AS4100Section:
+        """
+        Function to copy the AS4100Section instance but update specific attributes.
+
+        Parameters
+        ----------
+        new_attributes
+            Any attributes to update as key:value pairs.
+        """
+
+        new_section = copy.deepcopy(self)
+
+        for attr, value in new_attributes.items():
+            setattr(new_section, attr, value)
+
+        return new_section
 
     @property
     def section_name(self):
