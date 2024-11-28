@@ -42,6 +42,7 @@ class AS4100Section(ABC):
         self._section_name = section_name
         self._f_y = f_y
         self._f_u = f_u
+        self._geometry = None
 
     @property
     def section_name(self):
@@ -76,8 +77,16 @@ class AS4100Section(ABC):
         """
         return self._f_u
 
-    @property
     @abstractmethod
+    def _make_geometry(self):
+        """
+        A method to make the geometry object.
+        Should set the self._geometry attribute.
+        """
+
+        raise NotImplementedError
+
+    @property
     def geometry(self) -> Geometry:
         """
         A sectionproperties Geometry object describing the shape.
@@ -88,7 +97,11 @@ class AS4100Section(ABC):
         -------
         Geometry
         """
-        pass
+
+        if self._geometry is None:
+            self._make_geometry()
+
+        return self.geometry
 
     @property
     def geometry_net(self) -> Geometry:
@@ -252,8 +265,6 @@ class ISection(AS4100Section):
         self._corner_size = corner_size
         self._n_r = n_r
 
-        self._geometry = None
-
     @property
     def b_f(self) -> tuple[float, float]:
         """
@@ -386,10 +397,10 @@ class ISection(AS4100Section):
         """
         return self._n_r
 
-    @property
-    def geometry(self) -> Geometry:
-        if self._geometry is not None:
-            return self._geometry
+    def _make_geometry(self):
+        """
+        A private method to make the geometry for the section.
+        """
 
         points_a = [(self.b_fb / 2, 0), (self.b_fb / 2, self.t_fb)]
 
@@ -441,6 +452,19 @@ class ISection(AS4100Section):
         all_points = points_a + points_b + points_c + points_d + points_e
         poly = Polygon(all_points)
         self._geometry = Geometry(geom=poly)
+
+    @property
+    def geometry(self) -> Geometry:
+        """
+        A geometry object representing the I Section.
+
+        Returns
+        -------
+        Geometry
+        """
+
+        if self._geometry is None:
+            self._make_geometry()
 
         return self._geometry
 
