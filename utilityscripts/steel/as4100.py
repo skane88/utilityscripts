@@ -49,16 +49,27 @@ class AS4100Section(ABC):
         """
         Function to copy the AS4100Section instance but update specific attributes.
 
+        The returned copy is a deepcopy.
+        Note that the function replaces _geometry of the new instance with None.
+        The user of the instance is responsible for recreating the geometry.
+
         Parameters
         ----------
-        new_attributes
+        new_attributes : dict
             Any attributes to update as key:value pairs.
+
+        Returns
+        -------
+        AS4100Section
+            A new instance of an AS4100Section with updated attributes.
         """
 
         new_section = copy.deepcopy(self)
 
         for attr, value in new_attributes.items():
             setattr(new_section, attr, value)
+
+        new_section._geometry = None
 
         return new_section
 
