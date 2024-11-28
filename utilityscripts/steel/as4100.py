@@ -13,6 +13,8 @@ import numpy as np
 from sectionproperties.pre.geometry import Geometry
 from shapely import Polygon
 
+from utilityscripts.steel.steel import SteelGrade
+
 
 class CornerDetail(Enum):
     WELD = "weld"
@@ -27,22 +29,19 @@ class AS4100Section(ABC):
     and requires implementation for each section type, e.g. I, C, SHS etc.
     """
 
-    def __init__(self, *, section_name, f_y: float, f_u: float):
+    def __init__(self, *, section_name, steel: SteelGrade):
         """
 
         Parameters
         ----------
         section_name : str
             A name to give the section.
-        f_y : float
-            The section's yield strength.
-        f_u : float
-            The section's ultimate strength.
+        steel : SteelGrade
+            The steel material the section is made of.
         """
 
         self._section_name = section_name
-        self._f_y = f_y
-        self._f_u = f_u
+        self._steel = steel
         self._geometry = None
 
     def _copy_with_new(self, **new_attributes) -> AS4100Section:
@@ -85,7 +84,20 @@ class AS4100Section(ABC):
         return self._section_name
 
     @property
-    def f_y(self):
+    def steel(self) -> SteelGrade:
+        """
+        The steel material the section is made of.
+
+        Returns
+        -------
+        SteelGrade
+        """
+
+        return self._steel
+
+    @property
+    @abstractmethod
+    def f_y_min(self):
         """
         The yield strength of the section.
 
@@ -93,10 +105,12 @@ class AS4100Section(ABC):
         _______
         float
         """
-        return self._f_y
+
+        raise NotImplementedError()
 
     @property
-    def f_u(self):
+    @abstractmethod
+    def f_u_min(self):
         """
         The ultimate strength of the section.
 
@@ -104,7 +118,8 @@ class AS4100Section(ABC):
         -------
         float
         """
-        return self._f_u
+
+        raise NotImplementedError()
 
     @abstractmethod
     def _make_geometry(self):
@@ -177,7 +192,7 @@ class AS4100Section(ABC):
         -------
         float
         """
-        return self.area_gross * self.f_y
+        return self.area_gross * self.f_y_min
 
     def phi_n_ty(self, phi_steel: float = 0.9) -> float:
         """
@@ -208,7 +223,7 @@ class AS4100Section(ABC):
         -------
         float
         """
-        return self.area_net * self.f_u * fracture_modifier
+        return self.area_net * self.f_u_min * fracture_modifier
 
     def phi_n_tu(self, fracture_modifier: float = 0.85, phi_steel: float = 0.9):
         """
