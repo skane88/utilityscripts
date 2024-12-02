@@ -6,12 +6,14 @@ from math import log10
 from pathlib import Path
 
 import numpy as np
+import polars as pl
 import toml
 
 from utilityscripts.multiinterp import multi_interp
 
 FILE_PATH = Path(__file__)
 DEFAULT_DATA_PATH = FILE_PATH.parent / Path("as1170_2.toml")
+DEFAULT_DATA_PATH_XLSX = FILE_PATH.parent / Path("as1170_2.xlsx")
 STANDARD_DATA = {}
 
 MIN_TERRAIN_CATEGORY = 1.0
@@ -30,6 +32,26 @@ def init_standard_data(*, file_path=None):
         file_path = DEFAULT_DATA_PATH
 
     STANDARD_DATA = toml.load(f=file_path)
+
+
+def init_standard_data_2(*, file_path=None):
+    global STANDARD_DATA
+
+    if file_path is None:
+        file_path = DEFAULT_DATA_PATH_XLSX
+
+        sheet_set = {
+            "wind_direction_definitions",
+            "shielding_multiplier",
+            "region_windspeed_parameters",
+            "region_direction_parameters",
+            "terrain_height_multipliers",
+        }
+
+        STANDARD_DATA = {
+            sheet: pl.read_excel(source=file_path, sheet_name=sheet)
+            for sheet in sheet_set
+        }
 
 
 class WindSite:
