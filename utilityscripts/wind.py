@@ -7,7 +7,6 @@ from pathlib import Path
 
 import numpy as np
 import polars as pl
-import toml
 
 from utilityscripts.multiinterp import multi_interp
 
@@ -21,20 +20,6 @@ MAX_TERRAIN_CATEGORY = 4.0
 
 
 def init_standard_data(*, file_path=None):
-    """
-    Initialise the standard_data dictionary if required.
-    :param file_path: An optional filepath rather than using DEFAULT_DATA
-    """
-
-    global STANDARD_DATA
-
-    if file_path is None:
-        file_path = DEFAULT_DATA_PATH
-
-    STANDARD_DATA = toml.load(f=file_path)
-
-
-def init_standard_data_2(*, file_path=None):
     global STANDARD_DATA
 
     if file_path is None:
@@ -124,41 +109,26 @@ def v_r_no_f_x(*, a, b, r, k):
     return a - b * r**-k
 
 
-def f_x(*, wind_region, r):
+def m_c_or_f_x(*, wind_region, r, version: str = "2021"):
     """
-    Calculate the cyclonic region factor F_C or F_D.
-
-    :param wind_region: The wind region.
-    :param r: The Average Recurrence Interval (ARI) of the windspeed.
-    """
-
-    f_x_min_r = STANDARD_DATA["2011"]["region_windspeed_parameters"][wind_region][
-        "F_x_min_R"
-    ]
-
-    if r < f_x_min_r:
-        return 1.0
-
-    return STANDARD_DATA["2011"]["region_windspeed_parameters"][wind_region]["F_x"]
-
-
-def m_c(*, wind_region, r, version: str = "2021"):
-    """
-    Calculate the climate change factor M_C.
+    Calculate the climate change factor M_C
+    (2021 edition of standard) or F_C / F_D (2011 edition).
 
     :param wind_region: The wind region.
     :param r: The Average Recurrence Interval (ARI) of the windspeed.
     :param version: The version of the standard to look up.
     """
 
-    m_c_min_r = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region][
-        "M_c_min_R"
-    ]
+    filtered_df = STANDARD_DATA["region_windspeed_parameters"].filter(
+        (pl.col("standard") == int(version)) & (pl.col("region") == wind_region)
+    )
+
+    m_c, m_c_min_r = filtered_df.select(["m_c", "m_c_min_r"]).row(0)
 
     if r < m_c_min_r:
         return 1.0
 
-    return STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["M_c"]
+    return m_c
 
 
 def v_r(*, wind_region: str, r, version: str = "2021", ignore_m_c: bool = False):
@@ -175,19 +145,15 @@ def v_r(*, wind_region: str, r, version: str = "2021", ignore_m_c: bool = False)
     if len(STANDARD_DATA) == 0:
         init_standard_data()
 
-    if ignore_m_c:
-        f = 1.0
-    else:
-        f = (
-            m_c(wind_region=wind_region, r=r)
-            if version == "2021"
-            else f_x(wind_region=wind_region, r=r)
-        )
+    f = 1.0 if ignore_m_c else m_c_or_f_x(wind_region=wind_region, r=r, version=version)
 
-    a = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["a"]
-    b = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["b"]
-    k = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["k"]
-    v_min = STANDARD_DATA[version]["region_windspeed_parameters"][wind_region]["V_min"]
+    # Filter the DataFrame based on 'standard' and 'region' columns
+    filtered_df = STANDARD_DATA["region_windspeed_parameters"].filter(
+        (pl.col("standard") == int(version)) & (pl.col("region") == wind_region)
+    )
+
+    # Extracting the required values from the filtered DataFrame
+    a, b, k, v_min = filtered_df.select(["a", "b", "k", "v_min"]).row(0)
 
     return max(f * v_min, f * v_r_no_f_x(a=a, b=b, r=r, k=k))
 
@@ -216,32 +182,40 @@ def m_d(
     if isinstance(direction, str):
         direction = direction.upper()
 
-    region_m_d_parameters = STANDARD_DATA[version]["region_direction_parameters"][
-        wind_region
-    ]
     wind_direction_defs = STANDARD_DATA["wind_direction_definitions"]
 
-    f_not_clad = region_m_d_parameters["F_not_clad"]
+    filtered_df = STANDARD_DATA["region_direction_parameters"].filter(
+        (pl.col("wind_region") == wind_region) & (pl.col("standard") == int(version))
+    )
+
+    f_not_clad = filtered_df.filter(pl.col("direction") == "F_not_clad")["m_d"][0]
 
     # next bail out early if the direction doesn't matter
     if direction == "ANY":
-        m_d_clad = region_m_d_parameters[direction]
+        m_d_clad = filtered_df.filter(pl.col("direction") == direction)["m_d"][0]
         m_d = m_d_clad * f_not_clad
         return m_d, m_d_clad
 
+    # now throw away unneeded rows from the dataframe.
+    filtered_df = filtered_df.filter(
+        (pl.col("direction") != "ANY") & (pl.col("direction") != "F_not_clad")
+    )
+
     # next if the user has provided a text direction (e.g. "NW") get the angle value.
-    if direction in wind_direction_defs:
-        direction = wind_direction_defs[direction][0]
+    if direction in wind_direction_defs["direction"]:
+        direction = wind_direction_defs.filter(pl.col("direction") == direction)[
+            "angle"
+        ][0]
 
     # now check that direction is within the range of 0-360
     direction = direction % 360
 
     # now build a numpy array to use numpy's interp functions.
     m_d_table = [
-        [a, region_m_d_parameters[d]]
-        for d, angles in wind_direction_defs.items()
-        for a in angles
+        [a, filtered_df.filter(pl.col("direction") == d)["m_d"][0]]
+        for d, a in wind_direction_defs.iter_rows()
     ]
+    m_d_table.append([360.0, m_d_table[0][1]])
 
     m_d_table = np.array(m_d_table)
     # make sure to sort it correctly
