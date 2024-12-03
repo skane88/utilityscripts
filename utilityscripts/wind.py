@@ -2,7 +2,8 @@
 File to contain some basic AS1170.2 helper methods for working with wind loads
 """
 
-from math import log10
+import copy
+from math import log10, radians, tan
 from pathlib import Path
 
 import numpy as np
@@ -93,6 +94,217 @@ class WindSite:
         m_lee = self.m_lee()
 
         return v_r * m_d * m_zcat * m_s * m_t * m_lee
+
+    def __repr__(self):
+        return (
+            f"{type(self).__name__}(wind_region={self.wind_region!r}, "
+            f"terrain_category={self.terrain_category}, "
+            f"shielding_data={self.shielding_data!r})"
+        )
+
+
+class SimpleBuilding:
+    def __init__(
+        self,
+        *,
+        wind_site: WindSite,
+        principal_axis: float,
+        z_ave: float,
+        x_max: float,
+        y_max: float,
+        roof_pitch: float,
+        openings: list[tuple[int, float]],
+        version: str = "2021",
+    ):
+        """
+
+                  face 0
+                ---------
+                |   |   |
+                |   |   |
+        face 3  |   |   |  face 1
+                |   |   |
+                |   |   |
+                |   |   |
+                ---------
+                 face 2
+
+        NOTE: Roof is face 4.
+
+        Parameters
+        ----------
+        wind_site: WindSite
+            A windsite object to contain information about the site.
+        principal_axis: float
+            The direction of the building principal axis.
+            Typically the direction of the roof ridge line.
+        z_ave: float
+            The average height of the roof line.
+        x_max: float
+            The length of the building in the principal direction.
+        y_max: float
+            The width of the building.
+        roof_pitch: float
+            The roof pitch.
+        openings: list[tuple[int, float]]
+            Any openings in the building.
+            A list of tuples of the form: [(face, opening_area)]
+            In region B2, C & D these will be assumed
+            to be open when necessary to achieve conservative design.
+        version : str
+            The standard to check the building against.
+        """
+
+        self._wind_site = wind_site
+        self._principal_axis = principal_axis % 360  # ensure not larger than 360.
+        self._z_ave = z_ave
+        self._x_max = x_max
+        self._y_max = y_max
+        self._roof_pitch = roof_pitch
+        self._openings = openings
+
+    @property
+    def wind_site(self) -> WindSite:
+        return self._wind_site
+
+    @property
+    def principal_axis(self) -> float:
+        return self._principal_axis
+
+    @property
+    def z_ave(self) -> float:
+        return self._z_ave
+
+    @property
+    def x_max(self) -> float:
+        return self._x_max
+
+    @property
+    def y_max(self) -> float:
+        return self._y_max
+
+    @property
+    def roof_pitch(self) -> float:
+        return self._roof_pitch
+
+    @property
+    def half_span(self) -> float:
+        return self.y_max / 2.0
+
+    @property
+    def roof_rise(self) -> float:
+        """
+        The rise of the roof.
+
+        Returns
+        -------
+        float
+        """
+
+        return self.half_span * tan(radians(self.roof_pitch))
+
+    @property
+    def z_max(self) -> float:
+        """
+        The maximum height of the roof.
+
+        Returns
+        -------
+        float
+        """
+
+        return self.z_ave + self.roof_rise / 2.0
+
+    @property
+    def z_eaves(self) -> float:
+        """
+        The height of the eaves.
+
+        Returns
+        -------
+        float
+        """
+
+        return self.z_ave - self.roof_rise / 2.0
+
+    @property
+    def openings(self) -> list[tuple[int, float]]:
+        return self._openings
+
+    def add_opening(self, opening: tuple[int, float]) -> "SimpleBuilding":
+        new_building = copy.deepcopy(self)
+        new_building._openings.append(opening)
+
+        return new_building
+
+    @property
+    def total_open(self) -> float:
+        """
+        The total open area on the building.
+
+        Returns
+        -------
+        float
+        """
+
+        return sum([area for _, area in self.openings])
+
+    def open_area_on_face(self, face: int):
+        """
+        Total open area on a face.
+
+                  face 0
+                ---------
+                |   |   |
+                |   |   |
+        face 3  |   |   |  face 1
+                |   |   |
+                |   |   |
+                |   |   |
+                ---------
+                 face 2
+
+        NOTE: Roof is face 4.
+
+        Parameters
+        ----------
+        face : int
+            The face to get open area on.
+        """
+
+        return sum([area for f, area in self.openings if f == face])
+
+    @property
+    def design_angles(self):
+        """
+        Return the angles to design for each face.
+
+        Returns
+        -------
+        A list of the form [a0, a1, a2, a3]
+        """
+
+        a1 = self.principal_axis
+        a2 = (self.principal_axis + 90) % 360
+        a3 = (a2 + 90) % 360
+        a4 = (a3 + 90) % 360
+
+        return [a1, a2, a3, a4]
+
+    @property
+    def m_d(self):
+        """
+        Calculate the value of M_d for each face.
+
+        Returns
+        -------
+        A list of the form [M_d0, M_d1, M_d2, M_d3]
+        """
+
+        return [
+            m_d_des(wind_region=self.wind_site.wind_region, direction=a)
+            for a in self.design_angles
+        ]
 
 
 def v_r_no_f_x(*, a, b, r, k):
@@ -231,7 +443,54 @@ def m_d_exact(
     return m_d, m_d_clad
 
 
-def m_zcat_basic(*, z, terrain_category, version="2011") -> float:
+def m_d_des(
+    *,
+    wind_region: str,
+    direction: float | str,
+    version: str = "2021",
+    tolerance: float = 45,
+):
+    """
+    Determine the design value of the direction factor M_d,
+    within +/- tolderance of direction.
+
+    Parameters
+    ----------
+    wind_region : str
+        The wind region.
+    direction : float
+        The wind direction
+    version : str
+        The standard to design for.
+    tolerance : float
+        The tolerance in the wind angle.
+        Typically 45degrees.
+
+    Returns
+    -------
+    float
+    """
+
+    if isinstance(direction, str):
+        angles = [direction, direction, direction]
+    else:
+        angles = [
+            (direction - tolerance) % 360,
+            direction % 360,
+            (direction + tolerance) % 360,
+        ]
+
+    m_d_vals = [
+        m_d_exact(wind_region=wind_region, direction=a, version=version) for a in angles
+    ]
+
+    m_d_struct = max([m[0] for m in m_d_vals])
+    m_d_clad = max([m[1] for m in m_d_vals])
+
+    return (m_d_struct, m_d_clad)
+
+
+def m_zcat_basic(*, z, terrain_category, version="2021") -> float:
     """
     Determine the basic terrain category M_zcat at a given height and terrain.
 
