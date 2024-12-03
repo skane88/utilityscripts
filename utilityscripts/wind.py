@@ -62,7 +62,7 @@ class WindSite:
     ):
         return v_r(
             wind_region=self.wind_region,
-            r=return_period,
+            return_period=return_period,
             ignore_m_c=ignore_f_x,
             version=version,
         )
