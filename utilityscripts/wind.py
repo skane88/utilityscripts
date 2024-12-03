@@ -407,7 +407,9 @@ class SimpleBuilding:
         -------
         float
         """
-        return m_c_or_f_x(wind_region=wind_region, r=return_period, version=version)
+        return m_c_or_f_x(
+            wind_region=wind_region, return_period=return_period, version=version
+        )
 
     def v_sit_beta(
         self, return_period: float, version="2021"
