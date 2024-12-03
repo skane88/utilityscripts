@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 import toml
-from wind import k_v, m_d, v_r
+from wind import k_v, m_d_exact, v_r
 
 FILE_PATH = Path(__file__)
 TEST_DATA_PATH_2011 = FILE_PATH.parent / Path("test_as1170_2_2011.toml")
@@ -131,7 +131,7 @@ def test_m_d_2011(input_vals):
     direction = input_vals[0][1]
     expected = input_vals[1]
 
-    m_d_calc = m_d(wind_region=wind_region, direction=direction, version="2011")
+    m_d_calc = m_d_exact(wind_region=wind_region, direction=direction, version="2011")
 
     assert isclose(m_d_calc[0], expected[0])
     assert isclose(m_d_calc[1], expected[1])
@@ -170,7 +170,7 @@ def test_m_d_2021(input_vals):
     direction = input_vals[0][1]
     expected = input_vals[1]
 
-    m_d_calc = m_d(wind_region=wind_region, direction=direction, version="2021")
+    m_d_calc = m_d_exact(wind_region=wind_region, direction=direction, version="2021")
 
     assert isclose(m_d_calc[0], expected[0])
     assert isclose(m_d_calc[1], expected[1])

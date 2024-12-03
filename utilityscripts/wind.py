@@ -60,7 +60,7 @@ class WindSite:
         return v_r(wind_region=self.wind_region, r=r, ignore_m_c=ignore_f_x)
 
     def m_d(self, direction: float | str):
-        return m_d(direction=direction, wind_region=self.wind_region)
+        return m_d_exact(direction=direction, wind_region=self.wind_region)
 
     def m_z_cat(self, z):
         return m_zcat_basic(z=z, terrain_category=self.terrain_category)
@@ -158,11 +158,14 @@ def v_r(*, wind_region: str, r, version: str = "2021", ignore_m_c: bool = False)
     return max(f * v_min, f * v_r_no_f_x(a=a, b=b, r=r, k=k))
 
 
-def m_d(
+def m_d_exact(
     *, wind_region: str, direction: float | str, version: str = "2021"
 ) -> tuple[float, float]:
     """
     Return the wind direction multiplier for a given region and wind direction.
+
+    Does ot consider m_d in +/-45deg as required by AS1170.2 S2.3 - this should
+    be considered by the user of this method.
 
     :param wind_region: The wind region where the structure is located.
     :param direction: The direction as an angle between 0 and 360 degrees.
