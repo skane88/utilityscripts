@@ -172,7 +172,6 @@ def test_m_d_2021(input_vals):
 
     m_d_calc = m_d(wind_region=wind_region, direction=direction, version="2021")
 
-    # TODO: update test data for 2021 code.
     assert isclose(m_d_calc[0], expected[0])
     assert isclose(m_d_calc[1], expected[1])
 
