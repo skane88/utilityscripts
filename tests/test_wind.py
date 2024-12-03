@@ -37,7 +37,7 @@ def test_v_r_no_f_x_2011(region, r, v_r_exp):
     """
 
     v_r_calc = round(
-        v_r(wind_region=region, r=int(r), ignore_m_c=True, version="2011")
+        v_r(wind_region=region, return_period=int(r), ignore_m_c=True, version="2011")
     )  # round because the data from AS1170 is rounded
 
     assert v_r_calc == v_r_exp
@@ -51,7 +51,9 @@ def test_v_r_2011(region, r, v_r_exp):
     Basic test of the V_R method.
     """
 
-    v_r_calc = v_r(wind_region=region, r=int(r), ignore_m_c=False, version="2011")
+    v_r_calc = v_r(
+        wind_region=region, return_period=int(r), ignore_m_c=False, version="2011"
+    )
 
     v_r_calc = round(v_r_calc)  # round because the data from AS1170 is rounded
 
@@ -76,7 +78,9 @@ def test_v_r_2021_no_mc(region, r, v_r_expected):
     Basic test of the V_R method.
     """
 
-    v_r_calc = v_r(wind_region=region, r=int(r), ignore_m_c=True, version="2021")
+    v_r_calc = v_r(
+        wind_region=region, return_period=int(r), ignore_m_c=True, version="2021"
+    )
 
     v_r_calc = round(v_r_calc)  # round because the data from AS1170 is rounded
 
@@ -91,7 +95,9 @@ def test_v_r_2021(region, r, v_r_expected):
     Basic test of the V_R method.
     """
 
-    v_r_calc = v_r(wind_region=region, r=int(r), ignore_m_c=False, version="2021")
+    v_r_calc = v_r(
+        wind_region=region, return_period=int(r), ignore_m_c=False, version="2021"
+    )
 
     v_r_calc = round(v_r_calc)  # round because the data from AS1170 is rounded
 

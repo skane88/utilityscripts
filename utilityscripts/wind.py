@@ -57,14 +57,25 @@ class WindSite:
 
         self.shielding_data = shielding_data
 
-    def v_r(self, *, r: float, ignore_f_x: bool = False):
-        return v_r(wind_region=self.wind_region, r=r, ignore_m_c=ignore_f_x)
+    def v_r(
+        self, *, return_period: float, ignore_f_x: bool = False, version: str = "2021"
+    ):
+        return v_r(
+            wind_region=self.wind_region,
+            r=return_period,
+            ignore_m_c=ignore_f_x,
+            version=version,
+        )
 
-    def m_d(self, direction: float | str):
-        return m_d_exact(direction=direction, wind_region=self.wind_region)
+    def m_d(self, direction: float | str, version: str = "2021"):
+        return m_d_exact(
+            direction=direction, wind_region=self.wind_region, version=version
+        )
 
-    def m_z_cat(self, z):
-        return m_zcat_basic(z=z, terrain_category=self.terrain_category)
+    def m_z_cat(self, z, version: str = "2021"):
+        return m_zcat_basic(
+            z=z, terrain_category=self.terrain_category, version=version
+        )
 
     def m_s(self):
         if self.shielding_data is None:
@@ -84,16 +95,51 @@ class WindSite:
         return 1.0
 
     def v_sit(
-        self, *, r: float, direction: float | str, z: float, ignore_f_x: bool = False
-    ):
-        v_r = self.v_r(r=r, ignore_f_x=ignore_f_x)
-        m_d = self.m_d(direction=direction)
-        m_zcat = self.m_z_cat(z=z)
+        self,
+        *,
+        return_period: float,
+        direction: float | str,
+        z: float | None,
+        ignore_f_x: bool = False,
+        version: str = "2021",
+    ) -> tuple[float, float]:
+        """
+        Calculate the site design velocity v_sit_beta for a WindSite.
+
+        Parameters
+        ----------
+        return_period : float
+            The design return period.
+        direction : float | string
+            The angle the wind is blowing from.
+        z : float | None
+            The height the wind is blowing from.
+            If None, uses 10m
+        ignore_f_x : bool
+            Ignore the climate change multiplier.
+        version : str
+            The version of the standard to design for.
+
+        Returns
+        -------
+
+        """
+
+        if z is None:
+            z = 10.0
+
+        v_r = self.v_r(
+            return_period=return_period, ignore_f_x=ignore_f_x, version=version
+        )
+        m_d = self.m_d(direction=direction, version=version)
+        m_zcat = self.m_z_cat(z=z, version=version)
         m_s = self.m_s()
         m_t = self.m_t()
         m_lee = self.m_lee()
 
-        return v_r * m_d * m_zcat * m_s * m_t * m_lee
+        base_v = v_r * m_zcat * m_s * m_t * m_lee
+
+        return base_v * m_d[0], base_v * m_d[1]
 
     def __repr__(self):
         return (
@@ -291,8 +337,23 @@ class SimpleBuilding:
 
         return [a1, a2, a3, a4]
 
-    @property
-    def m_d(self):
+    def face_angle(self, face: int):
+        """
+        The face design angle for a particular face.
+
+        Parameters
+        ----------
+        face : int
+            The face to get the angle of.
+
+        Returns
+        -------
+        float
+        """
+
+        return self.design_angles[face]
+
+    def m_d(self, version: str = "2021") -> list[tuple[float, float]]:
         """
         Calculate the value of M_d for each face.
 
@@ -302,32 +363,118 @@ class SimpleBuilding:
         """
 
         return [
-            m_d_des(wind_region=self.wind_site.wind_region, direction=a)
+            m_d_des(
+                wind_region=self.wind_site.wind_region, direction=a, version=version
+            )
             for a in self.design_angles
         ]
 
+    def m_d_on_face(self, face: int, version: str = "2021") -> [float, float]:
+        """
+        The value of M_d on a given face.
 
-def v_r_no_f_x(*, a, b, r, k):
+        Parameters
+        ----------
+        face: int
+            The face to check.
+        version : str
+            The version of the standard to check.
+
+        Returns
+        -------
+        [float, float]
+        """
+        return m_d_des(
+            wind_region=self.wind_site.wind_region,
+            direction=self.face_angle(face=face),
+            version=version,
+        )
+
+    def m_c_or_f_x(self, wind_region: str, return_period: float, version: str = "2021"):
+        """
+        Get the value of M_c or F_C / F_D as appropriate.
+
+        Parameters
+        ----------
+        wind_region : str
+            The wind region.
+        return_period : float
+            The return period.
+        version : str
+            The version of the standard to check.
+
+        Returns
+        -------
+        float
+        """
+        return m_c_or_f_x(wind_region=wind_region, r=return_period, version=version)
+
+    def v_sit_beta(
+        self, return_period: float, version="2021"
+    ) -> list[tuple[float, float]]:
+        """
+        Return the design windspeeds for each face of the building.
+
+        Parameters
+        ----------
+        return_period : float
+            The return period to determine the wind load for.
+        version : str
+            The version of the standard to check.
+
+        Returns
+        -------
+        list[tuple[float, float]]
+        The design windspeeds as [(V_sit_beta_struct_0, V_sit_beta_clad_0),
+        ... , (V_sit_beta_struct_3, V_sit_beta_clad_3)]
+        """
+
+        return [
+            self.wind_site.v_sit(return_period=return_period, direction=d, z=None)
+            for d in self.design_angles
+        ]
+
+    def v_sit_beta_face(
+        self, face: int, return_period: float, version="2021"
+    ) -> tuple[float, float]:
+        """
+        Calculate the design windspeed for a given face.
+
+        Parameters
+        ----------
+        face
+        return_period
+        version
+
+        Returns
+        -------
+
+        """
+
+        return self.v_sit_beta(return_period=return_period, version=version)[face]
+
+
+def v_r_no_f_x(*, a, b, return_period, k):
     """
     Calculate the basic windspeed for a wind region. Ignores parameters F_C or F_D,
     for those use method V_R
 
     :param a: Windspeed parameter 'a'
     :param b: Windspeed parameter 'b'
-    :param r: The Average Recurrence Interval (ARI) of the windspeed.
+    :param return_period: The Average Recurrence Interval (ARI) of the windspeed.
     :param k: Windspeed parameter 'k'
     """
 
-    return a - b * r**-k
+    return a - b * return_period**-k
 
 
-def m_c_or_f_x(*, wind_region, r, version: str = "2021"):
+def m_c_or_f_x(*, wind_region, return_period, version: str = "2021"):
     """
     Calculate the climate change factor M_C
     (2021 edition of standard) or F_C / F_D (2011 edition).
 
     :param wind_region: The wind region.
-    :param r: The Average Recurrence Interval (ARI) of the windspeed.
+    :param return_period: The Average Recurrence Interval (ARI) of the windspeed.
     :param version: The version of the standard to look up.
     """
 
@@ -337,13 +484,15 @@ def m_c_or_f_x(*, wind_region, r, version: str = "2021"):
 
     m_c, m_c_min_r = filtered_df.select(["m_c", "m_c_min_r"]).row(0)
 
-    if r < m_c_min_r:
+    if return_period < m_c_min_r:
         return 1.0
 
     return m_c
 
 
-def v_r(*, wind_region: str, r, version: str = "2021", ignore_m_c: bool = False):
+def v_r(
+    *, wind_region: str, return_period, version: str = "2021", ignore_m_c: bool = False
+):
     """
     Calculate the regional windspeed V_R based on the region and return period.
 
@@ -357,7 +506,13 @@ def v_r(*, wind_region: str, r, version: str = "2021", ignore_m_c: bool = False)
     if len(STANDARD_DATA) == 0:
         init_standard_data()
 
-    f = 1.0 if ignore_m_c else m_c_or_f_x(wind_region=wind_region, r=r, version=version)
+    f = (
+        1.0
+        if ignore_m_c
+        else m_c_or_f_x(
+            wind_region=wind_region, return_period=return_period, version=version
+        )
+    )
 
     # Filter the DataFrame based on 'standard' and 'region' columns
     filtered_df = STANDARD_DATA["region_windspeed_parameters"].filter(
@@ -367,7 +522,7 @@ def v_r(*, wind_region: str, r, version: str = "2021", ignore_m_c: bool = False)
     # Extracting the required values from the filtered DataFrame
     a, b, k, v_min = filtered_df.select(["a", "b", "k", "v_min"]).row(0)
 
-    return max(f * v_min, f * v_r_no_f_x(a=a, b=b, r=r, k=k))
+    return max(f * v_min, f * v_r_no_f_x(a=a, b=b, return_period=return_period, k=k))
 
 
 def m_d_exact(
@@ -449,7 +604,7 @@ def m_d_des(
     direction: float | str,
     version: str = "2021",
     tolerance: float = 45,
-):
+) -> tuple[float, float]:
     """
     Determine the design value of the direction factor M_d,
     within +/- tolderance of direction.
@@ -468,7 +623,8 @@ def m_d_des(
 
     Returns
     -------
-    float
+    tuple[float, float]
+    Consisting of (M_d_struct, M_d_cladding)
     """
 
     if isinstance(direction, str):
@@ -504,11 +660,12 @@ def m_zcat_basic(*, z, terrain_category, version="2021") -> float:
     # first load some required data
     if len(STANDARD_DATA) == 0:
         init_standard_data()
-    terrain_height_multipliers = STANDARD_DATA[version]["terrain_height_multipliers"]
+    terrain_height_multipliers = STANDARD_DATA["terrain_height_multipliers"]
 
     # get the basic data into the function as np arrays as we will be interpolating
-    heights = np.array(terrain_height_multipliers["heights"])
-    terrain_cats = np.array([float(k) for k in terrain_height_multipliers["data"]])
+    terrain_cats = terrain_height_multipliers.filter(
+        pl.col("standard") == int(version)
+    )["terrain_cat"].unique()
 
     min_cat = min(terrain_cats)
     max_cat = max(terrain_cats)
@@ -519,6 +676,13 @@ def m_zcat_basic(*, z, terrain_category, version="2021") -> float:
             + f"{min_cat} to {max_cat}"
         )
 
+    # load the M_zcat data for all terrain types
+    m_z_cat_data = terrain_height_multipliers.filter(  # noqa: PD010
+        pl.col("standard") == int(version)
+    ).pivot("terrain_cat", index="height", values="m_z_cat")
+
+    heights = np.array(m_z_cat_data["height"].unique())
+
     max_height = max(heights)
     min_height = min(heights)
 
@@ -527,8 +691,7 @@ def m_zcat_basic(*, z, terrain_category, version="2021") -> float:
             f"Height {z} is outside the range " + f"{min_height} to {max_height}"
         )
 
-    # load the M_zcat data for all terrain types
-    m_zcat_all = np.array(list(terrain_height_multipliers["data"].values())).transpose()
+    m_zcat_all = np.array(m_z_cat_data.drop("height"))
 
     # interpolate for the case of a terrain category that is intermediate.
     # this returns a list of M_zcat at all input heights.
