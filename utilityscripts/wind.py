@@ -702,7 +702,7 @@ def m_zcat_basic(*, z, terrain_category, version="2021") -> float:
     ).flatten()
 
     # interpolate M_zcat for the specified height.
-    return np.interp(z, xp=heights, fp=m_zcat_for_terrain)
+    return float(np.interp(z, xp=heights, fp=m_zcat_for_terrain))
 
 
 def m_zcat_ave():
