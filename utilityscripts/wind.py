@@ -339,6 +339,49 @@ class SimpleBuilding:
 
         return sum([area for f, area in self.openings if f == face])
 
+    def open_on_other_faces(self, face: int):
+        """
+        Calculate the total open area on other faces
+
+        Parameters
+        ----------
+        face : int
+            The face to ignore.
+
+        Returns
+        -------
+        float
+        """
+        return sum([area for f, area in self.openings if f != face])
+
+    def area_ratio(self, face):
+        """
+        Calculate the ratio of open area on a face to the sum of all the other openings.
+
+        Parameters
+        ----------
+        face : int
+            The face to get the area ratio for.
+
+        Returns
+        -------
+        float
+        """
+        return self.open_area_on_face(face=face) / self.open_on_other_faces(face=face)
+
+    @property
+    def area_ratios(self) -> list[float]:
+        """
+        The area ratios of openings on all faces.
+
+        Returns
+        -------
+        list[float]
+        Area ratios list of the format:
+        [area_ratio_0, ..., area_ratio_4]
+        """
+        return [self.area_ratio(face=f) for f in range(0, 5)]
+
     @property
     def design_angles(self):
         """
