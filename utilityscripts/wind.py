@@ -789,6 +789,96 @@ def m_s(shielding_parameter):
     return np.interp(shielding_parameter, xp, fp)
 
 
+def c_pi(
+    *,
+    wall_type: WallType,
+    area_ratio: float,
+    is_cyclonic: bool,
+    governing_face: FaceType,
+    c_pe: float,
+    k_a: float = 1.0,
+    k_l: float = 1.0,
+    open_area: float = 0.0,
+    volume: float = 0.0,
+    version: str = "2021",
+) -> tuple[float, float]:
+    """
+    Calculate the internal pressure coefficient.
+
+    Returns
+    -------
+    tuple[float, float]
+    Values of (c_pi_min, c_pi_max) with the opening on the given face.
+    """
+
+    init_standard_data()
+
+    if wall_type == WallType.OPEN:
+        return c_pi_open(
+            area_ratio=area_ratio,
+            is_cyclonic=is_cyclonic,
+            governing_face=governing_face,
+            c_pe=c_pe,
+            k_a=k_a,
+            k_l=k_l,
+            open_area=open_area,
+            volume=volume,
+            version=version,
+        )
+
+    return c_pi_other()
+
+
+def c_pi_open(
+    *,
+    area_ratio: float,
+    is_cyclonic: bool,
+    governing_face: FaceType,
+    c_pe: float,
+    k_a: float = 1.0,
+    k_l: float = 1.0,
+    open_area: float = 0.0,
+    volume: float = 0.0,
+    version: str = "2021",
+) -> tuple[float, float]:
+    init_standard_data()
+
+    c_pi_data = STANDARD_DATA["cpi_t5b"].filter(pl.col("version") == int(version))
+    c_pi_data = c_pi_data.filter(pl.col("face") == governing_face)
+
+    c_pi_data = c_pi_data.with_columns(
+        pl.when(pl.col("c_pe"))
+        .then(pl.col("min_factor") * c_pe * k_a * k_l)
+        .otherwise(pl.col("min_factor"))
+    )
+    c_pi_data = c_pi_data.with_columns(
+        pl.when(pl.col("c_pe"))
+        .then(pl.col("max_factor") * c_pe * k_a * k_l)
+        .otherwise(pl.col("max_factor"))
+    )
+
+    area_ratios = np.asarray(c_pi_data["area_ratio"])
+    min_factor = np.asarray(c_pi_data["min_factor"])
+    max_factor = np.asarray(c_pi_data["max_factor"])
+
+    if is_cyclonic:
+        area_ratio = max(area_ratio, 2.0)
+
+    min_cpi = np.interp(area_ratio, area_ratios, min_factor)
+    max_cpi = np.interp(area_ratio, area_ratios, max_factor)
+
+    if area_ratio >= 6.0 and governing_face != FaceType.ROOF:  # noqa: PLR2004
+        k_v_val = k_v(open_area=open_area, volume=volume)
+    else:
+        k_v_val = 1.0
+
+    return min_cpi * k_v_val, max_cpi * k_v_val
+
+
+def c_pi_other():
+    raise NotImplementedError()
+
+
 def q_basic(v: float, *, rho_air: float = 1.2):
     """
     Calculate the basic wind pressure caused by a certain wind velocity.
