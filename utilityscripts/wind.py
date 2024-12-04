@@ -415,7 +415,7 @@ class SimpleBuilding:
         )
 
     def v_sit_beta(
-        self, return_period: float, version="2021"
+        self, return_period: float, z: float | None = None, version="2021"
     ) -> list[tuple[float, float]]:
         """
         Return the design windspeeds for each face of the building.
@@ -424,6 +424,9 @@ class SimpleBuilding:
         ----------
         return_period : float
             The return period to determine the wind load for.
+        z : float | None
+            The height at which to get the design pressure.
+            If None, determines the pressure at 10m.
         version : str
             The version of the standard to check.
 
@@ -435,25 +438,34 @@ class SimpleBuilding:
         """
 
         return [
-            self.wind_site.v_sit(return_period=return_period, direction=d, z=None)
+            self.wind_site.v_sit(
+                return_period=return_period, direction=d, z=z, version=version
+            )
             for d in self.design_angles
         ]
 
     def v_sit_beta_face(
-        self, face: int, return_period: float, version="2021"
+        self, face: int, return_period: float, z: float | None = None, version="2021"
     ) -> tuple[float, float]:
         """
         Calculate the design windspeed for a given face.
 
         Parameters
         ----------
-        face
-        return_period
-        version
+        face : int
+            The face to get the wind speed for.
+        return_period : float
+            The return period to determine the wind load for.
+        z : float | None
+            The height to calculate the design windspeed at.
+            If None, uses 10m instead.
+        version : str
+            The version of the standard to check.
 
         Returns
         -------
-
+        tuple[float, float]
+        The design windspeeds on the face as a tuple (V_sit_beta_struct, V_sit_beta_clad)
         """
 
         return self.v_sit_beta(return_period=return_period, version=version)[face]
