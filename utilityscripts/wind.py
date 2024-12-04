@@ -529,6 +529,41 @@ class SimpleBuilding:
 
         return self.v_sit_beta(return_period=return_period, version=version)[face]
 
+    def is_gable(self, face: int):
+        """
+        Is the face a hip or a gable?
+
+        Parameters
+        ----------
+        face : the face to check
+
+        Returns
+        -------
+        bool
+        """
+
+        gables = [0, 2]
+
+        return face in gables
+
+    def roof_pitch_for_face(self, face) -> float:
+        """
+        What is the effective roof pitch for wind blowing on a face?
+
+        Parameters
+        ----------
+        face : int
+            The face to check.
+
+        Returns
+        -------
+        float
+        """
+
+        if self.is_gable(face):
+            return 0.0
+        return self.roof_pitch
+
 
 def v_r_no_f_x(*, a, b, return_period, k):
     """
