@@ -3,6 +3,7 @@ File to contain some basic AS1170.2 helper methods for working with wind loads
 """
 
 import copy
+from enum import StrEnum
 from math import log10, radians, tan
 from pathlib import Path
 
@@ -20,6 +21,12 @@ MIN_TERRAIN_CATEGORY = 1.0
 MAX_TERRAIN_CATEGORY = 4.0
 
 
+class WallType(StrEnum):
+    IMPERMEABLE = "impermeable"
+    PERMEABLE = "permeable"
+    OPEN = "open"
+
+
 def init_standard_data(*, file_path=None, overwrite: bool = False):
     global STANDARD_DATA
 
@@ -35,6 +42,8 @@ def init_standard_data(*, file_path=None, overwrite: bool = False):
             "region_windspeed_parameters",
             "region_direction_parameters",
             "terrain_height_multipliers",
+            "cpi_t5a",
+            "cpi_t5b",
         }
 
         STANDARD_DATA = {
