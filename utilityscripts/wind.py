@@ -51,6 +51,7 @@ def init_standard_data(*, file_path=None, overwrite: bool = False):
             "terrain_height_multipliers",
             "cpi_t5a",
             "cpi_t5b",
+            "k_a",
         }
 
         STANDARD_DATA = {
@@ -1027,3 +1028,27 @@ def k_v(*, open_area, volume):
         return 1.085
 
     return 1.01 + 0.15 * log10(alpha)
+
+
+def k_a(
+    area: float, face_type: FaceType, z: float | None = None, version: str = "2021"
+):
+    init_standard_data()
+
+    k_a_data = STANDARD_DATA["k_a"]
+
+    k_a_data = k_a_data.filter(pl.col("version") == int(version))
+    k_a_data = k_a_data.filter(pl.col("face_type") == face_type)
+
+    max_z = max(k_a_data["h_limit"])
+
+    if z is None:
+        z = 0.0
+
+    if z > max_z:
+        return 1.0
+
+    area_vals = np.asarray(k_a_data["area"])
+    k_a_vals = np.asarray(k_a_data["k_a"])
+
+    return np.interp(area, area_vals, k_a_vals)
