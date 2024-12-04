@@ -20,8 +20,11 @@ MIN_TERRAIN_CATEGORY = 1.0
 MAX_TERRAIN_CATEGORY = 4.0
 
 
-def init_standard_data(*, file_path=None):
+def init_standard_data(*, file_path=None, overwrite: bool = False):
     global STANDARD_DATA
+
+    if not overwrite and len(STANDARD_DATA) > 0:
+        return
 
     if file_path is None:
         file_path = DEFAULT_DATA_PATH_XLSX
@@ -505,8 +508,7 @@ def v_r(
     :return: The regional windspeed.
     """
 
-    if len(STANDARD_DATA) == 0:
-        init_standard_data()
+    init_standard_data()
 
     f = (
         1.0
@@ -548,8 +550,7 @@ def m_d_exact(
     """
 
     # first load some required data
-    if len(STANDARD_DATA) == 0:
-        init_standard_data()
+    init_standard_data()
 
     if isinstance(direction, str):
         direction = direction.upper()
@@ -660,8 +661,7 @@ def m_zcat_basic(*, z, terrain_category, version="2021") -> float:
     """
 
     # first load some required data
-    if len(STANDARD_DATA) == 0:
-        init_standard_data()
+    init_standard_data()
     terrain_height_multipliers = STANDARD_DATA["terrain_height_multipliers"]
 
     # get the basic data into the function as np arrays as we will be interpolating
@@ -751,8 +751,7 @@ def m_s(shielding_parameter):
     """
 
     # first load some required data
-    if len(STANDARD_DATA) == 0:
-        init_standard_data()
+    init_standard_data()
 
     shielding_multiplier_data = STANDARD_DATA["shielding_multiplier"]
 
