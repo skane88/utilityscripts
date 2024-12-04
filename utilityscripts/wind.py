@@ -27,6 +27,13 @@ class WallType(StrEnum):
     OPEN = "open"
 
 
+class FaceType(StrEnum):
+    WINDWARD = "windward"
+    LEEWARD = "leeward"
+    SIDE = "side"
+    ROOF = "roof"
+
+
 def init_standard_data(*, file_path=None, overwrite: bool = False):
     global STANDARD_DATA
 
