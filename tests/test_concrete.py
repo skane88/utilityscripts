@@ -6,7 +6,7 @@ from math import isclose
 
 import pytest
 
-from utilityscripts.concrete import mesh_mass, reo_prop
+from utilityscripts.concrete.concrete import mesh_mass, reo_prop
 
 REL_TOL = 0.01
 
