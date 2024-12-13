@@ -456,7 +456,7 @@ def v_us_s8_2_5_2(*, a_sv, f_sy, d_v, theta_v, s: float = 1000, a_v: float = pi 
     Parameters
     ----------
     a_sv : float
-        The shear area of a single (set of) fitment in mm^2
+        The shear area of a single (set of) fitment in mm²
     f_sy : float
         The yield strength of the shear reinforcement.
     d_v : float
@@ -466,7 +466,7 @@ def v_us_s8_2_5_2(*, a_sv, f_sy, d_v, theta_v, s: float = 1000, a_v: float = pi 
     s : float
         The spacing of shear fitments in mm.
         The default value is 1000 mm.
-        If A_sv is given in mm^2 / m then s does not need to be provided.
+        If A_sv is given in mm² / m then s does not need to be provided.
     a_v : float
         The angle of the shear reinforcement to the longitudinal reinforcement,
         in radians.
