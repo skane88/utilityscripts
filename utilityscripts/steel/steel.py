@@ -23,7 +23,7 @@ from sectionproperties.pre.library.steel_sections import mono_i_section
 from utilityscripts.section_prop import build_circle
 
 # All the standard I & C sections as dataframes
-_DATA_PATH = Path(Path(__file__).parent.parent) / Path("data")
+_DATA_PATH = Path(Path(__file__).parent) / Path("data")
 
 PHI_STEEL = {"φ_s": 0.90, "φ_w.sp": 0.80, "φ_w.gp": 0.60}
 PHI_STEEL["steel"] = PHI_STEEL["φ_s"]
