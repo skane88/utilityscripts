@@ -97,9 +97,9 @@ class AS4100Section(ABC):
 
     @property
     @abstractmethod
-    def f_y_min(self):
+    def f_y_min(self) -> float:
         """
-        The yield strength of the section.
+        The minimum yield strength of the section.
 
         Returns
         _______
@@ -110,9 +110,9 @@ class AS4100Section(ABC):
 
     @property
     @abstractmethod
-    def f_u_min(self):
+    def f_u_min(self) -> float:
         """
-        The ultimate strength of the section.
+        The minimum ultimate strength of the section.
 
         Returns
         -------
