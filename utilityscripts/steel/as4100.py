@@ -248,8 +248,7 @@ class ISection(AS4100Section):
         self,
         *,
         section_name,
-        f_y: float,
-        f_u: float,
+        steel: SteelGrade,
         b_f: float | tuple[float, float],
         d: float,
         t_f: float | tuple[float, float],
@@ -286,7 +285,7 @@ class ISection(AS4100Section):
             Only used if a corner radius is specified.
         """
 
-        super().__init__(section_name=section_name, f_y=f_y, f_u=f_u)
+        super().__init__(section_name=section_name, steel=steel)
 
         if isinstance(b_f, float):
             b_f = (b_f, b_f)
@@ -308,6 +307,102 @@ class ISection(AS4100Section):
 
         self._corner_size = corner_size
         self._n_r = n_r
+
+    @property
+    def f_yw(self) -> float:
+        """
+        The yield strength of the web.
+
+        Returns
+        -------
+        float
+        """
+
+        return self.steel.get_f_y(thickness=self.t_w)
+
+    @property
+    def f_yft(self) -> float:
+        """
+        The yield strength of the top flange.
+
+        Returns
+        -------
+        float
+        """
+
+        return self.steel.get_f_y(thickness=self.t_ft)
+
+    @property
+    def f_yfb(self) -> float:
+        """
+        The yield strength of the bottom flange.
+
+        Returns
+        -------
+        float
+        """
+
+        return self.steel.get_f_y(thickness=self.t_fb)
+
+    @property
+    def f_uw(self) -> float:
+        """
+        The ultimate strength of the web.
+
+        Returns
+        -------
+        float
+        """
+
+        return self.steel.get_f_u(thickness=self.t_w)
+
+    @property
+    def f_uft(self) -> float:
+        """
+        The ultimate strength of the top flange.
+
+        Returns
+        -------
+        float
+        """
+
+        return self.steel.get_f_u(thickness=self.t_ft)
+
+    @property
+    def f_ufb(self) -> float:
+        """
+        The ultimate strength of the bottom flange.
+
+        Returns
+        -------
+        float
+        """
+
+        return self.steel.get_f_u(thickness=self.t_fb)
+
+    @property
+    def f_y_min(self) -> float:
+        """
+        The minimum yield strength of the section.
+
+        Returns
+        _______
+        float
+        """
+
+        return min(self.f_yw, self.f_yft, self.f_yfb)
+
+    @property
+    def f_u_min(self) -> float:
+        """
+        The minimum ultimate strength of the section.
+
+        Returns
+        -------
+        float
+        """
+
+        return min(self.f_uw, self.f_uft, self.f_ufb)
 
     @property
     def b_f(self) -> tuple[float, float]:
