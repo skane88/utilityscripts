@@ -483,6 +483,44 @@ def v_us_s8_2_5_2(*, a_sv, f_sy, d_v, theta_v, s: float = 1000, a_v: float = pi 
     return steel_param * angle_param / 1000
 
 
+def v_interface_s8_4_3(a_sf, f_sy, a_interface, mu, gp, k_co, f_ct):
+    """
+    Calculate the interface shear capacity as per AS3600 S8.4.3.
+
+    Notes
+    -----
+    AS3600 relies on some values being provided in unusual units (kN/mm etc.).
+    This function has been slightly modified to work with pressures where possible.
+
+    Parameters
+    ----------
+    a_sf : float
+        Area of reinforcement crossing the interface in mm².
+        If reinforcement is not anchored fully,
+        or crosses the interface at an angle the user should adjust
+        the area of reinforcement accordingly (or f_sy).
+    f_sy : float
+        The yield strength of the reinforcement in MPa.
+    a_interface : float
+        The area of the interface, in mm².
+    mu : float
+        The friction coefficient of the interface.
+    gp : float
+        Permanent compressive stress on the interface if any.
+        If tensile stress is present provide a -ve value.
+    k_co : float
+        The adhesion coefficient of the concrete.
+    f_ct : float
+        The characteristic tensile strength of the concrete in MPa.
+
+    Returns
+    -------
+    float
+    """
+
+    return mu * ((a_sf * f_sy) / a_interface + gp) + k_co * f_ct
+
+
 def v_uo(*, f_c, u, d_om, beta_h=1.0):
     """
     Calculate the punching shear capacity.
