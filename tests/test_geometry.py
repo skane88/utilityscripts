@@ -4,7 +4,7 @@ Contains some tests for the geometry module.
 
 from math import isclose, pi
 
-from geometry import Circle, CircularSegment
+from utilityscripts.geometry import Circle, CircularSegment
 
 
 def test_circle():

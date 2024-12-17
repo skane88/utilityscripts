@@ -3,6 +3,7 @@ Some tests for the section properties file
 """
 
 import math
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -88,8 +89,16 @@ ALL_PROPERTIES = (
 
 
 def get_i_sections():
-    section_df = pd.read_excel("..\\data\\steel_data.xlsx", sheet_name="Is")
-    section_df = section_df[section_df["section_type"] == "I"]  # filter for I sections
+    excel_file = (
+        Path(__file__).parent.parent
+        / Path("utilityscripts")
+        / Path("steel")
+        / Path("data")
+        / Path("steel_data.xlsx")
+    )
+
+    section_df = pd.read_excel(excel_file, sheet_name="is")
+    section_df = section_df[section_df["section_shape"] == "I"]  # filter for I sections
 
     return section_df.to_dict("records")  # use to_dict() to get each row as a dict.
 

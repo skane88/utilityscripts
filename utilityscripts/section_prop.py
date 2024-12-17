@@ -1310,7 +1310,7 @@ class CombinedSection(Section):
             moved_sect = s.move_to_point(end_point=n)
             all_polys.append(moved_sect.polygon)
 
-        return ops.cascaded_union(all_polys)
+        return ops.unary_union(all_polys)
 
     @property
     def area(self):
