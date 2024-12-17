@@ -61,7 +61,31 @@ def init_standard_data(*, file_path=None, overwrite: bool = False):
 
 
 class WindSite:
+    """
+    A class to represent a site for wind design.
+    """
+
     def __init__(self, wind_region: str, terrain_category: float, shielding_data=None):
+        """
+        Initialise a WindSite object.
+
+        Notes
+        -----
+        AS1170.2 only defines terrain categories 1.0, 2.0, 2.5, 3.0 and 4.0.
+        Intermediate terrain categories will be linearly interpolated.
+
+        Shielding is not yet implemented.
+
+        Parameters
+        ----------
+        wind_region : str
+            The wind region as per AS1170.2.
+        terrain_category : float
+            The terrain category. Should be between 1.0 and 4.0.
+        shielding_data : list[tuple[float, float]]
+            The shielding data.
+        """
+
         self.wind_region = wind_region
 
         if (
@@ -74,12 +98,29 @@ class WindSite:
             )
 
         self.terrain_category = terrain_category
-
         self.shielding_data = shielding_data
 
     def v_r(
         self, *, return_period: float, ignore_f_x: bool = False, version: str = "2021"
-    ):
+    ) -> float:
+        """
+        Calculate the regional windspeed V_R based on the region and return period.
+
+        Parameters
+        ----------
+        return_period : float
+            The Average Recurrence Interval (ARI) of the windspeed.
+        ignore_f_x : bool, default=False
+            Whether to ignore the cyclonic region factor M_c (2021 standard),
+            or the uncertainty factor F_C/F_D (older standards).
+        version : str, default="2021"
+            The version of the standard to use.
+
+        Returns
+        -------
+        float
+        """
+
         return v_r(
             wind_region=self.wind_region,
             return_period=return_period,
@@ -87,12 +128,61 @@ class WindSite:
             version=version,
         )
 
-    def m_d(self, direction: float | str, version: str = "2021"):
+    def m_d(self, direction: float | str, version: str = "2021") -> tuple[float, float]:
+        """
+        Return the wind direction multiplier wind direction.
+
+        Notes
+        -----
+        Does not consider m_d in +/-45deg as required by AS1170.2 S2.3 - this should
+        be considered by the user of this method.
+
+        Parameters
+        ----------
+        wind_region : str
+            The wind region where the structure is located.
+        direction : float or str
+            The direction as an angle between 0 and 360 degrees, where:
+            - 0/360 = Wind from North
+            - 90 = Wind from East
+            - 180 = Wind from South
+            - 270 = Wind from West
+
+            Can also be "ANY" to return the any direction value, or cardinal
+            values (e.g. "N", "NE", "E", ..., "NW").
+        version : str, default="2021"
+            The version of the standard to use.
+
+        Returns
+        -------
+        tuple[float, float]
+            The direction multiplier as (M_d, M_d_cladding)
+        """
+
         return m_d_exact(
             direction=direction, wind_region=self.wind_region, version=version
         )
 
     def m_z_cat(self, z, version: str = "2021"):
+        """
+        Determine the basic terrain category M_zcat at a given height and terrain.
+
+        Notes
+        -----
+        Does not do any averaging for changing terrain in the windward direction.
+
+        Parameters
+        ----------
+        z : float
+            The height at which the windspeed is being assessed.
+        version : str, default="2021"
+            The version of the standard to use.
+
+        Returns
+        -------
+        float
+        """
+
         return m_zcat_basic(
             z=z, terrain_category=self.terrain_category, version=version
         )
@@ -604,15 +694,25 @@ def m_c_or_f_x(*, wind_region, return_period, version: str = "2021"):
 
 def v_r(
     *, wind_region: str, return_period, version: str = "2021", ignore_m_c: bool = False
-):
+) -> float:
     """
     Calculate the regional windspeed V_R based on the region and return period.
 
-    :param wind_region: The wind region where the structure is located.
-    :param r: The Average Recurrence Interval (ARI) of the windspeed.
-    :param ignore_m_c: Ignore the cyclonic region factor M_c, or for older standards
-        the uncertainty factor F_C or F_D?
-    :return: The regional windspeed.
+    Parameters
+    ----------
+    wind_region : str
+        The wind region where the structure is located.
+    return_period : float
+        The Average Recurrence Interval (ARI) of the windspeed.
+    version : str, default="2021"
+        The version of the standard to use.
+    ignore_m_c : bool, default=False
+        Whether to ignore the cyclonic region factor M_c (2021 standard),
+        or the uncertainty factor F_C/F_D (older standards).
+
+    Returns
+    -------
+    float
     """
 
     init_standard_data()
@@ -642,18 +742,31 @@ def m_d_exact(
     """
     Return the wind direction multiplier for a given region and wind direction.
 
-    Does ot consider m_d in +/-45deg as required by AS1170.2 S2.3 - this should
+    Notes
+    -----
+    Does not consider m_d in +/-45deg as required by AS1170.2 S2.3 - this should
     be considered by the user of this method.
 
-    :param wind_region: The wind region where the structure is located.
-    :param direction: The direction as an angle between 0 and 360 degrees.
-        0 / 360 = Wind from North
-        90 = Wind from East
-        180 = Wind from South
-        270 = Wind from West
-        Alternatively, use "ANY" to return the any direction value, or the cardinal
+    Parameters
+    ----------
+    wind_region : str
+        The wind region where the structure is located.
+    direction : float or str
+        The direction as an angle between 0 and 360 degrees, where:
+        - 0/360 = Wind from North
+        - 90 = Wind from East
+        - 180 = Wind from South
+        - 270 = Wind from West
+
+        Can also be "ANY" to return the any direction value, or cardinal
         values (e.g. "N", "NE", "E", ..., "NW").
-    :return: The direction multiplier as a Tuple containing (M_d, M_d_cladding)
+    version : str, default="2021"
+        The version of the standard to use.
+
+    Returns
+    -------
+    tuple[float, float]
+        The direction multiplier as (M_d, M_d_cladding)
     """
 
     # first load some required data
@@ -760,11 +873,23 @@ def m_zcat_basic(*, z, terrain_category, version="2021") -> float:
     """
     Determine the basic terrain category M_zcat at a given height and terrain.
 
+    Notes
+    -----
     Does not do any averaging for changing terrain in the windward direction.
 
-    :param z: The height at which the windspeed is being assessed.
-    :param terrain_category: The terrain category, as a number between 1 and 4.
+    Parameters
+    ----------
+    z : float
+        The height at which the windspeed is being assessed.
+    terrain_category : float
+        The terrain category, as a number between 1 and 4.
         Floats are acceptable for intermediate categories.
+    version : str, default="2021"
+        The version of the standard to use.
+
+    Returns
+    -------
+    float
     """
 
     # first load some required data
