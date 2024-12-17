@@ -163,6 +163,36 @@ class WindSite:
             direction=direction, wind_region=self.wind_region, version=version
         )
 
+    def m_d_des(
+        self, direction: float | str, version: str = "2021", tolerance: float = 45.0
+    ):
+        """
+        Determine the design value of the direction factor M_d,
+        within +/- tolderance of direction.
+
+        Parameters
+        ----------
+        direction : float
+            The wind direction
+        version : str
+            The standard to design for.
+        tolerance : float
+            The tolerance in the wind angle.
+            Typically 45degrees.
+
+        Returns
+        -------
+        tuple[float, float]
+        Consisting of (M_d_struct, M_d_cladding)
+        """
+
+        return m_d_des(
+            wind_region=self.wind_region,
+            direction=direction,
+            version=version,
+            tolerance=tolerance,
+        )
+
     def m_z_cat(self, z, version: str = "2021"):
         """
         Determine the basic terrain category M_zcat at a given height and terrain.
@@ -826,7 +856,7 @@ def m_d_des(
     wind_region: str,
     direction: float | str,
     version: str = "2021",
-    tolerance: float = 45,
+    tolerance: float = 45.0,
 ) -> tuple[float, float]:
     """
     Determine the design value of the direction factor M_d,
