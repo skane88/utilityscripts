@@ -1112,6 +1112,30 @@ def c_pi_open(
     volume: float = 0.0,
     version: str = "2021",
 ) -> tuple[float, float]:
+    """
+    Calculate the internal pressure coefficient of a building with an opening.
+
+    Parameters
+    ----------
+    area_ratio : float
+        The area ratio of the governing opening/s to all other openings.
+    is_cyclonic : bool
+        Whether the structure is in a cyclonic region.
+    governing_face : FaceType
+        The face that the opening is on.
+    c_pe : float
+        The external pressure coefficient at the governing face.
+    k_a : float, default=1.0
+        The area reduction factor for the governing opening.
+    k_l : float, default=1.0
+        The local pressure coefficient for the governing opening.
+
+    Returns
+    -------
+    tuple[float, float]
+    Values of (c_pi_min, c_pi_max) with the opening on the given face.
+    """
+
     init_standard_data()
 
     c_pi_data = STANDARD_DATA["cpi_t5b"].filter(pl.col("version") == int(version))
@@ -1154,9 +1178,17 @@ def q_basic(v: float, *, rho_air: float = 1.2):
     """
     Calculate the basic wind pressure caused by a certain wind velocity.
 
-    :param rho_air: The density of air. Must be in kg / m³.
-    :param v: The wind velocity. Must be in m/s.
-    :return: The basic wind pressure in Pa.
+    Parameters
+    ----------
+    v : float
+        The wind velocity. Must be in m/s.
+    rho_air : float, default=1.2
+        The density of air. Must be in kg / m³.
+
+    Returns
+    -------
+    float
+    The basic wind pressure in Pa.
     """
 
     return 0.5 * rho_air * v**2
@@ -1166,13 +1198,22 @@ def pipe_wind_loads(cd, qz, d_max, d_ave, n_pipes):
     """
     Calculate wind loads on pipes in pipe racks.
 
+    Notes
+    -----
     Based on Oil Search design criteria 100-SPE-K-0001.
 
-    :param cd: Drag coefficient for largest pipe in the group.
-    :param qz: The design wind pressure.
-    :param d_max: The maximum pipe diameter.
-    :param d_ave: The average pipe diameter.
-    :param n_pipes: The number of pipes in the tray.
+    Parameters
+    ----------
+    cd : float
+        The drag coefficient for the largest pipe in the group.
+    qz : float
+        The design wind pressure.
+    d_max : float
+        The maximum pipe diameter.
+    d_ave : float
+        The average pipe diameter.
+    n_pipes : int
+        The number of pipes in the tray.
     """
 
     shielding = np.asarray(
