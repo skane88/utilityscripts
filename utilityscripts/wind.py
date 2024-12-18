@@ -1053,6 +1053,29 @@ def c_pi(
     """
     Calculate the internal pressure coefficient.
 
+    Parameters
+    ----------
+    wall_type : WallType
+        The type of wall with the opening/s.
+    area_ratio : float
+        The area ratio of the governing opening/s to all other openings.
+    is_cyclonic : bool
+        Whether the structure is in a cyclonic region.
+    governing_face : FaceType
+        The face that the opening is on.
+    c_pe : float
+        The external pressure coefficient at the governing face.
+    k_a : float, default=1.0
+        The area reduction factor for the governing opening.
+    k_l : float, default=1.0
+        The local pressure coefficient for the governing opening.
+    open_area : float, default=0.0
+        The open area of the governing opening.
+    volume : float, default=0.0
+        The volume of the enclosed space.
+    version : str, default="2021"
+        The version of the standard to use.
+
     Returns
     -------
     tuple[float, float]
