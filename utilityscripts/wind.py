@@ -51,6 +51,7 @@ def init_standard_data(*, file_path=None, overwrite: bool = False):
             "terrain_height_multipliers",
             "cpi_t5a",
             "cpi_t5b",
+            "cpe_t5_2c",
             "k_a",
         }
 
@@ -1192,6 +1193,39 @@ def q_basic(v: float, *, rho_air: float = 1.2):
     """
 
     return 0.5 * rho_air * v**2
+
+
+def c_pe_s(*, h_ref, d_edge, version="2021") -> tuple[float, float]:
+    """
+    Calculate the external pressure coefficient for a side-wall of a building
+
+    Parameters
+    ----------
+    h_ref : float
+        The reference height of the building
+    d_edge : float
+        The distance of the point under consideration from the windward end of the building.
+    version : str, default="2021"
+        The version of the standard to use.
+
+    Returns
+    -------
+    tuple[float, float]
+    The external pressure coefficient. Two copies are returned for consistency with the other c_pe functions.
+    """
+
+    init_standard_data()
+
+    c_pe_data = STANDARD_DATA["cpe_t5_2c"].filter(pl.col("version") == int(version))
+
+    distance_ratio = d_edge / h_ref
+
+    distances = np.asarray(c_pe_data["distance_edge"])
+    c_pe_vals = np.asarray(c_pe_data["c_pe"])
+
+    c_pe = np.interp(distance_ratio, distances, c_pe_vals)
+
+    return c_pe, c_pe
 
 
 def pipe_wind_loads(cd, qz, d_max, d_ave, n_pipes):
