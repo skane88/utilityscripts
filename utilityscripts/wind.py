@@ -242,6 +242,8 @@ class WindSite:
         z: float | None,
         ignore_f_x: bool = False,
         version: str = "2021",
+        use_exact_m_d: bool = False,
+        tolerance: float = 45.0,
     ) -> tuple[float, float]:
         """
         Calculate the site design velocity v_sit_beta for a WindSite.
@@ -259,6 +261,12 @@ class WindSite:
             Ignore the climate change multiplier.
         version : str
             The version of the standard to design for.
+        use_exact_m_d : bool
+            If true use m_d for the exact direction, not the 90deg or 45deg sectors
+            considered in AS1170.2.
+        tolerance : float
+            The tolerance in the wind angle.
+            Typically 45degrees.
 
         Returns
         -------
@@ -271,7 +279,13 @@ class WindSite:
         v_r = self.v_r(
             return_period=return_period, ignore_f_x=ignore_f_x, version=version
         )
-        m_d = self.m_d(direction=direction, version=version)
+        if use_exact_m_d:
+            m_d = self.m_d(direction=direction, version=version)
+        else:
+            m_d = self.m_d_des(
+                direction=direction, version=version, tolerance=tolerance
+            )
+
         m_zcat = self.m_z_cat(z=z, version=version)
         m_s = self.m_s()
         m_t = self.m_t()
