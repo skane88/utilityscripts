@@ -847,16 +847,16 @@ def i_sections(
 
     i_sects = {}
 
-    for _, *v in i_section_df().iterrows():
-        obj = v[0].to_dict()
+    i_sect_df = i_section_df()
+    i_sect_df = i_sect_df.filter(pl.col("current") == "yes")
 
+    for row in i_sect_df.to_dicts():
         sg = steel_grade
-        obj["current"] = obj["current"] == "yes"
 
         if isinstance(sg, dict):
-            sg = steel_grade.get(obj["designation"])
+            sg = steel_grade.get(row["designation"])
 
-        i_sects[obj["section"]] = ISectionData(**obj, steel_grade=sg)
+        i_sects[row["section"]] = ISectionData(**row, steel_grade=sg)
 
     return i_sects
 
