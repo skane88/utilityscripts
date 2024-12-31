@@ -302,7 +302,8 @@ class ISection(AS4100Section):
 
         if corner_detail is None:
             corner_size = None
-        elif corner_size is None:
+
+        if corner_size is None:
             corner_size = 0.0
 
         self._corner_size = corner_size
