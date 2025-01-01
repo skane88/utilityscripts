@@ -137,6 +137,11 @@ class AS4100Section(ABC):
         For complex sections can be a CompoundGeometry object
         as this is a sub-class of Geometry.
 
+        Notes
+        -----
+        This property should create the geometry if it has not already been created.
+        The returned section should not include any localised holes (e.g. bolt holes).
+
         Returns
         -------
         Geometry
@@ -537,9 +542,27 @@ class ISection(AS4100Section):
         """
         return self._n_r
 
-    def _make_geometry(self):
+    def _make_geometry(self) -> Geometry:
         """
         A private method to make the geometry for the section.
+        Sets the _geometry property.
+
+        Notes
+        -----
+        This method does not include any localised holes (e.g. bolt holes).
+        """
+
+        geom = self._base_geometry()
+        self._geometry = geom
+
+    def _base_geometry(self) -> Geometry:
+        """
+        A private method to make the base geometry for the section.
+
+        Returns
+        -------
+        Geometry :
+            A geometry object representing the I Section.
         """
 
         points_a = [(self.b_fb / 2, 0), (self.b_fb / 2, self.t_fb)]
