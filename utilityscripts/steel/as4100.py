@@ -314,6 +314,8 @@ class ISection(AS4100Section):
         self._corner_size = corner_size
         self._n_r = n_r
 
+        self._holes = []
+
     @property
     def f_yw(self) -> float:
         """
@@ -614,7 +616,7 @@ class ISection(AS4100Section):
 
         all_points = points_a + points_b + points_c + points_d + points_e
         poly = Polygon(all_points)
-        self._geometry = Geometry(geom=poly)
+        return Geometry(geom=poly)
 
     @property
     def geometry(self) -> Geometry:
@@ -630,6 +632,39 @@ class ISection(AS4100Section):
             self._make_geometry()
 
         return self._geometry
+
+    @property
+    def holes(self) -> list[str, tuple[float, float]]:
+        """
+        The holes in the section.
+
+        Returns :
+        -------
+        list[str, tuple[float, float]]
+            A list of holes, where each hole is a tuple of (hole_location, (diameter, offset from CL))
+        """
+
+        return self._holes
+
+    def add_holes(self, holes: list[str, tuple[float, float]]) -> AS4100Section:
+        """
+        Add holes to the section.
+
+        Parameters
+        ----------
+        holes : list[str, tuple[float, float]]
+            A list of holes, where each hole is a tuple of (hole_location, (diameter, offset from CL))
+            The hole offset indicates the top or bottom flange or web. Valid locations are:
+                "top-left", "top-right", "bottom-left", "bottom-right", "web"
+            The offset from the CL should be +ve for the flanges. For the web it can be either +ve or -ve.
+
+        Returns
+        -------
+        AS4100Section
+            A new AS4100Section object with the added holes.
+        """
+
+        return self._copy_with_new(**{"_holes": self.holes + holes})
 
     @property
     def area_gross(self) -> float:
