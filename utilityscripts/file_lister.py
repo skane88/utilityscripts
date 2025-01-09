@@ -6,7 +6,8 @@ to save the list to a text file.
 from pathlib import Path
 
 from rich.prompt import Confirm
-from ui_funcs import get_folder
+
+from utilityscripts.ui_funcs import get_folder
 
 
 def main():
