@@ -47,19 +47,27 @@ class SteelGrade:
         f_u: list[float] | np.ndarray,
     ):
         """
+        Represents a steel material, with different yield strengths
+        (and potentially ultimate strengths) at different thicknesses.
 
-        :param standard: The standard the steel is made to.
-        :param current: Is the steel a currently produced steel?
-        :param form: The form of the steel (e.g. plate, section etc.).
-        :param grade: The grade designation.
-        :param thickness: An array of thicknesses.
-            Must be sorted smallest to largest.
+        Parameters
+        ----------
+        standard : str
+            The standard the steel is made to.
+        current : bool
+            Is the steel a currently produced steel?
+        form : str
+            The form of the steel (e.g. plate, section etc.).
+        grade : str
+            The grade designation.
+        thickness : array_like
+            An array of thicknesses. Must be sorted smallest to largest.
             Typ. should start at 0 thick, or whatever minimum thickness
             the steel is produced in.
-        :param f_y: An array of yield strengths.
-            Should be sorted to match thickness.
-        :param f_u: An array of ultimate strengths.
-            Should be sorted to match thickness.
+        f_y : array_like
+            An array of yield strengths. Should be sorted to match thickness.
+        f_u : array_like
+            An array of ultimate strengths. Should be sorted to match thickness.
         """
 
         if len(thickness) != len(f_y) or len(thickness) != len(f_u):
@@ -77,7 +85,10 @@ class SteelGrade:
         """
         Get the yield strength at a given thickness.
 
-        :param thickness: The thickness to test.
+        Parameters
+        ----------
+        thickness : float
+            The thickness to test.
         """
 
         return np.interp(x=thickness, xp=self.thickness, fp=self.f_y)
@@ -86,7 +97,10 @@ class SteelGrade:
         """
         Get the ultimate strength at a given thickness.
 
-        :param thickness: The thickness to test.
+        Parameters
+        ----------
+        thickness : float
+            The thickness to test.
         """
 
         return np.interp(x=thickness, xp=self.thickness, fp=self.f_u)
@@ -95,7 +109,10 @@ class SteelGrade:
         """
         Plot the strength of the steel vs thickness.
 
-        :param strength: Either 'f_y' or 'f_u' or 'both'
+        Parameters
+        ----------
+        strength : str
+            Either 'f_y' or 'f_u' or 'both'
         """
 
         if strength != "f_y":
@@ -783,7 +800,10 @@ def i_section_df(
     """
     Get a Pandas Dataframe with all the Australian Standard I sections.
 
-    :param steel_grade: An optional SteelGrade object or dictionary to assign
+    Parameters
+    ----------
+    steel_grade : None | SteelGrade | dict[str, SteelGrade]
+        An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -833,7 +853,10 @@ def i_sections(
     """
     Build a dictionary of all the standard Australian I sections.
 
-    :param steel_grade: An optional SteelGrade object or dictionary to assign
+    Parameters
+    ----------
+    steel_grade : None | SteelGrade | dict[str, SteelGrade]
+        An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -862,7 +885,10 @@ def c_section_df(
     """
     Get a Polars DataFrame with all the Australian Standard C sections.
 
-    :param steel_grade: An optional SteelGrade object or dictionary to assign
+    Parameters
+    ----------
+    steel_grade : None | SteelGrade | dict[str, SteelGrade]
+        An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -911,7 +937,11 @@ def c_sections(
 ) -> dict[str, CSectionData]:
     """
     Build a dictionary of the standard Australian C sections.
-    :param steel_grade: An optional SteelGrade object or dictionary to assign
+
+    Parameters
+    ----------
+    steel_grade : None | SteelGrade | dict[str, SteelGrade]
+        An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -942,7 +972,10 @@ def angle_section_df(
     """
     Get a Polars DataFrame with all the Australian Standard Angle sections.
 
-    :param steel_grade: An optional SteelGrade object or dictionary to assign
+    Parameters
+    ----------
+    steel_grade : None | SteelGrade | dict[str, SteelGrade]
+        An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -983,7 +1016,10 @@ def angle_sections(
     """
     Build a dictionary of the standard Australian angle sections.
 
-    :param steel_grade: An optional SteelGrade object or dictionary to assign
+    Parameters
+    ----------
+    steel_grade : None | SteelGrade | dict[str, SteelGrade]
+        An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -1014,7 +1050,10 @@ def rhs_section_df(
     """
     Get a Polars DataFrame with all the Australian Standard RHS & SHS sections.
 
-    :param steel_grade: An optional SteelGrade object or dictionary to assign
+    Parameters
+    ----------
+    steel_grade : None | SteelGrade | dict[str, SteelGrade]
+        An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -1053,7 +1092,10 @@ def rhs_sections(
     """
     Build a dictionary of the standard Australian angle sections.
 
-    :param steel_grade: An optional SteelGrade object or dictionary to assign
+    Parameters
+    ----------
+    steel_grade : None | SteelGrade | dict[str, SteelGrade]
+        An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -1086,7 +1128,10 @@ def chs_section_df(
     """
     Get a Polars DataFrame with all the Australian Standard CHS sections.
 
-    :param steel_grade: An optional SteelGrade object or dictionary to assign
+    Parameters
+    ----------
+    steel_grade : None | SteelGrade | dict[str, SteelGrade]
+        An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -1125,7 +1170,10 @@ def chs_sections(
     """
     Build a dictionary of the standard Australian CHS sections.
 
-    :param steel_grade: An optional SteelGrade object or dictionary to assign
+    Parameters
+    ----------
+    steel_grade : None | SteelGrade | dict[str, SteelGrade]
+        An optional SteelGrade object or dictionary to assign
         to the sections. For different section types (e.g. WB vs UB),
         specify the grade as a dictionary: {designation: SteelGrade}.
         If a designation is missed, sections will be assigned a grade
@@ -1172,10 +1220,15 @@ def nearest_standard_plate(
     """
     Return the nearest standard plate to the specified thickness.
 
-    :param thickness: The thickness to test.
-    :param greater_than: If True, return the next largest or equal plate,
+    Parameters
+    ----------
+    thickness : float
+        The thickness to test.
+    greater_than : bool
+        If True, return the next largest or equal plate,
         If False return the next smallest or equal plate.
-    :param plate_df: Optionally pass a Dataframe of plates in rather than using
+    plate_df : pd.DataFrame | None
+        Optionally pass a Dataframe of plates in rather than using
         the one generated by standard_plate_df.
         The intent is to allow a DF with units attached to be passed in
         as well if required.
@@ -1211,10 +1264,15 @@ def nearest_standard_weld(
     """
     Return the nearest standard weld size to the specified size.
 
-    :param size: The size to test.
-    :param greater_than: If True, return the next largest or equal weld,
+    Parameters
+    ----------
+    size : float
+        The size to test.
+    greater_than : bool
+        If True, return the next largest or equal weld,
         If False return the next smallest or equal weld.
-    :param weld_df: Optionally pass a Dataframe of welds in rather than using
+    weld_df : pd.DataFrame | None
+        Optionally pass a Dataframe of welds in rather than using
         the one generated by standard_weld_df.
         The intent is to allow a DF with units attached to be passed in
         as well if required.
@@ -1235,10 +1293,16 @@ def t_tp_chamfer(*, t_w, alpha, t_l=0, use_radians: bool = True):
     """
     Calculate the effective throat thickness of a chamfered plate.
 
-    :param t_w: The size of the weld leg welded to the plate.
-    :param alpha: The angle of the plate chamfer.
-    :param t_l: The size of any landing on the chamfer.
-    :param use_radians: Is alpha in radians or degrees.
+    Parameters
+    ----------
+    t_w : float
+        The size of the weld leg welded to the plate.
+    alpha : float
+        The angle of the plate chamfer.
+    t_l : float
+        The size of any landing on the chamfer.
+    use_radians : bool
+        Is alpha in radians or degrees.
     """
 
     if not use_radians:
@@ -1256,11 +1320,17 @@ def jack_bolt_effort(*, load, p, r_effort, r_bolt, mu, against: bool = True):
     """
     Calculate the force required to turn a jacking bolt.
 
-    :param load: The weight or load.
-    :param p: The pitch of the screw
-    :param r_effort: The radius of the effort force.
-    :param r_bolt: The radius of the screw / bolt.
-    :param mu: The assumed coefficient of friction.
+    Parameters
+    ----------
+    load : float
+        The weight or load.
+    p : float
+        The pitch of the screw
+    r_effort : float
+        The radius of the effort force.
+    r_bolt : float
+        The radius of the screw / bolt.
+    mu : float
         Note that for bolts this can vary dramatically depending on thread condition.
     :param against: Is the jacking against the load or with the load?
         Jacking against the load (e.g. raising a load under gravity)
@@ -1289,10 +1359,16 @@ def local_thickness_reqd(
     This assumes a 45deg load dispersion through the plate towards the support, ignoring and load transfer into
     the 2nd dimension.
 
-    :param point_force: The load to transfer.
-    :param f_y: The yield stress of the plate.
-    :param phi: A capacity reduction factor.
-    :param width_lever: A tuple containing the width of the applied load and the lever arm between load and support.
+    Parameters
+    ----------
+    point_force : float
+        The load to transfer.
+    f_y : float
+        The yield stress of the plate.
+    phi : float
+        A capacity reduction factor.
+    width_lever : tuple[float, float] | None
+        A tuple containing the width of the applied load and the lever arm between load and support.
         If None, the load is treated as a point load.
     """
 
@@ -1313,10 +1389,15 @@ def make_section(
     """
     Turn a sectionproperties Geometry object into a Section object.
 
-    :param geometry: The Geometry object to turn into the Section object.
-    :param alpha_mesh: The area of the largest mesh element,
+    Parameters
+    ----------
+    geometry : Geometry
+        The Geometry object to turn into the Section object.
+    alpha_mesh : float
+        The area of the largest mesh element,
         as a fraction of the overall area of the section.
-    :param calculate_properties: Calculate the properties?
+    calculate_properties : bool
+        Calculate the properties?
     """
 
     area = geometry.calculate_area()
@@ -1348,26 +1429,38 @@ def make_i_section(
     Generate an I Section using the section-properties library.
     A helper wrapper around the exist. i section functions.
 
-    :param b_f: The width of the top flange.
-    :param d: The section depth.
-    :param t_f: The top flange thickness.
-    :param t_w: The web thickness.
-    :param b_fb: The width of the bottom section.
+    Parameters
+    ----------
+    b_f : float
+        The width of the top flange.
+    d : float
+        The section depth.
+    t_f : float
+        The top flange thickness.
+    t_w : float
+        The web thickness.
+    b_fb : float | None
+        The width of the bottom section.
         Provide None for a symmetric section.
     :param t_fb: The bottom flange thickness.
         Provide None if both flanges the same.
-    :param corner_radius: The corner radius of the i-section.
+    corner_radius : float | None
+        The corner radius of the i-section.
         NOTE: If both a corner radius and a weld size are defined,
         priority is given to corner radii.
         If a weld is present, set corner_radius = None.
-    :param weld_size: The corner fillet weld (if any).
+    weld_size : float | None
+        The corner fillet weld (if any).
         NOTE: If both a corner radius and a weld size are defined,
         priority is given to corner radii.
         If a weld is present, set corner_radius = None.
-    :param n_r: The no. of points used to model the corner.
-    :param alpha_mesh: The area of the largest mesh element,
+    n_r : int
+        The no. of points used to model the corner.
+    alpha_mesh : float
+        The area of the largest mesh element,
         as a fraction of the overall area of the section.
-    :param calculate_properties: Calculate the properties?
+    calculate_properties : bool
+        Calculate the properties?
     """
 
     geometry = make_i_geometry(
@@ -1396,19 +1489,29 @@ def make_i_geometry(
     Generate an I Section using the section-properties library.
     A helper wrapper around the exist. i section functions.
 
-    :param b_f: The width of the top flange.
-    :param d: The section depth.
-    :param t_f: The top flange thickness.
-    :param t_w: The web thickness.
-    :param b_fb: The width of the bottom section.
+    Parameters
+    ----------
+    b_f : float
+        The width of the top flange.
+    d : float
+        The section depth.
+    t_f : float
+        The top flange thickness.
+    t_w : float
+        The web thickness.
+    b_fb : float | None
+        The width of the bottom section.
         Provide None for a symmetric section.
-    :param t_fb: The bottom flange thickness.
+    t_fb : float | None
+        The bottom flange thickness.
         Provide None if both flanges the same.
-    :param corner_radius: The corner radius of the i-section.
+    corner_radius : float | None
+        The corner radius of the i-section.
         NOTE: If both a corner radius and a weld size are defined,
         priority is given to corner radii.
         If a weld is present, set corner_radius = None.
-    :param weld_size: The corner fillet weld (if any).
+    weld_size : float | None
+        The corner fillet weld (if any).
         NOTE: If both a corner radius and a weld size are defined,
         priority is given to corner radii.
         If a weld is present, set corner_radius = None.
@@ -1476,11 +1579,18 @@ def eff_length(
     """
     Calculate the effective length back-calculated from the buckling load.
 
-    :param elastic_modulus: The elastic modulus of the section.
-    :param second_moment: The second moment of area about the axis which is buckling.
-    :param buckling_load: The buckling load.
-    :param k_e: Calculate the length factor k_e rather than the buckling length.
-    :param actual_length: The actual length of the section. Only used if k_e=True.
+    Parameters
+    ----------
+    elastic_modulus : float
+        The elastic modulus of the section.
+    second_moment : float
+        The second moment of area about the axis which is buckling.
+    buckling_load : float
+        The buckling load.
+    k_e : bool
+        Calculate the length factor k_e rather than the buckling length.
+    actual_length : float | None
+        The actual length of the section. Only used if k_e=True.
     """
 
     kel = (((pi**2) * elastic_modulus * second_moment) / buckling_load) ** 0.5
@@ -1500,8 +1610,10 @@ class OverplatedSection:
     """
     Creates an overplated section with an overplate on the top & bottom.
 
-    NOTE: Overplates are centred on the section.
-    NOTE 2: This will work best with a symmetric or mono-symmetric I section,
+    Notes
+    -----
+    - Overplates are centred on the section.
+    - This will work best with a symmetric or mono-symmetric I section,
         with other sections your mileage may vary until I update it.
     """
 
@@ -1517,16 +1629,24 @@ class OverplatedSection:
         """
         Create an overplated I section.
 
-        :param base_section: The section to overplate.
-        :param t_op_top: The thickness of the top overplate.
+        Parameters
+        ----------
+        base_section : Section
+            The section to overplate.
+        t_op_top : float | None
+            The thickness of the top overplate.
             Use None if no overplate on top.
-        :param b_op_top: The width of the top overplate.
+        b_op_top : float | None
+            The width of the top overplate.
             Use None if no overplate on top.
-        :param t_op_bottom: The thickness of the bottom overplate.
+        t_op_bottom : float | None
+            The thickness of the bottom overplate.
             Use None if no overplate on bottom.
-        :param b_op_bottom: The width of the bottom overplate.
+        b_op_bottom : float | None
+            The width of the bottom overplate.
             Use None if no overplate on the bottom.
-        :param alpha_mesh_size: How big should the largest mesh element be,
+        alpha_mesh_size : float
+            How big should the largest mesh element be,
             as a fraction of the total area of the shape?
         """
 
