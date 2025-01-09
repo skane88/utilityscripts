@@ -15,6 +15,11 @@ from shapely import Polygon
 
 from utilityscripts.steel.steel import SteelGrade
 
+PHI_STEEL = {"φ_s": 0.90, "φ_w.sp": 0.80, "φ_w.gp": 0.60}
+PHI_STEEL["steel"] = PHI_STEEL["φ_s"]
+PHI_STEEL["weld, sp"] = PHI_STEEL["φ_w.sp"]
+PHI_STEEL["weld, gp"] = PHI_STEEL["φ_w.gp"]
+
 
 class CornerDetail(Enum):
     WELD = "weld"
