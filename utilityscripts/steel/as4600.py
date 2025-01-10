@@ -5,7 +5,7 @@ Python file to determine steel design properties based on AS4600
 from math import pi
 
 
-def f_cr_plate(k, elastic_modulus, thickness, width, poisson_ratio=0.3):
+def f_cr_plate(*, k, elastic_modulus, thickness, width, poisson_ratio=0.3):
     """
     Calculate the critical buckling stress of a plate element.
 
@@ -33,7 +33,7 @@ def f_cr_plate(k, elastic_modulus, thickness, width, poisson_ratio=0.3):
     ) ** 2
 
 
-def slenderness_ratio(f_star, f_cr):
+def slenderness_ratio(*, f_star, f_cr):
     """
     Calculate the slenderness ratio of an element as per AS4600 S2.2.1.2
 
@@ -69,7 +69,7 @@ def rho(slenderness):
     return min(1.0, (1 - 0.22 / slenderness) / slenderness)
 
 
-def phi_v_f_tearout_s5_3_2(f_u, f_y):
+def phi_v_f_tearout_s5_3_2(*, f_u, f_y):
     """
     Calculate the partial safety factor for the tearout capacity of a bolt hole,
     as per AS4600 S5.3.2
@@ -88,7 +88,7 @@ def phi_v_f_tearout_s5_3_2(f_u, f_y):
     return 0.60
 
 
-def v_f_tearout_s5_3_2(t, e, f_u):
+def v_f_tearout_s5_3_2(*, t, e, f_u):
     """
     Calculate the tearout capacity of a bolt hole, ignoring deformation,
     as per AS4600 S5.3.2
@@ -106,7 +106,7 @@ def v_f_tearout_s5_3_2(t, e, f_u):
     return t * e * f_u
 
 
-def n_f_s5_3_3(d_f, s_f, a_n, f_u):
+def n_f_s5_3_3(*, d_f, s_f, a_n, f_u):
     """
     Calculate the net tension capacity of the section at bolt holes,
     as per AS4600 S5.3.3
@@ -127,7 +127,7 @@ def n_f_s5_3_3(d_f, s_f, a_n, f_u):
     return (0.9 + (0.1 * d_f / s_f)) * a_n * f_u
 
 
-def v_b_s5_3_4_2(alpha, c, d_f, t, f_u):
+def v_b_s5_3_4_2(*, alpha, c, d_f, t, f_u):
     """
     Calculate the bearing capacity of a bolt hole, ignoring deformation,
     as per AS4600 S5.4.3.2
