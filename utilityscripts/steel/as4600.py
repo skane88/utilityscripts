@@ -4,6 +4,8 @@ Python file to determine steel design properties based on AS4600
 
 from math import pi
 
+import numpy as np
+
 
 def f_cr_plate(*, k, elastic_modulus, thickness, width, poisson_ratio=0.3):
     """
@@ -52,7 +54,7 @@ def slenderness_ratio(*, f_star, f_cr):
     return (f_star / f_cr) ** 0.5
 
 
-def rho(slenderness):
+def rho(*, slenderness):
     """
     Calculate the effective width factor for the given slenderness ratio.
 
@@ -171,3 +173,118 @@ def c_t5_3_4_2(*, d_f, t):
         return 4 - 0.1 * (d_f / t)
 
     return 1.8
+
+
+def n_t_s5_4_2_3(*, d_f, s_f, a_n, f_u, no_rows):
+    """
+    Calculate the net tension capacity of a screwed connection,
+    as per AS4600 S5.4.2.3.
+
+    Parameters
+    ----------
+    d_f : float
+        The nominal fastener diameter.
+    s_f : float
+        The spacing between bolt holes, perpendicular to the direction of loading.
+        If a single bolt hole, use the width of the sheet.
+    a_n : float
+        The net area of the section.
+    f_u : float
+        The ultimate tensile strength of the plate.
+    no_rows : int
+        The number of rows of bolt holes in the direction of loading.
+    """
+
+    n_t_net = a_n * f_u
+
+    if no_rows != 1:
+        return n_t_net
+
+    return min((2.5 * d_f / s_f) * n_t_net, n_t_net)
+
+
+def v_b_s5_4_2_4(*, d_f, t_1, t_2, f_u_1, f_u_2):
+    """
+    Calculate the bearing capacity of a screwed connection,
+    as per AS4600 S5.4.2.4.
+
+    Parameters
+    ----------
+    d_f : float
+        The nominal fastener diameter.
+    t_1 : float
+        The thickness of the part in contact with the screw head.
+    t_2 : float
+        The thickness of the part not in contact with the screw head.
+    f_u_1 : float
+        The ultimate tensile strength of the part in contact with the screw head.
+    f_u_2 : float
+        The ultimate tensile strength of the part not in contact with the screw head.
+    """
+
+    c_1 = c_5_4_2_4(d_f=d_f, t=t_1)
+    c_2 = c_5_4_2_4(d_f=d_f, t=t_2)
+
+    v_b_1 = c_1 * t_1 * d_f * f_u_1
+    v_b_2 = c_2 * t_2 * d_f * f_u_2
+    v_b_3 = 4.2 * (t_2**3 * d_f) ** 0.5 * f_u_2
+
+    t_ratio = t_2 / t_1
+
+    ratio = np.asarray([1.0, 2.5])
+    vals = np.asarray([min(v_b_1, v_b_2, v_b_3), min(v_b_1, v_b_2)])
+
+    return np.interp(t_ratio, ratio, vals)
+
+
+def c_5_4_2_4(*, d_f, t):
+    """
+    Calculate the bearing factor for a screw hole, as per AS4600 S5.4.2.4
+    """
+
+    d_f_t = d_f / t
+
+    if d_f_t < 6:  # noqa: PLR2004
+        return 2.7
+
+    if d_f_t <= 13.0:  # noqa: PLR2004
+        return 3.3 - 0.1 * d_f_t
+
+    return 2.0
+
+
+def phi_v_f_tearout_s5_4_2_5(*, f_u, f_y):
+    """
+    Calculate the partial safety factor for the tearout capacity of a
+    screwed connection, as per AS4600 S5.4.2.5
+
+    Parameters
+    ----------
+    f_u : float
+        The ultimate tensile strength of the plate.
+    f_y : float
+        The yield strength of the plate.
+    """
+
+    if f_u / f_y >= 1.05:  # noqa: PLR2004
+        return 0.70
+
+    return 0.60
+
+
+def v_f_tearout_s5_4_2_5(*, t, e, f_u):
+    """
+    Calculate the tearout capacity of a screwed connection,
+    as per AS4600 S5.4.2.5
+
+    Parameters
+    ----------
+    t : float
+        The thickness of the plate.
+    e : float
+        The edge distance.
+    f_u : float
+        The ultimate tensile strength of the plate.
+    """
+
+    return t * e * f_u
