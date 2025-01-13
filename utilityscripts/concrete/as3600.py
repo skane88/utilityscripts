@@ -4,9 +4,228 @@ Contains modules for working with concrete to AS3600
 
 from math import cos, pi, radians, sin, tan
 
+import numpy as np
+
 D500N_STRESS_STRAIN = [[-0.05, -0.0025, 0, 0.0025, 0.05], [-500, -500, 0, 500, 500]]
 D500L_STRESS_STRAIN = [[-0.015, -0.0025, 0, 0.0025, 0.015], [-500, -500, 0, 500, 500]]
 R250N_STRESS_STRAIN = [[-0.05, -0.0025, 0, 0.0025, 0.05], [-500, -500, 0, 500, 500]]
+
+
+STANDARD_GRADES = {
+    "f_c": [20, 25, 32, 40, 50, 65, 80, 100, 120],
+    "f_cm": [25, 31, 39, 48, 59, 75, 91, 110, 128],
+    "f_cmi": [22, 28, 35, 43, 53, 68, 82, 99, 115],
+    "E_c": [24000, 26700, 30100, 32800, 34800, 37400, 39600, 42200, 44400],
+}
+
+
+def get_f_cm(f_c):
+    """
+    Determine the mean compressive strength, based on the values given in
+    AS3600-2018 Table 3.1.2
+    """
+
+    f_c_vals = np.asarray(STANDARD_GRADES["f_c"])
+    f_cm_vals = np.asarray(STANDARD_GRADES["f_cm"])
+
+    return np.interp(f_c, f_c_vals, f_cm_vals)
+
+
+def get_f_cmi(f_c):
+    """
+    Determine the mean in-situ compressive strength, based on the values given in
+    AS3600-2018 Table 3.1.2
+    """
+
+    f_c_vals = np.asarray(STANDARD_GRADES["f_c"])
+    f_cmi_vals = np.asarray(STANDARD_GRADES["f_cmi"])
+
+    return np.interp(f_c, f_c_vals, f_cmi_vals)
+
+
+class Concrete:
+    """
+    Class to represent a concrete material.
+    """
+
+    def __init__(
+        self,
+        f_c: float,
+        *,
+        density: float | None = 2400,
+        f_cm: float | None = None,
+        f_cmi: float | None = None,
+        elastic_modulus: float | None = None,
+    ):
+        """
+        Initialise the concrete material.
+
+        Parameters
+        ----------
+        f_c : float
+            The characteristic compressive strength of the concrete.
+        density : float
+            The density of the concrete.
+            Default value is 2400 kg/m³.
+        f_cm : float
+            The mean compressive strength of the concrete.
+            If not provided, it is calculated based on the characteristic
+            compressive strength.
+        f_cmi : float
+            The mean in-situ compressive strength of the concrete.
+            If not provided, it is calculated based on the characteristic
+            compressive strength.
+        elastic_modulus : float
+            The elastic modulus of the concrete.
+            If not provided, it is calculated based on the characteristic
+            compressive strength.
+        """
+
+        self._f_c = f_c
+        self._density = density
+        self._f_cm = f_cm
+        self._f_cmi = f_cmi
+        self._elastic_modulus = elastic_modulus
+
+    @property
+    def f_c(self):
+        """
+        Return the characteristic compressive strength of the concrete.
+        """
+
+        return self._f_c
+
+    @property
+    def density(self):
+        """
+        Return the density of the concrete.
+        """
+
+        return self._density
+
+    @property
+    def f_cm(self):
+        """
+        Return the mean compressive strength of the concrete.
+
+        Notes
+        -----
+        If the value was not provided, it is calculated based on Table 3.1.2 in
+        AS3600-2018.
+        """
+
+        if self._f_cm is None:
+            self._f_cm = get_f_cm(self._f_c)
+
+        return self._f_cm
+
+    @property
+    def f_cmi(self):
+        """
+        Return the mean in-situ compressive strength of the concrete.
+
+        Notes
+        -----
+        If the value was not provided, it is calculated based on Table 3.1.2 in
+        AS3600-2018.
+        """
+
+        if self._f_cmi is None:
+            self._f_cmi = get_f_cmi(self._f_c)
+
+        return self._f_cmi
+
+    @property
+    def elastic_modulus(self):
+        """
+        Return the elastic modulus of the concrete.
+
+        Notes
+        -----
+        If the value was not provided, it is calculated based on Table 3.1.2 in
+        AS3600-2018.
+        """
+
+        if self._elastic_modulus is not None:
+            return self._elastic_modulus
+
+        if self.f_cmi <= 40:  # noqa: PLR2004
+            self._elastic_modulus = (self.density**1.5) * (0.043 * (self.f_cmi) ** 0.5)
+        else:
+            self._elastic_modulus = (self.density**1.5) * (
+                0.024 * (self.f_cmi) ** 0.5 + 0.12
+            )
+
+        return self._elastic_modulus
+
+    @property
+    def f_ctf(self):
+        """
+        Calculate the characteristic flexural strength of the concrete
+        as per AS3600 S3.1.1.3.
+        """
+
+        return 0.6 * (self.f_c**0.5)
+
+    @property
+    def f_ct(self):
+        """
+        Calculate the characteristic tensile strength of the concrete
+        as per AS3600 S3.1.1.3.
+        """
+
+        return 0.36 * (self.f_c**0.5)
+
+
+class Steel:
+    """
+    Class to represent a steel material.
+    """
+
+    def __init__(
+        self,
+        *,
+        f_sy: float,
+        elastic_modulus: float,
+        yield_strain: float,
+        ductility: "str",
+    ):
+        self._f_sy = f_sy
+        self._elastic_modulus = elastic_modulus
+        self._yield_strain = yield_strain
+        self._ductility = ductility
+
+    @property
+    def f_sy(self) -> float:
+        """
+        Return the yield strength of the steel.
+        """
+
+        return self._f_sy
+
+    @property
+    def elastic_modulus(self) -> float:
+        """
+        Return the elastic modulus of the steel.
+        """
+
+        return self._elastic_modulus
+
+    @property
+    def yield_strain(self) -> float:
+        """
+        Return the yield strain of the steel.
+        """
+
+        return self._yield_strain
+
+    @property
+    def ductility(self) -> str:
+        """
+        Return the ductility of the steel.
+        """
+
+        return self._ductility
 
 
 def cot(angle) -> float:
