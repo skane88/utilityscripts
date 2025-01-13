@@ -186,9 +186,9 @@ class Steel:
         self,
         *,
         f_sy: float,
-        elastic_modulus: float,
-        yield_strain: float,
-        ductility: "str",
+        elastic_modulus: float = 200e3,
+        yield_strain: float | None = None,
+        ductility: str = "N",
     ):
         self._f_sy = f_sy
         self._elastic_modulus = elastic_modulus
@@ -216,6 +216,9 @@ class Steel:
         """
         Return the yield strain of the steel.
         """
+
+        if self._yield_strain is None:
+            return self.f_sy / self.elastic_modulus
 
         return self._yield_strain
 
@@ -881,9 +884,7 @@ class RectBeam:
         d: float,
         concrete: Concrete,
         steel: Steel,
-        bot_cover: float,
-        top_cover: float,
-        side_cover: float,
+        cover: float | dict[str, float],
         bot_dia: float | None = None,
         bot_no: float | None = None,
         top_dia: float | None = None,
@@ -908,12 +909,11 @@ class RectBeam:
             A Concrete material object.
         steel : Steel
             A Steel material object.
-        bot_cover : float
-            The cover to the bottom reinforcement.
-        top_cover : float
-            The cover to the top reinforcement.
-        side_cover : float
-            The cover to the side reinforcement.
+        cover : float | dict[str, float]
+            The cover to the reinforcement.
+            If a float is provided, it is assumed to be the same for all reinforcement.
+            If a dictionary is provided, it should contain the keys
+            "bot", "top" & "side".
         bot_dia : float
             The diameter of the bottom reinforcement.
         bot_no : float
@@ -940,9 +940,6 @@ class RectBeam:
         self._d = d
         self._concrete = concrete
         self._steel = steel
-        self._bot_cover = bot_cover
-        self._top_cover = top_cover
-        self._side_cover = side_cover
         self._bot_dia = bot_dia
         self._bot_no = bot_no
         self._top_dia = top_dia
@@ -953,6 +950,15 @@ class RectBeam:
         self._shear_no_ligs = shear_no_ligs
         self._shear_spacing = shear_spacing
         self._shear_steel = shear_steel
+
+        if isinstance(cover, (int, float)):
+            self._bot_cover = float(cover)
+            self._top_cover = float(cover)
+            self._side_cover = float(cover)
+        else:
+            self._bot_cover = cover["bot"]
+            self._top_cover = cover["top"]
+            self._side_cover = cover["side"]
 
     @property
     def b(self):
@@ -1035,6 +1041,9 @@ class RectBeam:
         Return the total area of the top reinforcement.
         """
 
+        if self.top_no is None:
+            return 0.0
+
         return self.top_bar_area * self.top_no
 
     @property
@@ -1104,6 +1113,9 @@ class RectBeam:
         Return the total area of the bottom reinforcement.
         """
 
+        if self.bot_no is None:
+            return 0.0
+
         return self.bot_bar_area * self.bot_no
 
     @property
@@ -1161,6 +1173,9 @@ class RectBeam:
         """
         Return the total area of the side reinforcement.
         """
+
+        if self.side_no is None:
+            return 0.0
 
         return self.side_bar_area * self.side_no * 2
 
