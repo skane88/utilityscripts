@@ -246,6 +246,16 @@ def cot(angle) -> float:
     return 1 / tan(angle)
 
 
+def circle_area(diameter):
+    """
+    Calculate the area of a circle.
+
+    :param dia: the diameter of the circle.
+    """
+
+    return pi * (diameter**2) / 4
+
+
 def alpha_2(f_c):
     """
     Calculate parameter alpha_2 as per AS3600-2018.
@@ -848,3 +858,421 @@ def l_syt(*, f_c, f_sy, d_b, k_1=1.0, k_3=1.0, k_4=1.0, k_5=1.0):
     l_min = 0.058 * f_sy * k_1 * d_b
 
     return max(l_calc, l_min)
+
+
+class RectBeam:
+    """
+    Class to represent a simple rectangular beam.
+
+    Notes
+    -----
+    - At this point only top, bottom & side reinforcement will be considered.
+    - Only rectangular sections will be considered.
+    - All steel assumed to be the same grade.
+    - All reo is assumed to be evenly distributed across the relevant face.
+
+    For more complex sections recommend using the `concreteproperties` package.
+    """
+
+    def __init__(
+        self,
+        *,
+        b: float,
+        d: float,
+        concrete: Concrete,
+        steel: Steel,
+        bot_cover: float,
+        top_cover: float,
+        side_cover: float,
+        bot_dia: float | None = None,
+        bot_no: float | None = None,
+        top_dia: float | None = None,
+        top_no: float | None = None,
+        side_dia: float | None = None,
+        side_no: float | None = None,
+        shear_dia: float | None = None,
+        shear_no_ligs: float | None = None,
+        shear_spacing: float | None = None,
+        shear_steel: Steel | None = None,
+    ):
+        """
+        Initialize the RectBeam class.
+
+        Parameters
+        ----------
+        b : float
+            The width of the beam.
+        d : float
+            The depth of the beam.
+        concrete : Concrete
+            A Concrete material object.
+        steel : Steel
+            A Steel material object.
+        bot_cover : float
+            The cover to the bottom reinforcement.
+        top_cover : float
+            The cover to the top reinforcement.
+        side_cover : float
+            The cover to the side reinforcement.
+        bot_dia : float
+            The diameter of the bottom reinforcement.
+        bot_no : float
+            The number of bottom reinforcement bars.
+        top_dia : float
+            The diameter of the top reinforcement.
+        top_no : float
+            The number of top reinforcement bars.
+        side_dia : float
+            The diameter of the side reinforcement.
+        side_no : float
+            The number of side reinforcement bars.
+        shear_dia : float
+            The diameter of the shear reinforcement.
+        shear_no_ligs : float
+            The number of legs of shear reinforcement.
+        shear_spacing : float
+            The spacing of the shear reinforcement.
+        shear_steel : Steel | None
+            The shear reinforcement.
+        """
+
+        self._b = b
+        self._d = d
+        self._concrete = concrete
+        self._steel = steel
+        self._bot_cover = bot_cover
+        self._top_cover = top_cover
+        self._side_cover = side_cover
+        self._bot_dia = bot_dia
+        self._bot_no = bot_no
+        self._top_dia = top_dia
+        self._top_no = top_no
+        self._side_dia = side_dia
+        self._side_no = side_no
+        self._shear_dia = shear_dia
+        self._shear_no_ligs = shear_no_ligs
+        self._shear_spacing = shear_spacing
+        self._shear_steel = shear_steel
+
+    @property
+    def b(self):
+        """
+        Return the width of the beam.
+        """
+
+        return self._b
+
+    @property
+    def d(self):
+        """
+        Return the depth of the beam.
+        """
+
+        return self._d
+
+    @property
+    def concrete(self) -> Concrete:
+        """
+        Return a Concrete material object.
+        """
+
+        return self._concrete
+
+    @property
+    def steel(self) -> Steel:
+        """
+        Return a Steel material object.
+        """
+
+        return self._steel
+
+    @property
+    def modular_ratio(self):
+        """
+        Return the modular ratio of the steel & concrete.
+        """
+
+        return self.steel.elastic_modulus / self.concrete.elastic_modulus
+
+    @property
+    def top_dia(self):
+        """
+        Return the diameter of the top reinforcement.
+        """
+
+        if self._top_dia is None:
+            return 0
+
+        return self._top_dia
+
+    @property
+    def y_top(self):
+        """
+        Return the y-coordinate of the top reinforcement.
+        """
+
+        return self.d - self.top_cover - self.shear_dia - self.top_dia / 2
+
+    @property
+    def top_bar_area(self):
+        """
+        Return the area of the top reinforcement bars.
+        """
+
+        return circle_area(self.top_dia)
+
+    @property
+    def top_no(self):
+        """
+        Return the number of top reinforcement bars.
+        """
+
+        return self._top_no
+
+    @property
+    def area_steel_top(self):
+        """
+        Return the total area of the top reinforcement.
+        """
+
+        return self.top_bar_area * self.top_no
+
+    @property
+    def top_cover(self):
+        """
+        Return the cover to the top reinforcement.
+        """
+
+        return self._top_cover
+
+    @property
+    def top_bar_centres(self) -> list[tuple[float, float]]:
+        """
+        Return the centres of the top reinforcement bars.
+        """
+
+        if self.top_no is None or self.top_dia == 0:
+            return []
+
+        if self.top_no == 1:
+            return [(0, self.y_top)]
+
+        x_min = -self.b / 2 + (self.side_cover + self.shear_dia + self.top_dia / 2)
+        x_max = self.b / 2 - (self.side_cover + self.shear_dia + self.top_dia / 2)
+        centre_to_centre = (x_max - x_min) / (self.top_no - 1)
+
+        return [(x_min + i * centre_to_centre, self.y_top) for i in range(self.top_no)]
+
+    @property
+    def bot_dia(self):
+        """
+        Return the diameter of the bottom reinforcement.
+        """
+
+        if self._bot_dia is None:
+            return 0
+
+        return self._bot_dia
+
+    @property
+    def y_bot(self):
+        """
+        Return the y-coordinate of the bottom reinforcement.
+        """
+
+        return self.bot_cover + self.shear_dia + self.bot_dia / 2
+
+    @property
+    def bot_bar_area(self):
+        """
+        Return the area of the bottom reinforcement bars.
+        """
+
+        return circle_area(self.bot_dia)
+
+    @property
+    def bot_no(self):
+        """
+        Return the number of bottom reinforcement bars.
+        """
+
+        return self._bot_no
+
+    @property
+    def area_steel_bot(self):
+        """
+        Return the total area of the bottom reinforcement.
+        """
+
+        return self.bot_bar_area * self.bot_no
+
+    @property
+    def bot_cover(self):
+        """
+        Return the cover to the bottom reinforcement.
+        """
+
+        return self._bot_cover
+
+    @property
+    def bot_bar_centres(self) -> list[tuple[float, float]]:
+        """
+        Return the centres of the bottom reinforcement bars.
+        """
+
+        if self.bot_dia == 0 or self.bot_no is None:
+            return []
+
+        if self.bot_no == 1:
+            return [(0, self.y_bot)]
+
+        x_min = -self.b / 2 + (self.side_cover + self.shear_dia + self.bot_dia / 2)
+        x_max = self.b / 2 - (self.side_cover + self.shear_dia + self.bot_dia / 2)
+        centre_to_centre = (x_max - x_min) / (self.bot_no - 1)
+
+        return [(x_min + i * centre_to_centre, self.y_bot) for i in range(self.bot_no)]
+
+    @property
+    def side_dia(self):
+        """
+        Return the diameter of the side reinforcement.
+        """
+
+        return self._side_dia
+
+    @property
+    def side_bar_area(self):
+        """
+        Return the area of the side reinforcement bars.
+        """
+
+        return circle_area(self.side_dia)
+
+    @property
+    def side_no(self):
+        """
+        Return the number of side reinforcement bars per side.
+        """
+
+        return self._side_no
+
+    @property
+    def area_steel_side(self):
+        """
+        Return the total area of the side reinforcement.
+        """
+
+        return self.side_bar_area * self.side_no * 2
+
+    @property
+    def side_cover(self):
+        """
+        Return the cover to the side reinforcement.
+        """
+
+        return self._side_cover
+
+    @property
+    def side_bar_centres(self) -> list[tuple[float, float]]:
+        """
+        Return the centres of the side reinforcement bars.
+        """
+
+        if self.side_dia == 0 or self.side_no is None:
+            return []
+
+        y_bot = self.y_bot + self.bot_dia / 2
+        y_top = self.y_top - self.top_dia / 2
+
+        gap = y_top - y_bot
+        centre_to_centre = gap / (self.side_no + 1)
+
+        x_left = -self.b / 2 + (self.side_cover + self.shear_dia + self.side_dia / 2)
+        x_right = self.b / 2 - (self.side_cover + self.shear_dia + self.side_dia / 2)
+
+        return [
+            (x_left, y_bot + (i + 1) * centre_to_centre) for i in range(self.side_no)
+        ] + [(x_right, y_bot + (i + 1) * centre_to_centre) for i in range(self.side_no)]
+
+    @property
+    def area_steel(self):
+        """
+        Return the total area of the reinforcement.
+        """
+
+        return self.area_steel_top + self.area_steel_bot + self.area_steel_side
+
+    @property
+    def shear_dia(self):
+        """
+        Return the diameter of the shear reinforcement.
+        """
+
+        if self._shear_dia is None:
+            return 0
+
+        return self._shear_dia
+
+    @property
+    def shear_bar_area(self):
+        """
+        Return the area of the shear reinforcement bars.
+        """
+
+        return circle_area(self.shear_dia)
+
+    @property
+    def shear_no_ligs(self):
+        """
+        Return the number of legs of shear reinforcement.
+        """
+
+        if self._shear_no_ligs is None:
+            return 0
+
+        return self._shear_no_ligs
+
+    @property
+    def area_steel_shear(self):
+        """
+        Return the total area of the shear reinforcement.
+        """
+
+        return self.shear_bar_area * self.shear_no_ligs
+
+    @property
+    def shear_spacing(self):
+        """
+        Return the spacing of the shear reinforcement.
+        """
+
+        return self._shear_spacing
+
+    @property
+    def shear_steel(self) -> Steel:
+        """
+        Return the shear reinforcement steel object.
+        """
+
+        if self._shear_steel is None:
+            self._shear_steel = self.steel
+
+        return self._shear_steel
+
+    @property
+    def area_gross(self):
+        """
+        Return the gross area of the beam.
+        """
+
+        return self.b * self.d
+
+    @property
+    def transformed_area(self):
+        """
+        Return the transformed area of the beam.
+        """
+
+        return (
+            self.area_gross - self.area_steel
+        ) + self.area_steel * self.modular_ratio
