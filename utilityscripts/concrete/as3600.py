@@ -5,6 +5,7 @@ Contains modules for working with concrete to AS3600
 from math import cos, pi, radians, sin, tan
 
 import numpy as np
+from matplotlib import pyplot as plt
 
 D500N_STRESS_STRAIN = [[-0.05, -0.0025, 0, 0.0025, 0.05], [-500, -500, 0, 500, 500]]
 D500L_STRESS_STRAIN = [[-0.015, -0.0025, 0, 0.0025, 0.015], [-500, -500, 0, 500, 500]]
@@ -180,6 +181,8 @@ class Concrete:
 class Steel:
     """
     Class to represent a steel material.
+
+    The steel material is assumed to be linear elastic - perfectly plastic.
     """
 
     def __init__(
@@ -188,11 +191,30 @@ class Steel:
         f_sy: float,
         elastic_modulus: float = 200e3,
         yield_strain: float | None = None,
+        ultimate_strain: float = 0.1,
         ductility: str = "N",
     ):
+        """
+        Initialise the steel material.
+
+        Parameters
+        ----------
+        f_sy : float
+            The yield strength of the steel.
+        elastic_modulus : float
+            The elastic modulus of the steel.
+        yield_strain : float
+            The yield strain of the steel.
+        ultimate_strain : float
+            The ultimate strain of the steel.
+        ductility : str
+            The ductility of the steel.
+        """
+
         self._f_sy = f_sy
         self._elastic_modulus = elastic_modulus
         self._yield_strain = yield_strain
+        self._ultimate_strain = ultimate_strain
         self._ductility = ductility
 
     @property
@@ -223,12 +245,81 @@ class Steel:
         return self._yield_strain
 
     @property
+    def ultimate_strain(self) -> float:
+        """
+        Return the ultimate strain of the steel.
+        """
+
+        return self._ultimate_strain
+
+    @property
     def ductility(self) -> str:
         """
         Return the ductility of the steel.
         """
 
         return self._ductility
+
+    @property
+    def _strain_values(self) -> np.ndarray:
+        """
+        Return the strain values for the stress-strain curve.
+        """
+
+        return np.asarray(
+            [
+                -self.ultimate_strain,
+                -self.yield_strain,
+                0.0,
+                self.yield_strain,
+                self.ultimate_strain,
+            ]
+        )
+
+    @property
+    def _stress_values(self) -> np.ndarray:
+        """
+        Return the stress values for the stress-strain curve.
+        """
+
+        return np.asarray([-self.f_sy, -self.f_sy, 0.0, self.f_sy, self.f_sy])
+
+    def get_stress(self, strain: float) -> float:
+        """
+        Return the stress for a given strain.
+        If the strain is outside the range of -ve ultimate strain / +ve ultimate strain,
+        return 0.
+
+        Parameters
+        ----------
+        strain : float
+            The strain to calculate the stress for.
+
+        Returns
+        -------
+        float
+            The stress for the given strain.
+        """
+
+        return np.interp(
+            strain, self._strain_values, self._stress_values, left=0.0, right=0.0
+        )
+
+    def plot_stress_strain(self):
+        """
+        Plot the stress-strain curve for the steel.
+        """
+
+        plt.plot(self._strain_values, self._stress_values, label="Stress vs Strain")
+        plt.show()
+
+    def __repr__(self):
+        return (
+            f"{type(self).__name__}: f_sy: {self.f_sy} MPa, "
+            + f"ductility:'{self.ductility}', "
+            + f"Yield Strain: {self.yield_strain:.3%}, "
+            + f"Ultimate Strain: {self.ultimate_strain:.0%}"
+        )
 
 
 def cot(angle) -> float:
