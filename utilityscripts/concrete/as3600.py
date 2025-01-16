@@ -2,6 +2,8 @@
 Contains modules for working with concrete to AS3600
 """
 
+import sys
+from enum import StrEnum
 from math import cos, pi, radians, sin, tan
 
 import numpy as np
@@ -18,6 +20,16 @@ STANDARD_GRADES = {
     "f_cmi": [22, 28, 35, 43, 53, 68, 82, 99, 115],
     "E_c": [24000, 26700, 30100, 32800, 34800, 37400, 39600, 42200, 44400],
 }
+
+
+class SectType813(StrEnum):
+    """
+    An Enum to represent the 3x types of section referred to in S8.1.3 note 2.
+    """
+
+    RECTANGULAR = "rectangular"
+    CIRCULAR = "circular"
+    OTHER = "other"
 
 
 def get_f_cm(f_c):
@@ -53,10 +65,12 @@ class Concrete:
         self,
         f_c: float,
         *,
-        density: float | None = 2400,
+        density: float = 2400,
+        max_comp_strain: float = 0.003,
         f_cm: float | None = None,
         f_cmi: float | None = None,
         elastic_modulus: float | None = None,
+        sect_type: SectType813 = SectType813.RECTANGULAR,
     ):
         """
         Initialise the concrete material.
@@ -68,6 +82,9 @@ class Concrete:
         density : float
             The density of the concrete.
             Default value is 2400 kg/m³.
+        max_comp_strain : float
+            The maximum compressive strain of the concrete.
+            Default value is 0.003.
         f_cm : float
             The mean compressive strength of the concrete.
             If not provided, it is calculated based on the characteristic
@@ -80,13 +97,18 @@ class Concrete:
             The elastic modulus of the concrete.
             If not provided, it is calculated based on the characteristic
             compressive strength.
+        sect_type : SectType813
+            The type of section the concrete is formed into.
+            This is used to reduce alpha_2 as per note 2 in S8.1.3.
         """
 
         self._f_c = f_c
         self._density = density
+        self._max_comp_strain = max_comp_strain
         self._f_cm = f_cm
         self._f_cmi = f_cmi
         self._elastic_modulus = elastic_modulus
+        self._sect_type = sect_type
 
     @property
     def f_c(self):
@@ -103,6 +125,14 @@ class Concrete:
         """
 
         return self._density
+
+    @property
+    def max_comp_strain(self):
+        """
+        Return the maximum compressive strain of the concrete.
+        """
+
+        return self._max_comp_strain
 
     @property
     def f_cm(self):
@@ -176,6 +206,85 @@ class Concrete:
         """
 
         return 0.36 * (self.f_c**0.5)
+
+    @property
+    def alpha_2(self):
+        """
+        Calculate parameter alpha_2 as per AS3600-2018.
+        """
+
+        return alpha_2(f_c=self.f_c, sect_type=self._sect_type)
+
+    @property
+    def gamma(self):
+        """
+        Calculate parameter gamma as per AS3600-2018.
+        """
+
+        return gamma(self.f_c)
+
+    @property
+    def rect_strain(self):
+        """
+        Return the minimum strain for the rectangular stress block
+        """
+
+        return self.max_comp_strain * (1 - self.gamma)
+
+    @property
+    def _strain_values(self):
+        """
+        Return the strain values for the stress-strain curve.
+        """
+
+        return np.asarray(
+            [
+                0.0,
+                self.rect_strain - sys.float_info.epsilon,
+                self.rect_strain,
+                self.max_comp_strain,
+            ]
+        )
+
+    @property
+    def _stress_values(self):
+        """
+        Return the stress values for the stress-strain curve.
+        """
+
+        return np.asarray([0.0, 0.0, self.f_c * self.alpha_2, self.f_c * self.alpha_2])
+
+    def get_stress(self, strain: float) -> float:
+        """
+        Return the stress for a given strain.
+        If the strain is outside the range of -ve ultimate strain / +ve ultimate strain,
+        return 0.
+
+        Parameters
+        ----------
+        strain : float
+            The strain to calculate the stress for.
+
+        Returns
+        -------
+        float
+            The stress for the given strain.
+        """
+
+        return np.interp(
+            strain, self._strain_values, self._stress_values, left=0.0, right=0.0
+        )
+
+    def plot_stress_strain(self):
+        """
+        Plot the stress-strain curve for the steel.
+        """
+
+        plt.plot(self._strain_values, self._stress_values, label="Stress vs Strain")
+        plt.show()
+
+    def __repr__(self):
+        return f"{type(self).__name__}: f_c={self.f_c} MPa"
 
 
 class Steel:
@@ -350,14 +459,21 @@ def circle_area(diameter):
     return pi * (diameter**2) / 4
 
 
-def alpha_2(f_c):
+def alpha_2(f_c, *, sect_type: SectType813 = SectType813.RECTANGULAR):
     """
     Calculate parameter alpha_2 as per AS3600-2018.
 
     :param f_c: The characteristic compressive strength of the concrete
     """
 
-    return max(0.67, 0.85 - 0.0015 * f_c)
+    if sect_type == SectType813.RECTANGULAR:
+        multiplier = 1.00
+    elif sect_type == SectType813.CIRCULAR:
+        multiplier = 0.95
+    elif sect_type == SectType813.OTHER:
+        multiplier = 0.90
+
+    return max(0.67, 0.85 - 0.0015 * f_c) * multiplier
 
 
 def gamma(f_c):
