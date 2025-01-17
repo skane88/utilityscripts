@@ -474,18 +474,21 @@ def circle_area(diameter):
     return pi * (diameter**2) / 4
 
 
-def alpha_2(f_c, *, sect_type: SectType813 = SectType813.RECTANGULAR):
+def alpha_2(f_c, *, sect_type: SectType813 | str = SectType813.RECTANGULAR):
     """
     Calculate parameter alpha_2 as per AS3600-2018.
 
     :param f_c: The characteristic compressive strength of the concrete
     """
 
+    if isinstance(sect_type, str):
+        sect_type = SectType813(sect_type)
+
     if sect_type == SectType813.RECTANGULAR:
         multiplier = 1.00
     elif sect_type == SectType813.CIRCULAR:
         multiplier = 0.95
-    elif sect_type == SectType813.OTHER:
+    else:
         multiplier = 0.90
 
     return max(0.67, 0.85 - 0.0015 * f_c) * multiplier
