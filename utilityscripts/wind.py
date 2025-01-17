@@ -53,6 +53,7 @@ def init_standard_data(*, file_path=None, overwrite: bool = False):
             "cpi_t5b",
             "cpe_t5_2c",
             "k_a",
+            "app_c_fig_c2",
         }
 
         STANDARD_DATA = {
@@ -1319,3 +1320,36 @@ def k_a(
     k_a_vals = np.asarray(k_a_data["k_a"])
 
     return np.interp(area, area_vals, k_a_vals)
+
+
+def c_fig_rect_prism(d, b, theta):
+    init_standard_data()
+
+    c_fig_data = STANDARD_DATA["app_c_fig_c2"]
+
+    if theta < 0.0 or theta > 45:  # noqa: PLR2004
+        raise ValueError("Theta must be between 0 and 45 degrees")
+
+    d_b_ratio = d / b
+
+    data_theta_0 = c_fig_data.filter(pl.col("theta") == 0.0)
+    data_theta_45 = c_fig_data.filter(pl.col("theta") == 45.0)  # noqa: PLR2004
+
+    d_b_ratios = np.asarray(data_theta_0["d_b_ratio"])
+
+    f_x_0_vals = np.asarray(data_theta_0["f_x"])
+    f_x_45_vals = np.asarray(data_theta_45["f_x"])
+
+    f_y_0_vals = np.asarray(data_theta_0["f_y"])
+    f_y_45_vals = np.asarray(data_theta_45["f_y"])
+
+    f_x_0 = np.interp(d_b_ratio, d_b_ratios, f_x_0_vals)
+    f_x_45 = np.interp(d_b_ratio, d_b_ratios, f_x_45_vals)
+
+    f_y_0 = np.interp(d_b_ratio, d_b_ratios, f_y_0_vals)
+    f_y_45 = np.interp(d_b_ratio, d_b_ratios, f_y_45_vals)
+
+    f_x = np.interp(theta, [0.0, 45.0], [f_x_0, f_x_45])
+    f_y = np.interp(theta, [0.0, 45.0], [f_y_0, f_y_45])
+
+    return f_x, f_y
