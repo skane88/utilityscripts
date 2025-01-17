@@ -310,7 +310,7 @@ class Steel:
         elastic_modulus: float = 200e3,
         eta_sy: float | None = None,
         eta_su: float = 0.05,
-        ductility: Ductility = Ductility.N,
+        ductility: Ductility | str = Ductility.N,
     ):
         """
         Initialise the steel material.
@@ -336,7 +336,10 @@ class Steel:
         self._elastic_modulus = elastic_modulus
         self._eta_sy = eta_sy
         self._eta_su = eta_su
-        self._ductility = ductility
+
+        self._ductility = (
+            Ductility(ductility) if isinstance(ductility, str) else ductility
+        )
 
     @property
     def f_sy(self) -> float:
