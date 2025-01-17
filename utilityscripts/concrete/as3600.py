@@ -22,6 +22,15 @@ STANDARD_GRADES = {
 }
 
 
+class Ductility(StrEnum):
+    """
+    An Enum to represent the ductility grades of steel.
+    """
+
+    N = "N"
+    L = "L"
+
+
 class SectType813(StrEnum):
     """
     An Enum to represent the 3x types of section referred to in S8.1.3 note 2.
@@ -66,7 +75,7 @@ class Concrete:
         f_c: float,
         *,
         density: float = 2400,
-        max_comp_strain: float = 0.003,
+        eta_c: float = 0.003,
         f_cm: float | None = None,
         f_cmi: float | None = None,
         elastic_modulus: float | None = None,
@@ -82,7 +91,7 @@ class Concrete:
         density : float
             The density of the concrete.
             Default value is 2400 kg/m³.
-        max_comp_strain : float
+        eta_c : float
             The maximum compressive strain of the concrete.
             Default value is 0.003.
         f_cm : float
@@ -104,7 +113,7 @@ class Concrete:
 
         self._f_c = f_c
         self._density = density
-        self._max_comp_strain = max_comp_strain
+        self._eta_c = eta_c
         self._f_cm = f_cm
         self._f_cmi = f_cmi
         self._elastic_modulus = elastic_modulus
@@ -127,12 +136,12 @@ class Concrete:
         return self._density
 
     @property
-    def max_comp_strain(self):
+    def eta_c(self):
         """
         Return the maximum compressive strain of the concrete.
         """
 
-        return self._max_comp_strain
+        return self._eta_c
 
     @property
     def f_cm(self):
@@ -242,7 +251,7 @@ class Concrete:
                 0.0,
                 self.rect_strain - sys.float_info.epsilon,
                 self.rect_strain,
-                self.max_comp_strain,
+                self.eta_c,
             ]
         )
 
@@ -284,7 +293,7 @@ class Concrete:
         plt.show()
 
     def __repr__(self):
-        return f"{type(self).__name__}: f_c={self.f_c} MPa"
+        return f"{type(self).__name__}: f_c={self.f_c} MPa, eta_c={self.eta_c}"
 
 
 class Steel:
@@ -299,9 +308,9 @@ class Steel:
         *,
         f_sy: float,
         elastic_modulus: float = 200e3,
-        yield_strain: float | None = None,
-        ultimate_strain: float = 0.1,
-        ductility: str = "N",
+        eta_sy: float | None = None,
+        eta_su: float = 0.05,
+        ductility: Ductility = Ductility.N,
     ):
         """
         Initialise the steel material.
@@ -312,18 +321,21 @@ class Steel:
             The yield strength of the steel.
         elastic_modulus : float
             The elastic modulus of the steel.
-        yield_strain : float
+        eta_sy : float
             The yield strain of the steel.
-        ultimate_strain : float
+        eta_su : float
             The ultimate strain of the steel.
-        ductility : str
+            Default value is 0.05, which is the minimum ultimate strain required by
+            AS4671 for N grade bar.
+        ductility : Ductility
             The ductility of the steel.
+            Default value is 'N', for N grade bar.
         """
 
         self._f_sy = f_sy
         self._elastic_modulus = elastic_modulus
-        self._yield_strain = yield_strain
-        self._ultimate_strain = ultimate_strain
+        self._eta_sy = eta_sy
+        self._eta_su = eta_su
         self._ductility = ductility
 
     @property
@@ -343,26 +355,26 @@ class Steel:
         return self._elastic_modulus
 
     @property
-    def yield_strain(self) -> float:
+    def eta_sy(self) -> float:
         """
         Return the yield strain of the steel.
         """
 
-        if self._yield_strain is None:
+        if self._eta_sy is None:
             return self.f_sy / self.elastic_modulus
 
-        return self._yield_strain
+        return self._eta_sy
 
     @property
-    def ultimate_strain(self) -> float:
+    def eta_su(self) -> float:
         """
         Return the ultimate strain of the steel.
         """
 
-        return self._ultimate_strain
+        return self._eta_su
 
     @property
-    def ductility(self) -> str:
+    def ductility(self) -> Ductility:
         """
         Return the ductility of the steel.
         """
@@ -377,11 +389,11 @@ class Steel:
 
         return np.asarray(
             [
-                -self.ultimate_strain,
-                -self.yield_strain,
+                -self.eta_su,
+                -self.eta_sy,
                 0.0,
-                self.yield_strain,
-                self.ultimate_strain,
+                self.eta_sy,
+                self.eta_su,
             ]
         )
 
@@ -426,8 +438,8 @@ class Steel:
         return (
             f"{type(self).__name__}: f_sy: {self.f_sy} MPa, "
             + f"ductility:'{self.ductility}', "
-            + f"Yield Strain: {self.yield_strain:.3%}, "
-            + f"Ultimate Strain: {self.ultimate_strain:.0%}"
+            + f"Yield Strain: {self.eta_sy:.3%}, "
+            + f"Ultimate Strain: {self.eta_su:.0%}"
         )
 
 
