@@ -974,6 +974,9 @@ def build_circle(
         min_angle = 0
         max_angle = full_circle
 
+    if min_angle == 0 and max_angle == full_circle:
+        no_points += 1  # when the start and end points overlap, add a point.
+
     angle_range = np.linspace(start=min_angle, stop=max_angle, num=no_points)
     x_points_orig = np.full(no_points, radius)
 
