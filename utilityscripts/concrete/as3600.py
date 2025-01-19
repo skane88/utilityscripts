@@ -1516,3 +1516,19 @@ class RectBeam:
         return (
             self.area_gross - self.area_steel
         ) + self.area_steel * self.modular_ratio
+
+    @property
+    def geometry_gross(self):
+        """
+        Create a series of shapely geometry objects representing the beam.
+
+        This method is intended to be a helper method for calculating member properties.
+
+        Returns
+        -------
+        dict[str, shapely.geometry.Polygon]
+
+        Where the keys are "concrete" and "steel".
+        """
+
+        pass
