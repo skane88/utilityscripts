@@ -9,6 +9,8 @@ from math import cos, pi, radians, sin, tan
 import numpy as np
 from matplotlib import pyplot as plt
 
+from utilityscripts.steel.as4100 import build_circle
+
 D500N_STRESS_STRAIN = [[-0.05, -0.0025, 0, 0.0025, 0.05], [-500, -500, 0, 500, 500]]
 D500L_STRESS_STRAIN = [[-0.015, -0.0025, 0, 0.0025, 0.015], [-500, -500, 0, 500, 500]]
 R250N_STRESS_STRAIN = [[-0.05, -0.0025, 0, 0.0025, 0.05], [-500, -500, 0, 500, 500]]
@@ -1518,17 +1520,39 @@ class RectBeam:
         ) + self.area_steel * self.modular_ratio
 
     @property
-    def geometry_gross(self):
+    def geometry_points(self):
         """
-        Create a series of shapely geometry objects representing the beam.
+        Create a series of points representing the beam.
 
         This method is intended to be a helper method for calculating member properties.
 
         Returns
         -------
-        dict[str, shapely.geometry.Polygon]
+        dict[str, tuple[float, float]]
 
         Where the keys are "concrete" and "steel".
         """
 
-        pass
+        no_points = 4
+
+        steel = [
+            build_circle(centroid=bar, radius=self.top_dia / 2, no_points=no_points)
+            for bar in self.top_bar_centres
+        ]
+        steel += [
+            build_circle(centroid=bar, radius=self.bot_dia / 2, no_points=no_points)
+            for bar in self.bot_bar_centres
+        ]
+        steel += [
+            build_circle(centroid=bar, radius=self.side_dia / 2, no_points=no_points)
+            for bar in self.side_bar_centres
+        ]
+
+        concrete = [
+            (-self.b / 2, 0),
+            (self.b / 2, 0),
+            (self.b / 2, self.d),
+            (-self.b / 2, self.d),
+        ]
+
+        return {"steel": steel, "concrete": concrete}
