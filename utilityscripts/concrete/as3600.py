@@ -1520,7 +1520,7 @@ class RectBeam:
         ) + self.area_steel * self.modular_ratio
 
     @property
-    def geometry_points(self):
+    def _geometry_points(self):
         """
         Create a series of points representing the beam.
 
@@ -1533,18 +1533,30 @@ class RectBeam:
         Where the keys are "concrete" and "steel".
         """
 
-        no_points = 4
+        no_points = 8
+
+        # The area of a polygon is slightly smaller than the area of a circle.
+        # Therefore factor the area of the reinforcement polygon up to give an
+        # equivalent area to the circular bar.
+        alpha = 2 * pi / no_points
+        beta = ((alpha) / (sin(alpha))) ** 0.5
 
         steel = [
-            build_circle(centroid=bar, radius=self.top_dia / 2, no_points=no_points)
+            build_circle(
+                centroid=bar, radius=beta * self.top_dia / 2, no_points=no_points
+            )
             for bar in self.top_bar_centres
         ]
         steel += [
-            build_circle(centroid=bar, radius=self.bot_dia / 2, no_points=no_points)
+            build_circle(
+                centroid=bar, radius=beta * self.bot_dia / 2, no_points=no_points
+            )
             for bar in self.bot_bar_centres
         ]
         steel += [
-            build_circle(centroid=bar, radius=self.side_dia / 2, no_points=no_points)
+            build_circle(
+                centroid=bar, radius=beta * self.side_dia / 2, no_points=no_points
+            )
             for bar in self.side_bar_centres
         ]
 
