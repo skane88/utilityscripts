@@ -1249,7 +1249,7 @@ class RectBeam:
     @property
     def top_bar_area(self):
         """
-        Return the area of the top reinforcement bars.
+        Return the area of a single top reinforcement bar.
         """
 
         return circle_area(self.top_dia)
@@ -1263,7 +1263,7 @@ class RectBeam:
         return self._top_no
 
     @property
-    def area_steel_top(self):
+    def top_steel_area(self):
         """
         Return the total area of the top reinforcement.
         """
@@ -1321,7 +1321,7 @@ class RectBeam:
     @property
     def bot_bar_area(self):
         """
-        Return the area of the bottom reinforcement bars.
+        Return the area of a single bottom reinforcement bar.
         """
 
         return circle_area(self.bot_dia)
@@ -1335,7 +1335,7 @@ class RectBeam:
         return self._bot_no
 
     @property
-    def area_steel_bot(self):
+    def bot_steel_area(self):
         """
         Return the total area of the bottom reinforcement.
         """
@@ -1382,7 +1382,7 @@ class RectBeam:
     @property
     def side_bar_area(self):
         """
-        Return the area of the side reinforcement bars.
+        Return the area of a single side reinforcement bar.
         """
 
         return circle_area(self.side_dia)
@@ -1396,7 +1396,7 @@ class RectBeam:
         return self._side_no
 
     @property
-    def area_steel_side(self):
+    def side_steel_area(self):
         """
         Return the total area of the side reinforcement.
         """
