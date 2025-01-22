@@ -8,6 +8,7 @@ from math import cos, pi, radians, sin, tan
 
 import numpy as np
 from matplotlib import pyplot as plt
+from shapely.geometry import Polygon
 
 from utilityscripts.steel.as4100 import build_circle
 
@@ -1568,3 +1569,17 @@ class RectBeam:
         ]
 
         return {"steel": steel, "concrete": concrete}
+
+    @property
+    def _concrete_geometry(self):
+        """
+        Return the geometry of the concrete.
+        """
+
+        poly = Polygon(self._geometry_points["concrete"])
+
+        for bar in self._geometry_points["steel"]:
+            steel = Polygon(bar)
+            poly = poly - steel
+
+        return poly
