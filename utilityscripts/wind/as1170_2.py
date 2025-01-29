@@ -711,10 +711,10 @@ class OpenStructure:
     def __init__(
         self,
         *,
-        member_data: pl.DataFrame,
         frame_h: float,
         frame_l: float,
         frame_s: float,
+        member_data: pl.DataFrame | None = None,
     ):
         """
         Initialise an OpenStructure object.
@@ -741,6 +741,20 @@ class OpenStructure:
             The spacing of the frames
         """
 
+        if member_data is None:
+            member_data = pl.DataFrame(
+                {
+                    "name": [],
+                    "depth": [],
+                    "length": [],
+                    "drag_coefficient": [],
+                    "no_unshielded": [],
+                    "no_shielded": [],
+                    "ignore_for_area": [],
+                    "circular_or_sharp": [],
+                }
+            )
+
         self._member_data = copy.deepcopy(member_data)
         self._frame_h = frame_h
         self._frame_l = frame_l
@@ -748,6 +762,25 @@ class OpenStructure:
 
     @property
     def member_data(self) -> pl.DataFrame:
+        """
+        The member data for the open structure.
+
+        Returns
+        -------
+        pl.DataFrame
+
+        A dataframe with the following columns:
+            - name: a name for each section
+            - depth: the depth of the section in m
+            - length: the length of the section in m
+            - drag_coefficient: the drag coefficient for each section
+            - no_unshielded: the number of unshielded sections
+            - no_shielded: the number of shielded sections
+            - ignore_for_area: should the sections be ignored for overall
+                area calculations?
+            - circular_or_sharp: are the sections circular or sharp edged?
+        """
+
         return self._member_data
 
     @property
@@ -761,6 +794,59 @@ class OpenStructure:
     @property
     def frame_s(self) -> float:
         return self._frame_s
+
+    def add_member(
+        self,
+        *,
+        name: str,
+        depth: float,
+        length: float,
+        drag_coefficient: float,
+        no_unshielded: int,
+        no_shielded: int,
+        ignore_for_area: bool = False,
+        circular_or_sharp: str = "circular",
+    ):
+        """
+        Add a member to the open structure.
+
+        Parameters
+        ----------
+        name : str
+            The name of the member.
+        depth : float
+            The depth of the member.
+        length : float
+            The length of the member.
+        drag_coefficient : float
+            The drag coefficient for the member.
+        no_unshielded : int
+            The number of unshielded sections.
+        no_shielded : int
+            The number of shielded sections.
+        ignore_for_area : bool, default=False
+            Should the sections be ignored for overall area calculations?
+        circular_or_sharp : str, default="circular"
+            Are the sections circular or sharp edged?
+        """
+
+        self._member_data = pl.concat(
+            [
+                self._member_data,
+                pl.DataFrame(
+                    {
+                        "name": [name],
+                        "depth": [depth],
+                        "length": [length],
+                        "drag_coefficient": [drag_coefficient],
+                        "no_unshielded": [no_unshielded],
+                        "no_shielded": [no_shielded],
+                        "ignore_for_area": [ignore_for_area],
+                        "circular_or_sharp": [circular_or_sharp],
+                    }
+                ),
+            ]
+        )
 
 
 def v_r_no_f_x(*, a, b, return_period, k):
