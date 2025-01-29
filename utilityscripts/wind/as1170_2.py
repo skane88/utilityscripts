@@ -734,11 +734,11 @@ class OpenStructure:
             - circular_or_sharp: are the sections circular or sharp edged?
 
         frame_h : float
-            The height of the frame into the wind.
+            The height of the frame into the wind. In m.
         frame_l : float
-            The length of the frame.
+            The length of the frame. In m.
         frame_s : float
-            The spacing of the frames
+            The spacing of the frames. In m.
         """
 
         if member_data is None:
@@ -794,6 +794,14 @@ class OpenStructure:
     @property
     def frame_s(self) -> float:
         return self._frame_s
+
+    @property
+    def projected_area(self) -> float:
+        """
+        The projected area of the open structure.
+        """
+
+        return self.frame_l * self.frame_h
 
     def add_member(
         self,
