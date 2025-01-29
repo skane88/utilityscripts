@@ -8,7 +8,8 @@ from math import cos, pi, radians, sin, tan
 
 import numpy as np
 from matplotlib import pyplot as plt
-from shapely.geometry import Polygon
+from shapely import ops
+from shapely.geometry import LineString, Polygon
 
 from utilityscripts.steel.as4100 import build_circle
 
@@ -241,7 +242,7 @@ class Concrete:
         Return the minimum strain for the rectangular stress block
         """
 
-        return self.max_comp_strain * (1 - self.gamma)
+        return self.eta_c * (1 - self.gamma)
 
     @property
     def _strain_values(self):
@@ -1571,9 +1572,9 @@ class RectBeam:
         return {"steel": steel, "concrete": concrete}
 
     @property
-    def _concrete_geometry(self):
+    def _base_concrete_geometry(self):
         """
-        Return the geometry of the concrete.
+        Return the basic geometry of the concrete.
         """
 
         poly = Polygon(self._geometry_points["concrete"])
@@ -1583,3 +1584,28 @@ class RectBeam:
             poly = poly - steel
 
         return poly
+
+    def concrete_geometry(self, y: float = 0.0) -> list[Polygon]:
+        """
+        Return a geometry object that represents the concrete. Concrete can be
+        cut through by a line at a given y-coordinate.
+        Elements above the cut will be returned.
+
+        Parameters
+        ----------
+        y: float
+            The y-coordinate to cut the concrete at.
+
+        Returns
+        -------
+        list[Polygon]
+            A list of polygons representing the concrete.
+        """
+
+        length = self.b * 1.1
+
+        cut_line = LineString([(-length / 2, y), (length / 2, y)])
+
+        split_sect = ops.split(self._base_concrete_geometry, cut_line)
+
+        return [sect for sect in split_sect.geoms if sect.centroid.y > y]
