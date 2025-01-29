@@ -702,6 +702,67 @@ class SimpleBuilding:
         return self.roof_pitch
 
 
+class OpenStructure:
+    """
+    Class to represent an open structure and determine wind loads as per AS1170.2
+    Appendix C.
+    """
+
+    def __init__(
+        self,
+        *,
+        member_data: pl.DataFrame,
+        frame_h: float,
+        frame_l: float,
+        frame_s: float,
+    ):
+        """
+        Initialise an OpenStructure object.
+
+        Parameters
+        ----------
+        member_data : pl.DataFrame
+            A dataframe with the following columns:
+            - name: a name for each section
+            - depth: the depth of the section in m
+            - length: the length of the section in m
+            - drag_coefficient: the drag coefficient for each section
+            - no_unshielded: the number of unshielded sections
+            - no_shielded: the number of shielded sections
+            - ignore_for_area: should the sections be ignored for overall
+                area calculations?
+            - circular_or_sharp: are the sections circular or sharp edged?
+
+        frame_h : float
+            The height of the frame into the wind.
+        frame_l : float
+            The length of the frame.
+        frame_s : float
+            The spacing of the frames
+        """
+
+        self._member_data = copy.deepcopy(member_data)
+        self._frame_h = frame_h
+        self._frame_l = frame_l
+        self._frame_s = frame_s
+
+    @property
+    def member_data(self) -> pl.DataFrame:
+        return self._member_data
+
+    @property
+    def frame_h(self) -> float:
+        return self._frame_h
+
+    @property
+    def frame_l(self) -> float:
+        return self._frame_l
+
+    @property
+    def frame_s(self) -> float:
+        return self._frame_s
+
+
 def v_r_no_f_x(*, a, b, return_period, k):
     """
     Calculate the basic windspeed for a wind region. Ignores parameters F_C or F_D,
