@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 import toml
 
-from utilityscripts.wind import k_v, m_d_exact, v_r
+from utilityscripts.wind.as1170_2 import k_v, m_d_exact, v_r
 
 FILE_PATH = Path(__file__)
 TEST_DATA_PATH_2011 = FILE_PATH.parent / Path("test_as1170_2_2011.toml")
