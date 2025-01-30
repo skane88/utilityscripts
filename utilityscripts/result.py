@@ -7,7 +7,24 @@ from typing import Any
 
 class Result:
     """
-    Class to store results along with metadata.
+    Class to store results along with the equation, inputs,
+    and metadata used to generate it. The Result object will also produce formatted
+    strings for use in reports etc.
+
+    Notes
+    -----
+    It is intended that native operations on the Result object should act on
+    the stored .result attribute as though it were a stand-alone value.
+    e.g. Result * 2 should be equivalent to Result.result * 2 and so-on.
+    Initially the basic arithmetic operations will be implemented and over time
+    additional operations may be added. Be-aware that if the .result attribute
+    does not support an operation then an error may be raised.
+
+    Usage
+    -----
+    >>> r = Result(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
+    >>> r * 2
+    2
     """
 
     def __init__(
