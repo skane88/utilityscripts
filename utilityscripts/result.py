@@ -101,6 +101,15 @@ class Result:
             return self._result
         return complex(self._result)
 
+    def __neg__(self):
+        return self._result.__neg__()
+
+    def __pos__(self):
+        return self._result.__pos__()
+
+    def __invert__(self):
+        return self._result.__invert__()
+
     def __repr__(self):
         return (
             f"Result(result={self._result}, "
