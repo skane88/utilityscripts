@@ -23,19 +23,35 @@ class Result:
         self._metadata = metadata
 
     @property
-    def result(self):
+    def result(self) -> Any:
+        """
+        The result stored in the Result object.
+        """
+
         return self._result
 
     @property
-    def eqn(self):
+    def eqn(self) -> dict[str, Any] | None:
+        """
+        The equation used to generate the results
+        """
+
         return self._eqn
 
     @property
-    def inputs(self):
+    def inputs(self) -> dict[str, Any] | None:
+        """
+        The inputs to the equation.
+        """
+
         return self._inputs
 
     @property
-    def metadata(self):
+    def metadata(self) -> dict[str, Any] | None:
+        """
+        The metadata stored in the Result object.
+        """
+
         return self._metadata
 
     def __str__(self):
