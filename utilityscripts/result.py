@@ -102,13 +102,25 @@ class Result:
         return complex(self._result)
 
     def __neg__(self):
-        return self._result.__neg__()
+        if hasattr(self._result, "__neg__"):
+            return self._result.__neg__()
+        raise NotImplementedError(
+            f"{self.result!r} does not support the __neg__ operation."
+        )
 
     def __pos__(self):
-        return self._result.__pos__()
+        if hasattr(self._result, "__pos__"):
+            return self._result.__pos__()
+        raise NotImplementedError(
+            f"{self.result!r} does not support the __pos__ operation."
+        )
 
     def __invert__(self):
-        return self._result.__invert__()
+        if hasattr(self._result, "__invert__"):
+            return self._result.__invert__()
+        raise NotImplementedError(
+            f"{self.result!r} does not support the __invert__ operation."
+        )
 
     def __repr__(self):
         return (
