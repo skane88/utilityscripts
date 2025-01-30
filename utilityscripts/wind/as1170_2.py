@@ -2,6 +2,8 @@
 File to contain some basic AS1170.2 helper methods for working with wind loads
 """
 
+from __future__ import annotations
+
 import copy
 from enum import StrEnum
 from math import log10, radians, tan
@@ -714,25 +716,17 @@ class OpenStructure:
         frame_h: float,
         frame_l: float,
         frame_s: float,
-        member_data: pl.DataFrame | None = None,
     ):
         """
         Initialise an OpenStructure object.
 
+        Notes
+        -----
+        The created OpenStructure object does not have any members defined yet.
+        Use the add_member method to add members to the structure.
+
         Parameters
         ----------
-        member_data : pl.DataFrame
-            A dataframe with the following columns:
-            - name: a name for each section
-            - depth: the depth of the section in m
-            - length: the length of the section in m
-            - drag_coefficient: the drag coefficient for each section
-            - no_unshielded: the number of unshielded sections
-            - no_shielded: the number of shielded sections
-            - ignore_for_area: should the sections be ignored for overall
-                area calculations?
-            - circular_or_sharp: are the sections circular or sharp edged?
-
         frame_h : float
             The height of the frame into the wind. In m.
         frame_l : float
@@ -741,24 +735,48 @@ class OpenStructure:
             The spacing of the frames. In m.
         """
 
-        if member_data is None:
-            member_data = pl.DataFrame(
-                {
-                    "name": [],
-                    "depth": [],
-                    "length": [],
-                    "drag_coefficient": [],
-                    "no_unshielded": [],
-                    "no_shielded": [],
-                    "ignore_for_area": [],
-                    "circular_or_sharp": [],
-                }
-            )
-
-        self._member_data = copy.deepcopy(member_data)
+        self._member_data = pl.DataFrame(
+            {
+                "name": pl.Series([], dtype=pl.Utf8),
+                "depth": pl.Series([], dtype=pl.Float64),
+                "length": pl.Series([], dtype=pl.Float64),
+                "reference_height": pl.Series([], dtype=pl.Float64),
+                "drag_coefficient": pl.Series([], dtype=pl.Float64),
+                "no_unshielded": pl.Series([], dtype=pl.Int64),
+                "no_shielded": pl.Series([], dtype=pl.Int64),
+                "ignore_for_area": pl.Series([], dtype=pl.Boolean),
+                "circular_or_sharp": pl.Series([], dtype=pl.Utf8),
+            }
+        )
         self._frame_h = frame_h
         self._frame_l = frame_l
         self._frame_s = frame_s
+
+    def _copy_with_new(self, **new_attributes) -> OpenStructure:
+        """
+        Function to copy the OpenStructure instance but update specific attributes.
+
+        The returned copy is a deepcopy.
+        Note that the function replaces _geometry of the new instance with None.
+        The user of the instance is responsible for recreating the geometry.
+
+        Parameters
+        ----------
+        new_attributes : dict
+            Any attributes to update as key:value pairs.
+
+        Returns
+        -------
+        OpenStructure
+            A new instance of an OpenStructure with updated attributes.
+        """
+
+        new_structure = copy.deepcopy(self)
+
+        for attr, value in new_attributes.items():
+            setattr(new_structure, attr, value)
+
+        return new_structure
 
     @property
     def member_data(self) -> pl.DataFrame:
@@ -773,6 +791,7 @@ class OpenStructure:
             - name: a name for each section
             - depth: the depth of the section in m
             - length: the length of the section in m
+            - reference_height: the reference height of the section in m
             - drag_coefficient: the drag coefficient for each section
             - no_unshielded: the number of unshielded sections
             - no_shielded: the number of shielded sections
@@ -809,14 +828,20 @@ class OpenStructure:
         name: str,
         depth: float,
         length: float,
+        reference_height: float,
         drag_coefficient: float,
         no_unshielded: int,
         no_shielded: int,
         ignore_for_area: bool = False,
         circular_or_sharp: str = "circular",
-    ):
+    ) -> OpenStructure:
         """
         Add a member to the open structure.
+
+        Notes
+        -----
+        The method does not update the OpenStructure in place. A new OpenStructure
+        object is returned.
 
         Parameters
         ----------
@@ -826,6 +851,8 @@ class OpenStructure:
             The depth of the member.
         length : float
             The length of the member.
+        reference_height : float
+            The reference height of the member.
         drag_coefficient : float
             The drag coefficient for the member.
         no_unshielded : int
@@ -836,24 +863,32 @@ class OpenStructure:
             Should the sections be ignored for overall area calculations?
         circular_or_sharp : str, default="circular"
             Are the sections circular or sharp edged?
+
+        Returns
+        -------
+        OpenStructure
+            A new instance of an OpenStructure with the updated member data.
         """
 
-        self._member_data = pl.concat(
-            [
-                self._member_data,
-                pl.DataFrame(
-                    {
-                        "name": [name],
-                        "depth": [depth],
-                        "length": [length],
-                        "drag_coefficient": [drag_coefficient],
-                        "no_unshielded": [no_unshielded],
-                        "no_shielded": [no_shielded],
-                        "ignore_for_area": [ignore_for_area],
-                        "circular_or_sharp": [circular_or_sharp],
-                    }
-                ),
-            ]
+        return self._copy_with_new(
+            _member_data=pl.concat(
+                [
+                    self._member_data,
+                    pl.DataFrame(
+                        {
+                            "name": [name],
+                            "depth": [depth],
+                            "length": [length],
+                            "reference_height": [reference_height],
+                            "drag_coefficient": [drag_coefficient],
+                            "no_unshielded": [no_unshielded],
+                            "no_shielded": [no_shielded],
+                            "ignore_for_area": [ignore_for_area],
+                            "circular_or_sharp": [circular_or_sharp],
+                        }
+                    ),
+                ]
+            )
         )
 
 
