@@ -114,6 +114,8 @@ class Result:
         return (
             f"Result(result={self._result}, "
             + f"eqn={self._eqn}, "
-            + f"inputs={None if self._inputs is None else f'{len(self._inputs)} inputs'}, "
-            + f"metadata={None if self._metadata is None else f'{len(self._metadata)} items'})"
+            + "inputs="
+            + f"{None if self._inputs is None else f'{len(self._inputs)} inputs'}, "
+            + "metadata="
+            + f"{None if self._metadata is None else f'{len(self._metadata)} items'})"
         )
