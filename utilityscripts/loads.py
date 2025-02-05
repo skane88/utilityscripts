@@ -319,7 +319,7 @@ class EN14015:
         return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio.value)["t1-tt"])
 
     @property
-    def t_1(self) -> float:
+    def t_1(self) -> Result:
         """
         The fraction of the tank contents that behaves in an inertial manner.
         """

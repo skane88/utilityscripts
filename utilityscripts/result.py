@@ -32,7 +32,7 @@ class Result:
         value: Any,
         description: str | None = None,
         variable: str | None = None,
-        eqn: dict[str, Any] | None = None,
+        eqn: str | None = None,
         inputs: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ):
