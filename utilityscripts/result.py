@@ -29,14 +29,14 @@ class Result:
 
     def __init__(
         self,
-        result: Any,
+        value: Any,
         description: str | None = None,
         variable: str | None = None,
         eqn: dict[str, Any] | None = None,
         inputs: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ):
-        self._result = result
+        self._value = value
         self._description = description
         self._variable = variable
         self._eqn = eqn
@@ -44,12 +44,12 @@ class Result:
         self._metadata = metadata
 
     @property
-    def result(self) -> Any:
+    def value(self) -> Any:
         """
         The result stored in the Result object.
         """
 
-        return self._result
+        return self._value
 
     @property
     def description(self) -> str | None:
@@ -92,76 +92,89 @@ class Result:
         return self._metadata
 
     def __str__(self):
-        if isinstance(self._result, str):
-            return self._result
-        return str(self._result)
+        if isinstance(self._value, str):
+            return self._value
+        return str(self._value)
 
     def __bool__(self):
-        if isinstance(self._result, bool):
-            return self._result
-        return bool(self._result)
+        if isinstance(self._value, bool):
+            return self._value
+        return bool(self._value)
 
     def __int__(self):
-        if isinstance(self._result, int):
-            return self._result
-        return int(self._result)
+        if isinstance(self._value, int):
+            return self._value
+        return int(self._value)
 
     def __float__(self):
-        if isinstance(self._result, float):
-            return self._result
-        return float(self._result)
+        if isinstance(self._value, float):
+            return self._value
+        return float(self._value)
 
     def __bytes__(self):
-        if isinstance(self._result, bytes):
-            return self._result
-        return bytes(self._result)
+        if isinstance(self._value, bytes):
+            return self._value
+        return bytes(self._value)
 
     def __complex__(self):
-        if isinstance(self._result, complex):
-            return self._result
-        return complex(self._result)
+        if isinstance(self._value, complex):
+            return self._value
+        return complex(self._value)
 
     def __neg__(self):
-        if hasattr(self._result, "__neg__"):
-            return self._result.__neg__()
-        raise NotImplementedError(
-            f"{self.result!r} does not support the __neg__ operation."
-        )
+        if hasattr(self._value, "__neg__"):
+            return self._value.__neg__()
+        return NotImplemented
 
     def __pos__(self):
-        if hasattr(self._result, "__pos__"):
-            return self._result.__pos__()
-        raise NotImplementedError(
-            f"{self.result!r} does not support the __pos__ operation."
-        )
+        if hasattr(self._value, "__pos__"):
+            return self._value.__pos__()
+        return NotImplemented
 
     def __invert__(self):
-        if hasattr(self._result, "__invert__"):
-            return self._result.__invert__()
-        raise NotImplementedError(
-            f"{self.result!r} does not support the __invert__ operation."
-        )
+        if hasattr(self._value, "__invert__"):
+            return self._value.__invert__()
+        return NotImplemented
 
     def __format__(self, format_spec: str) -> str:
-        if hasattr(self._result, "__format__"):
-            return self._result.__format__(format_spec)
-        raise NotImplementedError(
-            f"{self.result!r} does not support the __format__ operation."
-        )
+        if hasattr(self._value, "__format__"):
+            return self._value.__format__(format_spec)
+        return NotImplemented
+
+    def __add__(self, other):
+        if hasattr(self._value, "__add__"):
+            return self._value + other
+        if hasattr(other, "__radd__"):
+            return self._value + other
+        return NotImplemented
+
+    def __radd__(self, other):
+        if hasattr(self._value, "__radd__"):
+            return other + self._value
+        if hasattr(other, "__add__"):
+            return other + self._value
+
+        return NotImplemented
+
+    def __sub__(self, other):
+        if hasattr(self._value, "__sub__"):
+            return self._value - other
+        return NotImplemented
+
+    def __rsub__(self, other):
+        if hasattr(self._value, "__rsub__"):
+            return other - self._value
+        return NotImplemented
 
     def __mul__(self, other):
-        if hasattr(self._result, "__mul__"):
-            return self._result.__mul__(other)
-        raise NotImplementedError(
-            f"{self.result!r} does not support the __mul__ operation."
-        )
+        if hasattr(self._value, "__mul__"):
+            return self._value * other
+        return NotImplemented
 
     def __rmul__(self, other):
-        if hasattr(self._result, "__rmul__"):
-            return self._result.__rmul__(other)
-        raise NotImplementedError(
-            f"{self.result!r} does not support the __rmul__ operation."
-        )
+        if hasattr(self._value, "__rmul__"):
+            return other * self._value
+        return NotImplemented
 
     def report(
         self,
@@ -186,9 +199,9 @@ class Result:
         result_str += "Equation:" + self.eqn + "\n" if self.eqn is not None else ""
 
         result_value = (
-            str(self.result)
+            str(self.value)
             if result_format is None
-            else f"{self.result:{result_format}}"
+            else f"{self.value:{result_format}}"
         )
 
         if self.variable is None:
@@ -200,7 +213,7 @@ class Result:
 
     def __repr__(self):
         return (
-            f"Result(result={self._result}, "
+            f"Result(result={self._value}, "
             + f"eqn={self._eqn}, "
             + "inputs="
             + f"{None if self._inputs is None else f'{len(self._inputs)} inputs'}, "

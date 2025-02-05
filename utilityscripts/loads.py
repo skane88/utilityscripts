@@ -11,6 +11,8 @@ import numpy as np
 import polars as pl
 from scipy.interpolate import interp1d
 
+from utilityscripts.result import Result
+
 
 class RoofType(StrEnum):
     ACCESSIBLE = "accessible"
@@ -303,7 +305,10 @@ class EN14015:
         The ratio of the contents diameter to the filling height of the tank.
         """
 
-        return self.d_i / self.h_t
+        return Result(
+            self.d_i / self.h_t,
+            description="Ratio of liquid diameter to filling height",
+        )
 
     @property
     def t_1_ratio(self) -> float:
@@ -311,7 +316,7 @@ class EN14015:
         The fraction of the tank contents that behaves in an inertial manner.
         """
 
-        return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio)["t1-tt"])
+        return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio.value)["t1-tt"])
 
     @property
     def t_1(self) -> float:
@@ -319,7 +324,13 @@ class EN14015:
         The fraction of the tank contents that behaves in an inertial manner.
         """
 
-        return self.t_1_ratio * self.m_liquid
+        return Result(
+            self.t_1_ratio * self.m_liquid,
+            description="Fraction of liquid behaving in an inertial manner",
+            variable="T_1",
+            eqn="T_1/m_liquid Ratio x m_liquid",
+            inputs={"m_liquid": self.m_liquid, "T_1 / m_liquid Ratio": self.t_1_ratio},
+        )
 
     @property
     def t_2_ratio(self) -> float:
@@ -328,7 +339,7 @@ class EN14015:
         convective manner.
         """
 
-        return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio)["t2-tt"])
+        return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio.value)["t2-tt"])
 
     @property
     def t_2(self) -> float:
@@ -346,7 +357,7 @@ class EN14015:
         liquid acts, as a fraction of h_t.
         """
 
-        return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio)["x1-ht"])
+        return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio.value)["x1-ht"])
 
     @property
     def x_2_ratio(self) -> float:
@@ -355,7 +366,7 @@ class EN14015:
         convective load of the liquid acts, as a fraction of h_t.
         """
 
-        return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio)["x2-ht"])
+        return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio.value)["x2-ht"])
 
     @property
     def x_1(self) -> float:
@@ -390,7 +401,7 @@ class EN14015:
         The sloshing acceleration factor.
         """
 
-        return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio)["ks"])
+        return float(self.get_ratios(d_h_t_ratio=float(self.d_h_t_ratio))["ks"])
 
     @property
     def j(self) -> float:
