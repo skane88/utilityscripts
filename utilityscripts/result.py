@@ -163,8 +163,11 @@ class Result:
             f"{self.result!r} does not support the __rmul__ operation."
         )
 
-    @property
-    def report(self) -> str:
+    def report(
+        self,
+        result_format: str | None = None,
+        input_formats: dict[str, str] | None = None,
+    ) -> str:
         """
         A short report on the result.
         """
@@ -173,14 +176,25 @@ class Result:
 
         if self._inputs is not None:
             for i in self._inputs:
-                result_str += f"{i}: {self._inputs[i]}\n"
+                if input_formats is None or i not in input_formats:
+                    input_val = f"{self.inputs[i]}"
+                else:
+                    input_val = f"{self.inputs[i]:{input_formats[i]}}"
+
+                result_str += f"{i}: " + input_val + "\n"
 
         result_str += "Equation:" + self.eqn + "\n" if self.eqn is not None else ""
 
+        result_value = (
+            str(self.result)
+            if result_format is None
+            else f"{self.result:{result_format}}"
+        )
+
         if self.variable is None:
-            result_str += f"{self.result}"
+            result_str += result_value
         else:
-            result_str += self.variable + "=" + f"{self.result}"
+            result_str += self.variable + "=" + result_value
 
         return result_str
 
