@@ -30,13 +30,15 @@ class Result:
     def __init__(
         self,
         result: Any,
-        title: str | None = None,
+        description: str | None = None,
+        variable: str | None = None,
         eqn: dict[str, Any] | None = None,
         inputs: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
     ):
         self._result = result
-        self._title = title
+        self._description = description
+        self._variable = variable
         self._eqn = eqn
         self._inputs = inputs
         self._metadata = metadata
@@ -50,12 +52,20 @@ class Result:
         return self._result
 
     @property
-    def title(self) -> str | None:
+    def description(self) -> str | None:
         """
-        The title of the Result object.
+        The description of the Result object.
         """
 
-        return self._title
+        return self._description
+
+    @property
+    def variable(self) -> str | None:
+        """
+        The variable name of the Result object.
+        """
+
+        return self._variable
 
     @property
     def eqn(self) -> dict[str, Any] | None:
@@ -138,18 +148,18 @@ class Result:
         A short report on the result.
         """
 
-        result_str = self.eqn + "\n\n" if self.eqn is not None else ""
+        result_str = self.description + "\n" if self.description is not None else ""
 
         if self._inputs is not None:
             for i in self._inputs:
                 result_str += f"{i}: {self._inputs[i]}\n"
 
-        result_str = result_str + "\n" if result_str != "" else ""
+        result_str += "Equation:" + self.eqn + "\n" if self.eqn is not None else ""
 
-        if self.title is None:
-            result_str = result_str + self.result
+        if self.variable is None:
+            result_str += f"{self.result}"
         else:
-            result_str = result_str + self.title + "=" + self.result
+            result_str += self.variable + "=" + f"{self.result}"
 
         return result_str
 
