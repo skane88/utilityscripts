@@ -159,11 +159,17 @@ class Result:
     def __sub__(self, other):
         if hasattr(self._value, "__sub__"):
             return self._value - other
+        if hasattr(other, "__rsub__"):
+            return self._value - other
+
         return NotImplemented
 
     def __rsub__(self, other):
         if hasattr(self._value, "__rsub__"):
             return other - self._value
+        if hasattr(other, "__sub__"):
+            return other - self._value
+
         return NotImplemented
 
     def __mul__(self, other):

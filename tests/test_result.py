@@ -48,6 +48,23 @@ def test_result_add(result, other, expected):
 @pytest.mark.parametrize(
     "result, other, expected",
     [
+        (1, 2, 1 - 2),
+        (2, 1, 2 - 1),
+        (1.0, 2.0, 1.0 - 2.0),
+        (2.0, 1.0, 2.0 - 1.0),
+        (True, True, 0),
+        (True, False, 1),
+        (False, False, 0),
+    ],
+)
+def test_result_sub(result, other, expected):
+    result = Result(result)
+    assert result - other == expected
+
+
+@pytest.mark.parametrize(
+    "result, other, expected",
+    [
         (1, 2, 1 * 2),
         (1, 0.5, 1 * 0.5),
         (1, -1, 1 * -1),
