@@ -142,6 +142,27 @@ class Result:
             f"{self.result!r} does not support the __invert__ operation."
         )
 
+    def __format__(self, format_spec: str) -> str:
+        if hasattr(self._result, "__format__"):
+            return self._result.__format__(format_spec)
+        raise NotImplementedError(
+            f"{self.result!r} does not support the __format__ operation."
+        )
+
+    def __mul__(self, other):
+        if hasattr(self._result, "__mul__"):
+            return self._result.__mul__(other)
+        raise NotImplementedError(
+            f"{self.result!r} does not support the __mul__ operation."
+        )
+
+    def __rmul__(self, other):
+        if hasattr(self._result, "__rmul__"):
+            return self._result.__rmul__(other)
+        raise NotImplementedError(
+            f"{self.result!r} does not support the __rmul__ operation."
+        )
+
     @property
     def report(self) -> str:
         """
