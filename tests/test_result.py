@@ -31,6 +31,23 @@ def test_result_invert():
 @pytest.mark.parametrize(
     "result, other, expected",
     [
+        (1, 2, 1 + 2),
+        (2, 1, 2 + 1),
+        ("a", "b", "a" + "b"),
+        ("b", "a", "b" + "a"),
+        (True, True, 2),
+        (True, False, 1),
+        (False, False, 0),
+    ],
+)
+def test_result_add(result, other, expected):
+    result = Result(result)
+    assert result + other == expected
+
+
+@pytest.mark.parametrize(
+    "result, other, expected",
+    [
         (1, 2, 1 * 2),
         (1, 0.5, 1 * 0.5),
         (1, -1, 1 * -1),
@@ -43,3 +60,4 @@ def test_result_invert():
 def test_result_mul(result, other, expected):
     result = Result(result)
     assert result * other == expected
+    assert other * result == expected
