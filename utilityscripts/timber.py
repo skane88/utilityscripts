@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-_DATA_PATH = Path(Path(__file__).parent.parent) / Path("data")
+_DATA_PATH = Path(Path(__file__).parent) / Path("data")
 
 
 def get_k_1(
