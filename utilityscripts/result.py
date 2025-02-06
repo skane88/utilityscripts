@@ -68,7 +68,7 @@ class Result:
         return self._variable
 
     @property
-    def eqn(self) -> dict[str, Any] | None:
+    def eqn(self) -> str | None:
         """
         The equation used to generate the results
         """
@@ -193,8 +193,8 @@ class Result:
 
         result_str = self.description + "\n" if self.description is not None else ""
 
-        if self._inputs is not None:
-            for i in self._inputs:
+        if self.inputs is not None:
+            for i in self.inputs:
                 if input_formats is None or i not in input_formats:
                     input_val = f"{self.inputs[i]}"
                 else:
