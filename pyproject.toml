@@ -1,21 +1,46 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "utilityscripts"
 authors = [{name = "Sean Kane", email = "mail@ifitsmoving.com"}]
+description = "Various utility scripts"
 readme = "README.md"
 license = {file = "LICENSE"}
 classifiers = ["License :: OSI Approved :: MIT License"]
-dynamic = ["version", "description"]
-dependencies = ["numpy", "matplotlib", "section-properties", "pint", "polars"]
+dynamic = ["version"]
+requires-python = ">=3.12"
+dependencies = [
+ "numpy",
+ "matplotlib",
+ "pint",
+ "polars",
+ "ipython",
+ "numpy",
+ "sympy",
+ "pint",
+ "shapely",
+ "concreteproperties",
+ "sectionproperties",
+ "simplebeam",
+ "Humre",
+ "scipy",
+ "toml",
+ "PyniteFEA",
+ "altair",
+ "openpyxl",
+ "fastexcel",
+ "Pillow",
+ "pillow-heif",
+ "pandas",
+]
 
 [project.urls]
 Home = "https://ifitsmoving.com"
 
 [project.optional-dependencies]
-dev = ['isort', 'coverage', 'mypy', 'pylint', 'pytest', 'ruff']
+dev = ['isort', 'coverage', 'mypy', 'pylint', 'pytest', 'ruff', "pytest-randomly"]
 
 [tool.pylint]
 disable = ["C0103"]
