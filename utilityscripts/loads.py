@@ -300,7 +300,7 @@ class EN14015:
         return self.m_tank + self.m_liquid
 
     @property
-    def d_h_t_ratio(self) -> float:
+    def d_h_t_ratio(self) -> Result:
         """
         The ratio of the contents diameter to the filling height of the tank.
         """
