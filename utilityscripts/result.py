@@ -175,11 +175,47 @@ class Result:
     def __mul__(self, other):
         if hasattr(self._value, "__mul__"):
             return self._value * other
+
+        if hasattr(other, "__rmul__"):
+            return self._value * other
+
         return NotImplemented
 
     def __rmul__(self, other):
         if hasattr(self._value, "__rmul__"):
             return other * self._value
+        if hasattr(other, "__mul__"):
+            return other * self._value
+
+        return NotImplemented
+
+    def __truediv__(self, other):
+        if hasattr(self._value, "__truediv__"):
+            return self._value / other
+        if hasattr(other, "__rtruediv__"):
+            return self._value / other
+
+        return NotImplemented
+
+    def __rtruediv__(self, other):
+        if hasattr(self._value, "__rtruediv__"):
+            return other / self._value
+        if hasattr(other, "__truediv__"):
+            return other / self._value
+        return NotImplemented
+
+    def __floordiv__(self, other):
+        if hasattr(self._value, "__floordiv__"):
+            return self._value // other
+        if hasattr(other, "__rfloordiv__"):
+            return self._value // other
+        return NotImplemented
+
+    def __rfloordiv__(self, other):
+        if hasattr(self._value, "__rfloordiv__"):
+            return other // self._value
+        if hasattr(other, "__floordiv__"):
+            return other // self._value
         return NotImplemented
 
     def report(

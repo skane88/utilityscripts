@@ -78,3 +78,51 @@ def test_result_mul(result, other, expected):
     result = Result(result)
     assert result * other == expected
     assert other * result == expected
+
+
+@pytest.mark.parametrize(
+    "result, other, expected",
+    [
+        (1, 2, 1 / 2),
+        (1, 0.5, 1 / 0.5),
+    ],
+)
+def test_result_truediv(result, other, expected):
+    result = Result(result)
+    assert result / other == expected
+
+
+@pytest.mark.parametrize(
+    "result, other, expected",
+    [
+        (1, 2, 2 / 1),
+        (1, 0.5, 0.5 / 1),
+    ],
+)
+def test_result_rtruediv(result, other, expected):
+    result = Result(result)
+    assert other / result == expected
+
+
+@pytest.mark.parametrize(
+    "result, other, expected",
+    [
+        (1, 2, 1 // 2),
+        (1, 0.5, 1 // 0.5),
+    ],
+)
+def test_result_floordiv(result, other, expected):
+    result = Result(result)
+    assert result // other == expected
+
+
+@pytest.mark.parametrize(
+    "result, other, expected",
+    [
+        (1, 2, 2 // 1),
+        (1, 0.5, 0.5 // 1),
+    ],
+)
+def test_result_rfloordiv(result, other, expected):
+    result = Result(result)
+    assert other // result == expected
