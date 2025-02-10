@@ -246,19 +246,14 @@ class Result:
             else f"{self.value:{result_format}}"
         )
 
-        if self.variable is None:
-            result_str += result_value
-        else:
-            result_str += self.variable + "=" + result_value
+        result_str += self.variable if self.variable is not None else ""
+        result_str += "=" + result_value
 
         return result_str
 
     def __repr__(self):
         return (
             f"Result(result={self._value}, "
-            + f"eqn={self._eqn}, "
-            + "inputs="
-            + f"{None if self._inputs is None else f'{len(self._inputs)} inputs'}, "
-            + "metadata="
-            + f"{None if self._metadata is None else f'{len(self._metadata)} items'})"
+            + "description="
+            + f"{None if self._description is None else self._description}"
         )
