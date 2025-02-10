@@ -218,6 +218,20 @@ class Result:
             return other // self._value
         return NotImplemented
 
+    def __pow__(self, other):
+        if hasattr(self._value, "__pow__"):
+            return self._value**other
+        if hasattr(other, "__rpow__"):
+            return self._value**other
+        return NotImplemented
+
+    def __rpow__(self, other):
+        if hasattr(self._value, "__rpow__"):
+            return other**self._value
+        if hasattr(other, "__pow__"):
+            return other**self._value
+        return NotImplemented
+
     def report(
         self,
         result_format: str | None = None,
