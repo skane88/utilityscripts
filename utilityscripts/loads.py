@@ -308,6 +308,8 @@ class EN14015:
         return Result(
             self.d_i / self.h_t,
             description="Ratio of liquid diameter to filling height",
+            eqn="d_i / h_t",
+            inputs={"d_i": self.d_i, "h_t": self.h_t},
         )
 
     @property
