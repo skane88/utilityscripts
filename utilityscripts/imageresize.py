@@ -29,10 +29,18 @@ def _validate_file(*, file_path: Path, missing_ok: bool):
     """
     Helper function to validate an image.
 
-    :param file_path: The file path to the image.
-    :param missing_ok: Is it ok for an image to be missing,
+    Parameters
+    ----------
+    file_path : Path
+        The file path to the image.
+    missing_ok : bool
+        Is it ok for an image to be missing,
         or should the function raise an error.
-    :return: True if the image exists and is of the correct extension.
+
+    Returns
+    -------
+    bool
+        True if the image exists and is of the correct extension.
         Otherwise, False. Raises an error if it is not OK for the image
         to be missing.
     """
@@ -48,7 +56,15 @@ def _validate_file(*, file_path: Path, missing_ok: bool):
 def _open_image(file_path: Path) -> Image:
     """
     Helper function to open an image and retry on one cause of failure.
-    :param file_path: The image to open.
+
+    Parameters
+    ----------
+    file_path : Path
+        The image to open.
+
+    Returns
+    -------
+    Image
     """
 
     def open_jpeg(file_path: Path) -> Image:
@@ -91,10 +107,16 @@ def _find_quality(
     """
     Helper method that uses binary search to find a target quality level that meets the size requirements.
 
-    :param image: The image to compress.
-    :param quality_min: The minimum acceptable quality level.
-    :param quality_max: The maximum quality level.
-    :param target_size: The target file size.
+    Parameters
+    ----------
+    image : Image
+        The image to compress.
+    quality_min : int
+        The minimum acceptable quality level.
+    quality_max : int
+        The maximum quality level.
+    target_size : int
+        The target file size.
     """
 
     final_quality = -1
@@ -128,23 +150,39 @@ def compress_image(
 ) -> Optional[Path]:
     """
     Uses the PILlow library to compress an image to below a target file size.
-    All images are saved as .jpg files.
-    Uses an IO Buffer to minimise writes to disk.
-    If it can't reach the target file size, without compromising quality it will either
-    raise an error or else save the file at the smallest size possible depending on
-    the paramter ``save_larger_than_target``
-    Based on the method at:
+
+    Notes
+    -----
+    - All images are saved as .jpg files.
+    - Uses an IO Buffer to minimise writes to disk.
+    - If it can't reach the target file size, without compromising quality it will either
+      raise an error or else save the file at the smallest size possible depending on
+      the paramter ``save_larger_than_target``
+    - Based on the method at:
     https://stackoverflow.com/questions/52259476/how-to-reduce-a-jpeg-size-to-a-desired-size
-    :param file_path: The path of the photo to resize.
-    :param target_size: The target size in bytes of the image.
+
+    Parameters
+    ----------
+    file_path : Path
+        The path of the photo to resize.
+    target_size : int
+        The target size in bytes of the image.
         Default of 512000 bytes = 500kb
-    :param quality_min: The minimum quality setting for the PILlow save function.
-    :param quality_max: The maximum quality setting for the PILlow save function.
-    :param save_larger_than_target: Will the program save the file if the projected
+    quality_min : int
+        The minimum quality setting for the PILlow save function.
+    quality_max : int
+        The maximum quality setting for the PILlow save function.
+    save_larger_than_target : bool
+        Will the program save the file if the projected
         file size is larger than the target?
-    :param delete_orig: Delete the original if it has a different file extension.
-    :param missing_ok: Is it ok to ignore missing files?
-    :returns: The resulting file path.
+    delete_orig : bool
+        Delete the original if it has a different file extension.
+    missing_ok : bool
+        Is it ok to ignore missing files?
+
+    Returns
+    -------
+    Optional[Path]
     """
 
     if not _validate_file(file_path=file_path, missing_ok=False):
@@ -225,8 +263,17 @@ def _get_size(*, image_to_size, quality) -> int:
     """
     A helper function to just get a potential image size after resizing by saving
     it into a buffer rather than as an image.
-    :param image_to_size: A PILlow Image object.
-    :param quality: The quality to save it at.
+
+    Parameters
+    ----------
+    image_to_size : Image
+        A PILlow Image object.
+    quality : int
+        The quality to save it at.
+
+    Returns
+    -------
+    int
     """
     buffer = io.BytesIO()
     # create a new buffer every time to prevent saving into the same buffer
@@ -250,11 +297,20 @@ def _save_image(
     """
     Save an image file to the provided path, at the provided quality.
 
-    :param image: The image to save.
-    :param file_path: The path to save it to.
-    :param quality: The quality level to save at.
-    :param img_format: The file format to save in. Must be a format known to PILlow.
-    :param exif: Any exif data to save to image in a format compatible with PILlow.
+    Notes
+    -----
+    - The image is saved as a JPEG file.
+
+    Parameters
+    ----------
+    image : Image
+        The image to save.
+    file_path : Union[Path, io.BytesIO]
+        The path to save it to.
+    quality : int
+        The quality to save it at.
+    exif : Any
+        Any exif data to save to image in a format compatible with PILlow.
         If None, any existing exif data on the image will be used instead.
     """
 
@@ -286,17 +342,23 @@ def _save_image(
 def _help_resize(input_vals):
     """
     Helper function to allow multi-processing of photos when processing a whole folder
-    :param input_vals: Expected values:
-        original_path,
-        target_size,
-        quality_min,
-        quality_max,
-        save_larger_than_target,
-        delete_orig,
-        missing_ok,
-        verbose,
-        ignore_errors
-    :return:
+
+    Parameters
+    ----------
+    input_vals : tuple
+        A tuple with the following values:
+        (original_path, target_size, quality_min, quality_max, save_larger_than_target,
+        delete_orig, missing_ok, verbose, ignore_errors)
+
+    Returns
+    -------
+    tuple
+        A tuple with the following values:
+        (original_path,
+        new_file_path,
+        original_size,
+        final_size,
+        warning)
     """
 
     (
@@ -356,8 +418,16 @@ def _find_files(*, folder, incl_subfolders: bool) -> list[Path]:
     """
     Helper function to find files to resize.
 
-    :param folder: The folder to search.
-    :param incl_subfolders: Should subfolders be included?
+    Parameters
+    ----------
+    folder : Path
+        The folder to search.
+    incl_subfolders : bool
+        Should subfolders be included?
+
+    Returns
+    -------
+    list[Path]
     """
 
     files_to_resize = []
@@ -394,21 +464,36 @@ def compress_all_in_folder(
     ignore_errors: bool = True,
 ) -> Tuple[List[Optional[Path]], List[str]]:
     """
+    Compress all images in a folder to below a target file size.
 
-    :param folder: The folder to search.
-    :param incl_subfolders: Do you want to resize images in subfolders?
-    :param target_size: The target size in bytes of the image.
+    Parameters
+    ----------
+    folder : Path
+        The folder to search.
+    incl_subfolders : bool
+        Do you want to resize images in subfolders?
+    target_size : int
+        The target size in bytes of the image.
         Default of 512000 bytes = 500kb
-    :param quality_min: The minimum quality setting for the PILlow save function.
-    :param quality_max: The maximum quality setting for the PILlow save function.
-    :param save_larger_than_target: Will the program save the file if the projected
+    quality_min : int
+        The minimum quality setting for the PILlow save function.
+    quality_max : int
+        The maximum quality setting for the PILlow save function.
+    save_larger_than_target : bool
+        Will the program save the file if the projected
         file size is larger than the target?
-    :param delete_orig: Delete the original if it has a different file extension.
-    :param missing_ok: bool = True,
-    :param verbose: Print status updates?
-    :param ignore_errors: Is it OK to ignore certain errors? Currently only the
+    delete_orig : bool
+        Delete the original if it has a different file extension.
+    missing_ok : bool
+        Is it OK to ignore missing files?
+    ignore_errors : bool
+        Is it OK to ignore certain errors? Currently only the
         ``UnidentifiedImageError`` is ignored.
-    :returns: A list of the resulting files and any warnings.
+
+    Returns
+    -------
+    tuple[list[Optional[Path]], list[str]]
+        A list of the resulting files and any warnings.
     """
 
     warnings: List[str] = []
