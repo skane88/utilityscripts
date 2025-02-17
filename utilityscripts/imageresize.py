@@ -102,7 +102,7 @@ def _find_quality(
         # use binary search to quickly converge on an acceptable level of quality.
 
         quality_average = math.floor((quality_min + quality_max) / 2)
-        size = _get_size(picture_to_size=image, quality=quality_average)
+        size = _get_size(image_to_size=image, quality=quality_average)
 
         if size <= target_size:
             final_quality = quality_average
@@ -164,7 +164,7 @@ def compress_image(
     # first do a check that at the minimum compression we will be smaller than the
     # target file size
 
-    min_size = _get_size(picture_to_size=image, quality=quality_min)
+    min_size = _get_size(image_to_size=image, quality=quality_min)
 
     if min_size >= current_size:
         # we have specified not to save if larger than the original, so bail out
@@ -186,7 +186,7 @@ def compress_image(
             target_size=target_size,
         )
 
-        size = _get_size(picture_to_size=image, quality=final_quality)
+        size = _get_size(image_to_size=image, quality=final_quality)
 
     # now we have figured out the level of quality required, resize the image.
 
@@ -221,17 +221,17 @@ def compress_image(
     return new_file_path
 
 
-def _get_size(*, picture_to_size, quality) -> int:
+def _get_size(*, image_to_size, quality) -> int:
     """
     A helper function to just get a potential image size after resizing by saving
     it into a buffer rather than as an image.
-    :param picture_to_size: A PILlow Image object.
+    :param image_to_size: A PILlow Image object.
     :param quality: The quality to save it at.
     """
     buffer = io.BytesIO()
     # create a new buffer every time to prevent saving into the same buffer
 
-    _save_image(image=picture_to_size, file_path=buffer, quality=quality)
+    _save_image(image=image_to_size, file_path=buffer, quality=quality)
 
     size = buffer.getbuffer().nbytes
     buffer.close()
