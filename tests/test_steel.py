@@ -8,9 +8,17 @@ import pytest
 
 from utilityscripts.steel.as4100 import k_t
 from utilityscripts.steel.steel import (
+    angle_section_df,
+    c_section_df,
+    chs_section_df,
     flat_plate_bending_point,
     flat_plate_bending_uniform,
+    i_section_df,
     local_thickness_reqd,
+    nearest_standard_plate,
+    nearest_standard_weld,
+    rhs_section_df,
+    steel_grades,
 )
 
 
@@ -164,3 +172,66 @@ def test_flat_plate_bending_uniform(
     assert isclose(result["sigma_max"], sigma_exp, rel_tol=tol)
     assert isclose(result["y_max"], y_max_exp, rel_tol=tol)
     assert isclose(result["R_max"], r_max_exp, rel_tol=tol)
+
+
+def test_steel_grades():
+    """Test the steel grades function"""
+
+    sg = steel_grades()
+
+    assert sg
+
+    assert sg["AS/NZS3678:250"].get_f_y(0.008) == 280  # noqa: PLR2004
+    assert sg["AS/NZS3678:250"].get_f_u(0.008) == 410  # noqa: PLR2004
+
+
+def test_nearest_standard_weld():
+    """Test the nearest standard weld function"""
+
+    assert nearest_standard_weld(0.006) == 0.006  # noqa: PLR2004
+    assert nearest_standard_weld(0.0065, greater_than=False) == 0.006  # noqa: PLR2004
+    assert nearest_standard_weld(0.0065, greater_than=True) == 0.008  # noqa: PLR2004
+
+
+def test_nearest_standard_plate():
+    """Test the nearest standard plate function"""
+
+    assert nearest_standard_plate(0.006) == 0.006  # noqa: PLR2004
+    assert nearest_standard_plate(0.0065, greater_than=False) == 0.006  # noqa: PLR2004
+    assert nearest_standard_plate(0.0065, greater_than=True) == 0.008  # noqa: PLR2004
+
+
+def test_i_section_df():
+    """Test the i_section_df function"""
+
+    i_sects = i_section_df()
+
+    assert not i_sects.is_empty()
+
+
+def test_c_section_df():
+    """Test the c_section_df function"""
+    c_sects = c_section_df()
+
+    assert not c_sects.is_empty()
+
+
+def test_angle_section_df():
+    """Test the angle_section_df function"""
+    angle_sects = angle_section_df()
+
+    assert not angle_sects.is_empty()
+
+
+def test_rhs_section_df():
+    """Test the rhs_section_df function"""
+    rhs_sects = rhs_section_df()
+
+    assert not rhs_sects.is_empty()
+
+
+def test_chs_section_df():
+    """Test the chs_section_df function"""
+    chs_sects = chs_section_df()
+
+    assert not chs_sects.is_empty()

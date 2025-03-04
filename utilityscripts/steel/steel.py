@@ -10,7 +10,6 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import polars as pl
 from sectionproperties.analysis.section import Section
 from sectionproperties.pre.geometry import Geometry
@@ -26,12 +25,12 @@ from utilityscripts.section_prop import build_circle
 _DATA_PATH = Path(Path(__file__).parent) / Path("data")
 
 
-def steel_grade_df() -> pd.DataFrame:
+def steel_grade_df() -> pl.DataFrame:
     """
-    Get a Pandas Dataframe with all the Australian Standard steel grades.
+    Get a Polars Dataframe with all the Australian Standard steel grades.
     """
 
-    return pd.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="grades")
+    return pl.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="grades")
 
 
 class SteelGrade:
@@ -139,20 +138,36 @@ def steel_grades() -> dict[str, SteelGrade]:
     Build a dictionary of steel grades out of the steel data spreadsheet.
     """
 
-    sg_df = steel_grade_df().sort_values(["standard", "grade", "t"])
+    sg_df = steel_grade_df().sort(["standard", "grade", "t"])
 
-    unique_grades = sg_df.drop_duplicates(subset=["standard", "grade"])
+    # get a list of unique grades
+    unique_grades = (
+        sg_df[["standard", "current", "form", "grade"]]
+        .unique(subset=["standard", "grade"])
+        .sort(["standard", "grade"])
+    )
 
     grades = {}
 
-    for _, standard, current, form, grade, *_ in unique_grades.itertuples():
-        t = sg_df[(sg_df.standard == standard) & (sg_df.grade == grade)].t.to_numpy()
-        f_y = sg_df[
-            (sg_df.standard == standard) & (sg_df.grade == grade)
-        ].f_y.to_numpy()
-        f_u = sg_df[
-            (sg_df.standard == standard) & (sg_df.grade == grade)
-        ].f_u.to_numpy()
+    for standard, current, form, grade in unique_grades.iter_rows():
+        t = (
+            sg_df.filter((pl.col("standard") == standard) & (pl.col("grade") == grade))
+            .select("t")
+            .to_numpy()
+            .T[0]
+        )
+        f_y = (
+            sg_df.filter((pl.col("standard") == standard) & (pl.col("grade") == grade))
+            .select("f_y")
+            .to_numpy()
+            .T[0]
+        )
+        f_u = (
+            sg_df.filter((pl.col("standard") == standard) & (pl.col("grade") == grade))
+            .select("f_u")
+            .to_numpy()
+            .T[0]
+        )
 
         current = current == "yes"
         grade = str(grade)
@@ -796,9 +811,9 @@ def _grade_funcs(
 
 def i_section_df(
     steel_grade: None | SteelGrade | dict[str, SteelGrade] = None,
-) -> pd.DataFrame:
+) -> pl.DataFrame:
     """
-    Get a Pandas Dataframe with all the Australian Standard I sections.
+    Get a Polars Dataframe with all the Australian Standard I sections.
 
     Parameters
     ----------
@@ -1205,7 +1220,7 @@ def standard_plate_df():
     Load a dataframe of standard plate thicknesses.
     """
 
-    return pd.read_excel(
+    return pl.read_excel(
         _DATA_PATH / Path("steel_data.xlsx"), sheet_name="standard_plate"
     )
 
@@ -1215,7 +1230,7 @@ def nearest_standard_plate(
     *,
     min_thickness: float | None = None,
     greater_than: bool = True,
-    plate_df: pd.DataFrame | None = None,
+    plate_df: pl.DataFrame | None = None,
 ):
     """
     Return the nearest standard plate to the specified thickness.
@@ -1241,11 +1256,19 @@ def nearest_standard_plate(
         plate_df = standard_plate_df()
 
     if not greater_than:
-        mask = plate_df.thickness.le(thickness)
-        return plate_df.loc[mask, "thickness"].max()
+        return (
+            plate_df.filter(pl.col("thickness").le(thickness))
+            .select("thickness")
+            .max()
+            .item()
+        )
 
-    mask = plate_df.thickness.ge(thickness)
-    return plate_df.loc[mask, "thickness"].min()
+    return (
+        plate_df.filter(pl.col("thickness").ge(thickness))
+        .select("thickness")
+        .min()
+        .item()
+    )
 
 
 def standard_weld_df():
@@ -1253,13 +1276,13 @@ def standard_weld_df():
     Get a DataFrame containing standard fillet weld sizes.
     """
 
-    return pd.read_excel(
+    return pl.read_excel(
         _DATA_PATH / Path("steel_data.xlsx"), sheet_name="standard_fillet_welds"
     )
 
 
 def nearest_standard_weld(
-    size, *, greater_than: bool = True, weld_df: pd.DataFrame | None = None
+    size, *, greater_than: bool = True, weld_df: pl.DataFrame | None = None
 ):
     """
     Return the nearest standard weld size to the specified size.
@@ -1282,11 +1305,11 @@ def nearest_standard_weld(
         weld_df = standard_weld_df()
 
     if not greater_than:
-        mask = weld_df.leg_size.le(size)
-        return weld_df.loc[mask, "leg_size"].max()
+        return (
+            weld_df.filter(pl.col("leg_size").le(size)).select("leg_size").max().item()
+        )
 
-    mask = weld_df.leg_size.ge(size)
-    return weld_df.loc[mask, "leg_size"].min()
+    return weld_df.filter(pl.col("leg_size").ge(size)).select("leg_size").min().item()
 
 
 def t_tp_chamfer(*, t_w, alpha, t_l=0, use_radians: bool = True):
