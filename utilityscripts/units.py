@@ -236,7 +236,7 @@ def m_floor_units(x: pint.Quantity, base: pint.Quantity | float):
         converted back to the original units before the result is returned.
     """
 
-    # perform a preliminary round of x to 1/10 of base, to get rid of potential
+    # perform a preliminary round of x to 1/100 of base, to get rid of potential
     # floating point errors.
     x = m_round_units(x, base / 100)
 
