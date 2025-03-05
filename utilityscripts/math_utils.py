@@ -49,7 +49,7 @@ def m_round(x, base):
     return round(round(x / base) * base, frac_digits)
 
 
-def m_floor(x, base):
+def m_floor(x, base, *, float_tolerance: float | None = 1e-6):
     """
     Floor a number to the nearest multiple.
 
@@ -58,9 +58,19 @@ def m_floor(x, base):
     will incur a performance overhead so only use this
     method if there is no better way to do this function.
 
-    :param x: the number to round.
-    :param base: the multiple to round to.
+    Parameters
+    ----------
+    x : float
+        The number to round.
+    base : float
+        The multiple to round to.
+    float_tolerance : float, optional
+        A tolerance for floating point math. If not None, the function first
+        rounds to the float_tolerance and then completes the rounding.
     """
+
+    if float_tolerance is not None:
+        x = m_round(x, float_tolerance)
 
     x = Decimal(str(x))
     base = Decimal(str(base))
@@ -77,7 +87,7 @@ def m_floor(x, base):
     return float(round(math.floor(x / base) * base, frac_digits))
 
 
-def m_ceil(x, base):
+def m_ceil(x, base, *, float_tolerance: float | None = 1e-6):
     """
     Floor a number to the nearest multiple.
 
@@ -86,9 +96,19 @@ def m_ceil(x, base):
     will incur a performance overhead so only use this
     method if there is no better way to do this function.
 
-    :param x: the number to round.
-    :param base: the multiple to round to.
+    Parameters
+    ----------
+    x : float
+        The number to round.
+    base : float
+        The multiple to round to.
+    float_tolerance : float, optional
+        A tolerance for floating point math. If not None, the function first
+        rounds to the float_tolerance and then completes the rounding.
     """
+
+    if float_tolerance is not None:
+        x = m_round(x, float_tolerance)
 
     x = Decimal(str(x))
     base = Decimal(str(base))
