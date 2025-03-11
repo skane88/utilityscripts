@@ -69,6 +69,44 @@ def get_f_cmi(f_c):
     return np.interp(f_c, f_c_vals, f_cmi_vals)
 
 
+def f_ctf_s3_1_1_3(f_c):
+    """
+    Determine the characteristic flexural strength of the concrete, based on S3.1.1.3 of
+    AS3600-2018.
+
+    Parameters
+    ----------
+    f_c : float
+        The characteristic compressive strength of the concrete.
+
+    Returns
+    -------
+    float
+        The characteristic flexural strength of the concrete.
+    """
+
+    return 0.6 * (f_c**0.5)
+
+
+def f_ct_s3_1_1_3(f_c):
+    """
+    Determine the characteristic tensile strength of the concrete, based on S3.1.1.3 of
+    AS3600-2018.
+
+    Parameters
+    ----------
+    f_c : float
+        The characteristic compressive strength of the concrete.
+
+    Returns
+    -------
+    float
+        The characteristic tensile strength of the concrete.
+    """
+
+    return 0.36 * (f_c**0.5)
+
+
 class Concrete:
     """
     Class to represent a concrete material.
@@ -209,7 +247,7 @@ class Concrete:
         as per AS3600 S3.1.1.3.
         """
 
-        return 0.6 * (self.f_c**0.5)
+        return f_ctf_s3_1_1_3(self.f_c)
 
     @property
     def f_ct(self):
@@ -218,7 +256,7 @@ class Concrete:
         as per AS3600 S3.1.1.3.
         """
 
-        return 0.36 * (self.f_c**0.5)
+        return f_ct_s3_1_1_3(self.f_c)
 
     @property
     def alpha_2(self):
