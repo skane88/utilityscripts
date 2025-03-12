@@ -41,7 +41,16 @@ dependencies = [
 Home = "https://ifitsmoving.com"
 
 [project.optional-dependencies]
-dev = ['isort', 'coverage', 'mypy', 'pylint', 'pytest', 'ruff', "pytest-randomly"]
+dev = [
+ 'isort',
+ 'coverage',
+ 'mypy',
+ 'pylint',
+ 'pytest',
+ 'ruff',
+ "pytest-randomly"
+ "pytest-cov",
+]
 
 [tool.pylint]
 disable = ["C0103"]
