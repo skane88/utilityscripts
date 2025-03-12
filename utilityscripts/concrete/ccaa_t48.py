@@ -408,31 +408,31 @@ def k_4(f_c: float) -> float:
 
 
 @lru_cache(maxsize=None)
-def _f_e1_data() -> dict[LoadingType, dict[LoadLocation, pl.DataFrame]]:
+def _f_e_data() -> dict[LoadingType, dict[LoadLocation, pl.DataFrame]]:
     """
     Get the f_e1 data into a dictionary for easy use later.
 
     Notes
     -----
-    Method cached to eliminate unneccsary Excel reads.
+    Method cached to eliminate unneccesary Excel reads.
     """
 
     data = {LoadingType.WHEEL: {}, LoadingType.POINT: {}, LoadingType.DISTRIBUTED: {}}
 
     data[LoadingType.WHEEL][LoadLocation.INTERNAL] = pl.read_excel(
-        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht11_f_e1"
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht11_f_e"
     )
     data[LoadingType.WHEEL][LoadLocation.EDGE] = pl.read_excel(
-        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht12_f_e1"
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht12_f_e"
     )
     data[LoadingType.POINT][LoadLocation.INTERNAL] = pl.read_excel(
-        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht13_f_e1"
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht13_f_e"
     )
     data[LoadingType.POINT][LoadLocation.EDGE] = deepcopy(
         data[LoadingType.POINT][LoadLocation.INTERNAL]
     )
     data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL] = pl.read_excel(
-        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht14_f_e1"
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht14_f_e"
     )
     data[LoadingType.DISTRIBUTED][LoadLocation.EDGE] = deepcopy(
         data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL]
@@ -441,15 +441,29 @@ def _f_e1_data() -> dict[LoadingType, dict[LoadLocation, pl.DataFrame]]:
     return data
 
 
-def f_e1(e_ss: float, load_type: LoadingType, load_location: LoadLocation) -> float:
+def f_e(e_ss: float, load_type: LoadingType, load_location: LoadLocation) -> float:
     """
-    Calculate the short term Young's modulus factor, f_e1 as per CCAA T48 section 3.3.8
+    Calculate the short term Young's modulus factor, f_e as per CCAA T48 section 3.3.8
+
+    Parameters
+    ----------
+    e_ss : float
+        The short term Young's modulus of the soil
+    load_type : LoadingType
+        The type of loading
+    load_location : LoadLocation
+        The location of the load
+
+    Returns
+    -------
+    float
+        The short term Young's modulus factor, f_e
     """
 
-    data = _f_e1_data()[load_type][load_location]
+    data = _f_e_data()[load_type][load_location]
 
     e_ss_vals = data["e_ss"].to_numpy()
-    f_e1_vals = data["f_e1"].to_numpy()
+    f_e_vals = data["f_e"].to_numpy()
 
     if e_ss < data["e_ss"].min():
         raise ValueError(
@@ -463,10 +477,88 @@ def f_e1(e_ss: float, load_type: LoadingType, load_location: LoadLocation) -> fl
             + f"the maximum value of {data['e_ss'].max():.0f}"
         )
 
-    return np.interp(e_ss, e_ss_vals, f_e1_vals)
+    return np.interp(e_ss, e_ss_vals, f_e_vals)
 
 
-def f_1(*, f_all, f_e1, f_h1, f_s1, k_3, k_4) -> float:
+@lru_cache(maxsize=None)
+def _f_s_data() -> dict[LoadingType, dict[LoadLocation, pl.DataFrame]]:
+    """
+    Get the f_s data into a dictionary for easy use later.
+
+    Notes
+    -----
+    Method cached to eliminate unneccesary Excel reads.
+    """
+
+    data = {LoadingType.WHEEL: {}, LoadingType.POINT: {}, LoadingType.DISTRIBUTED: {}}
+
+    data[LoadingType.WHEEL][LoadLocation.INTERNAL] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht11_f_s"
+    )
+    data[LoadingType.WHEEL][LoadLocation.EDGE] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht12_f_s"
+    )
+    data[LoadingType.POINT][LoadLocation.INTERNAL] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht13_f_s"
+    )
+    data[LoadingType.POINT][LoadLocation.EDGE] = deepcopy(
+        data[LoadingType.POINT][LoadLocation.INTERNAL]
+    )
+    data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht14_f_s"
+    )
+    data[LoadingType.DISTRIBUTED][LoadLocation.EDGE] = deepcopy(
+        data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL]
+    )
+
+    return data
+
+
+def f_s(x: float, load_type: LoadingType, load_location: LoadLocation) -> float:
+    """
+    Calculate the spacing factor, f_s as per CCAA T48 section 3.3.8
+
+    Parameters
+    ----------
+    x : float
+        The spacing parameter.
+
+        x = S for wheel loads,
+        x = average post spacing for post loads.
+        x = W for distributed loads.
+
+    load_type : LoadingType
+        The type of loading
+    load_location : LoadLocation
+        The location of the load
+
+    Returns
+    -------
+    float
+        The spacing factor, f_s
+    """
+
+    data = _f_s_data()[load_type][load_location]
+
+    x_vals = data["x"].to_numpy()
+    f_s_vals = data["f_s1"].to_numpy()
+
+    if x < data["x"].min():
+        raise ValueError(
+            f"x value of {x} is less than "
+            + f"the minimum value of {data['x'].min():.0f}"
+        )
+
+    if x > data["x"].max():
+        raise ValueError(
+            f"x value of {x} is greater than "
+            + f"the maximum value of {data['x'].max():.0f}"
+        )
+
+    return np.interp(x, x_vals, f_s_vals)
+
+
+def f_1(*, f_all, f_e, f_h, f_s, k_3, k_4) -> float:
     """
     Calculate the equvialent stress factor, F_1 as per CCAA T48 section 3.3.8
 
@@ -474,11 +566,11 @@ def f_1(*, f_all, f_e1, f_h1, f_s1, k_3, k_4) -> float:
     ----------
     f_all : float
         The allowable stress in the concrete
-    f_e1 : float
+    f_e : float
         The short term Young's modulus factor.
-    f_h1 : float
+    f_h : float
         The depth of soil factor.
-    f_s1 : float
+    f_s : float
         The wheel spacing factor.
     k_3 : float
         A calibration factor for geotechnical behaviour.
@@ -491,4 +583,4 @@ def f_1(*, f_all, f_e1, f_h1, f_s1, k_3, k_4) -> float:
         The equivalent stress factor, F_1
     """
 
-    return f_all * f_e1 * f_h1 * f_s1 * k_3 * k_4
+    return f_all * f_e * f_h * f_s * k_3 * k_4

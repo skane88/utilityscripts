@@ -9,7 +9,8 @@ from utilityscripts.concrete.ccaa_t48 import (
     e_se,
     e_sl_from_cbr,
     e_ss_from_e_sl,
-    f_e1,
+    f_e,
+    f_s,
     k_1,
     k_2,
     k_3,
@@ -196,6 +197,57 @@ def test_k_4_errors(f_c, expected):
     [
         (25, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.19),
         (100, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.5375),
+        (10.0, LoadingType.WHEEL, LoadLocation.EDGE, 1.00),
+        (100, LoadingType.WHEEL, LoadLocation.EDGE, 1.68),
+        (25, LoadingType.POINT, LoadLocation.INTERNAL, 1.19),
+        (100, LoadingType.POINT, LoadLocation.INTERNAL, 1.5375),
+        (25, LoadingType.POINT, LoadLocation.EDGE, 1.19),
+        (100, LoadingType.POINT, LoadLocation.EDGE, 1.5375),
+        (25, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.19),
+        (100, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.5375),
+        (25, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.19),
+        (100, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.5375),
+    ],
+)
+def test_f_e(e_ss, load_type, load_location, expected):
+    assert isclose(
+        f_e(e_ss=e_ss, load_type=load_type, load_location=load_location),
+        expected,
+        rel_tol=1e-2,
+    )
+
+
+@pytest.mark.parametrize(
+    "e_ss, load_type, load_location, expected",
+    [
+        (2.5, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.0),
+        (160, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.0),
+        (2.0, LoadingType.WHEEL, LoadLocation.EDGE, 1.0),
+        (160, LoadingType.WHEEL, LoadLocation.EDGE, 1.0),
+        (2.5, LoadingType.POINT, LoadLocation.INTERNAL, 1.0),
+        (160, LoadingType.POINT, LoadLocation.INTERNAL, 1.0),
+        (2.5, LoadingType.POINT, LoadLocation.EDGE, 1.0),
+        (160, LoadingType.POINT, LoadLocation.EDGE, 1.0),
+        (2.5, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.0),
+        (160, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.0),
+        (2.5, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.0),
+        (160, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.0),
+    ],
+)
+def test_f_e_errors(e_ss, load_type, load_location, expected):
+    with pytest.raises(ValueError):
+        assert isclose(
+            f_e(e_ss=e_ss, load_type=load_type, load_location=load_location),
+            expected,
+            rel_tol=1e-2,
+        )
+
+
+@pytest.mark.parametrize(
+    "x, load_type, load_location, expected",
+    [
+        (1.22, LoadingType.WHEEL, LoadLocation.INTERNAL, 0.95),
+        (2.85, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.16),
         (25, LoadingType.WHEEL, LoadLocation.EDGE, 1.19),
         (100, LoadingType.WHEEL, LoadLocation.EDGE, 1.5375),
         (25, LoadingType.POINT, LoadLocation.INTERNAL, 1.19),
@@ -208,35 +260,35 @@ def test_k_4_errors(f_c, expected):
         (100, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.5375),
     ],
 )
-def test_f_e1(e_ss, load_type, load_location, expected):
+def test_f_s(x, load_type, load_location, expected):
     assert isclose(
-        f_e1(e_ss=e_ss, load_type=load_type, load_location=load_location),
+        f_s(x=x, load_type=load_type, load_location=load_location),
         expected,
         rel_tol=1e-2,
     )
 
 
 @pytest.mark.parametrize(
-    "e_ss, load_type, load_location, expected",
+    "x, load_type, load_location, expected",
     [
-        (2.5, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.0),
-        (160, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.0),
-        (2.5, LoadingType.WHEEL, LoadLocation.EDGE, 1.0),
-        (160, LoadingType.WHEEL, LoadLocation.EDGE, 1.0),
-        (2.5, LoadingType.POINT, LoadLocation.INTERNAL, 1.0),
-        (160, LoadingType.POINT, LoadLocation.INTERNAL, 1.0),
-        (2.5, LoadingType.POINT, LoadLocation.EDGE, 1.0),
-        (160, LoadingType.POINT, LoadLocation.EDGE, 1.0),
-        (2.5, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.0),
-        (160, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.0),
-        (2.5, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.0),
-        (160, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.0),
+        (0.5, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.0),
+        (5.0, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.0),
+        (0.5, LoadingType.WHEEL, LoadLocation.EDGE, 1.0),
+        (5.0, LoadingType.WHEEL, LoadLocation.EDGE, 1.0),
+        (0.5, LoadingType.POINT, LoadLocation.INTERNAL, 1.0),
+        (5.0, LoadingType.POINT, LoadLocation.INTERNAL, 1.0),
+        (0.5, LoadingType.POINT, LoadLocation.EDGE, 1.0),
+        (5.0, LoadingType.POINT, LoadLocation.EDGE, 1.0),
+        (0.5, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.0),
+        (5.0, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.0),
+        (0.5, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.0),
+        (5.0, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.0),
     ],
 )
-def test_f_e1_errors(e_ss, load_type, load_location, expected):
+def test_f_s_errors(x, load_type, load_location, expected):
     with pytest.raises(ValueError):
         assert isclose(
-            f_e1(e_ss=e_ss, load_type=load_type, load_location=load_location),
+            f_s(x=x, load_type=load_type, load_location=load_location),
             expected,
             rel_tol=1e-2,
         )
