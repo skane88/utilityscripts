@@ -426,10 +426,10 @@ def _f_e_data() -> dict[LoadingType, dict[LoadLocation, pl.DataFrame]]:
         _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht12_f_e"
     )
     data[LoadingType.POINT][LoadLocation.INTERNAL] = pl.read_excel(
-        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht13_f_e"
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht13_f_e_interior"
     )
-    data[LoadingType.POINT][LoadLocation.EDGE] = deepcopy(
-        data[LoadingType.POINT][LoadLocation.INTERNAL]
+    data[LoadingType.POINT][LoadLocation.EDGE] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht13_f_e_edge"
     )
     data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL] = pl.read_excel(
         _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht14_f_e"
