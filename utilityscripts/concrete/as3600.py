@@ -264,7 +264,7 @@ class Concrete:
         Calculate parameter alpha_2 as per AS3600-2018.
         """
 
-        return alpha_2(f_c=self.f_c, sect_type=self._sect_type)
+        return alpha_2_s8_1_3(f_c=self.f_c, sect_type=self._sect_type)
 
     @property
     def gamma(self):
@@ -272,7 +272,7 @@ class Concrete:
         Calculate parameter gamma as per AS3600-2018.
         """
 
-        return gamma(self.f_c)
+        return gamma_s8_1_3(self.f_c)
 
     @property
     def rect_strain(self):
@@ -516,11 +516,18 @@ def circle_area(diameter):
     return pi * (diameter**2) / 4
 
 
-def alpha_2(f_c, *, sect_type: SectType813 | str = SectType813.RECTANGULAR):
+def alpha_2_s8_1_3(
+    f_c: float, *, sect_type: SectType813 | str = SectType813.RECTANGULAR
+) -> float:
     """
     Calculate parameter alpha_2 as per AS3600-2018.
 
-    :param f_c: The characteristic compressive strength of the concrete
+    Parameters
+    ----------
+    f_c : float
+        The characteristic compressive strength of the concrete
+    sect_type : SectType813
+        Is the section Rectangular or Circular.
     """
 
     if isinstance(sect_type, str):
@@ -536,11 +543,14 @@ def alpha_2(f_c, *, sect_type: SectType813 | str = SectType813.RECTANGULAR):
     return max(0.67, 0.85 - 0.0015 * f_c) * multiplier
 
 
-def gamma(f_c):
+def gamma_s8_1_3(f_c: float) -> float:
     """
-    Calculate parameter gamma as per AS3600-2018.
+    Calculate parameter gamma as per AS3600-2018 Section 8.1.3.
 
-    :param f_c: The characteristic compressive strength of the concrete.
+    Parameters
+    ----------
+    f_c : float
+        The characteristic compressive strength of the concrete.
     """
 
     return max(0.67, 0.97 - 0.0025 * f_c)
@@ -555,10 +565,10 @@ def generate_rectilinear_block(*, f_c, max_compression_strain: float = 0.003):
         concrete. According to AS3600 S8.1.3 this is 0.003.
     """
 
-    gamma_val = gamma(f_c)
+    gamma_val = gamma_s8_1_3(f_c)
     min_strain = max_compression_strain * (1 - gamma_val)
 
-    compressive_strength = alpha_2(f_c) * f_c
+    compressive_strength = alpha_2_s8_1_3(f_c) * f_c
 
     return [
         [0, min_strain, max_compression_strain],
