@@ -48,7 +48,7 @@ dev = [
  'pylint',
  'pytest',
  'ruff',
- "pytest-randomly"
+ "pytest-randomly",
  "pytest-cov",
 ]
 
