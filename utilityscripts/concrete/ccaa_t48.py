@@ -144,9 +144,13 @@ def f_all(*, k_1, k_2, f_cf):
 
 
 @lru_cache(maxsize=None)
-def _get_w_fi_data():
+def _get_w_fi_data() -> dict[LoadingType, pl.DataFrame]:
     """
     Get the w_fi data into a dictionary for easy use later.
+
+    Notes
+    -----
+    Method cached to eliminate unneccsary Excel reads.
     """
 
     data_excel = _DATA_PATH / Path("ccaa_t48_data.xlsx")
@@ -276,6 +280,10 @@ def e_ss_from_e_sl(e_sl: float, b: float) -> float:
 def _e_sl_data() -> pl.DataFrame:
     """
     Get the e_sl data into a DataFrame for easy use later.
+
+    Notes
+    -----
+    Method cached to eliminate unneccsary Excel reads.
     """
 
     return pl.read_excel(
@@ -365,6 +373,10 @@ def k_3(load_location: LoadLocation) -> float:
 def _k_4_data() -> pl.DataFrame:
     """
     Get the k_4 data into a DataFrame for easy use later.
+
+    Notes
+    -----
+    Method cached to eliminate unneccsary Excel reads.
     """
 
     return pl.read_excel(_DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="k_4")
@@ -399,6 +411,10 @@ def k_4(f_c: float) -> float:
 def _f_e1_data() -> dict[LoadingType, dict[LoadLocation, pl.DataFrame]]:
     """
     Get the f_e1 data into a dictionary for easy use later.
+
+    Notes
+    -----
+    Method cached to eliminate unneccsary Excel reads.
     """
 
     data = {LoadingType.WHEEL: {}, LoadingType.POINT: {}, LoadingType.DISTRIBUTED: {}}
