@@ -793,20 +793,28 @@ def plot_f_h():
     plt.show()
 
 
-def f_1(*, f_all, f_e, f_h, f_s, k_3, k_4) -> float:
+def f_12(
+    *,
+    f_all: float,
+    f_e12: float,
+    f_h12: float,
+    f_s12: float,
+    k_3: float,
+    k_4: float,
+) -> float:
     """
-    Calculate the equvialent stress factor, F_1 as per CCAA T48 section 3.3.8
+    Calculate the equvialent stress factor, F_1 or F2 as per CCAA T48 section 3.3.8
 
     Parameters
     ----------
     f_all : float
-        The allowable stress in the concrete
-    f_e : float
-        The short term Young's modulus factor.
-    f_h : float
-        The depth of soil factor.
-    f_s : float
-        The wheel spacing factor.
+        The allowable stress in the concrete, in MPa
+    f_e12 : float
+        The short term Young's modulus factor F_E1 or F_E2.
+    f_h12 : float
+        The depth of soil factor F_H1 or F_H2.
+    f_s12 : float
+        The wheel spacing factor F_S1 or F_S2.
     k_3 : float
         A calibration factor for geotechnical behaviour.
     k_4 : float
@@ -815,7 +823,75 @@ def f_1(*, f_all, f_e, f_h, f_s, k_3, k_4) -> float:
     Returns
     -------
     float
-        The equivalent stress factor, F_1
+        The equivalent stress factor, F_1 or F_2
     """
 
-    return f_all * f_e * f_h * f_s * k_3 * k_4
+    return f_all * f_e12 * f_h12 * f_s12 * k_3 * k_4
+
+
+def f_3(
+    *,
+    p: float,
+    f_all: float,
+    f_e3: float,
+    f_h3: float,
+    f_s3: float,
+) -> float:
+    """
+    Calculate the equvialent stress factor, F_3 as per CCAA T48 section 3.3.8
+
+    Parameters
+    ----------
+    p : float
+        The load, in kN
+    f_all : float
+        The allowable stress in the concrete, in MPa
+    f_e3 : float
+        The short term Young's modulus factor F_E3.
+    f_h3 : float
+        The depth of soil factor F_H3.
+    f_s3 : float
+        The wheel spacing factor F_S3.
+
+    Returns
+    -------
+    float
+        The equivalent stress factor, F_3
+    """
+
+    return (1000 / p) * f_all * f_e3 * f_h3 * f_s3
+
+
+def f_4(
+    *,
+    p: float,
+    f_all: float,
+    f_e4: float,
+    f_h4: float,
+    f_s4: float,
+) -> float:
+    """
+    Calculate the equvialent stress factor, F_4 as per CCAA T48 section 3.3.8
+
+    Parameters
+    ----------
+    load_location : LoadLocation
+        The location of the load
+    P : float
+        The distributed load, in kPa
+    f_all : float
+        The allowable stress in the concrete, in MPa
+    f_e4 : float
+        The short term Young's modulus factor F_E4.
+    f_h4 : float
+        The depth of soil factor F_H4.
+    f_s4 : float
+        The wheel spacing factor F_S4.
+
+    Returns
+    -------
+    float
+        The equivalent stress factor, F_4
+    """
+
+    return (1000 / p) * f_all * f_e4 * f_h4 * f_s4
