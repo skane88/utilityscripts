@@ -1336,6 +1336,7 @@ source = { editable = "." }
 dependencies = [
     { name = "altair" },
     { name = "concreteproperties" },
+    { name = "coverage" },
     { name = "fastexcel" },
     { name = "humre" },
     { name = "ipython" },
@@ -1372,6 +1373,7 @@ dev = [
 requires-dist = [
     { name = "altair" },
     { name = "concreteproperties" },
+    { name = "coverage", specifier = ">=7.6.10" },
     { name = "coverage", marker = "extra == 'dev'" },
     { name = "fastexcel" },
     { name = "humre" },
@@ -1390,7 +1392,7 @@ requires-dist = [
     { name = "pynitefea" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "pytest-randomly", marker = "extra == 'dev'" },
-    { name = "python-docx", specifier = ">=1.1.2" },
+    { name = "python-docx" },
     { name = "ruff", marker = "extra == 'dev'" },
     { name = "scipy" },
     { name = "sectionproperties" },
