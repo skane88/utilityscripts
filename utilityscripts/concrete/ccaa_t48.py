@@ -6,6 +6,7 @@ from enum import StrEnum
 from math import log10
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 
@@ -31,6 +32,15 @@ class MaterialFactor(StrEnum):
     CONSERVATIVE = "conservative"
     MIDRANGE = "midrange"
     UNCONSERVATIVE = "unconservative"
+
+
+class LoadLocation(StrEnum):
+    """
+    Where is the load located?
+    """
+
+    INTERNAL = "internal"
+    EDGE = "edge"
 
 
 MATERIAL_FACTOR = pl.DataFrame(
@@ -175,6 +185,43 @@ def w_fi(
     return np.interp(relative_depth, depth_p, w_fi_p)
 
 
+def plot_w_fi():
+    data_wheel = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="w_fi_wheels"
+    )
+    data_point = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="w_fi_posts"
+    )
+    data_distributed = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="w_fi_distributed"
+    )
+
+    fig, ax = plt.subplots()
+
+    ax.plot(
+        data_wheel["w_fi"], data_wheel["relative_depth"], label="Wheel Loading (X=S)"
+    )
+    ax.plot(
+        data_point["w_fi"],
+        data_point["relative_depth"],
+        label="Point Loading (X=f(x, y))",
+    )
+    ax.plot(
+        data_distributed["w_fi"],
+        data_distributed["relative_depth"],
+        label="Distributed Loading (X=W)",
+    )
+
+    ax.set_xlabel("Weight Factor W_fi")
+    ax.set_ylabel("Relative Depth (z / X)")
+    ax.legend()
+    ax.set_xlim(0, 1.0)
+    ax.set_ylim(12, 0)
+    ax.grid(visible=True)
+
+    plt.show()
+
+
 def e_se(
     h_layers: list[float],
     e_layers: list[float],
@@ -201,3 +248,157 @@ def e_se(
     )
 
     return np.sum(w_fi_layers * h_layers) / np.sum(w_fi_layers * h_layers / e_layers)
+
+
+def e_ss_from_e_sl(e_sl: float, b: float) -> float:
+    """
+    Calculate the short term Young's modulus of the soil from the long term value.
+    """
+
+    return e_sl / b
+
+
+def e_sl_from_cbr(cbr: float) -> float:
+    """
+    Calculate the long term Young's modulus of the soil from the CBR.
+
+    Uses data interpolated from CCAA T48 Figure 1.24.
+
+    Parameters
+    ----------
+    cbr : float
+        The CBR value
+
+    Returns
+    -------
+    float
+        The long term Young's modulus of the soil
+    """
+
+    data = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="e_sl_from_cbr"
+    )
+
+    cbr_vals = data["cbr"].to_numpy()
+    e_sl_vals = data["e_sl"].to_numpy()
+
+    if cbr < data["cbr"].min():
+        raise ValueError(
+            f"CBR value of {cbr} is less than "
+            + f"the minimum value of {data['cbr'].min():.1f}"
+        )
+
+    if cbr > data["cbr"].max():
+        raise ValueError(
+            f"CBR value of {cbr} is greater than "
+            + f"the maximum value of {data['cbr'].max():.0f}"
+        )
+
+    return np.interp(cbr, cbr_vals, e_sl_vals)
+
+
+def k_3(load_location: LoadLocation) -> float:
+    """
+    Calculate the calibration factor for geotechnical behaviour, k_3 as per CCAA T48.
+    """
+
+    mapping = {LoadLocation.INTERNAL: 1.2, LoadLocation.EDGE: 1.05}
+
+    return mapping[load_location]
+
+
+def k_4(f_c: float) -> float:
+    """
+    Calculate the calibration factor for concrete strength, k_4 as per CCAA T48.
+    """
+
+    data = pl.read_excel(_DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="k_4")
+
+    f_c_vals = data["f_c"].to_numpy()
+    k_4_vals = data["k_4"].to_numpy()
+
+    if f_c < data["f_c"].min():
+        raise ValueError(
+            f"f_c value of {f_c} is less than "
+            + f"the minimum value of {data['f_c'].min():.0f}"
+        )
+
+    if f_c > data["f_c"].max():
+        raise ValueError(
+            f"f_c value of {f_c} is greater than "
+            + f"the maximum value of {data['f_c'].max():.0f}"
+        )
+
+    return np.interp(f_c, f_c_vals, k_4_vals)
+
+
+def f_e1(e_ss: float, load_type: LoadingType, load_location: LoadLocation) -> float:
+    """
+    Calculate the short term Young's modulus factor, f_e1 as per CCAA T48 section 3.3.8
+    """
+
+    if load_type == LoadingType.WHEEL and load_location == LoadLocation.INTERNAL:
+        data = pl.read_excel(
+            _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht11_f_e1"
+        )
+    elif load_type == LoadingType.WHEEL and load_location == LoadLocation.EDGE:
+        data = pl.read_excel(
+            _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht12_f_e1"
+        )
+    elif load_type == LoadingType.POINT:
+        data = pl.read_excel(
+            _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht13_f_e1"
+        )
+    elif load_type == LoadingType.DISTRIBUTED:
+        data = pl.read_excel(
+            _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht14_f_e1"
+        )
+    else:
+        raise ValueError(
+            f"Invalid load type: {load_type} or load location: {load_location}"
+        )
+
+    e_ss_vals = data["e_ss"].to_numpy()
+    f_e1_vals = data["f_e1"].to_numpy()
+
+    if e_ss < data["e_ss"].min():
+        raise ValueError(
+            f"e_ss value of {e_ss} is less than "
+            + f"the minimum value of {data['e_ss'].min():.0f}"
+        )
+
+    if e_ss > data["e_ss"].max():
+        raise ValueError(
+            f"e_ss value of {e_ss} is greater than "
+            + f"the maximum value of {data['e_ss'].max():.0f}"
+        )
+
+    return np.interp(e_ss, e_ss_vals, f_e1_vals)
+
+
+def f_1(*, f_all, f_e1, f_h1, f_s1, k_3, k_4) -> float:
+    """
+    Calculate the equvialent stress factor, F_1 as per CCAA T48 section 3.3.8
+
+    Parameters
+    ----------
+    f_all : float
+        The allowable stress in the concrete
+    f_e1 : float
+        The short term Young's modulus factor.
+    f_h1 : float
+        The depth of soil factor.
+    f_s1 : float
+        The wheel spacing factor.
+    k_3 : float
+        A calibration factor for geotechnical behaviour.
+    k_4 : float
+        A calibration factor for concrete strength.
+
+    Returns
+    -------
+    float
+        The equivalent stress factor, F_1
+    """
+
+    return f_all * f_e1 * f_h1 * f_s1 * k_3 * k_4
