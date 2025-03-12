@@ -2,6 +2,7 @@
 Implements desing of a concrete slab to CCAA T48
 """
 
+from copy import deepcopy
 from enum import StrEnum
 from functools import lru_cache
 from math import log10
@@ -360,12 +361,21 @@ def k_3(load_location: LoadLocation) -> float:
     return mapping[load_location]
 
 
+@lru_cache(maxsize=None)
+def _k_4_data() -> pl.DataFrame:
+    """
+    Get the k_4 data into a DataFrame for easy use later.
+    """
+
+    return pl.read_excel(_DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="k_4")
+
+
 def k_4(f_c: float) -> float:
     """
     Calculate the calibration factor for concrete strength, k_4 as per CCAA T48.
     """
 
-    data = pl.read_excel(_DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="k_4")
+    data = _k_4_data()
 
     f_c_vals = data["f_c"].to_numpy()
     k_4_vals = data["k_4"].to_numpy()
@@ -385,31 +395,42 @@ def k_4(f_c: float) -> float:
     return np.interp(f_c, f_c_vals, k_4_vals)
 
 
+@lru_cache(maxsize=None)
+def _f_e1_data() -> dict[LoadingType, dict[LoadLocation, pl.DataFrame]]:
+    """
+    Get the f_e1 data into a dictionary for easy use later.
+    """
+
+    data = {LoadingType.WHEEL: {}, LoadingType.POINT: {}, LoadingType.DISTRIBUTED: {}}
+
+    data[LoadingType.WHEEL][LoadLocation.INTERNAL] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht11_f_e1"
+    )
+    data[LoadingType.WHEEL][LoadLocation.EDGE] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht12_f_e1"
+    )
+    data[LoadingType.POINT][LoadLocation.INTERNAL] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht13_f_e1"
+    )
+    data[LoadingType.POINT][LoadLocation.EDGE] = deepcopy(
+        data[LoadingType.POINT][LoadLocation.INTERNAL]
+    )
+    data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht14_f_e1"
+    )
+    data[LoadingType.DISTRIBUTED][LoadLocation.EDGE] = deepcopy(
+        data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL]
+    )
+
+    return data
+
+
 def f_e1(e_ss: float, load_type: LoadingType, load_location: LoadLocation) -> float:
     """
     Calculate the short term Young's modulus factor, f_e1 as per CCAA T48 section 3.3.8
     """
 
-    if load_type == LoadingType.WHEEL and load_location == LoadLocation.INTERNAL:
-        data = pl.read_excel(
-            _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht11_f_e1"
-        )
-    elif load_type == LoadingType.WHEEL and load_location == LoadLocation.EDGE:
-        data = pl.read_excel(
-            _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht12_f_e1"
-        )
-    elif load_type == LoadingType.POINT:
-        data = pl.read_excel(
-            _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht13_f_e1"
-        )
-    elif load_type == LoadingType.DISTRIBUTED:
-        data = pl.read_excel(
-            _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht14_f_e1"
-        )
-    else:
-        raise ValueError(
-            f"Invalid load type: {load_type} or load location: {load_location}"
-        )
+    data = _f_e1_data()[load_type][load_location]
 
     e_ss_vals = data["e_ss"].to_numpy()
     f_e1_vals = data["f_e1"].to_numpy()
