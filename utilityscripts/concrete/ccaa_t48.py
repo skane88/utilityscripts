@@ -612,6 +612,60 @@ def f_s(x: float, load_type: LoadingType, load_location: LoadLocation) -> float:
     return np.interp(x, x_vals, f_s_vals)
 
 
+def plot_f_s():
+    """
+    Plot the f_s data.
+
+    Primarily useful for debugging.
+    """
+
+    data = _f_s_data()
+
+    fig, ax = plt.subplots()
+
+    ax.plot(
+        data[LoadingType.WHEEL][LoadLocation.INTERNAL]["x"],
+        data[LoadingType.WHEEL][LoadLocation.INTERNAL]["f_s"],
+        label="Wheel Loading (Interior) (X=S)",
+    )
+    ax.plot(
+        data[LoadingType.WHEEL][LoadLocation.EDGE]["x"],
+        data[LoadingType.WHEEL][LoadLocation.EDGE]["f_s"],
+        label="Wheel Loading (Edge) (X=S)",
+    )
+    ax.plot(
+        data[LoadingType.POINT][LoadLocation.INTERNAL]["x"],
+        data[LoadingType.POINT][LoadLocation.INTERNAL]["f_s"],
+        label="Point Loading (Interior) (X=f(x, y))",
+    )
+    ax.plot(
+        data[LoadingType.POINT][LoadLocation.EDGE]["x"],
+        data[LoadingType.POINT][LoadLocation.EDGE]["f_s"],
+        label="Point Loading (Edge) (X=f(x, y))",
+    )
+    ax.plot(
+        data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL]["x"],
+        data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL]["f_s"],
+        label="Distributed Loading (Interior) (X=W)",
+    )
+    ax.plot(
+        data[LoadingType.DISTRIBUTED][LoadLocation.EDGE]["x"],
+        data[LoadingType.DISTRIBUTED][LoadLocation.EDGE]["f_s"],
+        label="Distributed Loading (Edge) (X=W)",
+    )
+
+    ax.set_xlabel("x")
+    ax.set_ylabel("F_S")
+    ax.legend()
+    ax.set_xlim(1, 5)
+    ax.set_ylim(0.5, 2.0)
+    ax.grid(visible=True)
+
+    ax.set_title("Factor F_S to x")
+
+    plt.show()
+
+
 def f_1(*, f_all, f_e, f_h, f_s, k_3, k_4) -> float:
     """
     Calculate the equvialent stress factor, F_1 as per CCAA T48 section 3.3.8
