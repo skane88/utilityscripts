@@ -3,6 +3,7 @@ Implements desing of a concrete slab to CCAA T48
 """
 
 from enum import StrEnum
+from functools import lru_cache
 from math import log10
 from pathlib import Path
 
@@ -140,6 +141,25 @@ def f_all(*, k_1, k_2, f_cf):
     return k_1 * k_2 * f_cf
 
 
+@lru_cache(maxsize=None)
+def _get_w_fi_data():
+    """
+    Get the w_fi data into a dictionary for easy use later.
+    """
+
+    data_excel = _DATA_PATH / Path("ccaa_t48_data.xlsx")
+
+    data_wheel = pl.read_excel(data_excel, sheet_name="w_fi_wheels")
+    data_point = pl.read_excel(data_excel, sheet_name="w_fi_posts")
+    data_distributed = pl.read_excel(data_excel, sheet_name="w_fi_distributed")
+
+    return {
+        LoadingType.WHEEL: data_wheel,
+        LoadingType.POINT: data_point,
+        LoadingType.DISTRIBUTED: data_distributed,
+    }
+
+
 def w_fi(
     *,
     depth: float,
@@ -164,17 +184,7 @@ def w_fi(
         The layer weighting factor w_fi
     """
 
-    data_excel = _DATA_PATH / Path("ccaa_t48_data.xlsx")
-
-    if loading_type == LoadingType.WHEEL:
-        data = pl.read_excel(data_excel, sheet_name="w_fi_wheels")
-
-    elif loading_type == LoadingType.POINT:
-        data = pl.read_excel(data_excel, sheet_name="w_fi_posts")
-
-    elif loading_type == LoadingType.DISTRIBUTED:
-        data = pl.read_excel(data_excel, sheet_name="w_fi_distributed")
-
+    data = _get_w_fi_data()[loading_type]
     data = data.sort("relative_depth")
 
     relative_depth = depth / normalising_length
@@ -186,29 +196,29 @@ def w_fi(
 
 
 def plot_w_fi():
-    data_wheel = pl.read_excel(
-        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="w_fi_wheels"
-    )
-    data_point = pl.read_excel(
-        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="w_fi_posts"
-    )
-    data_distributed = pl.read_excel(
-        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="w_fi_distributed"
-    )
+    """
+    Plot the w_fi curves.
+
+    Primarily useful for debugging.
+    """
+
+    data = _get_w_fi_data()
 
     fig, ax = plt.subplots()
 
     ax.plot(
-        data_wheel["w_fi"], data_wheel["relative_depth"], label="Wheel Loading (X=S)"
+        data[LoadingType.WHEEL]["w_fi"],
+        data[LoadingType.WHEEL]["relative_depth"],
+        label="Wheel Loading (X=S)",
     )
     ax.plot(
-        data_point["w_fi"],
-        data_point["relative_depth"],
+        data[LoadingType.POINT]["w_fi"],
+        data[LoadingType.POINT]["relative_depth"],
         label="Point Loading (X=f(x, y))",
     )
     ax.plot(
-        data_distributed["w_fi"],
-        data_distributed["relative_depth"],
+        data[LoadingType.DISTRIBUTED]["w_fi"],
+        data[LoadingType.DISTRIBUTED]["relative_depth"],
         label="Distributed Loading (X=W)",
     )
 
