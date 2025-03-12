@@ -248,8 +248,8 @@ def test_f_e_errors(e_ss, load_type, load_location, expected):
     [
         (1.22, LoadingType.WHEEL, LoadLocation.INTERNAL, 0.95),
         (2.85, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.16),
-        (25, LoadingType.WHEEL, LoadLocation.EDGE, 1.19),
-        (100, LoadingType.WHEEL, LoadLocation.EDGE, 1.5375),
+        (1.20, LoadingType.WHEEL, LoadLocation.EDGE, 0.956),
+        (2.90, LoadingType.WHEEL, LoadLocation.EDGE, 1.123),
         (25, LoadingType.POINT, LoadLocation.INTERNAL, 1.19),
         (100, LoadingType.POINT, LoadLocation.INTERNAL, 1.5375),
         (25, LoadingType.POINT, LoadLocation.EDGE, 1.19),

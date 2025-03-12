@@ -541,7 +541,7 @@ def f_s(x: float, load_type: LoadingType, load_location: LoadLocation) -> float:
     data = _f_s_data()[load_type][load_location]
 
     x_vals = data["x"].to_numpy()
-    f_s_vals = data["f_s1"].to_numpy()
+    f_s_vals = data["f_s"].to_numpy()
 
     if x < data["x"].min():
         raise ValueError(
