@@ -480,6 +480,60 @@ def f_e(e_ss: float, load_type: LoadingType, load_location: LoadLocation) -> flo
     return np.interp(e_ss, e_ss_vals, f_e_vals)
 
 
+def plot_f_e():
+    """
+    Plot the f_e data.
+
+    Primarily useful for debugging.
+    """
+
+    data = _f_e_data()
+
+    fig, ax = plt.subplots()
+
+    ax.plot(
+        data[LoadingType.WHEEL][LoadLocation.INTERNAL]["e_ss"],
+        data[LoadingType.WHEEL][LoadLocation.INTERNAL]["f_e"],
+        label="Wheel Loading (Interior) (X=S)",
+    )
+    ax.plot(
+        data[LoadingType.WHEEL][LoadLocation.EDGE]["e_ss"],
+        data[LoadingType.WHEEL][LoadLocation.EDGE]["f_e"],
+        label="Wheel Loading (Edge) (X=S)",
+    )
+    ax.plot(
+        data[LoadingType.POINT][LoadLocation.INTERNAL]["e_ss"],
+        data[LoadingType.POINT][LoadLocation.INTERNAL]["f_e"],
+        label="Point Loading (Interior) (X=f(x, y))",
+    )
+    ax.plot(
+        data[LoadingType.POINT][LoadLocation.EDGE]["e_ss"],
+        data[LoadingType.POINT][LoadLocation.EDGE]["f_e"],
+        label="Point Loading (Edge) (X=f(x, y))",
+    )
+    ax.plot(
+        data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL]["e_ss"],
+        data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL]["f_e"],
+        label="Distributed Loading (Interior) (X=W)",
+    )
+    ax.plot(
+        data[LoadingType.DISTRIBUTED][LoadLocation.EDGE]["e_ss"],
+        data[LoadingType.DISTRIBUTED][LoadLocation.EDGE]["f_e"],
+        label="Distributed Loading (Edge) (X=W)",
+    )
+
+    ax.set_xlabel("E_ss")
+    ax.set_ylabel("F_E")
+    ax.legend()
+    ax.set_xlim(0, 150)
+    ax.set_ylim(0, 5)
+    ax.grid(visible=True)
+
+    ax.set_title("Factor F_E to E_ss")
+
+    plt.show()
+
+
 @lru_cache(maxsize=None)
 def _f_s_data() -> dict[LoadingType, dict[LoadLocation, pl.DataFrame]]:
     """
