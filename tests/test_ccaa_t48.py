@@ -10,6 +10,7 @@ from utilityscripts.concrete.ccaa_t48 import (
     e_sl_from_cbr,
     e_ss_from_e_sl,
     f_e,
+    f_h,
     f_s,
     k_1,
     k_2,
@@ -289,6 +290,57 @@ def test_f_s_errors(x, load_type, load_location, expected):
     with pytest.raises(ValueError):
         assert isclose(
             f_s(x=x, load_type=load_type, load_location=load_location),
+            expected,
+            rel_tol=1e-2,
+        )
+
+
+@pytest.mark.parametrize(
+    "h, load_type, load_location, expected",
+    [
+        (1.0, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.19),
+        (15.5, LoadingType.WHEEL, LoadLocation.INTERNAL, 0.98),
+        (0.7, LoadingType.WHEEL, LoadLocation.EDGE, 1.25),
+        (15.2, LoadingType.WHEEL, LoadLocation.EDGE, 0.99),
+        (0.7, LoadingType.POINT, LoadLocation.INTERNAL, 1.58),
+        (11.0, LoadingType.POINT, LoadLocation.INTERNAL, 0.97),
+        (0.7, LoadingType.POINT, LoadLocation.EDGE, 1.58),
+        (11.0, LoadingType.POINT, LoadLocation.EDGE, 0.97),
+        (3.0, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.1),
+        (15.5, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 0.91),
+        (3.0, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.1),
+        (15.5, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 0.91),
+    ],
+)
+def test_f_h(h, load_type, load_location, expected):
+    assert isclose(
+        f_h(h=h, load_type=load_type, load_location=load_location),
+        expected,
+        rel_tol=1e-2,
+    )
+
+
+@pytest.mark.parametrize(
+    "h, load_type, load_location, expected",
+    [
+        (0.25, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.0),
+        (17.0, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.0),
+        (0.25, LoadingType.WHEEL, LoadLocation.EDGE, 1.0),
+        (17.0, LoadingType.WHEEL, LoadLocation.EDGE, 1.0),
+        (0.25, LoadingType.POINT, LoadLocation.INTERNAL, 1.0),
+        (17.0, LoadingType.POINT, LoadLocation.INTERNAL, 1.0),
+        (0.25, LoadingType.POINT, LoadLocation.EDGE, 1.0),
+        (17.0, LoadingType.POINT, LoadLocation.EDGE, 1.0),
+        (0.25, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.0),
+        (17.0, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.0),
+        (0.25, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.0),
+        (17.0, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.0),
+    ],
+)
+def test_f_h_errors(h, load_type, load_location, expected):
+    with pytest.raises(ValueError):
+        assert isclose(
+            f_h(h=h, load_type=load_type, load_location=load_location),
             expected,
             rel_tol=1e-2,
         )

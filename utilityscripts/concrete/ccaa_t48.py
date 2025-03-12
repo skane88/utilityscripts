@@ -666,6 +666,133 @@ def plot_f_s():
     plt.show()
 
 
+@lru_cache(maxsize=None)
+def _f_h_data() -> dict[LoadingType, dict[LoadLocation, pl.DataFrame]]:
+    """
+    Get the f_h data into a dictionary for easy use later.
+
+    Notes
+    -----
+    Method cached to eliminate unneccesary Excel reads.
+    """
+
+    data = {LoadingType.WHEEL: {}, LoadingType.POINT: {}, LoadingType.DISTRIBUTED: {}}
+
+    data[LoadingType.WHEEL][LoadLocation.INTERNAL] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht11_f_h"
+    )
+    data[LoadingType.WHEEL][LoadLocation.EDGE] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht12_f_h"
+    )
+    data[LoadingType.POINT][LoadLocation.INTERNAL] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht13_f_h"
+    )
+    data[LoadingType.POINT][LoadLocation.EDGE] = deepcopy(
+        data[LoadingType.POINT][LoadLocation.INTERNAL]
+    )
+    data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht14_f_h"
+    )
+    data[LoadingType.DISTRIBUTED][LoadLocation.EDGE] = deepcopy(
+        data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL]
+    )
+
+    return data
+
+
+def f_h(*, h: float, load_type: LoadingType, load_location: LoadLocation) -> float:
+    """
+    Calculate the soil thickness factor, f_h as per CCAA T48 section 3.3.8
+
+    Parameters
+    ----------
+    h : float
+        The soil thickness, in m.
+    load_type : LoadingType
+        The type of loading
+    load_location : LoadLocation
+        The location of the load
+
+    Returns
+    -------
+    float
+        The soil thickness factor, f_h
+    """
+
+    data = _f_h_data()[load_type][load_location]
+
+    h_vals = data["h"].to_numpy()
+    f_h_vals = data["f_h"].to_numpy()
+
+    if h < data["h"].min():
+        raise ValueError(
+            f"h value of {h} is less than "
+            + f"the minimum value of {data['h'].min():.0f}"
+        )
+
+    if h > data["h"].max():
+        raise ValueError(
+            f"h value of {h} is greater than "
+            + f"the maximum value of {data['h'].max():.0f}"
+        )
+
+    return np.interp(h, h_vals, f_h_vals)
+
+
+def plot_f_h():
+    """
+    Plot the f_h data.
+
+    Primarily useful for debugging.
+    """
+
+    data = _f_h_data()
+
+    fig, ax = plt.subplots()
+
+    ax.plot(
+        data[LoadingType.WHEEL][LoadLocation.INTERNAL]["h"],
+        data[LoadingType.WHEEL][LoadLocation.INTERNAL]["f_h"],
+        label="Wheel Loading (Interior)",
+    )
+    ax.plot(
+        data[LoadingType.WHEEL][LoadLocation.EDGE]["h"],
+        data[LoadingType.WHEEL][LoadLocation.EDGE]["f_h"],
+        label="Wheel Loading (Edge)",
+    )
+    ax.plot(
+        data[LoadingType.POINT][LoadLocation.INTERNAL]["h"],
+        data[LoadingType.POINT][LoadLocation.INTERNAL]["f_h"],
+        label="Point Loading (Interior)",
+    )
+    ax.plot(
+        data[LoadingType.POINT][LoadLocation.EDGE]["h"],
+        data[LoadingType.POINT][LoadLocation.EDGE]["f_h"],
+        label="Point Loading (Edge)",
+    )
+    ax.plot(
+        data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL]["h"],
+        data[LoadingType.DISTRIBUTED][LoadLocation.INTERNAL]["f_h"],
+        label="Distributed Loading (Interior)",
+    )
+    ax.plot(
+        data[LoadingType.DISTRIBUTED][LoadLocation.EDGE]["h"],
+        data[LoadingType.DISTRIBUTED][LoadLocation.EDGE]["f_h"],
+        label="Distributed Loading (Edge)",
+    )
+
+    ax.set_xlabel("h (m)")
+    ax.set_ylabel("F_H")
+    ax.legend()
+    ax.set_xlim(0, 16)
+    ax.set_ylim(0.5, 3)
+    ax.grid(visible=True)
+
+    ax.set_title("Factor F_H vs H")
+
+    plt.show()
+
+
 def f_1(*, f_all, f_e, f_h, f_s, k_3, k_4) -> float:
     """
     Calculate the equvialent stress factor, F_1 as per CCAA T48 section 3.3.8
