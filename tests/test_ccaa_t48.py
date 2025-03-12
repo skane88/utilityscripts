@@ -4,10 +4,16 @@ import pytest
 
 from utilityscripts.concrete.ccaa_t48 import (
     LoadingType,
+    LoadLocation,
     MaterialFactor,
     e_se,
+    e_sl_from_cbr,
+    e_ss_from_e_sl,
+    f_e1,
     k_1,
     k_2,
+    k_3,
+    k_4,
     w_fi,
 )
 
@@ -113,3 +119,124 @@ def test_e_se():
     )
 
     assert isclose(actual, expected, rel_tol=1e-3)
+
+
+@pytest.mark.parametrize(
+    "e_sl, b, expected",
+    [
+        (21, 0.4, 52.5),
+        (35, 0.8, 43.75),
+    ],
+)
+def test_e_ss_from_e_sl(e_sl, b, expected):
+    assert isclose(e_ss_from_e_sl(e_sl=e_sl, b=b), expected, rel_tol=1e-3)
+
+
+@pytest.mark.parametrize(
+    "cbr, expected",
+    [
+        (2, 9.5),
+        (10, 28),
+        (20, 36),
+        (40, 61),
+        (60, 84),
+    ],
+)
+def test_e_sl_from_cbr(cbr, expected):
+    assert isclose(e_sl_from_cbr(cbr=cbr), expected, rel_tol=1e-2)
+
+
+@pytest.mark.parametrize(
+    "cbr, expected ",
+    [
+        (1, 10),
+        (100, 27.5),
+    ],
+)
+def test_s_sl_from_cbr_errors(cbr, expected):
+    with pytest.raises(ValueError):
+        assert isclose(e_sl_from_cbr(cbr=cbr), expected, rel_tol=1e-2)
+
+
+@pytest.mark.parametrize(
+    "load_location, expected",
+    [
+        (LoadLocation.INTERNAL, 1.2),
+        (LoadLocation.EDGE, 1.05),
+    ],
+)
+def test_k_3(load_location, expected):
+    assert isclose(k_3(load_location=load_location), expected, rel_tol=1e-2)
+
+
+@pytest.mark.parametrize(
+    "f_c, expected",
+    [
+        (20, 1.03),
+        (22.5, 1.05),
+        (25, 1.07),
+        (32, 1.11),
+        (40, 1.16),
+        (45, 1.18),
+        (50, 1.20),
+    ],
+)
+def test_k_4(f_c, expected):
+    assert isclose(k_4(f_c=f_c), expected, rel_tol=1e-2)
+
+
+@pytest.mark.parametrize("f_c, expected", [(10, 10), (65, 10)])
+def test_k_4_errors(f_c, expected):
+    with pytest.raises(ValueError):
+        assert isclose(k_4(f_c=f_c), expected, rel_tol=1e-2)
+
+
+@pytest.mark.parametrize(
+    "e_ss, load_type, load_location, expected",
+    [
+        (25, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.19),
+        (100, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.5375),
+        (25, LoadingType.WHEEL, LoadLocation.EDGE, 1.19),
+        (100, LoadingType.WHEEL, LoadLocation.EDGE, 1.5375),
+        (25, LoadingType.POINT, LoadLocation.INTERNAL, 1.19),
+        (100, LoadingType.POINT, LoadLocation.INTERNAL, 1.5375),
+        (25, LoadingType.POINT, LoadLocation.EDGE, 1.19),
+        (100, LoadingType.POINT, LoadLocation.EDGE, 1.5375),
+        (25, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.19),
+        (100, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.5375),
+        (25, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.19),
+        (100, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.5375),
+    ],
+)
+def test_f_e1(e_ss, load_type, load_location, expected):
+    assert isclose(
+        f_e1(e_ss=e_ss, load_type=load_type, load_location=load_location),
+        expected,
+        rel_tol=1e-2,
+    )
+
+
+@pytest.mark.parametrize(
+    "e_ss, load_type, load_location, expected",
+    [
+        (2.5, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.0),
+        (160, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.0),
+        (2.5, LoadingType.WHEEL, LoadLocation.EDGE, 1.0),
+        (160, LoadingType.WHEEL, LoadLocation.EDGE, 1.0),
+        (2.5, LoadingType.POINT, LoadLocation.INTERNAL, 1.0),
+        (160, LoadingType.POINT, LoadLocation.INTERNAL, 1.0),
+        (2.5, LoadingType.POINT, LoadLocation.EDGE, 1.0),
+        (160, LoadingType.POINT, LoadLocation.EDGE, 1.0),
+        (2.5, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.0),
+        (160, LoadingType.DISTRIBUTED, LoadLocation.INTERNAL, 1.0),
+        (2.5, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.0),
+        (160, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.0),
+    ],
+)
+def test_f_e1_errors(e_ss, load_type, load_location, expected):
+    with pytest.raises(ValueError):
+        assert isclose(
+            f_e1(e_ss=e_ss, load_type=load_type, load_location=load_location),
+            expected,
+            rel_tol=1e-2,
+        )
