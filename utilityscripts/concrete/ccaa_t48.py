@@ -271,6 +271,17 @@ def e_ss_from_e_sl(e_sl: float, b: float) -> float:
     return e_sl / b
 
 
+@lru_cache(maxsize=None)
+def _e_sl_data() -> pl.DataFrame:
+    """
+    Get the e_sl data into a DataFrame for easy use later.
+    """
+
+    return pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="e_sl_from_cbr"
+    )
+
+
 def e_sl_from_cbr(cbr: float) -> float:
     """
     Calculate the long term Young's modulus of the soil from the CBR.
@@ -288,9 +299,7 @@ def e_sl_from_cbr(cbr: float) -> float:
         The long term Young's modulus of the soil
     """
 
-    data = pl.read_excel(
-        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="e_sl_from_cbr"
-    )
+    data = _e_sl_data()
 
     cbr_vals = data["cbr"].to_numpy()
     e_sl_vals = data["e_sl"].to_numpy()
@@ -317,9 +326,7 @@ def plot_e_sl_from_cbr():
     Primarily useful for debugging.
     """
 
-    data = pl.read_excel(
-        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="e_sl_from_cbr"
-    )
+    data = _e_sl_data()
 
     fig, ax = plt.subplots()
 
