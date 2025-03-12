@@ -10,6 +10,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
+from matplotlib import ticker
 
 _DATA_PATH = Path(Path(__file__).parent) / Path("data")
 
@@ -229,6 +230,8 @@ def plot_w_fi():
     ax.set_ylim(12, 0)
     ax.grid(visible=True)
 
+    ax.set_title("Layer Weighting Factors for Soil Modulus")
+
     plt.show()
 
 
@@ -305,6 +308,39 @@ def e_sl_from_cbr(cbr: float) -> float:
         )
 
     return np.interp(cbr, cbr_vals, e_sl_vals)
+
+
+def plot_e_sl_from_cbr():
+    """
+    Plot the e_sl from cbr data.
+
+    Primarily useful for debugging.
+    """
+
+    data = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="e_sl_from_cbr"
+    )
+
+    fig, ax = plt.subplots()
+
+    ax.plot(data["cbr"], data["e_sl"], label="E_sl from CBR")
+
+    ax.set_xlabel("CBR")
+    ax.set_ylabel("E_sl")
+
+    ax.set_xscale("log")
+    ax.set_xticks([1, 2, 4, 6, 8, 10, 20, 40, 60, 80, 100])  # ticks to match T48
+    ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, pos: f"{int(x)}"))
+    ax.set_xlim(1, 100)
+    ax.grid(visible=True)
+
+    ax.set_xlabel("CBR (%)")
+    ax.set_ylabel("E_sl (MPa)")
+
+    ax.set_title("E_sl to CBR Correlation")
+
+    ax.legend()
+    plt.show()
 
 
 def k_3(load_location: LoadLocation) -> float:
