@@ -18,6 +18,7 @@ from utilityscripts.concrete.ccaa_t48 import (
     k_4,
     t_3,
     t_4,
+    t_12,
     w_fi,
 )
 
@@ -346,6 +347,31 @@ def test_f_h_errors(h, load_type, load_location, expected):
             expected,
             rel_tol=1e-2,
         )
+
+
+@pytest.mark.parametrize(
+    "f_12, p, load_location, expected",
+    [
+        (0.5, 50, LoadLocation.INTERNAL, 350),
+        (4.0, 50, LoadLocation.INTERNAL, 98),
+        (2.8, 800, LoadLocation.INTERNAL, 600),
+        (5.0, 800, LoadLocation.INTERNAL, 420),
+        (0.0, 0.0, LoadLocation.INTERNAL, 0.0),
+        (2.5, 200, LoadLocation.INTERNAL, 295),
+        (0.8, 40, LoadLocation.INTERNAL, 180),
+        (0.5, 50, LoadLocation.EDGE, 500),
+        (5.0, 50, LoadLocation.EDGE, 107),
+        (3.9, 600, LoadLocation.EDGE, 590),
+        (5.0, 600, LoadLocation.EDGE, 510),
+        (0.0, 0.0, LoadLocation.EDGE, 0.0),
+        (1.0, 48, LoadLocation.EDGE, 315),
+        (2.8, 200, LoadLocation.EDGE, 400),
+    ],
+)
+def test_t_12(f_12, p, load_location, expected):
+    assert isclose(
+        t_12(f_12=f_12, p=p, load_location=load_location), expected, rel_tol=1e-2
+    )
 
 
 @pytest.mark.parametrize(

@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from matplotlib import ticker
+from scipy.interpolate import LinearNDInterpolator
 
 _DATA_PATH = Path(Path(__file__).parent) / Path("data")
 
@@ -877,6 +878,150 @@ def f_4(
     """
 
     return (1000 / p) * f_all * f_e4 * f_h4 * f_s4
+
+
+@lru_cache(maxsize=None)
+def _t_12_data() -> dict[LoadLocation, pl.DataFrame]:
+    """
+    Get the data for thicknesses based on F_1 and F_2 into a DataFrame for easy use
+    later.
+
+    Notes
+    -----
+    - The data is interpolated from CCAA T48 Chart 1.1 & 1.2.
+    - A separate method is used so that the call into the spreadsheet can be cached.
+    """
+
+    data = {}
+
+    data[LoadLocation.INTERNAL] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht11_thickness"
+    )
+    data[LoadLocation.EDGE] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht12_thickness"
+    )
+
+    return data
+
+
+@lru_cache(maxsize=None)
+def _t_12_interp(load_location: LoadLocation) -> LinearNDInterpolator:
+    """
+    Get the interpolator for the t_12 data.
+
+    Notes
+    -----
+    - The interpolator is cached to eliminate re-building the triangulation every call.
+    """
+
+    data = _t_12_data()[load_location]
+
+    return LinearNDInterpolator(
+        data[["f", "p"]],
+        data["t"],
+    )
+
+
+def t_12(*, f_12: float, p: float, load_location: LoadLocation) -> float:
+    """
+    Calculate the required slab thickness for wheel loads.
+
+    Parameters
+    ----------
+    f_12 : float
+        The equivalent stress factor, F_1 or F_2
+    p : float
+        The load, in kN
+    load_location : LoadLocation
+        The location of the load
+
+    Returns
+    -------
+    float
+        The required slab thickness, in mm
+    """
+
+    return _t_12_interp(load_location)(f_12, p)
+
+
+def plot_t_12_data(load_location: LoadLocation):
+    """
+    Plot the t_12 data.
+
+    Primarily useful for debugging.
+    """
+
+    data = _t_12_data()[load_location]
+
+    fig, ax = plt.subplots()
+
+    for p in data["p"].unique():
+        line_data = data.filter(pl.col("p") == p)
+        ax.plot(line_data["f"], line_data["t"], label=f"p = {p} kN")
+
+    ax.set_xlabel("F_12")
+    ax.set_ylabel("Thickness (mm)")
+    ax.legend()
+    ax.set_xlim(0, 5)
+    ax.set_ylim(0, 600)
+    ax.grid(visible=True)
+    ax.axhspan(400, 600, color="grey", alpha=0.34)
+    ax.text(
+        x=3,
+        y=500,
+        s="Use computer analysis\nin shaded area.",
+        bbox={"facecolor": "lightgrey", "edgecolor": "lightgrey"},
+        fontsize=8,
+    )
+
+    plt.show()
+
+
+def plot_t_12_space(load_location: LoadLocation):
+    """
+    Plot the solution space available for T_1 & T_2
+
+    Primarily useful for debugging.
+    """
+
+    f_space = np.linspace(0, 5, 100)
+    p_space = np.linspace(0, 600 if load_location == LoadLocation.EDGE else 800, 100)
+
+    f_space, p_space = np.meshgrid(f_space, p_space)
+    f_space = f_space.ravel()
+    p_space = p_space.ravel()
+    t_space = t_12(f_12=f_space, p=p_space, load_location=load_location)
+
+    mask = np.logical_not(np.isnan(t_space))
+
+    f_space = f_space[mask]
+    p_space = p_space[mask]
+    t_space = t_space[mask]
+
+    fig, ax = plt.subplots()
+    # ax.tricontourf(f_space, t_space, p_space)
+    ax.scatter(f_space, t_space, c=p_space, cmap="viridis", s=4)
+    fig.colorbar(ax.collections[0], label="P (kN)")
+
+    ax.set_xlabel("F_1" if load_location == LoadLocation.INTERNAL else "F_2")
+    ax.set_ylabel("Thickness (mm)")
+    ax.set_xlim(0, 5)
+    ax.set_ylim(0, 600)
+    ax.grid(visible=True)
+    ax.axhspan(400, 600, color="grey", alpha=0.34)
+    ax.text(
+        x=3,
+        y=500,
+        s="Use computer analysis\nin shaded area.",
+        bbox={"facecolor": "lightgrey", "edgecolor": "lightgrey"},
+        fontsize=8,
+    )
+
+    ax.set_title(
+        f"{'T_1' if load_location == LoadLocation.INTERNAL else 'T_2'} vs {'F_1' if load_location == LoadLocation.INTERNAL else 'F_2'}"
+    )
+
+    plt.show()
 
 
 @lru_cache(maxsize=None)
