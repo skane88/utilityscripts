@@ -880,6 +880,87 @@ def f_4(
 
 
 @lru_cache(maxsize=None)
+def _t_3_data() -> pl.DataFrame:
+    """
+    Get the t_3 data into a DataFrame for easy use later.
+    """
+
+    data = {}
+
+    data[LoadLocation.INTERNAL] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht13_t3_interior"
+    )
+    data[LoadLocation.EDGE] = pl.read_excel(
+        _DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht13_t3_edge"
+    )
+
+    return data
+
+
+def t_3(*, f_3: float, load_location: LoadLocation) -> float:
+    """
+    Calculate the required slab thickness for wheel loads.
+    """
+
+    data = _t_3_data()[load_location]
+
+    if f_3 < data["f_3"].min():
+        raise ValueError(
+            f"f_3 value of {f_3} is less than "
+            + f"the minimum value of {data['f_3'].min():.0f}"
+        )
+
+    if f_3 > data["f_3"].max():
+        raise ValueError(
+            f"f_3 value of {f_3} is greater than "
+            + f"the maximum value of {data['f_3'].max():.0f}"
+        )
+
+    return np.interp(f_3, data["f_3"], data["t_3"])
+
+
+def plot_t_3():
+    """
+    Plot the t_3 data.
+
+    Primarily useful for debugging.
+    """
+
+    data = _t_3_data()
+
+    fig, ax = plt.subplots()
+
+    ax.plot(
+        data[LoadLocation.INTERNAL]["f_3"],
+        data[LoadLocation.INTERNAL]["t_3"],
+        label="Interior",
+    )
+    ax.plot(
+        data[LoadLocation.EDGE]["f_3"], data[LoadLocation.EDGE]["t_3"], label="Edge"
+    )
+
+    ax.set_xlabel("F_3")
+    ax.set_ylabel("Thickness (mm)")
+    ax.legend()
+    ax.set_xlim(0, 130)
+    ax.set_ylim(0, 600)
+    ax.grid(visible=True)
+
+    ax.axhspan(400, 600, color="grey", alpha=0.34)
+    ax.text(
+        x=80,
+        y=500,
+        s="Use computer analysis\nin shaded area.",
+        bbox={"facecolor": "lightgrey", "edgecolor": "lightgrey"},
+        fontsize=8,
+    )
+
+    ax.set_title("Thickness vs F_3")
+
+    plt.show()
+
+
+@lru_cache(maxsize=None)
 def _t_4_data() -> pl.DataFrame:
     """
     Get the t_4 data into a DataFrame for easy use later.
