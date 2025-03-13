@@ -195,10 +195,7 @@ def w_fi(
 
     relative_depth = depth / normalising_length
 
-    depth_p = data["relative_depth"].to_numpy()
-    w_fi_p = data["w_fi"].to_numpy()
-
-    return np.interp(relative_depth, depth_p, w_fi_p)
+    return np.interp(relative_depth, data["relative_depth"], data["w_fi"])
 
 
 def plot_w_fi():
@@ -310,9 +307,6 @@ def e_sl_from_cbr(cbr: float) -> float:
 
     data = _e_sl_data()
 
-    cbr_vals = data["cbr"].to_numpy()
-    e_sl_vals = data["e_sl"].to_numpy()
-
     if cbr < data["cbr"].min():
         raise ValueError(
             f"CBR value of {cbr} is less than "
@@ -325,7 +319,7 @@ def e_sl_from_cbr(cbr: float) -> float:
             + f"the maximum value of {data['cbr'].max():.0f}"
         )
 
-    return np.interp(cbr, cbr_vals, e_sl_vals)
+    return np.interp(cbr, data["cbr"], data["e_sl"])
 
 
 def plot_e_sl_from_cbr():
@@ -389,9 +383,6 @@ def k_4(f_c: float) -> float:
 
     data = _k_4_data()
 
-    f_c_vals = data["f_c"].to_numpy()
-    k_4_vals = data["k_4"].to_numpy()
-
     if f_c < data["f_c"].min():
         raise ValueError(
             f"f_c value of {f_c} is less than "
@@ -404,7 +395,7 @@ def k_4(f_c: float) -> float:
             + f"the maximum value of {data['f_c'].max():.0f}"
         )
 
-    return np.interp(f_c, f_c_vals, k_4_vals)
+    return np.interp(f_c, data["f_c"], data["k_4"])
 
 
 @lru_cache(maxsize=None)
@@ -462,9 +453,6 @@ def f_e(e_ss: float, load_type: LoadingType, load_location: LoadLocation) -> flo
 
     data = _f_e_data()[load_type][load_location]
 
-    e_ss_vals = data["e_ss"].to_numpy()
-    f_e_vals = data["f_e"].to_numpy()
-
     if e_ss < data["e_ss"].min():
         raise ValueError(
             f"e_ss value of {e_ss} is less than "
@@ -477,7 +465,7 @@ def f_e(e_ss: float, load_type: LoadingType, load_location: LoadLocation) -> flo
             + f"the maximum value of {data['e_ss'].max():.0f}"
         )
 
-    return np.interp(e_ss, e_ss_vals, f_e_vals)
+    return np.interp(e_ss, data["e_ss"], data["f_e"])
 
 
 def plot_f_e():
@@ -594,9 +582,6 @@ def f_s(x: float, load_type: LoadingType, load_location: LoadLocation) -> float:
 
     data = _f_s_data()[load_type][load_location]
 
-    x_vals = data["x"].to_numpy()
-    f_s_vals = data["f_s"].to_numpy()
-
     if x < data["x"].min():
         raise ValueError(
             f"x value of {x} is less than "
@@ -609,7 +594,7 @@ def f_s(x: float, load_type: LoadingType, load_location: LoadLocation) -> float:
             + f"the maximum value of {data['x'].max():.0f}"
         )
 
-    return np.interp(x, x_vals, f_s_vals)
+    return np.interp(x, data["x"], data["f_s"])
 
 
 def plot_f_s():
@@ -721,9 +706,6 @@ def f_h(*, h: float, load_type: LoadingType, load_location: LoadLocation) -> flo
 
     data = _f_h_data()[load_type][load_location]
 
-    h_vals = data["h"].to_numpy()
-    f_h_vals = data["f_h"].to_numpy()
-
     if h < data["h"].min():
         raise ValueError(
             f"h value of {h} is less than "
@@ -736,7 +718,7 @@ def f_h(*, h: float, load_type: LoadingType, load_location: LoadLocation) -> flo
             + f"the maximum value of {data['h'].max():.0f}"
         )
 
-    return np.interp(h, h_vals, f_h_vals)
+    return np.interp(h, data["h"], data["f_h"])
 
 
 def plot_f_h():
@@ -895,3 +877,86 @@ def f_4(
     """
 
     return (1000 / p) * f_all * f_e4 * f_h4 * f_s4
+
+
+@lru_cache(maxsize=None)
+def _t_4_data() -> pl.DataFrame:
+    """
+    Get the t_4 data into a DataFrame for easy use later.
+
+    Notes
+    -----
+    - The data is interpolated from CCAA T48 Chart 1.4.
+    - A separate method is used so that the call into the spreadsheet can be cached.
+    """
+
+    return pl.read_excel(_DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht14_t4")
+
+
+def t_4(*, f_4: float) -> float:
+    """
+    Calculate the required slab thickness for distributed loads.
+
+    Notes
+    -----
+    - The data is interpolated from CCAA T48 Chart 1.4.
+
+    Parameters
+    ----------
+    f_4 : float
+        The equivalent stress factor, F_4
+
+    Returns
+    -------
+    float
+        The required slab thickness, in mm
+    """
+
+    data = _t_4_data()
+
+    if f_4 < data["f4"].min():
+        raise ValueError(
+            f"f_4 value of {f_4} is less than "
+            + f"the minimum value of {data['f4'].min():.0f}"
+        )
+
+    if f_4 > data["f4"].max():
+        raise ValueError(
+            f"f_4 value of {f_4} is greater than "
+            + f"the maximum value of {data['f4'].max():.0f}"
+        )
+
+    return np.interp(f_4, data["f4"], data["t4"])
+
+
+def plot_t_4():
+    """
+    Plot the t_4 data.
+
+    Primarily useful for debugging.
+    """
+
+    data = _t_4_data()
+
+    fig, ax = plt.subplots()
+
+    ax.plot(data["f4"], data["t4"], label="Thickness")
+
+    ax.set_xlabel("F_4")
+    ax.set_ylabel("Thickness (mm)")
+    ax.legend()
+    ax.set_xlim(30, 100)
+    ax.set_ylim(0, 600)
+    ax.grid(visible=True)
+    ax.axhspan(400, 600, color="grey", alpha=0.34)
+    ax.text(
+        x=80,
+        y=500,
+        s="Use computer analysis\nin shaded area.",
+        bbox={"facecolor": "lightgrey", "edgecolor": "lightgrey"},
+        fontsize=8,
+    )
+
+    ax.set_title("Thickness vs F_4")
+
+    plt.show()
