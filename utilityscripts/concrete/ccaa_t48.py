@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from matplotlib import ticker
-from scipy.interpolate import LinearNDInterpolator
+from scipy.interpolate import CloughTocher2DInterpolator
 
 _DATA_PATH = Path(Path(__file__).parent) / Path("data")
 
@@ -905,39 +905,57 @@ def _t_12_data() -> dict[LoadLocation, pl.DataFrame]:
 
 
 @lru_cache(maxsize=None)
-def _t_12_interp(load_location: LoadLocation) -> LinearNDInterpolator:
+def _t_12_interp(load_location: LoadLocation) -> CloughTocher2DInterpolator:
     """
     Get the interpolator for the t_12 data.
 
     Notes
     -----
+    - The Clough - Tocher interpolator is used because the Delaunay triangulation used
+      introduces some errors in the Linear interpolation, resulting in very local
+      significant underestimates of thickness. The Clough-Tocher interpolation does
+      result in some minor overestimates the required thickness compared to
+      a (correct) linear interpolation. This should be conservative.
     - The interpolator is cached to eliminate re-building the triangulation every call.
     """
 
     data = _t_12_data()[load_location]
 
-    return LinearNDInterpolator(
+    return CloughTocher2DInterpolator(
         data[["f", "p"]],
         data["t"],
     )
 
 
-def t_12(*, f_12: float, p: float, load_location: LoadLocation) -> float:
+def t_12(
+    *, f_12: float | np.ndarray, p: float | np.ndarray, load_location: LoadLocation
+) -> float | np.ndarray:
     """
     Calculate the required slab thickness for wheel loads.
 
+    Notes
+    -----
+    - A Clough - Tocher interpolation is used because the Delaunay triangulation required
+      for a 2D interpolation introduces some errors in the Linear interpolation.
+      This results in very local significant underestimates of thickness when using
+      a linear interpolator. The Clough-Tocher interpolation does
+      result in some minor overestimates the required thickness compared to
+      a (correct) linear interpolation. This should be conservative.
+
     Parameters
     ----------
-    f_12 : float
-        The equivalent stress factor, F_1 or F_2
-    p : float
-        The load, in kN
+    f_12 : float | np.ndarray
+        The equivalent stress factor, F_1 or F_2. If a numpy array is passed in then
+        multiple thicknesses will be calculated at once.
+    p : float | np.ndarray
+        The load, in kN. If a numpy array is passed in then multiple thicknesses will
+        be calculated at once.
     load_location : LoadLocation
         The location of the load
 
     Returns
     -------
-    float
+    float | np.ndarray
         The required slab thickness, in mm
     """
 
@@ -958,6 +976,7 @@ def plot_t_12_data(load_location: LoadLocation):
     for p in data["p"].unique():
         line_data = data.filter(pl.col("p") == p)
         ax.plot(line_data["f"], line_data["t"], label=f"p = {p} kN")
+        ax.scatter(line_data["f"], line_data["t"])
 
     ax.set_xlabel("F_12")
     ax.set_ylabel("Thickness (mm)")
