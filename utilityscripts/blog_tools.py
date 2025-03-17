@@ -39,7 +39,7 @@ def make_cmap(colors, *, position=None, bit=False):
                 bit_rgb[colors[i][2]],
             )
     cdict = {"red": [], "green": [], "blue": []}
-    for pos, color in zip(position, colors):
+    for pos, color in zip(position, colors, strict=True):
         cdict["red"].append((pos, color[0], color[0]))
         cdict["green"].append((pos, color[1], color[1]))
         cdict["blue"].append((pos, color[2], color[2]))

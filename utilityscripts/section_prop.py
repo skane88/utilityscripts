@@ -1193,7 +1193,7 @@ class Rectangle(GenericSection):
         x = [-length / 2, length / 2, length / 2, -length / 2]
         y = [-thickness / 2, -thickness / 2, thickness / 2, thickness / 2]
 
-        p = Polygon(zip(x, y))
+        p = Polygon(zip(x, y, strict=True))
 
         if rotation_angle != 0:
             p = aff.rotate(

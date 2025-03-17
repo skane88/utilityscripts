@@ -30,7 +30,7 @@ def get_nouns(no_rolls=5):
     words = random.sample(population=nouns, k=no_choices)
     numbers = product("123456", repeat=no_rolls)
 
-    return zip(numbers, words)
+    return zip(numbers, words, strict=True)
 
 
 def get_adjs(no_rolls=5):
@@ -61,7 +61,7 @@ def get_adjs(no_rolls=5):
     words = random.sample(population=adjs, k=no_choices)
     numbers = product("123456", repeat=no_rolls)
 
-    return zip(numbers, words)
+    return zip(numbers, words, strict=True)
 
 
 def make_lists():
