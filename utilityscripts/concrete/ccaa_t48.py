@@ -1003,8 +1003,17 @@ def plot_t_12_space(load_location: LoadLocation):
     Primarily useful for debugging.
     """
 
+    data = _t_12_data()[load_location]
+
     f_space = np.linspace(0, 5, 100)
-    p_space = np.linspace(0, 600 if load_location == LoadLocation.EDGE else 800, 100)
+    p_space = np.linspace(0, 100, 50)
+    p_space = np.hstack((p_space, np.linspace(0, 200, 25)))
+    p_space = np.hstack(
+        (
+            p_space,
+            np.linspace(200, 600 if load_location == LoadLocation.EDGE else 800, 100),
+        )
+    )
 
     f_space, p_space = np.meshgrid(f_space, p_space)
     f_space = f_space.ravel()
@@ -1035,6 +1044,10 @@ def plot_t_12_space(load_location: LoadLocation):
         bbox={"facecolor": "lightgrey", "edgecolor": "lightgrey"},
         fontsize=8,
     )
+
+    for p in data["p"].unique():
+        line_data = data.filter(pl.col("p") == p)
+        ax.plot(line_data["f"], line_data["t"], color="black", label=f"p = {p} kN")
 
     ax.set_title(
         f"{'T_1' if load_location == LoadLocation.INTERNAL else 'T_2'} vs {'F_1' if load_location == LoadLocation.INTERNAL else 'F_2'}"
