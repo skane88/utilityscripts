@@ -6,25 +6,6 @@ import math
 from decimal import Decimal
 
 
-def num_digits(number, max_digits=100):
-    """
-    Determine the number of digits of precision in a number.
-
-    :param number: the number to get the precision of.
-    :max_digits: the maximum number of digits.
-        NOTE: necessary because floating point math may
-        result in the tests in this function never returning
-        an equality.
-    """
-
-    for i in range(max_digits):
-        digits = -int(math.floor(math.log10(number))) + i
-        if round(number, digits) == number:
-            break
-
-    return digits
-
-
 def m_round(x, base):
     """
     Round a number to the nearest multiple.
@@ -36,17 +17,9 @@ def m_round(x, base):
     :param base: the multiple to round to.
     """
 
-    base = abs(base)
+    x, base = Decimal(str(x)), Decimal(str(base))
 
-    # next need to find the number of digits in the base.
-    # this is because sometimes round(x / base) * base
-    # returns a floating point number slightly above or below
-    # the real result. It is therefore necessary to round
-    # the resulting value to the number of digits of
-    # base.
-    frac_digits = num_digits(base)
-
-    return round(round(x / base) * base, frac_digits)
+    return float(round(x / base) * base)
 
 
 def m_floor(x, base, *, float_tolerance: float | None = 1e-6):
@@ -72,19 +45,15 @@ def m_floor(x, base, *, float_tolerance: float | None = 1e-6):
     if float_tolerance is not None:
         x = m_round(x, float_tolerance)
 
-    x = Decimal(str(x))
-    base = Decimal(str(base))
-    base = abs(base)
+    x, base = Decimal(str(x)), Decimal(str(base))
+    x_orig = x
 
-    # next need to find the number of digits in the base.
-    # this is because sometimes round(x / base) * base
-    # returns a floating point number slightly above or below
-    # the real result. It is therefore necessary to round
-    # the resulting value to the number of digits of
-    # base.
-    frac_digits = num_digits(base)
+    val = math.floor(x / base) * base
 
-    return float(round(math.floor(x / base) * base, frac_digits))
+    if val > x_orig:
+        val = val - abs(base)
+
+    return float(val)
 
 
 def m_ceil(x, base, *, float_tolerance: float | None = 1e-6):
@@ -110,19 +79,14 @@ def m_ceil(x, base, *, float_tolerance: float | None = 1e-6):
     if float_tolerance is not None:
         x = m_round(x, float_tolerance)
 
-    x = Decimal(str(x))
-    base = Decimal(str(base))
-    base = abs(base)
+    x, base = Decimal(str(x)), Decimal(str(base))
+    x_orig = x
+    val = math.ceil(x / base) * base
 
-    # next need to find the number of digits in the base.
-    # this is because sometimes round(x / base) * base
-    # returns a floating point number slightly above or below
-    # the real result. It is therefore necessary to round
-    # the resulting value to the number of digits of
-    # base.
-    frac_digits = num_digits(base)
+    if val < x_orig:
+        val = val + abs(base)
 
-    return float(round(math.ceil(x / base) * base, frac_digits))
+    return float(val)
 
 
 def round_significant(x, s: int = 3):
