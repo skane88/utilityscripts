@@ -2,9 +2,11 @@
 File to test the math utilities file
 """
 
+from math import isclose
+
 import pytest
 
-from utilityscripts.math_utils import m_ceil, m_floor, m_round
+from utilityscripts.math_utils import m_ceil, m_floor, m_round, round_significant
 
 
 @pytest.mark.parametrize(
@@ -74,3 +76,26 @@ def test_m_floor(x, base, float_tolerance, expected):
 )
 def test_m_ceil(x, base, float_tolerance, expected):
     assert m_ceil(x, base, float_tolerance=float_tolerance) == expected
+
+
+@pytest.mark.parametrize(
+    "x, s, expected",
+    [
+        (123.456, 2, 120),
+        (123.456, 3, 123),
+        (123.456, 4, 123.5),
+        (-123.456, 2, -120),
+        (-123.456, 3, -123),
+        (-123.456, 4, -123.5),
+        (0.123456, 1, 0.1),
+        (0.123456, 2, 0.12),
+        (0.123456, 3, 0.123),
+        (0.123456, 4, 0.1235),
+        (-0.123456, 1, -0.1),
+        (-0.123456, 2, -0.12),
+        (-0.123456, 3, -0.123),
+        (-0.123456, 4, -0.1235),
+    ],
+)
+def test_round_significant(x, s, expected):
+    assert isclose(round_significant(x, s), expected, abs_tol=1e-9)
