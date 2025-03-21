@@ -56,6 +56,105 @@ MATERIAL_FACTOR = pl.DataFrame(
 )
 
 
+class Soil:
+    """
+    Represents a soil.
+    """
+
+    def __init__(self, *, e_sl: float, e_ss: float, soil_name: str | None = None):
+        """
+        Create a Soil object.
+
+        Parameters
+        ----------
+        e_sl : float
+            The long term Young's modulus of the soil, in MPa.
+        e_ss : float
+            The short term Young's modulus of the soil, in MPa.
+        soil_name : str | None
+            An optional name to give the soil.
+        """
+
+        self._e_sl = e_sl
+        self._e_ss = e_ss
+        self._soil_name = soil_name
+
+    @property
+    def e_sl(self) -> float:
+        """
+        Get the long term Young's modulus of the soil. In MPa.
+        """
+
+        return self._e_sl
+
+    @property
+    def e_ss(self) -> float:
+        """
+        Get the short term Young's modulus of the soil. In MPa.
+        """
+
+        return self._e_ss
+
+    @property
+    def soil_name(self) -> str | None:
+        """
+        An optional name for the soil type.
+        """
+
+        return self._soil_name
+
+
+class SoilProfile:
+    """
+    Represents a soil profile.
+    """
+
+    def __init__(self, *, h_layers: list[float], soils: list[Soil]):
+        """
+        Create a SoilProfile object.
+
+        Parameters
+        ----------
+        h_layers : list[float]
+            The thickness of each soil layer. List from the shallowest to the deepest.
+        soils : list[Soil]
+            The soils in the profile
+        """
+
+        self._h_layers = h_layers
+        self._soils = soils
+
+    @property
+    def h_layers(self) -> list[float]:
+        return self._h_layers
+
+    @property
+    def soils(self) -> list[Soil]:
+        return self._soils
+
+    def e_ss(self, *, normalising_length: float, loading_type: LoadingType) -> float:
+        if len(self.soils) == 1:
+            return self.soils[0].e_ss
+
+        return e_se(
+            h_layers=self.h_layers,
+            e_layers=[soil.e_ss for soil in self.soils],
+            normalising_length=normalising_length,
+            loading_type=loading_type,
+        )
+
+    def e_sl(self, *, normalising_length: float, loading_type: LoadingType) -> float:
+        if len(self.soils) == 1:
+            return self.soils[0].e_sl
+
+        return e_se(
+            h_layers=self.h_layers,
+            e_layers=[soil.e_sl for soil in self.soils],
+            normalising_length=normalising_length,
+            loading_type=loading_type,
+        )
+
+
 def k_1(*, loading_type: LoadingType, material_factor: MaterialFactor) -> float:
     """
     Calculates the material factor k_1, based on the loading type and material factor

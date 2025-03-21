@@ -6,6 +6,8 @@ from utilityscripts.concrete.ccaa_t48 import (
     LoadingType,
     LoadLocation,
     MaterialFactor,
+    Soil,
+    SoilProfile,
     e_se,
     e_sl_from_cbr,
     e_ss_from_e_sl,
@@ -21,6 +23,74 @@ from utilityscripts.concrete.ccaa_t48 import (
     t_12,
     w_fi,
 )
+
+
+def test_soil():
+    e_ss = 44
+    e_sl = 35
+    soil = Soil(e_sl=e_sl, e_ss=e_ss)
+
+    assert soil
+    assert soil.e_sl == e_sl
+    assert soil.e_ss == e_ss
+    assert soil.soil_name is None
+
+    soil = Soil(e_sl=e_sl, e_ss=e_ss, soil_name="Sand")
+
+    assert soil
+    assert soil.e_sl == e_sl
+    assert soil.e_ss == e_ss
+    assert soil.soil_name == "Sand"
+
+
+def test_soil_profile():
+    e_ss = 44
+    e_sl = 35
+
+    soil = Soil(e_sl=e_sl, e_ss=e_ss, soil_name="Sand")
+
+    soil_profile = SoilProfile(h_layers=[2.0], soils=[soil])
+
+    assert (
+        soil_profile.e_sl(normalising_length=1.0, loading_type=LoadingType.POINT)
+        == e_sl
+    )
+    assert (
+        soil_profile.e_ss(normalising_length=1.0, loading_type=LoadingType.POINT)
+        == e_ss
+    )
+    assert soil_profile.h_layers == [2.0]
+    assert soil_profile.soils == [soil]
+
+
+def test_soil_profile_2():
+    h_layers = [1.5, 2.5, 2.0, 3.0]
+    layer_names = ["Fill", "Sand", "Sandy Clay", "Very Stiff Clay"]
+    e_sl_layers = [20, 42, 37.4, 59.5]
+    b_layers = [1.0, 0.8, 0.7, 0.6]
+    e_ss_layers = [
+        e_ss_from_e_sl(e_sl=e_sl, b=b)
+        for e_sl, b in zip(e_sl_layers, b_layers, strict=True)
+    ]
+
+    soils = [
+        Soil(e_sl=e_sl, e_ss=e_ss, soil_name=soil_name)
+        for e_sl, e_ss, soil_name in zip(
+            e_sl_layers, e_ss_layers, layer_names, strict=True
+        )
+    ]
+
+    soil_profile = SoilProfile(h_layers=h_layers, soils=soils)
+
+    wheel_spacing = 1.8
+    loading = LoadingType.WHEEL
+    expected = 31.8
+
+    assert isclose(
+        soil_profile.e_sl(normalising_length=wheel_spacing, loading_type=loading),
+        expected,
+        rel_tol=1e-3,
+    )
 
 
 @pytest.mark.parametrize(
