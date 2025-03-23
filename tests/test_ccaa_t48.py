@@ -64,6 +64,10 @@ def test_soil_profile():
 
 
 def test_soil_profile_2():
+    """
+    Test SoilProfile against example D1 in CCAA T48
+    """
+
     h_layers = [1.5, 2.5, 2.0, 3.0]
     layer_names = ["Fill", "Sand", "Sandy Clay", "Very Stiff Clay"]
     e_sl_layers = [20, 42, 37.4, 59.5]
@@ -88,6 +92,40 @@ def test_soil_profile_2():
 
     assert isclose(
         soil_profile.e_sl(normalising_length=wheel_spacing, loading_type=loading),
+        expected,
+        rel_tol=1e-3,
+    )
+
+
+def test_soil_profile_3():
+    """
+    Test SoilProfile against example D3 in CCAA T48
+    """
+
+    h_layers = [2.0, 5.0]
+    layer_names = ["Fill", "Clay"]
+    e_sl_layers = [30.0, 18.0]
+    b_layers = [0.4, 0.6]
+    e_ss_layers = [
+        e_ss_from_e_sl(e_sl=e_sl, b=b)
+        for e_sl, b in zip(e_sl_layers, b_layers, strict=True)
+    ]
+
+    soils = [
+        Soil(e_sl=e_sl, e_ss=e_ss, soil_name=soil_name)
+        for e_sl, e_ss, soil_name in zip(
+            e_sl_layers, e_ss_layers, layer_names, strict=True
+        )
+    ]
+
+    soil_profile = SoilProfile(h_layers=h_layers, soils=soils)
+
+    load_width = 4.0
+    loading = LoadingType.DISTRIBUTED
+    expected = 20.8
+
+    assert isclose(
+        soil_profile.e_sl(normalising_length=load_width, loading_type=loading),
         expected,
         rel_tol=1e-3,
     )
@@ -179,7 +217,11 @@ def test_w_fi(depth, normalising_length, loading_type, expected):
     )
 
 
-def test_e_se():
+def test_e_se_1():
+    """
+    Test e_se against example D1 in CCAA T48
+    """
+
     h_layers = [1.5, 2.5, 2.0, 3.0]
     e_layers = [20, 42, 37.4, 59.5]
     wheel_spacing = 1.8
@@ -190,6 +232,27 @@ def test_e_se():
         h_layers=h_layers,
         e_layers=e_layers,
         normalising_length=wheel_spacing,
+        loading_type=loading,
+    )
+
+    assert isclose(actual, expected, rel_tol=1e-3)
+
+
+def test_e_se_2():
+    """
+    Test e_se against example D3 in CCAA T48
+    """
+
+    h_layers = [2.0, 5.0]
+    e_layers = [30.0, 18.0]
+    load_width = 4.0
+    loading = LoadingType.DISTRIBUTED
+    expected = 20.8
+
+    actual = e_se(
+        h_layers=h_layers,
+        e_layers=e_layers,
+        normalising_length=load_width,
         loading_type=loading,
     )
 
