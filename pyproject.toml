@@ -50,6 +50,7 @@ dev = [
  'ruff',
  "pytest-randomly",
  "pytest-cov",
+ "pre-commit",
 ]
 
 [tool.pylint]
