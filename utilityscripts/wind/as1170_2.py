@@ -1149,7 +1149,7 @@ def m_zcat_basic(*, z, terrain_category, version="2021") -> float:
     # load the M_zcat data for all terrain types
     m_z_cat_data = terrain_height_multipliers.filter(
         pl.col("standard") == int(version)
-    ).pivot("terrain_cat", index="height", values="m_z_cat")
+    ).pivot_table("terrain_cat", index="height", values="m_z_cat")
 
     heights = np.array(m_z_cat_data["height"].unique())
 
