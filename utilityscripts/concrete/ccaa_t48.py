@@ -103,6 +103,14 @@ class Soil:
 
         return self._soil_name
 
+    def __repr__(self):
+        return (
+            f"{type(self).__name__}: "
+            + f"e_sl = {self.e_sl:.1f} MPa, "
+            + f"e_ss = {self.e_ss:.1f} MPa"
+            + f"{', ' + self.soil_name if self.soil_name + '.' else '.'}"
+        )
+
 
 class SoilProfile:
     """
@@ -132,6 +140,9 @@ class SoilProfile:
     def soils(self) -> list[Soil]:
         return self._soils
 
+    def h_total(self) -> float:
+        return sum(self.h_layers)
+
     def e_ss(self, *, normalising_length: float, loading_type: LoadingType) -> float:
         if len(self.soils) == 1:
             return self.soils[0].e_ss
@@ -152,6 +163,13 @@ class SoilProfile:
             e_layers=[soil.e_sl for soil in self.soils],
             normalising_length=normalising_length,
             loading_type=loading_type,
+        )
+
+    def __repr__(self):
+        return (
+            f"{type(self).__name__}: "
+            + f"no. layers = {len(self.h_layers)}, "
+            + f"total thickness = {self.h_total():.1f}."
         )
 
 
