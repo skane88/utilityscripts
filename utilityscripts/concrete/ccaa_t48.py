@@ -140,6 +140,7 @@ class SoilProfile:
     def soils(self) -> list[Soil]:
         return self._soils
 
+    @property
     def h_total(self) -> float:
         return sum(self.h_layers)
 
