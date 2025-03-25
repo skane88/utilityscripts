@@ -1336,3 +1336,178 @@ def plot_t_4():
     ax.set_title("Thickness vs F_4")
 
     plt.show()
+
+
+class Load:
+    def __init__(
+        self,
+        *,
+        load_type: LoadingType,
+        load_location: LoadLocation,
+        p_or_q: float,
+        normalising_length: float,
+    ):
+        self._load_type = load_type
+        self._load_location = load_location
+        self._p_or_q = p_or_q
+        self._normalising_length = normalising_length
+
+    @property
+    def load_type(self) -> LoadingType:
+        """
+        The type of load.
+        """
+
+        return self._load_type
+
+    @property
+    def load_location(self) -> LoadLocation:
+        """
+        The location of the load.
+        """
+
+        return self._load_location
+
+    @property
+    def p_or_q(self) -> float:
+        """
+        The load magnitude.
+
+        Notes
+        -----
+        - For wheel loads or point loads this is in kN.
+        - For distributed loads this is in kPa.
+        """
+
+        return self._p_or_q
+
+    @property
+    def normalising_length(self) -> float:
+        """
+        The normalising length.
+
+        Notes
+        -----
+        - For wheel loads or point loads this is the spacing.
+        - For distributed loads this is the width of the load or the aisle.
+        """
+
+        return self._normalising_length
+
+    def __repr__(self):
+        return (
+            f"{type(self).__name__}: "
+            + f"Load Type: {self.load_type}, "
+            + f"Load Location: {self.load_location}, "
+            + f"Load Magnitude: {self.p_or_q}"
+            + f"{'kPa' if self.load_type == LoadingType.DISTRIBUTED else 'kN'}, "
+            + f"Normalising Length: {self.normalising_length}."
+        )
+
+
+class Slab:
+    """
+    A class to handle calculating slab thicknesses
+    """
+
+    def __init__(self, *, soil_profile: SoilProfile, loads=dict[str, Load]):
+        self._soil_profile = soil_profile
+        self._loads = loads
+
+    @property
+    def soil_profile(self) -> SoilProfile:
+        """
+        The soil profile below the slab.
+        """
+
+        return self._soil_profile
+
+    @property
+    def loads(self) -> dict[str, Load]:
+        """
+        The loads on the slab.
+        """
+
+        return self._loads
+
+    def add_load(
+        self,
+        *,
+        load_id: str,
+        load_type: LoadingType,
+        load_location: LoadLocation,
+        p_or_q: float,
+        normalising_length: float,
+    ):
+        """
+        Add a load to the Slab object.
+
+        Notes
+        -----
+        - Slab objects are immutable, so this method returns a new Slab object.
+
+        Parameters
+        ----------
+        load_id : str
+            The ID of the load.
+        load_type : LoadingType
+            The type of load.
+        load_location : LoadLocation
+            The location of the load.
+        p_or_q : float
+            The load magnitude.
+        normalising_length : float
+            The normalising length.
+
+        Returns
+        -------
+        Slab
+            A new Slab object with the load added.
+        """
+
+        new_loads = deepcopy(self._loads)
+
+        new_loads[load_id] = Load(
+            load_type=load_type,
+            load_location=load_location,
+            p_or_q=p_or_q,
+            normalising_length=normalising_length,
+        )
+
+        return Slab(soil_profile=self.soil_profile, loads=new_loads)
+
+    def add_loads(self, *, loads: dict[str, Load]) -> "Slab":
+        """
+        Add multiple loads to the Slab object.
+
+        Notes
+        -----
+        - Slab objects are immutable, so this method returns a new Slab object.
+
+        Parameters
+        ----------
+        loads : dict[str, Load]
+            The loads to add.
+
+        Returns
+        -------
+        Slab
+            A new Slab object with the loads added.
+        """
+
+        new_loads = deepcopy(self._loads)
+
+        for load_id, load in loads.items():
+            if load_id in new_loads:
+                raise ValueError(f"Load {load_id} already exists.")
+
+            new_loads[load_id] = load
+
+        return Slab(soil_profile=self.soil_profile, loads=new_loads)
+
+    def __repr__(self):
+        return (
+            f"{type(self).__name__}: "
+            + f"Soil Profile: {self.soil_profile}, "
+            + f"With {len(self.loads)} loads."
+        )

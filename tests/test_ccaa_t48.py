@@ -3,6 +3,7 @@ from math import isclose
 import pytest
 
 from utilityscripts.concrete.ccaa_t48 import (
+    Load,
     LoadingType,
     LoadLocation,
     MaterialFactor,
@@ -558,3 +559,16 @@ def test_t_4(f_4, expected):
 def test_t_4_errors(f_4, expected):
     with pytest.raises(ValueError):
         assert isclose(t_4(f_4=f_4), expected, rel_tol=1e-2)
+
+
+def test_load():
+    load = Load(
+        load_type=LoadingType.WHEEL,
+        load_location=LoadLocation.INTERNAL,
+        p_or_q=100.0,
+        normalising_length=1.0,
+    )
+    assert load.load_type == LoadingType.WHEEL
+    assert load.load_location == LoadLocation.INTERNAL
+    assert load.p_or_q == 100.0  # noqa: PLR2004
+    assert load.normalising_length == 1.0
