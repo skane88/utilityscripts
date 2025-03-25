@@ -1394,6 +1394,17 @@ class Load:
 
         return self._normalising_length
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Load):
+            return False
+
+        return (
+            self.load_type == other.load_type
+            and self.load_location == other.load_location
+            and self.p_or_q == other.p_or_q
+            and self.normalising_length == other.normalising_length
+        )
+
     def __repr__(self):
         return (
             f"{type(self).__name__}: "
