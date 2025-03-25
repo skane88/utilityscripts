@@ -125,7 +125,7 @@ class EN14015:
         m_roof : float
             The mass of the roof. In kg.
         rho_liquid : float
-            The density of the liquid. In kg/m.
+            The density of the liquid. In kg/m^3.
         a_seismic : float
             The seismic acceleration coefficient for inertial movement of the tank.
             In m/s^2.
