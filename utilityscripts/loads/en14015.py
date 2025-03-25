@@ -1,5 +1,5 @@
 """
-Utilities for working with loads
+Contains methods and classes for calculating seismic loads on tanks as per EN14015.
 """
 
 from enum import StrEnum
@@ -14,76 +14,10 @@ from scipy.interpolate import interp1d
 from utilityscripts.result import Result
 
 
-class RoofType(StrEnum):
-    ACCESSIBLE = "accessible"
-    ACCESSIBLEFROMGROUND = "accessible from ground"
-    OTHER = "other"
-
-
-def pipe_load(*, pipe_density, content_density, outer_diameter, inner_diameter):
-    """
-    Calculate loads in a pipe.
-
-    :param pipe_density: The density of the pipe.
-    :param content_density: The density of the contents.
-    :param outer_diameter: The outer diameter.
-    :param inner_diameter: The inner diameter.
-    :return: A dictionary of masses.
-    """
-
-    total_area = 0.25 * pi * outer_diameter**2
-    inner_area = 0.25 * pi * inner_diameter**2
-
-    pipe_area = total_area - inner_area
-
-    empty_weight = pipe_area * pipe_density
-    content_weight = inner_area * content_density
-    full_weight = empty_weight + content_weight
-
-    return {
-        "empty_weight": empty_weight,
-        "content_weight": content_weight,
-        "full_weight": full_weight,
-    }
-
-
-def roof_load_as1170_1(
-    roof_type: RoofType | str, area: float | None
-) -> tuple[float, float]:
-    """
-    Calculate roof load as per AS1170.1 S3.5
-
-    Notes
-    -----
-    Ignores the distinction between structure and cladding
-    that AS1170 allows for OTHER type roofs.
-
-    Parameters
-    ----------
-    roof_type : RoofType | str
-        What sort of roof is it?
-    area : float | None
-        The tributary area.
-
-    Returns
-    -------
-    tuple[float, float]
-
-    The loads to apply as (pressure in kPa, point load in kN)
-    """
-
-    if roof_type == RoofType.ACCESSIBLE:
-        return 1.5, 1.8
-
-    if roof_type == RoofType.ACCESSIBLEFROMGROUND:
-        return 1.0, 1.8
-
-    if roof_type != RoofType.OTHER:
-        raise ValueError(
-            "Roof type should be a valid RoofType Enum or equivalent string."
-        )
-
-    return max(0.25, 1.8 / area + 0.12), 1.4
+class SoilType(StrEnum):
+    A = "A"
+    B = "B"
+    C = "C"
 
 
 class EN14015:
@@ -97,7 +31,7 @@ class EN14015:
         m_roof: float,
         rho_liquid: float,
         a_seismic: float,
-        soil_profile: str,
+        soil_profile: SoilType,
         rho_shell: float = 7850.0,
     ):
         """
@@ -212,7 +146,7 @@ class EN14015:
         return self._a_seismic
 
     @property
-    def soil_profile(self) -> str:
+    def soil_profile(self) -> SoilType:
         """
         The soil profile type.
         """
@@ -318,7 +252,7 @@ class EN14015:
         The fraction of the tank contents that behaves in an inertial manner.
         """
 
-        return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio.value)["t1-tt"])
+        return float(get_ratios(d_h_t_ratio=self.d_h_t_ratio.value)["t1-tt"])
 
     @property
     def t_1(self) -> Result:
@@ -341,7 +275,7 @@ class EN14015:
         convective manner.
         """
 
-        return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio.value)["t2-tt"])
+        return float(get_ratios(d_h_t_ratio=self.d_h_t_ratio.value)["t2-tt"])
 
     @property
     def t_2(self) -> float:
@@ -359,7 +293,7 @@ class EN14015:
         liquid acts, as a fraction of h_t.
         """
 
-        return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio.value)["x1-ht"])
+        return float(get_ratios(d_h_t_ratio=self.d_h_t_ratio.value)["x1-ht"])
 
     @property
     def x_2_ratio(self) -> float:
@@ -368,7 +302,7 @@ class EN14015:
         convective load of the liquid acts, as a fraction of h_t.
         """
 
-        return float(self.get_ratios(d_h_t_ratio=self.d_h_t_ratio.value)["x2-ht"])
+        return float(get_ratios(d_h_t_ratio=self.d_h_t_ratio.value)["x2-ht"])
 
     @property
     def x_1(self) -> float:
@@ -403,7 +337,7 @@ class EN14015:
         The sloshing acceleration factor.
         """
 
-        return float(self.get_ratios(d_h_t_ratio=float(self.d_h_t_ratio))["ks"])
+        return float(get_ratios(d_h_t_ratio=float(self.d_h_t_ratio))["ks"])
 
     @property
     def j(self) -> float:
@@ -411,7 +345,7 @@ class EN14015:
         The soil profile factor.
         """
 
-        return {"A": 1.0, "B": 1.2, "C": 1.5}[self.soil_profile]
+        return {SoilType.A: 1.0, SoilType.B: 1.2, SoilType.C: 1.5}[self.soil_profile]
 
     @property
     def t_s(self) -> float:
@@ -524,50 +458,88 @@ class EN14015:
 
         return self.meq_t + self.meq_r + self.meq_1 + self.meq_2
 
-    @classmethod
-    @lru_cache(maxsize=None)
-    def get_ratios(cls, *, d_h_t_ratio: float):
-        """
-        Get the fractions of tank contents that behave in the inertial
-        and convection modes and their heights of application from
-        Figure G.1 & G.2 of EN14015-2004.
 
-        Gets the sloshing parameter k_s from figure G.3 of EN14015-2004.
+@lru_cache(maxsize=None)
+def _get_ratio_interpolators() -> dict[str, interp1d]:
+    """
+    Get the ratio data from the Excel file and set up a
+    series of SciPy interpolators.
 
-        Parameters
-        ----------
-        d_h_t_ratio : float
-            The ratio of the diameter to the filling height of the tank.
+    Notes
+    -----
+    This function is cached to avoid multiple calls into Excel.
 
-        Returns
-        -------
-        dict[str, float]
-            A dictionary of the ratios, with keys:
-            - t1-tt : The fraction of the tank contents that behaves in an
-              inertial manner.
-            - t2-tt : The fraction of the tank contents that behaves in a
-              sloshing or convective manner.
-            - x1-ht : The height from the bottom of the tank at which the inertia
-              load of the liquid acts, as a fraction of h_t.
-            - x2-ht : The height from the bottom of the tank at which the sloshing or
-              convective load of the liquid acts, as a fraction of h_t.
-            - ks : The sloshing acceleration factor.
-        """
+    Returns
+    -------
+    dict[str, interp1d]
+        A dictionary of the ratios, with keys:
+        - t1-tt : The fraction of the tank contents that behaves in an
+            inertial manner.
+        - t2-tt : The fraction of the tank contents that behaves in a
+            sloshing or convective manner.
+        - x1-ht : The height from the bottom of the tank at which the inertia
+            load of the liquid acts, as a fraction of h_t.
+        - x2-ht : The height from the bottom of the tank at which the sloshing or
+            convective load of the liquid acts, as a fraction of h_t.
+        - ks : The sloshing parameter.
+    """
 
-        sheet_sets = {"t1-tt", "t2-tt", "x1-ht", "x2-ht", "ks"}
+    sheet_sets = {"t1-tt", "t2-tt", "x1-ht", "x2-ht", "ks"}
+    file_path = Path(__file__).parent / Path("en14015_data.xlsx")
 
-        ratios = {}
+    ratios = {}
 
-        file_path = Path(__file__).parent / Path("en14015_data.xlsx")
+    for sheet in sheet_sets:
+        data = pl.read_excel(source=file_path, sheet_name=sheet)
 
-        for sheet in sheet_sets:
-            data = pl.read_excel(source=file_path, sheet_name=sheet)
+        x_vals = np.asarray(data["x"])
+        y_vals = np.asarray(data["y"])
 
-            x_vals = np.asarray(data["x"])
-            y_vals = np.asarray(data["y"])
+        interp = interp1d(x_vals, y_vals, kind="cubic", fill_value="extrapolate")
 
-            interp = interp1d(x_vals, y_vals, kind="cubic", fill_value="extrapolate")
+        ratios[sheet] = interp
 
-            ratios[sheet] = interp(d_h_t_ratio)
+    return ratios
 
-        return ratios
+
+@lru_cache(maxsize=None)
+def get_ratios(*, d_h_t_ratio: float):
+    """
+    Get the fractions of tank contents that behave in the inertial
+    and convection modes and their heights of application from
+    Figure G.1 & G.2 of EN14015-2004.
+
+    Gets the sloshing parameter k_s from figure G.3 of EN14015-2004.
+
+    Notes
+    -----
+    This function is cached to avoid interpolating multiple times.
+
+    Parameters
+    ----------
+    d_h_t_ratio : float
+        The ratio of the diameter to the filling height of the tank.
+
+    Returns
+    -------
+    dict[str, float]
+        A dictionary of the ratios, with keys:
+        - t1-tt : The fraction of the tank contents that behaves in an
+            inertial manner.
+        - t2-tt : The fraction of the tank contents that behaves in a
+            sloshing or convective manner.
+        - x1-ht : The height from the bottom of the tank at which the inertia
+            load of the liquid acts, as a fraction of h_t.
+        - x2-ht : The height from the bottom of the tank at which the sloshing or
+            convective load of the liquid acts, as a fraction of h_t.
+        - ks : The sloshing acceleration factor.
+    """
+
+    ratio_interpolators = _get_ratio_interpolators()
+
+    ratios = {}
+
+    for ratio_name, interpolator in ratio_interpolators.items():
+        ratios[ratio_name] = interpolator(d_h_t_ratio)
+
+    return ratios
