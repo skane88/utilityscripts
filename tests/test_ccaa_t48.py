@@ -7,6 +7,7 @@ from utilityscripts.concrete.ccaa_t48 import (
     LoadingType,
     LoadLocation,
     MaterialFactor,
+    Slab,
     Soil,
     SoilProfile,
     e_se,
@@ -572,3 +573,54 @@ def test_load():
     assert load.load_location == LoadLocation.INTERNAL
     assert load.p_or_q == 100.0  # noqa: PLR2004
     assert load.normalising_length == 1.0
+
+
+def test_slab():
+    soil_profile = SoilProfile(
+        h_layers=[1.0, 1.0],
+        soils=[
+            Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil1"),
+            Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
+        ],
+    )
+    slab = Slab(soil_profile=soil_profile, loads={})
+
+    assert slab.soil_profile == soil_profile
+    assert slab.loads == {}
+
+    slab_2 = slab.add_load(
+        load_id="load_1",
+        load_type=LoadingType.WHEEL,
+        load_location=LoadLocation.INTERNAL,
+        p_or_q=100.0,
+        normalising_length=1.0,
+    )
+    assert slab.loads == {}
+    assert slab_2.loads == {
+        "load_1": Load(
+            load_type=LoadingType.WHEEL,
+            load_location=LoadLocation.INTERNAL,
+            p_or_q=100.0,
+            normalising_length=1.0,
+        )
+    }
+
+    slab_3 = slab.add_loads(
+        loads={
+            "load_1": Load(
+                load_type=LoadingType.WHEEL,
+                load_location=LoadLocation.INTERNAL,
+                p_or_q=100.0,
+                normalising_length=1.0,
+            )
+        }
+    )
+    assert slab.loads == {}
+    assert slab_3.loads == {
+        "load_1": Load(
+            load_type=LoadingType.WHEEL,
+            load_location=LoadLocation.INTERNAL,
+            p_or_q=100.0,
+            normalising_length=1.0,
+        )
+    }
