@@ -624,3 +624,63 @@ def test_slab():
             normalising_length=1.0,
         )
     }
+
+
+def test_slab_add_load_error():
+    soil_profile = SoilProfile(
+        h_layers=[1.0, 1.0],
+        soils=[
+            Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil1"),
+            Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
+        ],
+    )
+    slab = Slab(soil_profile=soil_profile)
+    slab = slab.add_load(
+        load_id="load_1",
+        load_type=LoadingType.WHEEL,
+        load_location=LoadLocation.INTERNAL,
+        p_or_q=100.0,
+        normalising_length=1.0,
+    )
+
+    with pytest.raises(ValueError):
+        slab.add_load(
+            load_id="load_1",
+            load_type=LoadingType.WHEEL,
+            load_location=LoadLocation.INTERNAL,
+            p_or_q=100.0,
+            normalising_length=1.0,
+        )
+
+
+def test_slab_add_loads_error():
+    soil_profile = SoilProfile(
+        h_layers=[1.0, 1.0],
+        soils=[
+            Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil1"),
+            Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
+        ],
+    )
+    slab = Slab(soil_profile=soil_profile)
+    slab = slab.add_loads(
+        loads={
+            "load_1": Load(
+                load_type=LoadingType.WHEEL,
+                load_location=LoadLocation.INTERNAL,
+                p_or_q=100.0,
+                normalising_length=1.0,
+            ),
+        }
+    )
+
+    with pytest.raises(ValueError):
+        slab.add_loads(
+            loads={
+                "load_1": Load(
+                    load_type=LoadingType.WHEEL,
+                    load_location=LoadLocation.INTERNAL,
+                    p_or_q=100.0,
+                    normalising_length=1.0,
+                ),
+            }
+        )

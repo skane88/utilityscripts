@@ -1269,7 +1269,7 @@ def _t_4_data() -> pl.DataFrame:
     return pl.read_excel(_DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht14_t4")
 
 
-def t_4(*, f_4: float) -> float:
+def t_4(*, f_4: float) -> float | np.ndarray:
     """
     Calculate the required slab thickness for distributed loads.
 
@@ -1487,16 +1487,19 @@ class Slab:
             A new Slab object with the load added.
         """
 
-        new_loads = deepcopy(self._loads)
+        if load_id in self._loads:
+            raise ValueError(f"Load {load_id} already exists.")
 
-        new_loads[load_id] = Load(
+        copied_loads = deepcopy(self._loads)
+
+        copied_loads[load_id] = Load(
             load_type=load_type,
             load_location=load_location,
             p_or_q=p_or_q,
             normalising_length=normalising_length,
         )
 
-        return Slab(soil_profile=self.soil_profile, loads=new_loads)
+        return Slab(soil_profile=self.soil_profile, loads=copied_loads)
 
     def add_loads(self, *, loads: dict[str, Load]) -> "Slab":
         """
@@ -1517,15 +1520,15 @@ class Slab:
             A new Slab object with the loads added.
         """
 
-        new_loads = deepcopy(self._loads)
-
-        for load_id, load in loads.items():
-            if load_id in new_loads:
+        for load_id in loads:
+            if load_id in self._loads:
                 raise ValueError(f"Load {load_id} already exists.")
 
-            new_loads[load_id] = load
+        copied_loads = deepcopy(self._loads)
 
-        return Slab(soil_profile=self.soil_profile, loads=new_loads)
+        copied_loads = copied_loads | loads
+
+        return Slab(soil_profile=self.soil_profile, loads=copied_loads)
 
     def __repr__(self):
         return (
