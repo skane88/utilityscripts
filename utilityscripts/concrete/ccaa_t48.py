@@ -1419,11 +1419,22 @@ class Load:
 class Slab:
     """
     A class to handle calculating slab thicknesses
+
+    Notes
+    -----
+    - Slab objects are immutable. Methods that modify internal state will return new
+      Slab objects.
     """
 
-    def __init__(self, *, soil_profile: SoilProfile, loads=dict[str, Load]):
+    def __init__(
+        self, *, soil_profile: SoilProfile, loads: dict[str, Load] | None = None
+    ):
         self._soil_profile = soil_profile
-        self._loads = loads
+
+        if loads is None:
+            self._loads = {}
+        else:
+            self._loads = loads
 
     @property
     def soil_profile(self) -> SoilProfile:
