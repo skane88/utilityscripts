@@ -1512,7 +1512,7 @@ class Slab:
         Parameters
         ----------
         loads : dict[str, Load]
-            The loads to add.
+            The loads to add. Should be a dict of the form {load_id: Load}.
 
         Returns
         -------
