@@ -7,6 +7,7 @@ from functools import lru_cache
 from math import pi
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from scipy.interpolate import interp1d
@@ -457,6 +458,69 @@ class EN14015:
         """
 
         return self.meq_t + self.meq_r + self.meq_1 + self.meq_2
+
+
+@lru_cache(maxsize=None)
+def _get_ratio_data() -> dict[str, pl.DataFrame]:
+    """
+    Get the ratio data from the Excel file.
+
+    Notes
+    -----
+    This function is cached to avoid multiple calls into Excel.
+
+    Returns
+    -------
+    dict[str, pl.DataFrame]
+        A dictionary of the ratios, with keys:
+        - t1-tt : The fraction of the tank contents that behaves in an
+            inertial manner.
+        - t2-tt : The fraction of the tank contents that behaves in a
+            sloshing or convective manner.
+        - x1-ht : The height from the bottom of the tank at which the inertia
+            load of the liquid acts, as a fraction of h_t.
+        - x2-ht : The height from the bottom of the tank at which the sloshing or
+            convective load of the liquid acts, as a fraction of h_t.
+        - ks : The sloshing parameter.
+    """
+
+    sheet_sets = {"t1-tt", "t2-tt", "x1-ht", "x2-ht", "ks"}
+    file_path = Path(__file__).parent / Path("en14015_data.xlsx")
+
+    return {
+        sheet: pl.read_excel(source=file_path, sheet_name=sheet) for sheet in sheet_sets
+    }
+
+
+def plot_t1_t2_data():
+    """
+    Plot the t1-tt data.
+
+    Notes
+    -----
+    Primarily provided for debugging purposes.
+    """
+
+    curves = {"t1-tt": "T_1 / m_liquid", "t2-tt": "T_2 / m_liquid"}
+
+    for curve in curves:
+        data = _get_ratio_data()[curve]
+
+        plt.scatter(data["x"], data["y"], label=f"{curves[curve]} (data)")
+
+    x = np.linspace(0, 8, 100)
+
+    for curve in curves:
+        interpolator = _get_ratio_interpolators()[curve]
+
+        plt.plot(x, interpolator(x), label=f"{curves[curve]} (interpolated)")
+
+    plt.xlim(0, 8)
+    plt.ylim(0, 1)
+    plt.grid()
+
+    plt.legend()
+    plt.show()
 
 
 @lru_cache(maxsize=None)
