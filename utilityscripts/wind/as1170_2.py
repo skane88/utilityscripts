@@ -23,6 +23,22 @@ MIN_TERRAIN_CATEGORY = 1.0
 MAX_TERRAIN_CATEGORY = 4.0
 
 
+class CardinalDirection(StrEnum):
+    """
+    The valid cardinal directions
+    """
+
+    N = "N"
+    NE = "NE"
+    E = "E"
+    SE = "SE"
+    S = "S"
+    SW = "SW"
+    W = "W"
+    NW = "NW"
+    ANY = "ANY"
+
+
 class StandardVersion(StrEnum):
     AS1170_2_2011 = "AS/NZS1170.2-2011"
     AS1170_2_2021 = "AS/NZS1170.2-2021"
@@ -39,6 +55,11 @@ class FaceType(StrEnum):
     LEEWARD = "leeward"
     SIDE = "side"
     ROOF = "roof"
+
+
+class SectionType(StrEnum):
+    CIRCULAR = "circular"
+    SHARP = "sharp"
 
 
 class WindRegion(StrEnum):
@@ -254,7 +275,7 @@ class WindSite:
 
     def m_d(
         self,
-        direction: float | str,
+        direction: float | CardinalDirection,
         version: StandardVersion = StandardVersion.AS1170_2_2021,
     ) -> tuple[float, float]:
         """
@@ -269,15 +290,15 @@ class WindSite:
         ----------
         wind_region : str
             The wind region where the structure is located.
-        direction : float or str
+        direction : float or CardinalDirection
             The direction as an angle between 0 and 360 degrees, where:
             - 0/360 = Wind from North
             - 90 = Wind from East
             - 180 = Wind from South
             - 270 = Wind from West
 
-            Can also be "ANY" to return the any direction value, or cardinal
-            values (e.g. "N", "NE", "E", ..., "NW").
+            Can also be any of the CardinalDirections including "ANY" to indicate the
+            wind direction is to be ignored.
         version : StandardVersion, default=StandardVersion.AS1170_2_2021
             The version of the standard to use.
 
@@ -976,7 +997,7 @@ class OpenStructure:
         no_unshielded: int,
         no_shielded: int,
         ignore_for_area: bool = False,
-        circular_or_sharp: str = "circular",
+        circular_or_sharp: SectionType = SectionType.CIRCULAR,
     ) -> OpenStructure:
         """
         Add a member to the open structure.
@@ -1004,7 +1025,7 @@ class OpenStructure:
             The number of shielded sections.
         ignore_for_area : bool, default=False
             Should the sections be ignored for overall area calculations?
-        circular_or_sharp : str, default="circular"
+        circular_or_sharp : SectionType, default=SectionType.CIRCULAR
             Are the sections circular or sharp edged?
 
         Returns
@@ -1137,7 +1158,7 @@ def v_r(
 def m_d_exact(
     *,
     wind_region: str,
-    direction: float | str,
+    direction: float | CardinalDirection,
     version: StandardVersion = StandardVersion.AS1170_2_2021,
 ) -> tuple[float, float]:
     """
@@ -1152,15 +1173,15 @@ def m_d_exact(
     ----------
     wind_region : str
         The wind region where the structure is located.
-    direction : float or str
+    direction : float or CardinalDirection
         The direction as an angle between 0 and 360 degrees, where:
         - 0/360 = Wind from North
         - 90 = Wind from East
         - 180 = Wind from South
         - 270 = Wind from West
 
-        Can also be "ANY" to return the any direction value, or cardinal
-        values (e.g. "N", "NE", "E", ..., "NW").
+        Can also be one of the CardinalDirections including "ANY" to indicate the
+        wind direction is to be ignored.
     version : StandardVersion, default=StandardVersion.AS1170_2_2021
         The version of the standard to use.
 
