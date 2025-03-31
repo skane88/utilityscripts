@@ -15,6 +15,7 @@ from utilityscripts.wind.as1170_2 import (
     k_v,
     m_d_exact,
     v_r,
+    valid_region,
 )
 
 FILE_PATH = Path(__file__)
@@ -23,6 +24,19 @@ TEST_DATA_2011 = toml.load(TEST_DATA_PATH_2011)
 
 TEST_DATA_PATH_2021 = FILE_PATH.parent / Path("test_as1170_2_2021.toml")
 TEST_DATA_2021 = toml.load(TEST_DATA_PATH_2021)
+
+
+@pytest.mark.parametrize(
+    "region, version, expected",
+    [
+        (WindRegion.A1, StandardVersion.AS1170_2_2011, True),
+        (WindRegion.A1, StandardVersion.AS1170_2_2021, True),
+        (WindRegion.A0, StandardVersion.AS1170_2_2011, False),
+        (WindRegion.A7, StandardVersion.AS1170_2_2021, False),
+    ],
+)
+def test_valid_region(region, version, expected):
+    assert valid_region(region, version) == expected
 
 
 def build_v_r_pairs_2011(v_r_data):
