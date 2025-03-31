@@ -49,14 +49,14 @@ class SoilClass(StrEnum):
 
 @lru_cache(maxsize=None)
 def spectral_shape_factor(
-    *, soil_type: SoilClass, period: float, min_period: bool = False
+    *, soil_class: SoilClass, period: float, min_period: bool = False
 ) -> float:
     """
     Calculate the spectral shape factor for a given soil type and period.
 
     Parameters
     ----------
-    soil_type : SoilType
+    soil_class : SoilClass
         The type of soil
     period : float
         The period of the structure
@@ -80,7 +80,7 @@ def spectral_shape_factor(
     data = STANDARD_DATA["soil_spectra"]
 
     # first select only the row from the spectra data that we need.
-    data = data.filter(pl.col("soil_type") == soil_type)
+    data = data.filter(pl.col("soil_class") == soil_class)
     data = data.filter(period <= pl.col("max_period"))
     data = data.filter(pl.col("max_period") == pl.col("max_period").min())
 
@@ -120,13 +120,13 @@ def plot_spectra():
 
     periods = np.linspace(0.0, 5.0, 200)
 
-    for soil_type in SoilClass:
+    for soil_class in SoilClass:
         y = [
-            spectral_shape_factor(soil_type=soil_type, period=float(period))
+            spectral_shape_factor(soil_class=soil_class, period=float(period))
             for period in periods
         ]
 
-        plt.plot(periods, y, label=soil_type)
+        plt.plot(periods, y, label=soil_class)
 
     plt.grid()
     plt.xlabel("Period T (s)")
@@ -139,7 +139,7 @@ def plot_spectra():
 
 def c_t(
     *,
-    soil_type: SoilClass,
+    soil_class: SoilClass,
     period: float,
     k_p: float,
     z: float,
@@ -161,7 +161,7 @@ def c_t(
 
     Parameters
     ----------
-    soil_type : SoilType
+    soil_class : SoilClass
         The type of soil
     period : float
         The period of the structure
@@ -183,7 +183,7 @@ def c_t(
 
     kp_z = max(min_kpz, k_p * z)
     ch_t = spectral_shape_factor(
-        soil_type=soil_type, period=period, min_period=min_period
+        soil_class=soil_class, period=period, min_period=min_period
     )
 
     return kp_z * ch_t
@@ -191,7 +191,7 @@ def c_t(
 
 def cd_t(
     *,
-    soil_type: SoilClass,
+    soil_class: SoilClass,
     period: float,
     k_p: float,
     z: float,
@@ -213,7 +213,7 @@ def cd_t(
 
     Parameters
     ----------
-    soil_type : SoilType
+    soil_class : SoilClass
         The type of soil
     period : float
         The period of the structure
@@ -238,7 +238,7 @@ def cd_t(
     """
 
     return c_t(
-        soil_type=soil_type,
+        soil_class=soil_class,
         period=period,
         k_p=k_p,
         z=z,

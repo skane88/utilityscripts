@@ -76,7 +76,7 @@ from utilityscripts.earthquake.as1170_4 import SoilClass, cd_t, spectral_shape_f
 )
 def test_spectral_shape_factor(soil: SoilClass, period: float, expected: float):
     assert isclose(
-        spectral_shape_factor(soil_type=soil, period=period), expected, abs_tol=2e-2
+        spectral_shape_factor(soil_class=soil, period=period), expected, abs_tol=2e-2
     )
 
 
@@ -100,7 +100,7 @@ def test_cd_t(
     expected: float,
 ):
     assert isclose(
-        cd_t(soil_type=soil, period=period, k_p=k_p, z=z, s_p=s_p, mu=mu),
+        cd_t(soil_class=soil, period=period, k_p=k_p, z=z, s_p=s_p, mu=mu),
         expected,
         abs_tol=1e-2,
     )
