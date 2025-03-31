@@ -8,7 +8,14 @@ from pathlib import Path
 import pytest
 import toml
 
-from utilityscripts.wind.as1170_2 import k_v, m_d_exact, v_r
+from utilityscripts.wind.as1170_2 import (
+    StandardVersion,
+    WindRegion,
+    WindSite,
+    k_v,
+    m_d_exact,
+    v_r,
+)
 
 FILE_PATH = Path(__file__)
 TEST_DATA_PATH_2011 = FILE_PATH.parent / Path("test_as1170_2_2011.toml")
@@ -22,7 +29,7 @@ def build_v_r_pairs_2011(v_r_data):
     test_data = TEST_DATA_2011[v_r_data]
 
     return [
-        (region, r, v_r_exp)
+        (WindRegion(region), r, v_r_exp)
         for region, v in test_data.items()
         for r, v_r_exp in v.items()
     ]
@@ -38,7 +45,12 @@ def test_v_r_no_f_x_2011(region, r, v_r_exp):
     """
 
     v_r_calc = round(
-        v_r(wind_region=region, return_period=int(r), ignore_m_c=True, version="2011")
+        v_r(
+            wind_region=region,
+            return_period=int(r),
+            ignore_m_c=True,
+            version=StandardVersion.AS1170_2_2011,
+        )
     )  # round because the data from AS1170 is rounded
 
     assert v_r_calc == v_r_exp
@@ -53,7 +65,10 @@ def test_v_r_2011(region, r, v_r_exp):
     """
 
     v_r_calc = v_r(
-        wind_region=region, return_period=int(r), ignore_m_c=False, version="2011"
+        wind_region=region,
+        return_period=int(r),
+        ignore_m_c=False,
+        version=StandardVersion.AS1170_2_2011,
     )
 
     v_r_calc = round(v_r_calc)  # round because the data from AS1170 is rounded
@@ -80,7 +95,10 @@ def test_v_r_2021_no_mc(region, r, v_r_expected):
     """
 
     v_r_calc = v_r(
-        wind_region=region, return_period=int(r), ignore_m_c=True, version="2021"
+        wind_region=region,
+        return_period=int(r),
+        ignore_m_c=True,
+        version=StandardVersion.AS1170_2_2021,
     )
 
     v_r_calc = round(v_r_calc)  # round because the data from AS1170 is rounded
@@ -97,7 +115,10 @@ def test_v_r_2021(region, r, v_r_expected):
     """
 
     v_r_calc = v_r(
-        wind_region=region, return_period=int(r), ignore_m_c=False, version="2021"
+        wind_region=region,
+        return_period=int(r),
+        ignore_m_c=False,
+        version=StandardVersion.AS1170_2_2021,
     )
 
     v_r_calc = round(v_r_calc)  # round because the data from AS1170 is rounded
@@ -138,7 +159,11 @@ def test_m_d_2011(input_vals):
     direction = input_vals[0][1]
     expected = input_vals[1]
 
-    m_d_calc = m_d_exact(wind_region=wind_region, direction=direction, version="2011")
+    m_d_calc = m_d_exact(
+        wind_region=wind_region,
+        direction=direction,
+        version=StandardVersion.AS1170_2_2011,
+    )
 
     assert isclose(m_d_calc[0], expected[0])
     assert isclose(m_d_calc[1], expected[1])
@@ -177,7 +202,11 @@ def test_m_d_2021(input_vals):
     direction = input_vals[0][1]
     expected = input_vals[1]
 
-    m_d_calc = m_d_exact(wind_region=wind_region, direction=direction, version="2021")
+    m_d_calc = m_d_exact(
+        wind_region=wind_region,
+        direction=direction,
+        version=StandardVersion.AS1170_2_2021,
+    )
 
     assert isclose(m_d_calc[0], expected[0])
     assert isclose(m_d_calc[1], expected[1])
@@ -221,3 +250,17 @@ def k_v_calc(area, volume):
 )
 def test_k_v(area, vol, expected):
     assert isclose(k_v(open_area=area, volume=vol), expected)
+
+
+def test_windsite():
+    """
+    Basic test of the WindSite class.
+    """
+
+    site = WindSite(
+        wind_region=WindRegion.A1, terrain_category=1.0, shielding_data=None
+    )
+
+    assert site.wind_region == WindRegion.A1
+    assert site.terrain_category == 1.0
+    assert site.shielding_data is None

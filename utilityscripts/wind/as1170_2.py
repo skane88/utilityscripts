@@ -23,6 +23,11 @@ MIN_TERRAIN_CATEGORY = 1.0
 MAX_TERRAIN_CATEGORY = 4.0
 
 
+class StandardVersion(StrEnum):
+    AS1170_2_2011 = "AS/NZS1170.2-2011"
+    AS1170_2_2021 = "AS/NZS1170.2-2021"
+
+
 class WallType(StrEnum):
     IMPERMEABLE = "impermeable"
     PERMEABLE = "permeable"
@@ -36,7 +41,89 @@ class FaceType(StrEnum):
     ROOF = "roof"
 
 
-def init_standard_data(*, file_path=None, overwrite: bool = False):
+class WindRegion(StrEnum):
+    """
+    Valid wind regions as per AS1170.2
+
+    Notes
+    -----
+    Some of these regions are not valid in every version of the standard.
+    """
+
+    A0 = "A0"
+    A1 = "A1"
+    A2 = "A2"
+    A3 = "A3"
+    A4 = "A4"
+    A5 = "A5"
+    A6 = "A6"
+    A7 = "A7"
+    B = "B"
+    B1 = "B1"
+    B2 = "B2"
+    NZ1 = "NZ1"
+    NZ2 = "NZ2"
+    NZ3 = "NZ3"
+    NZ4 = "NZ4"
+    C = "C"
+    D = "D"
+    W = "W"
+
+
+def valid_region(region: WindRegion, version: StandardVersion) -> bool:
+    """
+    Check if a wind region is valid for a given version of the standard.
+
+    Parameters
+    ----------
+    region : WindRegion
+        The wind region to check.
+    version : StandardVersion
+        The version of the standard to check.
+
+    Returns
+    -------
+    bool
+        True if the wind region is valid for the given version of the standard,
+        False otherwise.
+    """
+
+    valid_regions = {
+        StandardVersion.AS1170_2_2011: [
+            WindRegion.A1,
+            WindRegion.A2,
+            WindRegion.A3,
+            WindRegion.A4,
+            WindRegion.A5,
+            WindRegion.A6,
+            WindRegion.A7,
+            WindRegion.B,
+            WindRegion.C,
+            WindRegion.D,
+            WindRegion.W,
+        ],
+        StandardVersion.AS1170_2_2021: [
+            WindRegion.A0,
+            WindRegion.A1,
+            WindRegion.A2,
+            WindRegion.A3,
+            WindRegion.A4,
+            WindRegion.A5,
+            WindRegion.B1,
+            WindRegion.B2,
+            WindRegion.C,
+            WindRegion.D,
+            WindRegion.NZ1,
+            WindRegion.NZ2,
+            WindRegion.NZ3,
+            WindRegion.NZ4,
+        ],
+    }
+
+    return region in valid_regions[version]
+
+
+def init_standard_data(*, file_path: Path | None = None, overwrite: bool = False):
     global STANDARD_DATA
 
     if not overwrite and len(STANDARD_DATA) > 0:
@@ -69,7 +156,12 @@ class WindSite:
     A class to represent a site for wind design.
     """
 
-    def __init__(self, wind_region: str, terrain_category: float, shielding_data=None):
+    def __init__(
+        self,
+        wind_region: WindRegion,
+        terrain_category: float,
+        shielding_data: list[tuple[float, float]] | None = None,
+    ):
         """
         Initialise a WindSite object.
 
@@ -90,7 +182,7 @@ class WindSite:
             The shielding data.
         """
 
-        self.wind_region = wind_region
+        self._wind_region = wind_region
 
         if (
             terrain_category < MIN_TERRAIN_CATEGORY
@@ -101,11 +193,39 @@ class WindSite:
                 + f"Received {terrain_category}"
             )
 
-        self.terrain_category = terrain_category
-        self.shielding_data = shielding_data
+        self._terrain_category = terrain_category
+        self._shielding_data = shielding_data
+
+    @property
+    def wind_region(self) -> WindRegion:
+        """
+        The Wind Region of the site.
+        """
+
+        return self._wind_region
+
+    @property
+    def terrain_category(self) -> float:
+        """
+        The Terrain Category of the site.
+        """
+
+        return self._terrain_category
+
+    @property
+    def shielding_data(self) -> list[tuple[float, float]] | None:
+        """
+        The Shielding Data of the site.
+        """
+
+        return self._shielding_data
 
     def v_r(
-        self, *, return_period: float, ignore_f_x: bool = False, version: str = "2021"
+        self,
+        *,
+        return_period: float,
+        ignore_f_x: bool = False,
+        version: StandardVersion = StandardVersion.AS1170_2_2021,
     ) -> float:
         """
         Calculate the regional windspeed V_R based on the region and return period.
@@ -117,7 +237,7 @@ class WindSite:
         ignore_f_x : bool, default=False
             Whether to ignore the cyclonic region factor M_c (2021 standard),
             or the uncertainty factor F_C/F_D (older standards).
-        version : str, default="2021"
+        version : StandardVersion, default=StandardVersion.AS1170_2_2021
             The version of the standard to use.
 
         Returns
@@ -132,7 +252,11 @@ class WindSite:
             version=version,
         )
 
-    def m_d(self, direction: float | str, version: str = "2021") -> tuple[float, float]:
+    def m_d(
+        self,
+        direction: float | str,
+        version: StandardVersion = StandardVersion.AS1170_2_2021,
+    ) -> tuple[float, float]:
         """
         Return the wind direction multiplier wind direction.
 
@@ -154,7 +278,7 @@ class WindSite:
 
             Can also be "ANY" to return the any direction value, or cardinal
             values (e.g. "N", "NE", "E", ..., "NW").
-        version : str, default="2021"
+        version : StandardVersion, default=StandardVersion.AS1170_2_2021
             The version of the standard to use.
 
         Returns
@@ -168,7 +292,10 @@ class WindSite:
         )
 
     def m_d_des(
-        self, direction: float | str, version: str = "2021", tolerance: float = 45.0
+        self,
+        direction: float | str,
+        version: StandardVersion = StandardVersion.AS1170_2_2021,
+        tolerance: float = 45.0,
     ):
         """
         Determine the design value of the direction factor M_d,
@@ -178,7 +305,7 @@ class WindSite:
         ----------
         direction : float
             The wind direction
-        version : str
+        version : StandardVersion
             The standard to design for.
         tolerance : float
             The tolerance in the wind angle.
@@ -197,7 +324,7 @@ class WindSite:
             tolerance=tolerance,
         )
 
-    def m_z_cat(self, z, version: str = "2021"):
+    def m_z_cat(self, z, version: StandardVersion = StandardVersion.AS1170_2_2021):
         """
         Determine the basic terrain category M_zcat at a given height and terrain.
 
@@ -209,7 +336,7 @@ class WindSite:
         ----------
         z : float
             The height at which the windspeed is being assessed.
-        version : str, default="2021"
+        version : StandardVersion, default=StandardVersion.AS1170_2_2021
             The version of the standard to use.
 
         Returns
@@ -245,7 +372,7 @@ class WindSite:
         direction: float | str,
         z: float | None,
         ignore_f_x: bool = False,
-        version: str = "2021",
+        version: StandardVersion = StandardVersion.AS1170_2_2021,
         use_exact_m_d: bool = False,
         tolerance: float = 45.0,
     ) -> tuple[float, float]:
@@ -263,7 +390,7 @@ class WindSite:
             If None, uses 10m
         ignore_f_x : bool
             Ignore the climate change multiplier.
-        version : str
+        version : StandardVersion
             The version of the standard to design for.
         use_exact_m_d : bool
             If true use m_d for the exact direction, not the 90deg or 45deg sectors
@@ -318,7 +445,7 @@ class SimpleBuilding:
         y_max: float,
         roof_pitch: float,
         openings: list[tuple[int, float]],
-        version: str = "2021",
+        version: StandardVersion = StandardVersion.AS1170_2_2021,
     ):
         """
 
@@ -554,7 +681,9 @@ class SimpleBuilding:
 
         return self.design_angles[face]
 
-    def m_d(self, version: str = "2021") -> list[tuple[float, float]]:
+    def m_d(
+        self, version: StandardVersion = StandardVersion.AS1170_2_2021
+    ) -> list[tuple[float, float]]:
         """
         Calculate the value of M_d for each face.
 
@@ -570,7 +699,9 @@ class SimpleBuilding:
             for a in self.design_angles
         ]
 
-    def m_d_on_face(self, face: int, version: str = "2021") -> [float, float]:
+    def m_d_on_face(
+        self, face: int, version: StandardVersion = StandardVersion.AS1170_2_2021
+    ) -> [float, float]:
         """
         The value of M_d on a given face.
 
@@ -591,7 +722,12 @@ class SimpleBuilding:
             version=version,
         )
 
-    def m_c_or_f_x(self, wind_region: str, return_period: float, version: str = "2021"):
+    def m_c_or_f_x(
+        self,
+        wind_region: str,
+        return_period: float,
+        version: StandardVersion = StandardVersion.AS1170_2_2021,
+    ):
         """
         Get the value of M_c or F_C / F_D as appropriate.
 
@@ -601,7 +737,7 @@ class SimpleBuilding:
             The wind region.
         return_period : float
             The return period.
-        version : str
+        version : StandardVersion
             The version of the standard to check.
 
         Returns
@@ -613,7 +749,10 @@ class SimpleBuilding:
         )
 
     def v_sit_beta(
-        self, return_period: float, z: float | None = None, version="2021"
+        self,
+        return_period: float,
+        z: float | None = None,
+        version: StandardVersion = StandardVersion.AS1170_2_2021,
     ) -> list[tuple[float, float]]:
         """
         Return the design windspeeds for each face of the building.
@@ -625,7 +764,7 @@ class SimpleBuilding:
         z : float | None
             The height at which to get the design pressure.
             If None, determines the pressure at 10m.
-        version : str
+        version : StandardVersion
             The version of the standard to check.
 
         Returns
@@ -643,7 +782,11 @@ class SimpleBuilding:
         ]
 
     def v_sit_beta_face(
-        self, face: int, return_period: float, z: float | None = None, version="2021"
+        self,
+        face: int,
+        return_period: float,
+        z: float | None = None,
+        version: StandardVersion = StandardVersion.AS1170_2_2021,
     ) -> tuple[float, float]:
         """
         Calculate the design windspeed for a given face.
@@ -657,7 +800,7 @@ class SimpleBuilding:
         z : float | None
             The height to calculate the design windspeed at.
             If None, uses 10m instead.
-        version : str
+        version : StandardVersion
             The version of the standard to check.
 
         Returns
@@ -906,18 +1049,33 @@ def v_r_no_f_x(*, a, b, return_period, k):
     return a - b * return_period**-k
 
 
-def m_c_or_f_x(*, wind_region, return_period, version: str = "2021"):
+def m_c_or_f_x(
+    *,
+    wind_region: WindRegion,
+    return_period: float,
+    version: StandardVersion = StandardVersion.AS1170_2_2021,
+):
     """
     Calculate the climate change factor M_C
     (2021 edition of standard) or F_C / F_D (2011 edition).
 
-    :param wind_region: The wind region.
-    :param return_period: The Average Recurrence Interval (ARI) of the windspeed.
-    :param version: The version of the standard to look up.
+    Parameters
+    ----------
+    wind_region : WindRegion
+        The wind region.
+    return_period : float
+        The Average Recurrence Interval (ARI) of the windspeed.
+    version : StandardVersion, default=StandardVersion.AS1170_2_2021
+        The version of the standard to look up.
+
+    Returns
+    -------
+    float
+        The climate change factor.
     """
 
     filtered_df = STANDARD_DATA["region_windspeed_parameters"].filter(
-        (pl.col("standard") == int(version)) & (pl.col("region") == wind_region)
+        (pl.col("standard") == version) & (pl.col("region") == wind_region)
     )
 
     m_c, m_c_min_r = filtered_df.select(["m_c", "m_c_min_r"]).row(0)
@@ -929,18 +1087,22 @@ def m_c_or_f_x(*, wind_region, return_period, version: str = "2021"):
 
 
 def v_r(
-    *, wind_region: str, return_period, version: str = "2021", ignore_m_c: bool = False
+    *,
+    wind_region: WindRegion,
+    return_period,
+    version: StandardVersion = StandardVersion.AS1170_2_2021,
+    ignore_m_c: bool = False,
 ) -> float:
     """
     Calculate the regional windspeed V_R based on the region and return period.
 
     Parameters
     ----------
-    wind_region : str
+    wind_region : WindRegion
         The wind region where the structure is located.
     return_period : float
         The Average Recurrence Interval (ARI) of the windspeed.
-    version : str, default="2021"
+    version : StandardVersion, default=StandardVersion.AS1170_2_2021
         The version of the standard to use.
     ignore_m_c : bool, default=False
         Whether to ignore the cyclonic region factor M_c (2021 standard),
@@ -963,7 +1125,7 @@ def v_r(
 
     # Filter the DataFrame based on 'standard' and 'region' columns
     filtered_df = STANDARD_DATA["region_windspeed_parameters"].filter(
-        (pl.col("standard") == int(version)) & (pl.col("region") == wind_region)
+        (pl.col("standard") == version) & (pl.col("region") == wind_region)
     )
 
     # Extracting the required values from the filtered DataFrame
@@ -973,7 +1135,10 @@ def v_r(
 
 
 def m_d_exact(
-    *, wind_region: str, direction: float | str, version: str = "2021"
+    *,
+    wind_region: str,
+    direction: float | str,
+    version: StandardVersion = StandardVersion.AS1170_2_2021,
 ) -> tuple[float, float]:
     """
     Return the wind direction multiplier for a given region and wind direction.
@@ -996,7 +1161,7 @@ def m_d_exact(
 
         Can also be "ANY" to return the any direction value, or cardinal
         values (e.g. "N", "NE", "E", ..., "NW").
-    version : str, default="2021"
+    version : StandardVersion, default=StandardVersion.AS1170_2_2021
         The version of the standard to use.
 
     Returns
@@ -1014,7 +1179,7 @@ def m_d_exact(
     wind_direction_defs = STANDARD_DATA["wind_direction_definitions"]
 
     filtered_df = STANDARD_DATA["region_direction_parameters"].filter(
-        (pl.col("wind_region") == wind_region) & (pl.col("standard") == int(version))
+        (pl.col("wind_region") == wind_region) & (pl.col("standard") == version)
     )
 
     f_not_clad = filtered_df.filter(pl.col("direction") == "F_not_clad")["m_d"][0]
@@ -1061,7 +1226,7 @@ def m_d_des(
     *,
     wind_region: str,
     direction: float | str,
-    version: str = "2021",
+    version: StandardVersion = StandardVersion.AS1170_2_2021,
     tolerance: float = 45.0,
 ) -> tuple[float, float]:
     """
@@ -1074,7 +1239,7 @@ def m_d_des(
         The wind region.
     direction : float
         The wind direction
-    version : str
+    version : StandardVersion
         The standard to design for.
     tolerance : float
         The tolerance in the wind angle.
@@ -1105,7 +1270,9 @@ def m_d_des(
     return (m_d_struct, m_d_clad)
 
 
-def m_zcat_basic(*, z, terrain_category, version="2021") -> float:
+def m_zcat_basic(
+    *, z, terrain_category, version: StandardVersion = StandardVersion.AS1170_2_2021
+) -> float:
     """
     Determine the basic terrain category M_zcat at a given height and terrain.
 
@@ -1120,7 +1287,7 @@ def m_zcat_basic(*, z, terrain_category, version="2021") -> float:
     terrain_category : float
         The terrain category, as a number between 1 and 4.
         Floats are acceptable for intermediate categories.
-    version : str, default="2021"
+    version : StandardVersion, default=StandardVersion.AS1170_2_2021
         The version of the standard to use.
 
     Returns
@@ -1133,9 +1300,9 @@ def m_zcat_basic(*, z, terrain_category, version="2021") -> float:
     terrain_height_multipliers = STANDARD_DATA["terrain_height_multipliers"]
 
     # get the basic data into the function as np arrays as we will be interpolating
-    terrain_cats = terrain_height_multipliers.filter(
-        pl.col("standard") == int(version)
-    )["terrain_cat"].unique()
+    terrain_cats = terrain_height_multipliers.filter(pl.col("standard") == version)[
+        "terrain_cat"
+    ].unique()
 
     min_cat = min(terrain_cats)
     max_cat = max(terrain_cats)
@@ -1148,7 +1315,7 @@ def m_zcat_basic(*, z, terrain_category, version="2021") -> float:
 
     # load the M_zcat data for all terrain types
     m_z_cat_data = terrain_height_multipliers.filter(
-        pl.col("standard") == int(version)
+        pl.col("standard") == version
     ).pivot_table("terrain_cat", index="height", values="m_z_cat")
 
     heights = np.array(m_z_cat_data["height"].unique())
@@ -1240,7 +1407,7 @@ def c_pi(
     k_l: float = 1.0,
     open_area: float = 0.0,
     volume: float = 0.0,
-    version: str = "2021",
+    version: StandardVersion = StandardVersion.AS1170_2_2021,
 ) -> tuple[float, float]:
     """
     Calculate the internal pressure coefficient.
@@ -1265,7 +1432,7 @@ def c_pi(
         The open area of the governing opening.
     volume : float, default=0.0
         The volume of the enclosed space.
-    version : str, default="2021"
+    version : StandardVersion, default=StandardVersion.AS1170_2_2021
         The version of the standard to use.
 
     Returns
@@ -1302,7 +1469,7 @@ def c_pi_open(
     k_l: float = 1.0,
     open_area: float = 0.0,
     volume: float = 0.0,
-    version: str = "2021",
+    version: StandardVersion = StandardVersion.AS1170_2_2021,
 ) -> tuple[float, float]:
     """
     Calculate the internal pressure coefficient of a building with an opening.
@@ -1386,7 +1553,9 @@ def q_basic(v: float, *, rho_air: float = 1.2):
     return 0.5 * rho_air * v**2
 
 
-def c_pe_s(*, h_ref, d_edge, version="2021") -> tuple[float, float]:
+def c_pe_s(
+    *, h_ref, d_edge, version: StandardVersion = StandardVersion.AS1170_2_2021
+) -> tuple[float, float]:
     """
     Calculate the external pressure coefficient for a side-wall of a building
 
@@ -1396,7 +1565,7 @@ def c_pe_s(*, h_ref, d_edge, version="2021") -> tuple[float, float]:
         The reference height of the building
     d_edge : float
         The distance of the point under consideration from the windward end of the building.
-    version : str, default="2021"
+    version : StandardVersion, default=StandardVersion.AS1170_2_2021
         The version of the standard to use.
 
     Returns
@@ -1489,7 +1658,10 @@ def k_v(*, open_area, volume):
 
 
 def k_a(
-    area: float, face_type: FaceType, z: float | None = None, version: str = "2021"
+    area: float,
+    face_type: FaceType,
+    z: float | None = None,
+    version: StandardVersion = StandardVersion.AS1170_2_2021,
 ):
     init_standard_data()
 
