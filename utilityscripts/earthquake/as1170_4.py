@@ -35,7 +35,7 @@ def init_standard_data(*, file_path: Path | None = None, overwrite: bool = False
         }
 
 
-class SoilType(StrEnum):
+class SoilClass(StrEnum):
     """
     The type of soil
     """
@@ -49,7 +49,7 @@ class SoilType(StrEnum):
 
 @lru_cache(maxsize=None)
 def spectral_shape_factor(
-    *, soil_type: SoilType, period: float, min_period: bool = False
+    *, soil_type: SoilClass, period: float, min_period: bool = False
 ) -> float:
     """
     Calculate the spectral shape factor for a given soil type and period.
@@ -89,13 +89,15 @@ def spectral_shape_factor(
 
     if period < values["min_period"]:
         raise ValueError(
-            "Period is less than the expected minimum period for which this equation is valid. "
+            "Period is less than the expected minimum period for "
+            + "which this equation is valid. "
             + f"{period} <= {values['min_period']}"
         )
 
     if period > values["max_period"]:
         raise ValueError(
-            "Period is greater than the expected maximum period for which this equation is valid. "
+            "Period is greater than the expected maximum period "
+            + "for which this equation is valid. "
             + f"{period} >= {values['max_period']}"
         )
 
@@ -118,7 +120,7 @@ def plot_spectra():
 
     periods = np.linspace(0.0, 5.0, 200)
 
-    for soil_type in SoilType:
+    for soil_type in SoilClass:
         y = [
             spectral_shape_factor(soil_type=soil_type, period=float(period))
             for period in periods
@@ -135,5 +137,111 @@ def plot_spectra():
     plt.show()
 
 
-if __name__ == "__main__":
-    plot_spectra()
+def c_t(
+    *,
+    soil_type: SoilClass,
+    period: float,
+    k_p: float,
+    z: float,
+    min_kpz: float = 0.08,
+    min_period: bool = False,
+) -> float:
+    """
+    The elastic site hazard spectrum, calculated from the spectral shape factor,
+    the hazard design factor and the probability factor.
+
+    Notes
+    -----
+    - This is equivalent to the lateral acceleration which would be
+      experienced in an earthquake, as a percentage of gravity.
+    - In real structures the force experienced is likely less than would
+      be calculated from this value due to plastic deformation and other
+      energy absorbing mechanisms. For the design force refer to function
+      cd_t.
+
+    Parameters
+    ----------
+    soil_type : SoilType
+        The type of soil
+    period : float
+        The period of the structure
+    k_p : float
+        The probability factor
+    z : float
+        The site hazard design factor
+    min_kpz : float
+        The minimum value of k_p * z.
+        AS1170.4 requires a minimum value of 0.08.
+    min_period : bool
+        If True, enforce a minimum period of 0.1 seconds.
+
+    Returns
+    -------
+    float
+        The elastic site hazard spectrum
+    """
+
+    kp_z = max(min_kpz, k_p * z)
+    ch_t = spectral_shape_factor(
+        soil_type=soil_type, period=period, min_period=min_period
+    )
+
+    return kp_z * ch_t
+
+
+def cd_t(
+    *,
+    soil_type: SoilClass,
+    period: float,
+    k_p: float,
+    z: float,
+    s_p: float,
+    mu: float,
+    min_kpz: float = 0.08,
+    min_period: bool = False,
+) -> float:
+    """
+    The horizontal design action coefficient.
+
+    Notes
+    -----
+    - This is equivalent to the lateral acceleration experienced by the
+      structure due to an earthquake, as a percentage of gravity.
+    - This differs from the elastic site hazard spectrum in that it is
+      scaled by the ductility factor and the structural peformance factor.
+      This gives a more realistic value for the design force.
+
+    Parameters
+    ----------
+    soil_type : SoilType
+        The type of soil
+    period : float
+        The period of the structure
+    k_p : float
+        The probability factor
+    z : float
+        The site hazard design factor
+    s_p : float
+        The structural performance factor
+    mu : float
+        The ductility factor
+    min_kpz : float
+        The minimum value of k_p * z.
+        AS1170.4 requires a minimum value of 0.08.
+    min_period : bool
+        If True, enforce a minimum period of 0.1 seconds.
+
+    Returns
+    -------
+    float
+        The horizontal design action coefficient
+    """
+
+    return c_t(
+        soil_type=soil_type,
+        period=period,
+        k_p=k_p,
+        z=z,
+        min_kpz=min_kpz,
+        min_period=min_period,
+    ) * (s_p / mu)
