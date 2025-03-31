@@ -390,7 +390,7 @@ class WindSite:
         self,
         *,
         return_period: float,
-        direction: float | str,
+        direction: float | CardinalDirection,
         z: float | None,
         ignore_f_x: bool = False,
         version: StandardVersion = StandardVersion.AS1170_2_2021,
@@ -404,7 +404,7 @@ class WindSite:
         ----------
         return_period : float
             The design return period.
-        direction : float | string
+        direction : float | CardinalDirection
             The angle the wind is blowing from.
         z : float | None
             The height the wind is blowing from.
@@ -422,7 +422,8 @@ class WindSite:
 
         Returns
         -------
-
+        tuple[float, float]
+            The design velocity for the structure and the cladding.
         """
 
         if z is None:
@@ -1337,7 +1338,7 @@ def m_zcat_basic(
     # load the M_zcat data for all terrain types
     m_z_cat_data = terrain_height_multipliers.filter(
         pl.col("standard") == version
-    ).pivot_table("terrain_cat", index="height", values="m_z_cat")
+    ).pivot("terrain_cat", index="height", values="m_z_cat")
 
     heights = np.array(m_z_cat_data["height"].unique())
 
