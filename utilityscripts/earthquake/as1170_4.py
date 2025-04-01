@@ -4,11 +4,13 @@ Earthquake loads to AS1170.4
 
 from enum import StrEnum
 from functools import lru_cache
+from numbers import Number
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
+from matplotlib import cm
 
 FILE_PATH = Path(__file__)
 DEFAULT_DATA_PATH = FILE_PATH.parent / Path("as1170_4_data.xlsx")
@@ -27,6 +29,7 @@ def init_standard_data(*, file_path: Path | None = None, overwrite: bool = False
         sheet_set = {
             "soil_descriptors",
             "soil_spectra",
+            "k_p",
         }
 
         STANDARD_DATA = {
@@ -45,6 +48,52 @@ class SoilClass(StrEnum):
     Ce = "Ce"
     De = "De"
     Ee = "Ee"
+
+
+def k_p(
+    *,
+    p: float | np.ndarray,
+) -> float | np.ndarray:
+    """
+    Determine the probability factor k_p for a given period as per AS1170.4 Table 3.1
+
+    Parameters
+    ----------
+    p : float
+        The annual probabiltiy of exceedance.
+
+    Returns
+    -------
+    float
+        The probability factor k_p
+    """
+
+    init_standard_data()
+
+    data = STANDARD_DATA["k_p"]
+    data = data.sort("P")
+
+    x = data["P"]
+    y = data["k_p"]
+
+    if isinstance(p, Number) and p > x.max():
+        raise ValueError(
+            "Probability of exceedance larger the bounds of Table 3.1. "
+            + f" {p} > {x.max()}"
+        )
+
+    if isinstance(p, np.ndarray) and np.any(p > x.max()):
+        raise ValueError(
+            "Probability of exceedance larger than the bounds of Table 3.1. "
+            + "Check input values."
+        )
+
+    k_p = np.interp(p, x, y)
+
+    if isinstance(p, float):
+        return float(k_p)
+
+    return k_p
 
 
 @lru_cache(maxsize=None)
@@ -119,14 +168,15 @@ def plot_spectra():
     """
 
     periods = np.linspace(0.0, 5.0, 200)
+    cmap = cm.get_cmap("viridis", len(SoilClass))
 
-    for soil_class in SoilClass:
+    for i, soil_class in enumerate(SoilClass):
         y = [
             spectral_shape_factor(soil_class=soil_class, period=float(period))
             for period in periods
         ]
 
-        plt.plot(periods, y, label=soil_class)
+        plt.plot(periods, y, label=soil_class, color=cmap(i))
 
     plt.grid()
     plt.xlabel("Period T (s)")

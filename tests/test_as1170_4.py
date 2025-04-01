@@ -4,9 +4,46 @@ Test the earthquake module.
 
 from math import isclose
 
+import numpy as np
 import pytest
 
-from utilityscripts.earthquake.as1170_4 import SoilClass, cd_t, spectral_shape_factor
+from utilityscripts.earthquake.as1170_4 import (
+    SoilClass,
+    cd_t,
+    k_p,
+    spectral_shape_factor,
+)
+
+
+@pytest.mark.parametrize(
+    "p, expected",
+    [
+        (2500, 1.8),
+        (2250, 1.75),
+        (2000, 1.7),
+        (1500, 1.5),
+        (1000, 1.3),
+        (800, 1.25),
+        (500, 1.0),
+        (250, 0.75),
+        (200, 0.70),
+        (100, 0.50),
+        (50, 0.50),
+        (np.asarray([2500, 800, 100]), np.asarray([1.8, 1.25, 0.5])),
+    ],
+)
+def test_k_p(p: float | np.ndarray, expected: float | np.ndarray):
+    if isinstance(p, float):
+        assert isclose(k_p(p=p), expected, abs_tol=1e-2)
+
+    if isinstance(p, np.ndarray):
+        assert np.allclose(k_p(p=p), expected, atol=1e-2)
+
+
+@pytest.mark.parametrize("p", [10000, 10000.0, np.asarray([10000, 500])])
+def test_k_p_raises_error(p):
+    with pytest.raises(ValueError):
+        k_p(p=p)
 
 
 @pytest.mark.parametrize(
