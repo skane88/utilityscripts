@@ -30,6 +30,7 @@ def init_standard_data(*, file_path: Path | None = None, overwrite: bool = False
             "soil_descriptors",
             "soil_spectra",
             "k_p",
+            "k_p_z_min",
         }
 
         STANDARD_DATA = {
@@ -56,6 +57,11 @@ def k_p(
 ) -> float | np.ndarray:
     """
     Determine the probability factor k_p for a given period as per AS1170.4 Table 3.1
+
+    Notes
+    -----
+    - If p is greater than 2500 an error is returned.
+    - If p is less than 100, the value for 1/100 is returned.
 
     Parameters
     ----------
@@ -94,6 +100,55 @@ def k_p(
         return float(k_p)
 
     return k_p
+
+
+def k_p_z_min(*, p: float | np.ndarray) -> float | np.ndarray:
+    """
+    Determine the minimum value of k_p * z for a given probability of exceedance, in
+    accordance with AS1170.4 Table 3.3.
+
+    Notes
+    -----
+    - If p is greater than 2500 an error is returned.
+    - If p is less than 500, the value for 1/500 is returned.
+
+    Parameters
+    ----------
+    p : float
+        The annual probability of exceedance.
+
+    Returns
+    -------
+    float
+        The minimum value of k_p * z
+    """
+
+    init_standard_data()
+
+    data = STANDARD_DATA["k_p_z_min"]
+    data = data.sort("P")
+
+    x = data["P"]
+    y = data["k_p_z_min"]
+
+    if isinstance(p, Number) and p > x.max():
+        raise ValueError(
+            "Probability of exceedance larger the bounds of Table 3.1. "
+            + f" {p} > {x.max()}"
+        )
+
+    if isinstance(p, np.ndarray) and np.any(p > x.max()):
+        raise ValueError(
+            "Probability of exceedance larger than the bounds of Table 3.1. "
+            + "Check input values."
+        )
+
+    k_p_z_min = np.interp(p, x, y)
+
+    if isinstance(p, float):
+        return float(k_p_z_min)
+
+    return k_p_z_min
 
 
 @lru_cache(maxsize=None)
@@ -191,9 +246,9 @@ def c_t(
     *,
     soil_class: SoilClass,
     period: float,
-    k_p: float,
     z: float,
-    min_kpz: float = 0.08,
+    p: float,
+    min_kpz: bool = True,
     min_period: bool = False,
 ) -> float:
     """
@@ -215,13 +270,13 @@ def c_t(
         The type of soil
     period : float
         The period of the structure
-    k_p : float
-        The probability factor
     z : float
         The site hazard design factor
+    p : float
+        The annual probability of exceedance.
     min_kpz : float
         The minimum value of k_p * z.
-        AS1170.4 requires a minimum value of 0.08.
+        AS1170.4 requires a minimum value that depends on the return period.
     min_period : bool
         If True, enforce a minimum period of 0.1 seconds.
 
@@ -231,7 +286,12 @@ def c_t(
         The elastic site hazard spectrum
     """
 
-    kp_z = max(min_kpz, k_p * z)
+    k_p_val = k_p(p=p)
+    kp_z = k_p_val * z
+
+    if min_kpz:
+        kp_z = min(k_p_z_min(p=p), kp_z)
+
     ch_t = spectral_shape_factor(
         soil_class=soil_class, period=period, min_period=min_period
     )
@@ -243,11 +303,11 @@ def cd_t(
     *,
     soil_class: SoilClass,
     period: float,
-    k_p: float,
     z: float,
+    p: float,
     s_p: float,
     mu: float,
-    min_kpz: float = 0.08,
+    min_kpz: bool = True,
     min_period: bool = False,
 ) -> float:
     """
@@ -267,17 +327,17 @@ def cd_t(
         The type of soil
     period : float
         The period of the structure
-    k_p : float
-        The probability factor
     z : float
         The site hazard design factor
+    p : float
+        The annual probability of exceedance.
     s_p : float
         The structural performance factor
     mu : float
         The ductility factor
-    min_kpz : float
-        The minimum value of k_p * z.
-        AS1170.4 requires a minimum value of 0.08.
+    min_kpz : bool
+        If True, enforce a minimum value of k_p * z.
+        AS1170.4 requires a minimum value that depends on the return period.
     min_period : bool
         If True, enforce a minimum period of 0.1 seconds.
 
@@ -290,8 +350,8 @@ def cd_t(
     return c_t(
         soil_class=soil_class,
         period=period,
-        k_p=k_p,
         z=z,
+        p=p,
         min_kpz=min_kpz,
         min_period=min_period,
     ) * (s_p / mu)
