@@ -51,7 +51,7 @@ class SoilClass(StrEnum):
     Ee = "Ee"
 
 
-def k_p(
+def k_p_data(
     *,
     p: float | np.ndarray,
 ) -> float | np.ndarray:
@@ -217,6 +217,35 @@ def spectral_shape_factor(
     return min(max_val, ch)
 
 
+def k_p_z(*, p: float, z: float, min_kpz: bool = True) -> float:
+    """
+    Calculate the product of the probability factor and the site hazard design factor.
+
+    Parameters
+    ----------
+    p : float
+        The annual probability of exceedance.
+    z : float
+        The site hazard design factor.
+    min_kpz : bool
+        If True, enforce a minimum value of k_p * z.
+        This is calculated with the function k_p_z_min.
+
+    Returns
+    -------
+    float
+        The product of the probability factor and the site hazard design factor.
+    """
+
+    k_p = k_p_data(p=p)
+    k_p_z = k_p * z
+
+    if min_kpz:
+        k_p_z = max(k_p_z, k_p_z_min(p=p))
+
+    return k_p_z
+
+
 def plot_spectra():
     """
     Plot the spectra for all soil types.
@@ -246,9 +275,7 @@ def c_t(
     *,
     soil_class: SoilClass,
     period: float,
-    z: float,
-    p: float,
-    min_kpz: bool = True,
+    k_p_z: float,
     min_period: bool = False,
 ) -> float:
     """
@@ -270,13 +297,11 @@ def c_t(
         The type of soil
     period : float
         The period of the structure
-    z : float
-        The site hazard design factor
-    p : float
-        The annual probability of exceedance.
-    min_kpz : float
-        The minimum value of k_p * z.
-        AS1170.4 requires a minimum value that depends on the return period.
+    k_p_z : float
+        The product of the probability factor and the site hazard design factor.
+        This is required to be calculated by the caller external to this function,
+        so that there is no confusion over what value of k_p x z is used in this
+        function.
     min_period : bool
         If True, enforce a minimum period of 0.1 seconds.
 
@@ -286,28 +311,20 @@ def c_t(
         The elastic site hazard spectrum
     """
 
-    k_p_val = k_p(p=p)
-    kp_z = k_p_val * z
-
-    if min_kpz:
-        kp_z = min(k_p_z_min(p=p), kp_z)
-
     ch_t = spectral_shape_factor(
         soil_class=soil_class, period=period, min_period=min_period
     )
 
-    return kp_z * ch_t
+    return k_p_z * ch_t
 
 
 def cd_t(
     *,
     soil_class: SoilClass,
     period: float,
-    z: float,
-    p: float,
+    k_p_z: float,
     s_p: float,
     mu: float,
-    min_kpz: bool = True,
     min_period: bool = False,
 ) -> float:
     """
@@ -327,17 +344,15 @@ def cd_t(
         The type of soil
     period : float
         The period of the structure
-    z : float
-        The site hazard design factor
-    p : float
-        The annual probability of exceedance.
+    k_p_z : float
+        The product of the probability factor and the site hazard design factor.
+        This is required to be calculated by the caller external to this function,
+        so that there is no confusion over what value of k_p x z is used in this
+        function.
     s_p : float
         The structural performance factor
     mu : float
         The ductility factor
-    min_kpz : bool
-        If True, enforce a minimum value of k_p * z.
-        AS1170.4 requires a minimum value that depends on the return period.
     min_period : bool
         If True, enforce a minimum period of 0.1 seconds.
 
@@ -350,8 +365,6 @@ def cd_t(
     return c_t(
         soil_class=soil_class,
         period=period,
-        z=z,
-        p=p,
-        min_kpz=min_kpz,
+        k_p_z=k_p_z,
         min_period=min_period,
     ) * (s_p / mu)

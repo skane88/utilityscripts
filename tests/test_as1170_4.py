@@ -10,7 +10,8 @@ import pytest
 from utilityscripts.earthquake.as1170_4 import (
     SoilClass,
     cd_t,
-    k_p,
+    k_p_data,
+    k_p_z,
     k_p_z_min,
     spectral_shape_factor,
 )
@@ -35,16 +36,16 @@ from utilityscripts.earthquake.as1170_4 import (
 )
 def test_k_p(p: float | np.ndarray, expected: float | np.ndarray):
     if isinstance(p, float):
-        assert isclose(k_p(p=p), expected, abs_tol=1e-2)
+        assert isclose(k_p_data(p=p), expected, abs_tol=1e-2)
 
     if isinstance(p, np.ndarray):
-        assert np.allclose(k_p(p=p), expected, atol=1e-2)
+        assert np.allclose(k_p_data(p=p), expected, atol=1e-2)
 
 
 @pytest.mark.parametrize("p", [10000, 10000.0, np.asarray([10000, 500])])
 def test_k_p_raises_error(p):
     with pytest.raises(ValueError):
-        k_p(p=p)
+        k_p_data(p=p)
 
 
 @pytest.mark.parametrize(
@@ -70,6 +71,23 @@ def test_k_p_z_min(p, expected):
 def test_k_p_z_min_raises_error(p):
     with pytest.raises(ValueError):
         k_p_z_min(p=p)
+
+
+@pytest.mark.parametrize(
+    "p, z, min_kpz, expected",
+    [
+        (500, 0.08, True, 0.08),
+        (500, 0.10, True, 0.10),
+        (500, 0.08, False, 0.08),
+        (500, 0.10, False, 0.10),
+        (2500, 0.08, True, 0.15),
+        (2500, 0.10, True, 0.18),
+        (2500, 0.08, False, 0.144),
+        (2500, 0.10, False, 0.18),
+    ],
+)
+def test_k_p_z(p, z, min_kpz, expected):
+    assert isclose(k_p_z(p=p, z=z, min_kpz=min_kpz), expected, abs_tol=1e-2)
 
 
 @pytest.mark.parametrize(
@@ -144,26 +162,25 @@ def test_spectral_shape_factor(soil: SoilClass, period: float, expected: float):
 
 
 @pytest.mark.parametrize(
-    "soil, period, z, p, s_p, mu, expected",
+    "soil, period, k_p_z, s_p, mu, expected",
     [
-        (SoilClass.Ae, 0.1, 0.08, 500, 0.77, 2.00, 0.072),
-        (SoilClass.Be, 0.1, 0.08, 500, 0.77, 2.00, 0.091),
-        (SoilClass.Ce, 0.1, 0.08, 500, 0.77, 2.00, 0.113),
-        (SoilClass.De, 0.1, 0.08, 500, 0.77, 2.00, 0.113),
-        (SoilClass.Ee, 0.1, 0.08, 500, 0.77, 2.00, 0.113),
+        (SoilClass.Ae, 0.1, 0.08, 0.77, 2.00, 0.072),
+        (SoilClass.Be, 0.1, 0.08, 0.77, 2.00, 0.091),
+        (SoilClass.Ce, 0.1, 0.08, 0.77, 2.00, 0.113),
+        (SoilClass.De, 0.1, 0.08, 0.77, 2.00, 0.113),
+        (SoilClass.Ee, 0.1, 0.08, 0.77, 2.00, 0.113),
     ],
 )
 def test_cd_t(
     soil: SoilClass,
     period: float,
-    z: float,
-    p: float,
+    k_p_z: float,
     s_p: float,
     mu: float,
     expected: float,
 ):
     assert isclose(
-        cd_t(soil_class=soil, period=period, z=z, p=p, s_p=s_p, mu=mu),
+        cd_t(soil_class=soil, period=period, k_p_z=k_p_z, s_p=s_p, mu=mu),
         expected,
         abs_tol=1e-2,
     )
