@@ -1529,14 +1529,34 @@ def c_pi_open(
     c_pi_data = c_pi_data.filter(pl.col("face") == governing_face)
 
     c_pi_data = c_pi_data.with_columns(
-        pl.when(pl.col("consider_c_pe"))
-        .then(pl.col("min_factor") * c_pe * k_a * k_l)
-        .otherwise(pl.col("min_factor"))
+        (
+            pl.when(pl.col("consider_c_pe"))
+            .then(pl.col("min_factor") * c_pe * k_a * k_l)
+            .otherwise(pl.col("min_factor"))
+        ).alias("min_factor")
     )
     c_pi_data = c_pi_data.with_columns(
-        pl.when(pl.col("consider_c_pe"))
-        .then(pl.col("max_factor") * c_pe * k_a * k_l)
-        .otherwise(pl.col("max_factor"))
+        (
+            pl.when(pl.col("consider_c_pe"))
+            .then(pl.col("max_factor") * c_pe * k_a * k_l)
+            .otherwise(pl.col("max_factor"))
+        ).alias("max_factor")
+    )
+    k_v_val = k_v(open_area=open_area, volume=volume)
+
+    c_pi_data = c_pi_data.with_columns(
+        (
+            pl.when(pl.col("area_ratio") >= 6.0)  # noqa: PLR2004
+            .then(pl.col("min_factor") * k_v_val)
+            .otherwise(pl.col("min_factor"))
+        ).alias("min_factor")
+    )
+    c_pi_data = c_pi_data.with_columns(
+        (
+            pl.when(pl.col("area_ratio") >= 6.0)  # noqa: PLR2004
+            .then(pl.col("max_factor") * k_v_val)
+            .otherwise(pl.col("max_factor"))
+        ).alias("max_factor")
     )
 
     area_ratios = np.asarray(c_pi_data["area_ratio"])
@@ -1549,12 +1569,7 @@ def c_pi_open(
     min_cpi = np.interp(area_ratio, area_ratios, min_factor)
     max_cpi = np.interp(area_ratio, area_ratios, max_factor)
 
-    if area_ratio >= 6.0 and governing_face != FaceType.ROOF:  # noqa: PLR2004
-        k_v_val = k_v(open_area=open_area, volume=volume)
-    else:
-        k_v_val = 1.0
-
-    return min_cpi * k_v_val, max_cpi * k_v_val
+    return min_cpi, max_cpi
 
 
 def c_pi_other():
