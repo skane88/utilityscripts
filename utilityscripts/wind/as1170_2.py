@@ -1422,7 +1422,7 @@ def c_pi(
     *,
     wall_type: WallType,
     area_ratio: float,
-    is_cyclonic: bool,
+    wind_region: WindRegion,
     governing_face: FaceType,
     c_pe: float,
     k_a: float = 1.0,
@@ -1440,8 +1440,8 @@ def c_pi(
         The type of wall with the opening/s.
     area_ratio : float
         The area ratio of the governing opening/s to all other openings.
-    is_cyclonic : bool
-        Whether the structure is in a cyclonic region.
+    wind_region : WindRegion
+        The wind region of the structure.
     governing_face : FaceType
         The face that the opening is on.
     c_pe : float
@@ -1468,7 +1468,7 @@ def c_pi(
     if wall_type == WallType.OPEN:
         return c_pi_open(
             area_ratio=area_ratio,
-            is_cyclonic=is_cyclonic,
+            wind_region=wind_region,
             governing_face=governing_face,
             c_pe=c_pe,
             k_a=k_a,
