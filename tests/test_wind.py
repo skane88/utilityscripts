@@ -13,6 +13,7 @@ from utilityscripts.wind.as1170_2 import (
     StandardVersion,
     WindRegion,
     WindSite,
+    c_pi_open,
     k_a,
     k_v,
     m_d_exact,
@@ -237,6 +238,130 @@ def test_m_zcat_ave():
 
 
 def test_m_s():
+    raise AssertionError()
+
+
+@pytest.mark.parametrize(
+    "area_ratio, wind_region, governing_face, c_pe, k_a, k_l, open_area, volume, version, expected",
+    [
+        (
+            0.1,
+            WindRegion.C,
+            FaceType.WINDWARD,
+            -0.2,
+            1.0,
+            1.0,
+            100.0,
+            1000.0,
+            StandardVersion.AS1170_2_2021,
+            (-0.20 * 0.70, -0.20 * 0.70),
+        ),
+        (
+            0.1,
+            WindRegion.A0,
+            FaceType.WINDWARD,
+            -0.2,
+            1.0,
+            1.0,
+            100.0,
+            1000.0,
+            StandardVersion.AS1170_2_2021,
+            (-0.30, 0.00),
+        ),
+        (
+            0.1,
+            WindRegion.C,
+            FaceType.SIDE,
+            -0.2,
+            1.0,
+            1.0,
+            100.0,
+            1000.0,
+            StandardVersion.AS1170_2_2021,
+            (-0.20, -0.20),
+        ),
+        (
+            0.1,
+            WindRegion.A0,
+            FaceType.SIDE,
+            -0.2,
+            1.0,
+            1.0,
+            100.0,
+            1000.0,
+            StandardVersion.AS1170_2_2021,
+            (-0.30, 0.00),
+        ),
+        (
+            3.0,
+            WindRegion.A0,
+            FaceType.WINDWARD,
+            0.80,
+            1.0,
+            1.0,
+            100.0,
+            1000.0,
+            StandardVersion.AS1170_2_2021,
+            (0.85 * 0.80, 0.85 * 0.80),
+        ),
+        (
+            1.0,
+            WindRegion.A0,
+            FaceType.WINDWARD,
+            0.80,
+            1.0,
+            1.0,
+            100.0,
+            1000.0,
+            StandardVersion.AS1170_2_2021,
+            (-0.10, 0.20),
+        ),
+        (
+            6.0,
+            WindRegion.C,
+            FaceType.WINDWARD,
+            0.80,
+            1.0,
+            1.0,
+            100.0,
+            1000.0,
+            StandardVersion.AS1170_2_2021,
+            (1.0 * 0.80 * 1.085, 1.0 * 0.80 * 1.085),
+        ),
+    ],
+)
+def test_c_pi_open(
+    area_ratio,
+    wind_region,
+    governing_face,
+    c_pe,
+    k_a,
+    k_l,
+    open_area,
+    volume,
+    version,
+    expected,
+):
+    result = c_pi_open(
+        area_ratio=area_ratio,
+        wind_region=wind_region,
+        governing_face=governing_face,
+        c_pe=c_pe,
+        k_a=k_a,
+        k_l=k_l,
+        open_area=open_area,
+        volume=volume,
+        version=version,
+    )
+
+    assert isclose(
+        result[0],
+        expected[0],
+    )
+    assert isclose(result[1], expected[1])
+
+
+def test_c_pi_other():
     raise AssertionError()
 
 
