@@ -16,7 +16,7 @@ from utilityscripts.multiinterp import multi_interp
 
 FILE_PATH = Path(__file__)
 DEFAULT_DATA_PATH = FILE_PATH.parent / Path("as1170_2.toml")
-DEFAULT_DATA_PATH_XLSX = FILE_PATH.parent / Path("as1170_2.xlsx")
+DEFAULT_DATA_PATH_XLSX = FILE_PATH.parent / Path("as1170_2_data.xlsx")
 STANDARD_DATA = {}
 
 MIN_TERRAIN_CATEGORY = 1.0
@@ -1685,11 +1685,38 @@ def k_a(
     z: float | None = None,
     version: StandardVersion = StandardVersion.AS1170_2_2021,
 ):
+    """
+    Calculate the area reduction factor K_a as per AS1170.2
+
+    Parameters
+    ----------
+    area : float
+        The area of the face.
+    face_type : FaceType
+        The type of face.
+    z : float | None, default=None
+        The height of the point under consideration.
+    version : StandardVersion, default=StandardVersion.AS1170_2_2021
+        The version of the standard to use.
+
+    Returns
+    -------
+    float
+        The area reduction factor K_a.
+    """
+
     init_standard_data()
 
     k_a_data = STANDARD_DATA["k_a"]
 
-    k_a_data = k_a_data.filter(pl.col("version") == int(version))
+    if version not in k_a_data["version"].unique():
+        return 1.0
+
+    k_a_data = k_a_data.filter(pl.col("version") == version)
+
+    if face_type not in k_a_data["face_type"].unique():
+        return 1.0
+
     k_a_data = k_a_data.filter(pl.col("face_type") == face_type)
 
     max_z = max(k_a_data["h_limit"])
