@@ -14,6 +14,8 @@ import polars as pl
 from matplotlib import ticker
 from scipy.interpolate import CloughTocher2DInterpolator
 
+from utilityscripts.plotting import AGILITUS_COLORS
+
 _DATA_PATH = Path(Path(__file__).parent) / Path("data")
 
 
@@ -328,6 +330,8 @@ def plot_w_fi():
 
     fig, ax = plt.subplots()
 
+    ax.set_prop_cycle(AGILITUS_COLORS)
+
     ax.plot(
         data[LoadingType.WHEEL]["w_fi"],
         data[LoadingType.WHEEL]["relative_depth"],
@@ -451,6 +455,8 @@ def plot_e_sl_from_cbr():
     data = _e_sl_data()
 
     fig, ax = plt.subplots()
+
+    ax.set_prop_cycle(AGILITUS_COLORS)
 
     ax.plot(data["cbr"], data["e_sl"], label="E_sl from CBR")
 
@@ -598,6 +604,8 @@ def plot_f_e():
 
     fig, ax = plt.subplots()
 
+    ax.set_prop_cycle(AGILITUS_COLORS)
+
     ax.plot(
         data[LoadingType.WHEEL][LoadLocation.INTERNAL]["e_ss"],
         data[LoadingType.WHEEL][LoadLocation.INTERNAL]["f_e"],
@@ -727,6 +735,8 @@ def plot_f_s():
 
     fig, ax = plt.subplots()
 
+    ax.set_prop_cycle(AGILITUS_COLORS)
+
     ax.plot(
         data[LoadingType.WHEEL][LoadLocation.INTERNAL]["x"],
         data[LoadingType.WHEEL][LoadLocation.INTERNAL]["f_s"],
@@ -850,6 +860,8 @@ def plot_f_h():
     data = _f_h_data()
 
     fig, ax = plt.subplots()
+
+    ax.set_prop_cycle(AGILITUS_COLORS)
 
     ax.plot(
         data[LoadingType.WHEEL][LoadLocation.INTERNAL]["h"],
@@ -1091,6 +1103,8 @@ def plot_t_12_data(load_location: LoadLocation):
 
     fig, ax = plt.subplots()
 
+    ax.set_prop_cycle(AGILITUS_COLORS)
+
     for p in data["p"].unique():
         line_data = data.filter(pl.col("p") == p)
         ax.plot(line_data["f"], line_data["t"], label=f"p = {p} kN")
@@ -1225,6 +1239,8 @@ def plot_t_3():
 
     fig, ax = plt.subplots()
 
+    ax.set_prop_cycle(AGILITUS_COLORS)
+
     ax.plot(
         data[LoadLocation.INTERNAL]["f_3"],
         data[LoadLocation.INTERNAL]["t_3"],
@@ -1315,6 +1331,8 @@ def plot_t_4():
     data = _t_4_data()
 
     fig, ax = plt.subplots()
+
+    ax.set_prop_cycle(AGILITUS_COLORS)
 
     ax.plot(data["f4"], data["t4"], label="Thickness")
 
