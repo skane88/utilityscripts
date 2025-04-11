@@ -16,14 +16,23 @@ AGILITUS_BLUE_COLORMAP = LinearSegmentedColormap.from_list(
 )
 
 PERSONAL_COLORS = cycler(
-    color=["#333333", "#CE190D", "#1B365D", "#707070", "#A3D5FF", "#F2A71B", "#268F63"]
+    color=[
+        "#333333",
+        "#CE190D",
+        "#4183C4",
+        "#707070",
+        "#AA3E98",
+        "#F2A71B",
+        "#268F63",
+        "#E8E8E8",
+    ]
 )
 PERSONAL_COLORMAP = LinearSegmentedColormap.from_list(
-    "PERSONAL", ["#CE190D", "#707070", "#1B365D"]
+    "PERSONAL", ["#CE190D", "#4183C4"]
 )
 PERSONAL_RED_COLORMAP = LinearSegmentedColormap.from_list(
     "PERSONAL_RED", ["#CE190D", "#FFFFFF"]
 )
 PERSONAL_BLUE_COLORMAP = LinearSegmentedColormap.from_list(
-    "PERSONAL_BLUE", ["#1B365D", "#FFFFFF"]
+    "PERSONAL_BLUE", ["#4183C4", "#FFFFFF"]
 )
