@@ -93,8 +93,11 @@ def test_as5222_s5_2_a_h(m_h, expected):
 
 
 @pytest.mark.parametrize(
-    "v_wind, a_h, c_h, expected",
-    [(20, 0.5, 2.4, 288.0), (5, 1, 2.0, 30.0)],
+    "q_z, a_h, c_h, expected",
+    [
+        (240, 0.5, 2.4, 288.0),  # corresonds to a 20m/s windspeed
+        (15, 1, 2.0, 30.0),
+    ],  # corresponds to a 5m/s windspeed
 )
-def test_as5222_s5_2_f_h(v_wind, a_h, c_h, expected):
-    assert isclose(as5222_s5_2_f_h(v_wind=v_wind, a_h=a_h, c_h=c_h), expected)
+def test_as5222_s5_2_f_h(q_z, a_h, c_h, expected):
+    assert isclose(as5222_s5_2_f_h(q_z=q_z, a_h=a_h, c_h=c_h), expected)

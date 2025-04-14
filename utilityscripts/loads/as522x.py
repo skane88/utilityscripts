@@ -12,7 +12,6 @@ import numpy as np
 import polars as pl
 
 from utilityscripts.plotting import AGILITUS_COLORS
-from utilityscripts.wind.as1170_2 import q_basic
 
 _DATA_PATH = Path(Path(__file__).parent)
 CRANE_DATA_FILE = "crane_data.xlsx"
@@ -171,14 +170,16 @@ def as5222_s5_2_a_h(*, m_h: float) -> float:
     return 0.0005 * m_h
 
 
-def as5222_s5_2_f_h(*, v_wind: float, a_h: float, c_h: float = 2.40) -> float:
+def as5222_s5_2_f_h(*, q_z: float, a_h: float, c_h: float = 2.40) -> float:
     """
     Calculate the wind load on a hoisted load.
 
     Parameters
     ----------
-    v_wind : float
-        The wind speed. In m/s.
+    q_z : float
+        The design wind pressure at the reference height. In Pa.
+        Typically the reference height is the highest point of the crane during the
+        lift.
     a_h : float
         The nominal area of the hoisted load. In m^2.
     c_h : float, optional
@@ -190,4 +191,4 @@ def as5222_s5_2_f_h(*, v_wind: float, a_h: float, c_h: float = 2.40) -> float:
         The wind load on the hoisted load. In N.
     """
 
-    return q_basic(v=v_wind) * c_h * a_h
+    return q_z * c_h * a_h
