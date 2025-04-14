@@ -9,6 +9,8 @@ import pytest
 from utilityscripts.loads.as522x import (
     DriveClass,
     HoistClass,
+    as5222_s5_2_a_h,
+    as5222_s5_2_f_h,
     get_beta_2,
     get_hoist_class,
     get_phi_2_min,
@@ -77,3 +79,22 @@ def test_phi_2_min(hoist_class: HoistClass, drive_class: DriveClass, expected: f
     assert isclose(
         get_phi_2_min(hoist_class=hoist_class, drive_class=drive_class), expected
     )
+
+
+@pytest.mark.parametrize(
+    "m_h, expected",
+    [
+        (1000, 0.5),
+        (2000, 1.0),
+    ],
+)
+def test_as5222_s5_2_a_h(m_h, expected):
+    assert isclose(as5222_s5_2_a_h(m_h=m_h), expected)
+
+
+@pytest.mark.parametrize(
+    "v_wind, a_h, c_h, expected",
+    [(20, 0.5, 2.4, 288.0), (5, 1, 2.0, 30.0)],
+)
+def test_as5222_s5_2_f_h(v_wind, a_h, c_h, expected):
+    assert isclose(as5222_s5_2_f_h(v_wind=v_wind, a_h=a_h, c_h=c_h), expected)
