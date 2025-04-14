@@ -6,7 +6,7 @@ from math import isclose
 
 import pytest
 
-from utilityscripts.loads.loads import (
+from utilityscripts.loads.as522x import (
     DriveClass,
     HoistClass,
     get_beta_2,
