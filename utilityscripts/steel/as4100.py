@@ -885,43 +885,71 @@ def as_s5_15_3(*, gamma, a_w, alpha_v, v_star, v_u, d_p, s, phi=0.9):
     return a_1 * a_2 * a_3 * a_4
 
 
-def v_by(*, d_f, t_p, f_up):
+def s9_2_2_4_v_by(*, d_f: float, t_p: float, f_up: float) -> float:
     """
     Calculate the bolt hole bearing capacity, as limited by local yielding, as per
     AS4100 S9.2.2.4
 
-    :param d_f: The fastener diameter.
-    :param t_p: The thickness of the plate.
-    :param f_up: The ultimate tensile stress of the plate.
+    Parameters
+    ----------
+    d_f : float
+        The fastener diameter.
+    t_p : float
+        The thickness of the plate.
+    f_up : float
+        The ultimate tensile stress of the plate.
     """
 
     return 3.2 * d_f * t_p * f_up
 
 
-def v_bt(*, a_e, t_p, f_up):
+def s9_2_2_4_v_bt(*, a_e: float, t_p: float, f_up: float) -> float:
     """
     Calculate the bolt hole bearing capacity, as limited by tear-out, as per
     AS4100 S9.2.2.4
 
-    :param a_e: Fastener edge distance.
-    :param t_p: Thickness of plate.
-    :param f_up: The ultimate tensile stress of the plate.
+    Parameters
+    ----------
+    a_e : float
+        Fastener edge distance. In m.
+    t_p : float
+        Thickness of plate. In m.
+    f_up : float
+        The ultimate tensile stress of the plate. In Pa.
+
+    Returns
+    -------
+    float
+        The bolt hole bearing capacity, as limited by tear-out, in N.
     """
 
     return a_e * t_p * f_up
 
 
-def v_w(size, f_uw, k_r=1.0, phi_weld=0.8):
+def s9_6_3_10_v_w(
+    *, size: float, f_uw: float, k_r: float = 1.0, phi_weld: float = 0.8
+) -> float:
     """
     Calculate the capacity of a fillet weld as per AS4100-2020
 
-    :param size: The leg length of the weld.
+    Parameters
+    ----------
+    size : float
+        The leg length of the weld. In m.
         Future versions of this function may be extended to
         allow for uneven legs.
-    :param f_uw: The ultimate strength of the weld metal.
-    :param k_r: The weld length parameter. For welds less than
+    f_uw : float
+        The ultimate strength of the weld metal. In Pa.
+    k_r : float
+        The weld length parameter. For welds less than
         1.7m long (almost all welds) this is 1.00.
-    :param phi_weld: The capacity reduction factor.
+    phi_weld : float
+        The capacity reduction factor.
+
+    Returns
+    -------
+    float
+        The capacity of the weld in N/m.
     """
 
     t_t = size / (2**0.5)
