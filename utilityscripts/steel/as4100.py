@@ -13,6 +13,7 @@ import numpy as np
 from sectionproperties.pre.geometry import Geometry
 from shapely import Polygon
 
+from utilityscripts.geometry import Circle
 from utilityscripts.steel.steel import SteelGrade
 
 PHI_STEEL = {"φ_s": 0.90, "φ_w.sp": 0.80, "φ_w.gp": 0.60}
@@ -924,6 +925,76 @@ def s9_2_2_4_v_bt(*, a_e: float, t_p: float, f_up: float) -> float:
     """
 
     return a_e * t_p * f_up
+
+
+def s9_4_1_v_f(*, d_pin: float, n_s: float, f_yp: float) -> float:
+    """
+    Calculate the capacity of a pin in shear as per AS4100 S9.4.1
+
+    Parameters
+    ----------
+    d_pin : float
+        The diameter of the pin. In m.
+    n_s : float
+        The number of shear planes.
+    f_yp : float
+        The yield strength of the pin. In Pa.
+
+    Returns
+    -------
+    float
+        The capacity of the pin in shear. In N.
+    """
+
+    circle = Circle(d=d_pin)
+    return 0.62 * n_s * circle.area * f_yp
+
+
+def s9_4_2_v_b(*, d_pin: float, t_p: float, f_yp: float, k_p: float) -> float:
+    """
+    Calculate the capacity of a pin in bearing as per AS4100 S9.4.2
+
+    Parameters
+    ----------
+    d_pin : float
+        The diameter of the pin. In m.
+    t_p : float
+        The thickness of the plate. In m.
+    f_yp : float
+        The yield strength of the plate. In Pa.
+    k_p : float
+        The rotation factor.
+        Typically 1.0 for stationary pins and 0.5 for rotating pins.
+
+    Returns
+    -------
+    float
+        The capacity of the pin in bearing. In N.
+    """
+
+    return 1.4 * f_yp * t_p * d_pin * k_p
+
+
+def s9_4_3_m_p(*, d_pin: float, f_yp: float) -> float:
+    """
+    Calculate the capacity of a pin in bending as per AS4100 S9.4.3
+
+    Parameters
+    ----------
+    d_pin : float
+        The diameter of the pin. In m.
+    f_yp : float
+        The yield strength of the pin. In Pa.
+
+    Returns
+    -------
+    float
+        The capacity of the pin in bending. In Nm.
+    """
+
+    s = d_pin**3 / 6
+
+    return f_yp * s
 
 
 def s9_6_3_10_v_w(

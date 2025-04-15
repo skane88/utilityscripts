@@ -2,7 +2,15 @@ from math import isclose
 
 import pytest
 
-from utilityscripts.steel.as4100 import k_t, s9_2_2_4_v_bt, s9_2_2_4_v_by, s9_6_3_10_v_w
+from utilityscripts.steel.as4100 import (
+    k_t,
+    s9_2_2_4_v_bt,
+    s9_2_2_4_v_by,
+    s9_4_1_v_f,
+    s9_4_2_v_b,
+    s9_4_3_m_p,
+    s9_6_3_10_v_w,
+)
 
 
 @pytest.mark.parametrize(
@@ -58,6 +66,53 @@ def test_s9_2_2_4_v_bt(a_e, t_p, f_up, expected):
     """
 
     assert isclose(s9_2_2_4_v_bt(a_e=a_e, t_p=t_p, f_up=f_up), expected, rel_tol=1e-6)
+
+
+@pytest.mark.parametrize(
+    "d_pin, n_s, f_yp, expected",
+    [
+        (0.016, 1, 250e6, 31160.0),
+        (0.020, 2, 300e6, 116900.0),
+    ],
+)
+def test_s9_4_1_v_f(d_pin, n_s, f_yp, expected):
+    """
+    Test the s9_4_1_v_f method.
+    """
+
+    assert isclose(s9_4_1_v_f(d_pin=d_pin, n_s=n_s, f_yp=f_yp), expected, rel_tol=1e-2)
+
+
+@pytest.mark.parametrize(
+    "d_pin, t_p, f_yp, k_p, expected",
+    [
+        (0.016, 0.012, 250e6, 1.0, 67200.0),
+        (0.020, 0.020, 300e6, 0.5, 84000.0),
+    ],
+)
+def test_s9_4_2_v_b(d_pin, t_p, f_yp, k_p, expected):
+    """
+    Test the s9_4_2_v_b method.
+    """
+
+    assert isclose(
+        s9_4_2_v_b(d_pin=d_pin, t_p=t_p, f_yp=f_yp, k_p=k_p), expected, rel_tol=1e-2
+    )
+
+
+@pytest.mark.parametrize(
+    "d_pin, f_yp, expected",
+    [
+        (0.016, 250e6, 171.0),
+        (0.020, 300e6, 400.0),
+    ],
+)
+def test_s9_4_3_m_p(d_pin, f_yp, expected):
+    """
+    Test the s9_4_3_m_p method.
+    """
+
+    assert isclose(s9_4_3_m_p(d_pin=d_pin, f_yp=f_yp), expected, rel_tol=1e-2)
 
 
 @pytest.mark.parametrize(
