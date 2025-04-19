@@ -898,37 +898,63 @@ def s5_11_5_alpha_v(
     return min(a1 * a2, 1.0)
 
 
-def alpha_d(*, alpha_v, d_p, s):
+def s5_11_5_2_alpha_d(*, alpha_v, d_p, s):
     """
     Calculate the stiffened web shear buckling parameter alpha_d as per
     AS4100 S5.11.5.2.
 
     Does not check for the presence of a stiffened end post.
 
-    :param alpha_v: The stiffened web shear buckling parameter alpha_v as per
+    Parameters
+    ----------
+    alpha_v : float
+        The stiffened web shear buckling parameter alpha_v for STIFFENED webs as per
         AS4100 S5.11.5.2.
-    :param d_p: The depth of the web panel.
-    :param s: The length of the web or spacing of vertical stiffeners that meet the
+    d_p : float
+        The depth of the web panel.
+    s : float
+        The length of the web or spacing of vertical stiffeners that meet the
         requirement of AS4100.
+
+    Returns
+    -------
+    float
+        The stiffened web shear buckling parameter alpha_d.
     """
 
     return 1 + ((1 - alpha_v) / (1.15 * alpha_v * (1 + (s / d_p) ** 2) ** 0.5))
 
 
-def as_s5_15_3(*, gamma, a_w, alpha_v, v_star, v_u, d_p, s, phi=0.9):
+def s5_15_3_a_s(*, gamma, a_w, alpha_v, v_star, v_u, d_p, s, phi=0.9):
     """
     Calculate the minimum area of a transverse shear stiffener as per AS4100 S5.15.3
 
-    :param gamma: The stiffener type factor.
-    :param a_w: The area of the web.
-    :param alpha_v: The stiffened web shear buckling parameter alpha_v as per
+    Parameters
+    ----------
+    gamma : float
+        The stiffener type factor.
+    a_w : float
+        The area of the web.
+    alpha_v : float
+        The stiffened web shear buckling parameter alpha_v as per
         AS4100 S5.11.5.2.
-    :param v_star: The shear in the web.
-    :param v_u: The ultimate shear capacity of the web.
-    :param d_p: The depth of the web panel.
-    :param s: The length of the web or spacing of vertical stiffeners that meet the
+    v_star : float
+        The shear in the web.
+    v_u : float
+        The ultimate shear capacity of the web.
+    d_p : float
+        The depth of the web panel.
+    s : float
+        The length of the web or spacing of vertical stiffeners that meet the
         requirement of AS4100.
-    :param phi: The capacity reduction factor
+    phi : float, optional
+        The capacity reduction factor.
+        Default is 0.9.
+
+    Returns
+    -------
+    float
+        The minimum area of a transverse shear stiffener.
     """
 
     a_1 = 0.5 * gamma * a_w
