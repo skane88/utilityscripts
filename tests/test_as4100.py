@@ -1,9 +1,14 @@
+"""
+Test the AS4100 methods.
+"""
+
 from math import isclose
 
 import pytest
 
 from utilityscripts.steel.as4100 import (
-    k_t,
+    RestraintCode,
+    s5_6_3_k_t,
     s9_2_2_4_v_bt,
     s9_2_2_4_v_by,
     s9_4_1_v_f,
@@ -24,6 +29,14 @@ from utilityscripts.steel.as4100 import (
         ("LL", 0.2834, 10.0, 0.0118, 0.0067, 1, 1.0),
         ("FU", 0.2834, 10.0, 0.0118, 0.0067, 1, 1.0),
         ("UF", 0.2834, 10.0, 0.0118, 0.0067, 1, 1.0),
+        ((RestraintCode.P, RestraintCode.P), 0.2060, 4.00, 0.0120, 0.0065, 1, 1.081012),
+        ((RestraintCode.P, RestraintCode.F), 0.2834, 10.0, 0.0118, 0.0067, 1, 1.019352),
+        ((RestraintCode.F, RestraintCode.F), 0.2834, 10.0, 0.0118, 0.0067, 1, 1.0),
+        ((RestraintCode.F, RestraintCode.L), 0.2834, 10.0, 0.0118, 0.0067, 1, 1.0),
+        ((RestraintCode.L, RestraintCode.F), 0.2834, 10.0, 0.0118, 0.0067, 1, 1.0),
+        ((RestraintCode.L, RestraintCode.L), 0.2834, 10.0, 0.0118, 0.0067, 1, 1.0),
+        ((RestraintCode.F, RestraintCode.U), 0.2834, 10.0, 0.0118, 0.0067, 1, 1.0),
+        ((RestraintCode.U, RestraintCode.F), 0.2834, 10.0, 0.0118, 0.0067, 1, 1.0),
     ],
 )
 def test_k_t(restraint_code, d_1, length, t_f, t_w, n_w, expected):
@@ -31,7 +44,7 @@ def test_k_t(restraint_code, d_1, length, t_f, t_w, n_w, expected):
     Test the k_t method.
     """
 
-    k_t_calc = k_t(
+    k_t_calc = s5_6_3_k_t(
         restraint_code=restraint_code, d_1=d_1, length=length, t_f=t_f, t_w=t_w, n_w=n_w
     )
 

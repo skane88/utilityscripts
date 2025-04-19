@@ -27,6 +27,18 @@ class CornerDetail(Enum):
     RADIUS = "radius"
 
 
+class RestraintCode(Enum):
+    """
+    The bending restraint code for the section.
+    """
+
+    F = "F"
+    L = "L"
+    P = "P"
+    U = "U"
+    C = "C"  # continuous
+
+
 class AS4100Section(ABC):
     """
     Store a cross-section that provides AS4100 compatible section properties.
@@ -713,7 +725,7 @@ class AS4100Member:
         return self._restraints
 
 
-def alpha_m(*, m_m, m_2, m_3, m_4):
+def s5_6_1_1_alpha_m(*, m_m, m_2, m_3, m_4):
     """
     Determines the moment modification factor as per AS4100 S5.6.1.1.a.iii.
 
@@ -737,9 +749,9 @@ def alpha_m(*, m_m, m_2, m_3, m_4):
     return 1.7 * m_m / (m_2**2 + m_3**2 + m_4**2) ** 0.5
 
 
-def k_t(
+def s5_6_3_k_t(
     *,
-    restraint_code: str,
+    restraint_code: tuple[RestraintCode, RestraintCode] | str,
     d_1: float,
     length: float,
     t_f: float,
@@ -762,7 +774,7 @@ def k_t(
     t_w : float
         The web thickness.
     n_w : float, optional
-        THe number of webs of the beam section.
+        The number of webs in the beam section.
 
     Returns
     -------
@@ -778,10 +790,30 @@ def k_t(
     1.00000
     """
 
-    if restraint_code in ["FF", "FL", "LF", "LL", "FU", "UF"]:
+    if isinstance(restraint_code, str):
+        restraint_code = (
+            RestraintCode(restraint_code[0]),
+            RestraintCode(restraint_code[1]),
+        )
+
+    if restraint_code in [
+        (RestraintCode.F, RestraintCode.F),
+        (RestraintCode.F, RestraintCode.L),
+        (RestraintCode.L, RestraintCode.F),
+        (RestraintCode.L, RestraintCode.L),
+        (RestraintCode.F, RestraintCode.U),
+        (RestraintCode.U, RestraintCode.F),
+    ]:
         return 1.0
 
-    if restraint_code in ["FP", "PF", "PL", "LP", "PU", "UP"]:
+    if restraint_code in [
+        (RestraintCode.F, RestraintCode.P),
+        (RestraintCode.P, RestraintCode.F),
+        (RestraintCode.P, RestraintCode.L),
+        (RestraintCode.L, RestraintCode.P),
+        (RestraintCode.P, RestraintCode.U),
+        (RestraintCode.U, RestraintCode.P),
+    ]:
         return 1 + ((d_1 / length) * (t_f / (2 * t_w)) ** 3) / n_w
 
     return 1 + (2.0 * (d_1 / length) * (t_f / (2 * t_w)) ** 3) / n_w
