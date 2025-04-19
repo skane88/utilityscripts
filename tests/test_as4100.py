@@ -8,7 +8,9 @@ import pytest
 
 from utilityscripts.steel.as4100 import (
     RestraintCode,
+    WebType,
     s5_6_3_k_t,
+    s5_11_5_alpha_v,
     s9_2_2_4_v_bt,
     s9_2_2_4_v_by,
     s9_4_1_v_f,
@@ -49,6 +51,28 @@ def test_k_t(restraint_code, d_1, length, t_f, t_w, n_w, expected):
     )
 
     assert isclose(k_t_calc, expected, rel_tol=1e-6)
+
+
+@pytest.mark.parametrize(
+    "d_p, t_w, f_y, s, f_y_ref, web_type, expected",
+    [
+        (1.000, 0.008, 300e6, 0.800, 250e6, WebType.STIFFENED, 0.918947),
+    ],
+)
+def test_s5_11_5_alpha_v(d_p, t_w, f_y, s, f_y_ref, web_type, expected):
+    """
+    Test the s5_11_5_alpha_v method.
+    """
+
+    # TODO: add more tests
+
+    assert isclose(
+        s5_11_5_alpha_v(
+            d_p=d_p, t_w=t_w, f_y=f_y, s=s, f_y_ref=f_y_ref, web_type=web_type
+        ),
+        expected,
+        rel_tol=1e-6,
+    )
 
 
 @pytest.mark.parametrize(

@@ -39,6 +39,11 @@ class RestraintCode(Enum):
     C = "C"  # continuous
 
 
+class WebType(Enum):
+    STIFFENED = "stiffened"
+    UNSTIFFENED = "unstiffened"
+
+
 class AS4100Section(ABC):
     """
     Store a cross-section that provides AS4100 compatible section properties.
@@ -783,10 +788,10 @@ def s5_6_3_k_t(
 
     Examples
     --------
-    >>> k_t(restraint_code="PP", d_1=0.206, length=4.0, t_f=0.012, t_w=0.0065)
+    >>> s5_6_3_k_t(restraint_code="PP", d_1=0.206, length=4.0, t_f=0.012, t_w=0.0065)
     1.08101
 
-    >>> k_t(restraint_code="FF", d_1=0.206, length=4.0, t_f=0.012, t_w=0.0065)
+    >>> s5_6_3_k_t(restraint_code="FF", d_1=0.206, length=4.0, t_f=0.012, t_w=0.0065)
     1.00000
     """
 
@@ -819,10 +824,18 @@ def s5_6_3_k_t(
     return 1 + (2.0 * (d_1 / length) * (t_f / (2 * t_w)) ** 3) / n_w
 
 
-def alpha_v(*, d_p, t_w, f_y, s, f_y_ref=250.0):
+def s5_11_5_alpha_v(
+    *,
+    d_p,
+    t_w,
+    f_y,
+    s: float | None = None,
+    f_y_ref=250.0,
+    web_type: WebType = WebType.UNSTIFFENED,
+):
     """
     Calculate the stiffened web shear buckling parameter alpha_v as per
-    AS4100 S5.11.5.2.
+    AS4100 S5.11.5.1 and S5.11.5.2.
 
     This is used to reduce the shear capacity of a web when it is prone to buckling.
 
@@ -835,12 +848,16 @@ def alpha_v(*, d_p, t_w, f_y, s, f_y_ref=250.0):
     f_y : float
         The yield strength of the web panel in MPa.
         If different units are used, make sure to update `f_y_ref` accordingly.
-    s : float
+    s : float | None, optional
         The length of the web or spacing between vertical stiffeners
         that meet the requirements of AS4100.
+        If web is not stiffened this value is ignored.
     f_y_ref : float, optional
         The reference yield stress, nominally 250.0.
         Default is 250.0MPa.
+    web_type : WebType, optional
+        The type of web. If STIFFENED, use S5.11.5.2, otherwise use S5.11.5.1.
+        Default is WebType.UNSTIFFENED.
 
     Returns
     -------
@@ -864,11 +881,15 @@ def alpha_v(*, d_p, t_w, f_y, s, f_y_ref=250.0):
     >>> t_w = 0.008    # Thickness of the web
     >>> f_y = 300.0   # Yield strength of the web panel in MPa
     >>> s = 0.800     # Length of the web or spacing of vertical stiffeners
-    >>> alpha_v(d_p=d_p, t_w=t_w, f_y=f_y, s=s)
+    >>> web_type = WebType.STIFFENED
+    >>> s5_11_5_2_alpha_v(d_p=d_p, t_w=t_w, f_y=f_y, s=s, web_type=web_type)
     0.918947
     """
 
     a1 = (82 / ((d_p / t_w) * (f_y / f_y_ref) ** 0.5)) ** 2
+
+    if web_type == WebType.UNSTIFFENED:
+        return min(a1, 1.0)
 
     a2_param = 1.0 if (s / d_p) <= 1.0 else 0.75
 
