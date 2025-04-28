@@ -4,10 +4,13 @@ Module to contain tests for code in steel.py
 
 from math import isclose
 
+import numpy as np
 import pytest
 
 from utilityscripts.steel.steel import (
+    BoltGrade,
     angle_section_df,
+    bolt_grades,
     c_section_df,
     chs_section_df,
     flat_plate_bending_point,
@@ -209,3 +212,56 @@ def test_chs_section_df():
     chs_sects = chs_section_df()
 
     assert not chs_sects.is_empty()
+
+
+def test_bolt_grade():
+    """
+    Test the bolt grade class
+    """
+
+    grade = "8.8"
+
+    thicknesses = [0.000, 0.015999, 0.016, 0.100]
+    f_yf = [640e6, 640e6, 660e6, 660e6]
+    f_uf = [800e6, 800e6, 830e6, 830e6]
+
+    bg = BoltGrade(grade=grade, diameters=thicknesses, f_yf=f_yf, f_uf=f_uf)
+
+    thicknesses = np.asarray(thicknesses)
+    f_yf = np.asarray(f_yf)
+    f_uf = np.asarray(f_uf)
+
+    assert bg.grade == grade
+    assert np.array_equal(bg.diameters, thicknesses)
+    assert np.array_equal(bg.f_yf, f_yf)
+    assert np.array_equal(bg.f_uf, f_uf)
+
+    assert isclose(bg.get_f_y(0.008), 640e6)
+    assert isclose(bg.get_f_y(0.015999), 640e6)
+    assert isclose(bg.get_f_y(0.016), 660e6)
+    assert isclose(bg.get_f_y(0.099), 660e6)
+
+    assert isclose(bg.get_f_u(0.008), 800e6)
+    assert isclose(bg.get_f_u(0.015999), 800e6)
+    assert isclose(bg.get_f_u(0.016), 830e6)
+    assert isclose(bg.get_f_u(0.100), 830e6)
+
+
+def test_bolt_grades():
+    """
+    Can the bolt_grades method actually initiate grades?
+    """
+
+    assert bolt_grades()
+    assert isclose(bolt_grades()["8.8"].get_f_yf(0.008), 640e6)
+    assert isclose(bolt_grades()["8.8"].get_f_uf(0.008), 800e6)
+    assert isclose(bolt_grades()["8.8"].get_f_yf(0.016), 660e6)
+    assert isclose(bolt_grades()["8.8"].get_f_uf(0.016), 830e6)
+    assert isclose(bolt_grades()["4.6"].get_f_yf(0.008), 240e6)
+    assert isclose(bolt_grades()["4.6"].get_f_uf(0.008), 400e6)
+    assert isclose(bolt_grades()["4.6"].get_f_yf(0.016), 240e6)
+    assert isclose(bolt_grades()["4.6"].get_f_uf(0.016), 400e6)
+    assert isclose(bolt_grades()["10.9"].get_f_yf(0.008), 940e6)
+    assert isclose(bolt_grades()["10.9"].get_f_uf(0.008), 1040e6)
+    assert isclose(bolt_grades()["10.9"].get_f_yf(0.016), 940e6)
+    assert isclose(bolt_grades()["10.9"].get_f_uf(0.016), 1040e6)

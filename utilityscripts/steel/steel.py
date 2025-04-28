@@ -2078,3 +2078,152 @@ def flat_plate_bending_point(
     y_max = alpha * w * b**2 / (e * t**3)
 
     return {"sigma_max": sigma_max, "y_max": y_max}
+
+
+def bolt_grade_df():
+    """
+    Get a dataframe of the bolt grades.
+    """
+
+    return pl.read_excel(_DATA_PATH / Path("steel_data.xlsx"), sheet_name="bolt_grades")
+
+
+class BoltGrade:
+    """
+    A class to represent a bolt grade.
+    """
+
+    def __init__(
+        self,
+        *,
+        grade: str,
+        diameters: list[float] | np.ndarray,
+        f_yf: list[float] | np.ndarray,
+        f_uf: list[float] | np.ndarray,
+    ):
+        """
+        Initialise the BoltGrade class.
+
+        Parameters
+        ----------
+        grade : str
+            The grade designation.
+        diameters : list[float] | np.ndarray
+            The limiting diameters for the grade, in m.
+        f_yf : list[float] | np.ndarray
+            The yield strength of the bolts, in Pa. The length should match the
+            length of the diameters array.
+        f_uf : list[float] | np.ndarray
+            The ultimate strength of the bolts, in Pa. The length should match the
+            length of the diameters array.
+        """
+
+        self._grade = grade
+        self._diameters = np.asarray(diameters)
+        self._f_yf = np.asarray(f_yf)
+        self._f_uf = np.asarray(f_uf)
+
+    @property
+    def grade(self) -> str:
+        """
+        The grade designation.
+        """
+
+        return self._grade
+
+    @property
+    def diameters(self) -> np.ndarray:
+        """
+        The limiting diameters for the grade, in m.
+        """
+
+        return self._diameters
+
+    @property
+    def f_yf(self) -> np.ndarray:
+        """
+        The yield strength of the bolts, in Pa.
+        """
+
+        return self._f_yf
+
+    @property
+    def f_uf(self) -> np.ndarray:
+        """
+        The ultimate strength of the bolts, in Pa.
+        """
+
+        return self._f_uf
+
+    def get_f_yf(self, diameter: float) -> float:
+        """
+        Get the yield strength of the bolts, in Pa.
+
+        Parameters
+        ----------
+        diameter : float
+            The diameter of the bolt, in m.
+
+        Returns
+        -------
+        float
+            The yield strength of the bolts, in Pa.
+        """
+
+        return np.interp(diameter, self._diameters, self._f_yf)
+
+    def get_f_uf(self, diameter: float) -> float:
+        """
+        Get the ultimate strength of the bolts, in Pa.
+
+        Parameters
+        ----------
+        diameter : float
+            The diameter of the bolt, in m.
+
+        Returns
+        -------
+        float
+            The ultimate strength of the bolts, in Pa.
+        """
+
+        return np.interp(diameter, self._diameters, self._f_uf)
+
+    def __repr__(self):
+        return f"{type(self).__name__} {self.grade}"
+
+
+def bolt_grades() -> dict[str, BoltGrade]:
+    """
+    Get a dictionary of the standard bolt grades.
+
+    Returns
+    -------
+    dict[str, BoltGrade]
+        A dictionary of the standard bolt grades, with the designation as the key.
+    """
+
+    bolt_grade_data = bolt_grade_df().sort(["grade", "d_f"])
+
+    # get a list of unique grades
+    unique_grades = bolt_grade_data[["grade"]].unique(subset=["grade"]).sort(["grade"])
+
+    grades = {}
+
+    for grade in unique_grades.iter_rows():
+        bg = bolt_grade_data.filter((pl.col("grade") == grade[0])).select(
+            "d_f", "f_yf", "f_uf"
+        )
+
+        diameters = bg.select("d_f").to_numpy().T[0]
+        f_yf = bg.select("f_yf").to_numpy().T[0]
+        f_uf = bg.select("f_uf").to_numpy().T[0]
+
+        grades[str(grade[0])] = BoltGrade(
+            grade=str(grade[0]),
+            diameters=diameters,
+            f_yf=f_yf,
+            f_uf=f_uf,
+        )
+
+    return grades
