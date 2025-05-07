@@ -14,7 +14,7 @@ from sectionproperties.pre.geometry import Geometry
 from shapely import Polygon
 
 from utilityscripts.geometry import Circle
-from utilityscripts.steel.steel import SteelGrade
+from utilityscripts.steel.steel import SteelGrade, bolt_grades
 
 PHI_STEEL = {"φ_s": 0.90, "φ_w.sp": 0.80, "φ_w.gp": 0.60}
 PHI_STEEL["steel"] = PHI_STEEL["φ_s"]
@@ -963,6 +963,145 @@ def s5_15_3_a_s(*, gamma, a_w, alpha_v, v_star, v_u, d_p, s, phi=0.9):
     a_4 = (s / d_p) - ((s / d_p) ** 2 / (1 + (s / d_p) ** 2) ** 0.5)
 
     return a_1 * a_2 * a_3 * a_4
+
+
+def s9_1_9_block(
+    *,
+    a_gv: float,
+    a_nv: float,
+    a_nt: float,
+    f_yp: float,
+    f_up: float,
+    k_bs: float,
+):
+    """
+    Calculate the block shear capacity as per AS4100.
+
+    Parameters
+    ----------
+    a_gv : float
+        The gross shear failure area.
+    a_nv : float
+        The net shear failure area.
+    a_nt : float
+        The net tension failure area.
+    f_yp : float
+        The yield strength of the plate.
+    f_up : float
+        The ultimate strength of the plate.
+    k_bs : float
+        The block shear eccentrictity factor.
+    """
+
+    return min(0.6 * a_nv * f_up, 0.6 * a_gv * f_yp) + k_bs * a_nt * f_up
+
+
+class Bolt:
+    def __init__(
+        self,
+        *,
+        d_f: float,
+        grade: str,
+        stresses: tuple[float, float] | None = None,
+        a_c: float | None = None,
+        a_o: float | None = None,
+        a_s: float | None = None,
+    ):
+        """
+        Class to represent a bolt.
+
+        Parameters
+        ----------
+        d_f : float
+            The bolt diameter. In m.
+        grade : str
+            The grade of the bolt, e.g. 4.6, 8.8 etc.
+        stresses : tuple[float, float] | None
+            The nominal tensile stress and the ultimate tensile stress of the bolt:
+            (f_yf, f_uf) in Pa.
+            If None is provided, it is calculated based on the grade and the rules in
+            AS1275. If the grade is not found in the grade data an error will be raised.
+        a_c : float | None
+            The minor diameter area of the bolt. In m^2. If None is provided, it is
+            calculated based on the diameter and the rules in AS1275.
+        a_o : float | None
+            The nominal plain shank area of the bolt. In m^2. If None is provided, it is
+            calculated based on the diameter and the rules in AS1275.
+        a_s : float | None
+            The tensile stress area of the bolt. In m^2. If None is provided, it is
+            calculated based on the diameter and the rules in AS1275.
+        """
+
+        self._d_f = d_f
+        self._grade = grade
+
+        self._f_yf = 0.0
+        self._f_uf = 0.0
+
+        if stresses is None:
+            bolt_grade = bolt_grades()[grade]
+            self._f_yf = bolt_grade.get_f_yf(d_f)
+            self._f_uf = bolt_grade.get_f_uf(d_f)
+
+        else:
+            self._f_yf = stresses[0]
+            self._f_uf = stresses[1]
+
+        # TODO: set the a_c, a_o and a_s values.
+
+        if a_c is None:
+            self._a_c = 0.0
+
+        if a_o is None:
+            self._a_o = 0.0
+
+        if a_s is None:
+            self._a_s = 0.0
+
+        self._a_c = a_c
+        self._a_o = a_o
+        self._a_s = a_s
+
+    @property
+    def d_f(self) -> float:
+        """
+        The diameter of the bolt. In m.
+        """
+
+        return self._d_f
+
+    @property
+    def grade(self) -> str | None:
+        """
+        The grade of the bolt. If the bolt object was set up with an f_uf / f_yf tuple,
+        this will return None.
+        """
+
+        return self._grade
+
+    @property
+    def a_c(self) -> float:
+        """
+        The minor diameter area of the bolt. In m^2.
+        """
+
+        return self._a_c
+
+    @property
+    def a_o(self) -> float:
+        """
+        The nominal plain shank area of the bolt. In m^2.
+        """
+
+        return self._a_o
+
+    @property
+    def a_s(self) -> float:
+        """
+        The tensile stress area of the bolt. In m^2.
+        """
+
+        return self._a_s
 
 
 def s9_2_2_4_v_by(*, d_f: float, t_p: float, f_up: float) -> float:

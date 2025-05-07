@@ -11,6 +11,7 @@ from utilityscripts.steel.as4100 import (
     WebType,
     s5_6_3_k_t,
     s5_11_5_alpha_v,
+    s9_1_9_block,
     s9_2_2_4_v_bt,
     s9_2_2_4_v_by,
     s9_4_1_v_f,
@@ -80,6 +81,8 @@ def test_s5_11_5_alpha_v(d_p, t_w, f_y, s, f_y_ref, web_type, expected):
     [
         (0.020, 0.012, 410e6, 314880.0),
         (0.016, 0.020, 440e6, 450560.0),
+        (0.020, 0.020, 440e6, 563200.0),  # Steel Designer's handbook 8ed, p.262
+        (0.020, 0.008, 440e6, 225280.0),  # Steel Designer's handbook 8ed, p.262
     ],
 )
 def test_s9_2_2_4_v_by(d_f, t_p, f_up, expected):
@@ -95,6 +98,8 @@ def test_s9_2_2_4_v_by(d_f, t_p, f_up, expected):
     [
         (0.035, 0.012, 410e6, 172200.0),
         (0.028, 0.020, 440e6, 246400.0),
+        (0.035, 0.020, 440e6, 308000.0),  # Steel Designer's handbook 8ed, p.262
+        (0.048, 0.008, 440e6, 168960.0),  # Steel Designer's handbook 8ed, p.262
     ],
 )
 def test_s9_2_2_4_v_bt(a_e, t_p, f_up, expected):
@@ -103,6 +108,41 @@ def test_s9_2_2_4_v_bt(a_e, t_p, f_up, expected):
     """
 
     assert isclose(s9_2_2_4_v_bt(a_e=a_e, t_p=t_p, f_up=f_up), expected, rel_tol=1e-6)
+
+
+@pytest.mark.parametrize(
+    "a_gv, a_nv, a_nt, f_yp, f_up, k_bs, expected",
+    [
+        (
+            4200e-6,
+            2880e-6,
+            1360e-6,
+            280e6,
+            440e6,
+            1.0,
+            1304000.0,
+        ),  # Steel Designer's Handbook, 8ed, Example E.2, P441.
+        (
+            2100e-6,
+            1440e-6,
+            2240e-6,
+            280e6,
+            440e6,
+            1.0,
+            1338400.0,
+        ),  # Steel Designer's Handbook, 8ed, Example E.2, P442.
+    ],
+)
+def test_s9_1_9_block(a_gv, a_nv, a_nt, f_yp, f_up, k_bs, expected):
+    """
+    Test the s9_1_9_block method.
+    """
+
+    assert isclose(
+        s9_1_9_block(a_gv=a_gv, a_nv=a_nv, a_nt=a_nt, f_yp=f_yp, f_up=f_up, k_bs=k_bs),
+        expected,
+        rel_tol=1e-6,
+    )
 
 
 @pytest.mark.parametrize(
