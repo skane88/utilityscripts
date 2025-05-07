@@ -162,6 +162,29 @@ def test_spectral_shape_factor(soil: SoilClass, period: float, expected: float):
 
 
 @pytest.mark.parametrize(
+    "soil, period, min_period, expected",
+    [
+        (SoilClass.Ae, 0.0, False, 0.80),
+        (SoilClass.Ae, 0.0, True, 2.35),
+        (SoilClass.Be, 0.0, False, 1.00),
+        (SoilClass.Be, 0.0, True, 2.94),
+        (SoilClass.Ce, 0.0, False, 1.30),
+        (SoilClass.Ce, 0.0, True, 3.68),
+        (SoilClass.De, 0.0, False, 1.10),
+        (SoilClass.De, 0.0, True, 3.68),
+        (SoilClass.Ee, 0.0, False, 1.10),
+        (SoilClass.Ee, 0.0, True, 3.68),
+    ],
+)
+def test_spectral_shape_factor_min(soil, period, min_period, expected):
+    assert isclose(
+        spectral_shape_factor(soil_class=soil, period=period, min_period=min_period),
+        expected,
+        abs_tol=2e-2,
+    )
+
+
+@pytest.mark.parametrize(
     "soil, period, k_p_z, s_p, mu, expected",
     [
         (SoilClass.Ae, 0.1, 0.08, 0.77, 2.00, 0.072),

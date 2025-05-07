@@ -3,7 +3,6 @@ Earthquake loads to AS1170.4
 """
 
 from enum import StrEnum
-from functools import lru_cache
 from numbers import Number
 from pathlib import Path
 
@@ -96,7 +95,7 @@ def k_p_data(
 
     k_p = np.interp(p, x, y)
 
-    if isinstance(p, float):
+    if isinstance(p, float | int):
         return float(k_p)
 
     return k_p
@@ -145,13 +144,12 @@ def k_p_z_min(*, p: float | np.ndarray) -> float | np.ndarray:
 
     k_p_z_min = np.interp(p, x, y)
 
-    if isinstance(p, float):
+    if isinstance(p, float | int):
         return float(k_p_z_min)
 
     return k_p_z_min
 
 
-@lru_cache(maxsize=None)
 def spectral_shape_factor(
     *, soil_class: SoilClass, period: float, min_period: bool = False
 ) -> float:
