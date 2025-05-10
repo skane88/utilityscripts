@@ -2,7 +2,6 @@
 Contains classes etc. to model a lifting lug.
 """
 
-from collections import namedtuple
 from math import asin, atan, cos, radians, sin
 
 import matplotlib.pyplot as plt
@@ -13,20 +12,6 @@ from shapely.ops import split
 from shapely.plotting import plot_polygon
 
 from utilityscripts.steel.steel import SteelGrade
-
-LoadComponents = namedtuple(
-    "LoadComponents",
-    [
-        "load",
-        "load_dynamic",
-        "load_uls_static",
-        "load_uls_dynamic",
-        "oop_allowance",
-        "oop_allowance_dynamic",
-        "oop_allowance_uls_static",
-        "oop_allowance_uls_dynamic",
-    ],
-)
 
 
 class LugLoad:
@@ -158,7 +143,7 @@ class LugLoad:
         in_plane_angle,
         out_of_plane_angle,
         match_sign_out_of_plane: bool = True,
-    ) -> LoadComponents:
+    ) -> tuple[float, float]:
         """
         Generate the load components for a single load angle.
 
@@ -175,8 +160,9 @@ class LugLoad:
 
         Returns
         -------
-        LoadComponents
-            A namedtuple with the load components.
+        tuple[float, float]
+            A tuple with the load and out-of-plane load:
+            (in-plane-load, out-of-plane-load).
         """
 
         if in_plane_angle > self.max_in_plane_angle:
@@ -202,25 +188,9 @@ class LugLoad:
 
         sign = (1 if out_of_plane_angle >= 0 else -1) if match_sign_out_of_plane else 1
 
-        return LoadComponents(
-            load=self.swl,
-            load_dynamic=self.swl * self.daf,
-            load_uls_static=self.swl * self.uls,
-            load_uls_dynamic=self.swl * self.uls * self.daf,
-            oop_allowance=self.out_of_plane_allowance * self.swl * sign,
-            oop_allowance_dynamic=self.out_of_plane_allowance
-            * self.swl
-            * self.daf
-            * sign,
-            oop_allowance_uls_static=self.out_of_plane_allowance
-            * self.swl
-            * self.uls
-            * sign,
-            oop_allowance_uls_dynamic=self.out_of_plane_allowance
-            * self.swl
-            * self.daf
-            * self.uls
-            * sign,
+        return (
+            self.swl * self.uls * self.daf,
+            self.out_of_plane_allowance * self.swl * self.daf * self.uls * sign,
         )
 
     def in_plane_angles(self, no_increments: int) -> np.ndarray:
@@ -261,7 +231,7 @@ class LugLoad:
         in_plane_increments: int = 101,
         out_of_plane_increments: int = 21,
         match_sign_out_plane: bool = True,
-    ) -> dict[tuple[float, float], LoadComponents]:
+    ) -> dict[tuple[float, float], tuple[float, float]]:
         """
         Generates loads through a range of angle increments.
 
@@ -278,9 +248,9 @@ class LugLoad:
 
         Returns
         -------
-        dict[tuple[float, float] : dict[str, float]]
-            A dictionary with a Tuple key and LoadComponent value, of the format:
-            {(in_plane_angle, out_of_plane_angle): LoadComponent}
+        dict[tuple[float, float] : tuple[float, float]]
+            A dictionary with a Tuple key and tuple value, of the format:
+            {(in_plane_angle, out_of_plane_angle): (in-plane-load, out-of-plane-load)}
         """
 
         in_plane = self.in_plane_angles(no_increments=in_plane_increments)
