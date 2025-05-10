@@ -35,9 +35,9 @@ def create_lug():
     )
 
 
-def create_eccentric():
+def create_eccentric_lug():
     """
-    Create a basic lug for use in later tests.
+    Create an eccentric lug for use in later tests.
     """
 
     return Lug(
@@ -61,7 +61,7 @@ def create_eccentric():
             (-0.433013, 0.75, -0.5, -0.025981, 0.066651, 0.021160),
         ),
         (
-            create_eccentric(),
+            create_eccentric_lug(),
             1.0,
             0.0,
             (-0.433013, 0.75, -0.5, 0.000269, 0.066651, 0.038660),
@@ -73,7 +73,7 @@ def create_eccentric():
             (-0.433013, 0.75, -0.46, -0.025981, 0.062519, 0.020160),
         ),
         (
-            create_eccentric(),
+            create_eccentric_lug(),
             1.0,
             0.04,
             (-0.433013, 0.75, -0.46, 0.000269, 0.062519, 0.036260),
