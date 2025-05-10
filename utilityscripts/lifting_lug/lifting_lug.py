@@ -23,16 +23,12 @@ class LugLoad:
         self,
         *,
         swl: float,
+        out_of_plane_allowance: float,
         dia_pin: float,
-        dynamic_factor: float = 1.0,
-        uls_factor: float = 1.0,
-        hole_offset: float = 0.0,
+        shackle_offset: float = 0.0,
+        out_of_plane_offset: float = 0.0,
         in_plane_angle_limits: tuple[float, float] = (0.0, 0.0),
         out_of_plane_angle_limits: tuple[float, float] = (0.0, 0.0),
-        out_of_plane_allowance: float = 0.04,
-        daf_out_of_plane: float = 1.0,
-        uls_out_of_plane: float = 1.0,
-        out_of_plane_offset: float = 0.0,
         use_radians: bool = True,
     ):
         """
@@ -41,38 +37,33 @@ class LugLoad:
         ----------
         swl : float
             The safe working load of the lug.
-        dia_pin : float
-            The diameter of the pin used.
-        dynamic_factor : float
-            The dynamic amplification factor for the load.
-        uls_factor : float
-            The ULS load factor.
-        hole_offset : float
-            Any offset from the hole centre in the direction towards
-            the load. For example due to a shackle etc.
-        in_plane_angle_limits : tuple[float, float]
-            The minimum and maximum angle of the load, in plane.
-            A tuple of the form (min, max). In Radians. +ve is CCW.
-        out_of_plane_angle_limits : tuple[float, float]
-            The maximum angle of the load, in plane.
-            A tuple of the form (min, max). In Radians. +ve is CCW
         out_of_plane_allowance : float
             An allowance for any unintended out-of-plane
-            loading. In % of SWL. Typ. value in AS1418 is 4%.
-        daf_out_of_plane : float
-            Dynamic factor to apply to the out-of-plane allowance.
-        uls_out_of_plane : float
-            ULS load factor to apply to the out-of-plane allowance.
+            loading. Typ. value in AS1418 is 4% of the SWL.
+            This is applied in addition to the calculated out-of-plane load.
+        dia_pin : float
+            The diameter of the pin used.
+        shackle_offset : float
+            Any offset from the hole centre in the direction towards
+            the load. For example due to a shackle etc.
         out_of_plane_offset : float
             Any horizontal offset out-of-plane.
             For example, if using shackles too wide for the lug.
+        in_plane_angle_limits : tuple[float, float]
+            The minimum and maximum angle of the load, in plane.
+            A tuple of the form (min, max). +ve is CCW.
+        out_of_plane_angle_limits : tuple[float, float]
+            The maximum angle of the load, in plane.
+            A tuple of the form (min, max). +ve is CCW
+        use_radians : bool
+            Are the angles entered in radians or degrees?
         """
 
-        self.swl = swl
-        self.dia_pin = dia_pin
-        self.daf = dynamic_factor
-        self.uls = uls_factor
-        self.hole_offset = hole_offset
+        self._swl = swl
+        self._dia_pin = dia_pin
+        self._out_of_plane_allowance = out_of_plane_allowance
+        self._shackle_offset = shackle_offset
+        self._out_of_plane_offset = out_of_plane_offset
 
         if in_plane_angle_limits[0] > in_plane_angle_limits[1]:
             raise ValueError(
@@ -100,10 +91,69 @@ class LugLoad:
 
         self._out_of_plane_angle_limits = out_of_plane_angle_limits
 
-        self.out_of_plane_allowance = out_of_plane_allowance
-        self.daf_out_of_plane = daf_out_of_plane
-        self.uls_out_of_plane = uls_out_of_plane
-        self.out_of_plane_offset = out_of_plane_offset
+    @property
+    def swl(self):
+        """
+        The safe working load of the lug.
+        """
+
+        return self._swl
+
+    @property
+    def dia_pin(self):
+        """
+        The diameter of the pin used.
+        """
+
+        return self._dia_pin
+
+    @property
+    def out_of_plane_allowance(self):
+        """
+        The out-of-plane allowance of the lug.
+
+        An allowance for any unintended out-of-plane loading.
+        Typ. value in AS1418 is 4% of the SWL.
+        This is applied in addition to the calculated out-of-plane load.
+        """
+
+        return self._out_of_plane_allowance
+
+    @property
+    def shackle_offset(self):
+        """
+        Any offset from the hole centre in the direction towards the load.
+
+        For example, due to the length of the shackle.
+        """
+
+        return self._shackle_offset
+
+    @property
+    def out_of_plane_offset(self):
+        """
+        Any horizontal offset out-of-plane.
+
+        For example, if using shackles too wide for the lug.
+        """
+
+        return self._out_of_plane_offset
+
+    @property
+    def in_plane_angle_limits(self):
+        """
+        The minimum and maximum angle of the load, in plane.
+        """
+
+        return self._in_plane_angle_limits
+
+    @property
+    def out_of_plane_angle_limits(self):
+        """
+        The minimum and maximum angle of the load, out-of-plane.
+        """
+
+        return self._out_of_plane_angle_limits
 
     @property
     def min_in_plane_angle(self):
@@ -189,8 +239,8 @@ class LugLoad:
         sign = (1 if out_of_plane_angle >= 0 else -1) if match_sign_out_of_plane else 1
 
         return (
-            self.swl * self.uls * self.daf,
-            self.out_of_plane_allowance * self.swl * self.daf * self.uls * sign,
+            self.swl,
+            self.out_of_plane_allowance * sign,
         )
 
     def in_plane_angles(self, no_increments: int) -> np.ndarray:
@@ -198,8 +248,14 @@ class LugLoad:
         Returns a range of angles between the minimum and maximum in-plane angles.
         Increments are linearly spaced.
 
-        :param no_increments: The no. of increments to return.
-        :return: A numpy array of the angles.
+        Parameters
+        ----------
+        no_increments : int
+            The no. of increments to return.
+
+        Returns
+        -------
+        np.ndarray
         """
 
         if self.min_in_plane_angle == self.max_in_plane_angle:
@@ -214,8 +270,14 @@ class LugLoad:
         Returns a range of angles between the minimum and maximum out-of-plane angles.
         Increments are linearly spaced.
 
-        :param no_increments: The no. of increments to return.
-        :return: A numpy array of the angles.
+        Parameters
+        ----------
+        no_increments : int
+            The no. of increments to return.
+
+        Returns
+        -------
+        np.ndarray
         """
 
         if self.min_out_of_plane_angle == self.max_out_of_plane_angle:
@@ -282,16 +344,12 @@ class LugLoad:
             (
                 f"{type(self).__name__}("
                 + f"{self.swl=:.3f}, "
+                + f"{self.out_of_plane_allowance=:.3f}, "
                 + f"{self.dia_pin=:.3f}, "
-                + f"{self.daf=:.3f}, "
-                + f"{self.uls=:.3f}, "
-                + f"{self.hole_offset=:.3f}, "
+                + f"{self.shackle_offset=:.3f}, "
+                + f"{self.out_of_plane_offset=:.3f}, "
                 + f"{self._in_plane_str=}, "
                 + f"{self._out_plane_str=}), "
-                + f"{self.out_of_plane_allowance=:.3f}, "
-                + f"{self.daf_out_of_plane=:.3f}, "
-                + f"{self.uls_out_of_plane=:.3f}, "
-                + f"{self.out_of_plane_offset=:.3f}, "
             )
             .replace("self._", "")
             .replace("self.", "")
