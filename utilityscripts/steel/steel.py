@@ -19,7 +19,7 @@ from sectionproperties.pre.library.primitive_sections import (
 )
 from sectionproperties.pre.library.steel_sections import mono_i_section
 
-from utilityscripts.section_prop import build_circle
+from utilityscripts.geometry import build_circle
 
 # All the standard I & C sections as dataframes
 _DATA_PATH = Path(Path(__file__).parent) / Path("data")
