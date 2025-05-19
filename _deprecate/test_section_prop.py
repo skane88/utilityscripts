@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from utilityscripts.section_prop import (
+from _deprecate.section_prop import (
     CombinedSection,
     GenericSection,
     Polygon,
@@ -170,8 +170,8 @@ def test_combined_section_and_generic_centroid(sections):
     a = sections[1].move(x=23, y=23)
     b = sections[0].move(x=23, y=23)
 
-    assert math.isclose(a.centroid.x, b.centroid.x)
-    assert math.isclose(a.centroid.y, b.centroid.y)
+    assert math.isclose(a.centroid.x, b.centroid.x)  # noqa: S101
+    assert math.isclose(a.centroid.y, b.centroid.y)  # noqa: S101
 
 
 @pytest.mark.parametrize(
@@ -184,7 +184,7 @@ def test_combined_section_gives_same_as_generic(sect_property, sections):
     Test a test shape of a CombinedSection
     """
 
-    assert round(getattr(sections[0], sect_property)) == round(
+    assert round(getattr(sections[0], sect_property)) == round(  # noqa: S101
         getattr(sections[1], sect_property)
     )
 
@@ -242,7 +242,7 @@ def test_combined_section_to_poly_is_correct(sect_property, sections):
     c = make_i(b_f=311, d=327.2, t_f=25, t_w=15.7)
     from_p = GenericSection(poly=c.polygon)
 
-    assert round(getattr(c, sect_property)) == round(getattr(from_p, sect_property))
+    assert round(getattr(c, sect_property)) == round(getattr(from_p, sect_property))  # noqa: S101
 
 
 @pytest.mark.parametrize(
@@ -294,7 +294,7 @@ def test_against_standard_sects(data, sect_property):
         calculated = getattr(i_sect, a)
         test = data[sect_property]
 
-        assert math.isclose(calculated, test, rel_tol=0.1)
+        assert math.isclose(calculated, test, rel_tol=0.1)  # noqa: S101
 
 
 @pytest.mark.parametrize(
@@ -361,7 +361,7 @@ def test_against_standard_sects_with_radius(data, sect_property):
         calculated = getattr(i_sect, a)
         test = data[sect_property]
 
-        assert math.isclose(calculated, test, rel_tol=0.03)
+        assert math.isclose(calculated, test, rel_tol=0.03)  # noqa: S101
 
 
 @pytest.mark.parametrize(
@@ -382,7 +382,7 @@ def test_first_moment_uu(test_input, cut_height, expected):
     """
 
     actual = test_input.first_moment_uu(cut_uu=cut_height)
-    assert math.isclose(actual, expected)
+    assert math.isclose(actual, expected)  # noqa: S101
 
 
 @pytest.mark.parametrize(
@@ -403,7 +403,7 @@ def test_first_moment_vv(test_input, cut_right, expected):
     """
 
     actual = test_input.first_moment_vv(cut_vv=cut_right)
-    assert math.isclose(actual, expected)
+    assert math.isclose(actual, expected)  # noqa: S101
 
 
 @pytest.mark.parametrize(
@@ -432,7 +432,7 @@ def test_first_moment_11(test_input, cut_22, expected):
     """
 
     actual = test_input.first_moment_11(cut_22=cut_22)
-    assert math.isclose(actual, expected)
+    assert math.isclose(actual, expected)  # noqa: S101
 
 
 @pytest.mark.parametrize(
@@ -461,7 +461,7 @@ def test_first_moment_22(test_input, cut_11, expected):
     """
 
     actual = test_input.first_moment_22(cut_11=cut_11)
-    assert math.isclose(actual, expected)
+    assert math.isclose(actual, expected)  # noqa: S101
 
 
 @pytest.mark.parametrize(
@@ -498,36 +498,36 @@ def test_plastic_modulus_same(sect_a, sect_b):
     :param sect_b: The second section.
     """
 
-    assert math.isclose(
+    assert math.isclose(  # noqa: S101
         sect_a.first_moment_11(cut_22=15, above=True),
         sect_a.first_moment_11(cut_22=15, above=False),
     )
-    assert math.isclose(
+    assert math.isclose(  # noqa: S101
         sect_b.first_moment_11(cut_22=15, above=True),
         sect_b.first_moment_11(cut_22=15, above=False),
     )
-    assert math.isclose(
+    assert math.isclose(  # noqa: S101
         sect_a.first_moment_11(cut_22=15, above=True),
         sect_b.first_moment_11(cut_22=15, above=True),
     )
-    assert math.isclose(
+    assert math.isclose(  # noqa: S101
         sect_a.first_moment_11(cut_22=15, above=False),
         sect_b.first_moment_11(cut_22=15, above=False),
     )
 
-    assert math.isclose(
+    assert math.isclose(  # noqa: S101
         sect_a.first_moment_22(cut_11=15, right=True),
         sect_a.first_moment_22(cut_11=15, right=False),
     )
-    assert math.isclose(
+    assert math.isclose(  # noqa: S101
         sect_b.first_moment_22(cut_11=15, right=True),
         sect_b.first_moment_22(cut_11=15, right=False),
     )
-    assert math.isclose(
+    assert math.isclose(  # noqa: S101
         sect_a.first_moment_22(cut_11=15, right=True),
         sect_b.first_moment_22(cut_11=15, right=True),
     )
-    assert math.isclose(
+    assert math.isclose(  # noqa: S101
         sect_a.first_moment_22(cut_11=15, right=False),
         sect_b.first_moment_22(cut_11=15, right=False),
     )
@@ -541,10 +541,10 @@ def test_plastic_modulus_uuvv():
 
     sect = make_i(b_f=100, d=100, t_f=10, t_w=10).move(x=10, y=10)
 
-    assert math.isclose(
+    assert math.isclose(  # noqa: S101
         sect.first_moment_uu(cut_uu=15), sect.first_moment_uu(cut_xx=25)
     )
-    assert math.isclose(
+    assert math.isclose(  # noqa: S101
         sect.first_moment_vv(cut_vv=15), sect.first_moment_vv(cut_yy=25)
     )
 
@@ -564,7 +564,7 @@ def test_plastic_modulus_uuvv2():
     uu = strengthened.first_moment_uu(cut_uu=-(strengthened.centroid.y - 0.025))
     xx = strengthened.first_moment_uu(cut_xx=0.025)
 
-    assert math.isclose(uu, xx)
+    assert math.isclose(uu, xx)  # noqa: S101
 
 
 def test_plastic_modulus_uu3():
@@ -581,7 +581,7 @@ def test_plastic_modulus_uu3():
 
     uu = strengthened.first_moment_uu(cut_xx=0)
 
-    assert math.isclose(uu, 0.0, abs_tol=1e-6)
+    assert math.isclose(uu, 0.0, abs_tol=1e-6)  # noqa: S101
 
 
 def test_plastic_modulus_11_rotated():
@@ -596,5 +596,5 @@ def test_plastic_modulus_11_rotated():
 
     t_end = t_start.rotate(angle=45, use_radians=False)
 
-    assert math.isclose(t_end.plastic_modulus_11, t_expected_11, abs_tol=1e-6)
-    assert math.isclose(t_end.plastic_modulus_22, t_expected_22, abs_tol=1e-6)
+    assert math.isclose(t_end.plastic_modulus_11, t_expected_11, abs_tol=1e-6)  # noqa: S101
+    assert math.isclose(t_end.plastic_modulus_22, t_expected_22, abs_tol=1e-6)  # noqa: S101
