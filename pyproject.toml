@@ -50,13 +50,9 @@ dev = [
  'ruff',
  "pytest-randomly",
  "pytest-cov",
- "pytest-xdist",
  "pytest-sugar",
  "pre-commit",
 ]
 
 [tool.pylint]
 disable = ["C0103"]
-
-[tool.pytest.ini_options]
-addopts = ["--numprocesses=auto"]
