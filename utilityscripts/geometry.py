@@ -3,7 +3,10 @@ Intended to contain some helper functions & classes for basic geometric operatio
 (calculating areas etc.). This is not intended to calculate section properties.
 """
 
-from math import asin, cos, pi, sin, sqrt
+from math import asin, cos, pi, radians, sin, sqrt
+
+import numpy as np
+from shapely.geometry import Point
 
 
 class Circle:
@@ -227,3 +230,57 @@ if __name__ == "__main__":
     print(c4.y2)
     print(c4.x)
     print()
+
+
+def build_circle(
+    *,
+    centroid=Point | tuple[float, float],
+    radius,
+    no_points: int = 64,
+    limit_angles: tuple[float, float] | None = None,
+    use_radians: bool = True,
+) -> list[tuple[float, float]]:
+    """
+    Build a list of points that approximate a circle or circular arc.
+
+    :param centroid: The centroid of the circle.
+    :param radius: The radius of the circle.
+    :param no_points: The no. of points to include in the definition of the circle.
+    :param limit_angles: Angles to limit the circular arc. Should be of the format
+        (min, max).
+        Angles to be taken CCW.
+    :param use_radians: Use radians for angles?
+    :return: A circle, or part thereof, as a list of lists defining the points:
+        [[x1, y1], [x2, y2], ..., [xn, yn]]
+    """
+
+    full_circle = radians(360)
+
+    if limit_angles is not None:
+        min_angle = limit_angles[0]
+        max_angle = limit_angles[1]
+
+        if not use_radians:
+            min_angle = radians(min_angle)
+            max_angle = radians(max_angle)
+
+    else:
+        min_angle = 0
+        max_angle = full_circle
+
+    angle_range = np.linspace(start=min_angle, stop=max_angle, num=no_points)
+    x_points_orig = np.full(no_points, radius)
+
+    x_points = x_points_orig * np.cos(angle_range)  # - y_points * np.sin(angle_range)
+    y_points = x_points_orig * np.sin(angle_range)  # + y_points * np.cos(angle_range)
+    # can neglect the 2nd half of the formula because the y-points are just zeroes
+
+    if isinstance(centroid, Point):
+        centroid = (centroid.x, centroid.y)
+
+    x_points = x_points + centroid[0]
+    y_points = y_points + centroid[1]
+
+    all_points = np.transpose(np.stack((x_points, y_points)))
+
+    return [(p[0], p[1]) for p in all_points.tolist()]
