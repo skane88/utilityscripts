@@ -236,15 +236,15 @@ def test_bolt_grade():
     assert np.array_equal(bg.f_yf, f_yf)
     assert np.array_equal(bg.f_uf, f_uf)
 
-    assert isclose(bg.get_f_y(0.008), 640e6)
-    assert isclose(bg.get_f_y(0.015999), 640e6)
-    assert isclose(bg.get_f_y(0.016), 660e6)
-    assert isclose(bg.get_f_y(0.099), 660e6)
+    assert isclose(bg.get_f_yf(0.008), 640e6)
+    assert isclose(bg.get_f_yf(0.015999), 640e6)
+    assert isclose(bg.get_f_yf(0.016), 660e6)
+    assert isclose(bg.get_f_yf(0.099), 660e6)
 
-    assert isclose(bg.get_f_u(0.008), 800e6)
-    assert isclose(bg.get_f_u(0.015999), 800e6)
-    assert isclose(bg.get_f_u(0.016), 830e6)
-    assert isclose(bg.get_f_u(0.100), 830e6)
+    assert isclose(bg.get_f_uf(0.008), 800e6)
+    assert isclose(bg.get_f_uf(0.015999), 800e6)
+    assert isclose(bg.get_f_uf(0.016), 830e6)
+    assert isclose(bg.get_f_uf(0.100), 830e6)
 
 
 def test_bolt_grades():
