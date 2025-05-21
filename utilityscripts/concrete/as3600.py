@@ -35,7 +35,7 @@ class Ductility(StrEnum):
     L = "L"
 
 
-class SectType813(StrEnum):
+class S813SectType(StrEnum):
     """
     An Enum to represent the 3x types of section referred to in S8.1.3 note 2.
     """
@@ -45,7 +45,7 @@ class SectType813(StrEnum):
     OTHER = "other"
 
 
-def get_f_cm(f_c):
+def s3_1_2_get_f_cm(f_c):
     """
     Determine the mean compressive strength, based on the values given in
     AS3600-2018 Table 3.1.2
@@ -57,7 +57,7 @@ def get_f_cm(f_c):
     return np.interp(f_c, f_c_vals, f_cm_vals)
 
 
-def get_f_cmi(f_c):
+def s3_1_2_get_f_cmi(f_c):
     """
     Determine the mean in-situ compressive strength, based on the values given in
     AS3600-2018 Table 3.1.2
@@ -69,7 +69,7 @@ def get_f_cmi(f_c):
     return np.interp(f_c, f_c_vals, f_cmi_vals)
 
 
-def f_ctf_s3_1_1_3(f_c):
+def s3_1_1_3_f_ctf(f_c):
     """
     Determine the characteristic flexural strength of the concrete, based on S3.1.1.3 of
     AS3600-2018.
@@ -88,7 +88,7 @@ def f_ctf_s3_1_1_3(f_c):
     return 0.6 * (f_c**0.5)
 
 
-def f_ct_s3_1_1_3(f_c):
+def s3_1_1_3_f_ct(f_c):
     """
     Determine the characteristic tensile strength of the concrete, based on S3.1.1.3 of
     AS3600-2018.
@@ -121,7 +121,7 @@ class Concrete:
         f_cm: float | None = None,
         f_cmi: float | None = None,
         elastic_modulus: float | None = None,
-        sect_type: SectType813 = SectType813.RECTANGULAR,
+        sect_type: S813SectType = S813SectType.RECTANGULAR,
     ):
         """
         Initialise the concrete material.
@@ -197,7 +197,7 @@ class Concrete:
         """
 
         if self._f_cm is None:
-            self._f_cm = get_f_cm(self._f_c)
+            self._f_cm = s3_1_2_get_f_cm(self._f_c)
 
         return self._f_cm
 
@@ -213,7 +213,7 @@ class Concrete:
         """
 
         if self._f_cmi is None:
-            self._f_cmi = get_f_cmi(self._f_c)
+            self._f_cmi = s3_1_2_get_f_cmi(self._f_c)
 
         return self._f_cmi
 
@@ -247,7 +247,7 @@ class Concrete:
         as per AS3600 S3.1.1.3.
         """
 
-        return f_ctf_s3_1_1_3(self.f_c)
+        return s3_1_1_3_f_ctf(self.f_c)
 
     @property
     def f_ct(self):
@@ -256,7 +256,7 @@ class Concrete:
         as per AS3600 S3.1.1.3.
         """
 
-        return f_ct_s3_1_1_3(self.f_c)
+        return s3_1_1_3_f_ct(self.f_c)
 
     @property
     def alpha_2(self):
@@ -264,7 +264,7 @@ class Concrete:
         Calculate parameter alpha_2 as per AS3600-2018.
         """
 
-        return alpha_2_s8_1_3(f_c=self.f_c, sect_type=self._sect_type)
+        return s8_1_3_alpha_2(f_c=self.f_c, sect_type=self._sect_type)
 
     @property
     def gamma(self):
@@ -272,7 +272,7 @@ class Concrete:
         Calculate parameter gamma as per AS3600-2018.
         """
 
-        return gamma_s8_1_3(self.f_c)
+        return s8_1_3_gamma(self.f_c)
 
     @property
     def rect_strain(self):
@@ -516,8 +516,8 @@ def circle_area(diameter):
     return pi * (diameter**2) / 4
 
 
-def alpha_2_s8_1_3(
-    f_c: float, *, sect_type: SectType813 | str = SectType813.RECTANGULAR
+def s8_1_3_alpha_2(
+    f_c: float, *, sect_type: S813SectType | str = S813SectType.RECTANGULAR
 ) -> float:
     """
     Calculate parameter alpha_2 as per AS3600-2018.
@@ -531,11 +531,11 @@ def alpha_2_s8_1_3(
     """
 
     if isinstance(sect_type, str):
-        sect_type = SectType813(sect_type)
+        sect_type = S813SectType(sect_type)
 
-    if sect_type == SectType813.RECTANGULAR:
+    if sect_type == S813SectType.RECTANGULAR:
         multiplier = 1.00
-    elif sect_type == SectType813.CIRCULAR:
+    elif sect_type == S813SectType.CIRCULAR:
         multiplier = 0.95
     else:
         multiplier = 0.90
@@ -543,7 +543,7 @@ def alpha_2_s8_1_3(
     return max(0.67, 0.85 - 0.0015 * f_c) * multiplier
 
 
-def gamma_s8_1_3(f_c: float) -> float:
+def s8_1_3_gamma(f_c: float) -> float:
     """
     Calculate parameter gamma as per AS3600-2018 Section 8.1.3.
 
@@ -565,10 +565,10 @@ def generate_rectilinear_block(*, f_c, max_compression_strain: float = 0.003):
         concrete. According to AS3600 S8.1.3 this is 0.003.
     """
 
-    gamma_val = gamma_s8_1_3(f_c)
+    gamma_val = s8_1_3_gamma(f_c)
     min_strain = max_compression_strain * (1 - gamma_val)
 
-    compressive_strength = alpha_2_s8_1_3(f_c) * f_c
+    compressive_strength = s8_1_3_alpha_2(f_c) * f_c
 
     return [
         [0, min_strain, max_compression_strain],
@@ -599,7 +599,7 @@ def m_uo():
     pass
 
 
-def a_svmin_s8_2_1_7(*, f_c, f_sy, b_v, s: float = 1000):
+def s8_2_1_7_a_svmin(*, f_c, f_sy, b_v, s: float = 1000):
     """
     Calculate the minimum transverse shear reinforcement required as per AS3600.
 
@@ -629,7 +629,7 @@ def a_svmin_s8_2_1_7(*, f_c, f_sy, b_v, s: float = 1000):
     return s * 0.08 * (f_c**0.5) * b_v / f_sy
 
 
-def v_u_s8_2_3_1(
+def s8_2_3_1_v_u(
     *,
     f_c: float,
     b_v: float,
@@ -682,12 +682,12 @@ def v_u_s8_2_3_1(
         The shear capacity in kN
     """
 
-    return v_uc_s8_2_4_1(f_c=f_c, k_v=k_v, b_v=b_v, d_v=d_v) + v_us_s8_2_5_2(
+    return s8_2_4_1_v_uc(f_c=f_c, k_v=k_v, b_v=b_v, d_v=d_v) + s8_2_5_2_v_us(
         a_sv=a_sv, f_sy=f_sy, d_v=d_v, theta_v=theta_v, s=s, a_v=a_v
     )
 
 
-def v_u_max_s8_2_3_2(
+def s8_2_3_2_v_u_max(
     *, f_c: float, b_v: float, d_v: float, theta_v: float, a_v: float = pi / 2
 ):
     """
@@ -721,7 +721,7 @@ def v_u_max_s8_2_3_2(
     return 0.55 * (part_a * part_b) / 1000
 
 
-def v_uc_s8_2_4_1(*, k_v, b_v, d_v, f_c):
+def s8_2_4_1_v_uc(*, k_v, b_v, d_v, f_c):
     """
     Calculate the concrete contribution to shear capacity.
     As per AS3600 S8.2.4.1.
@@ -747,7 +747,7 @@ def v_uc_s8_2_4_1(*, k_v, b_v, d_v, f_c):
     return k_v * b_v * d_v * f_c**0.5 / 1000
 
 
-def theta_v_s8_2_4_2(*, eta_x, return_radians: float = True):
+def s8_2_4_2_theta_v(*, eta_x, return_radians: float = True):
     """
     Calculate the inclination of the concrete compressive strut.
     As per AS3600 S8.2.4.2.
@@ -771,7 +771,7 @@ def theta_v_s8_2_4_2(*, eta_x, return_radians: float = True):
     return theta_v
 
 
-def k_v_s8_2_4_2(*, f_c, a_sv, a_svmin, eta_x, d_v, d_g: float = 20.0):
+def s8_2_4_2_k_v(*, f_c, a_sv, a_svmin, eta_x, d_v, d_g: float = 20.0):
     """
     Calculate the concrete shear strength modification factor, k_v.
     As per AS3600 S8.2.4.2.
@@ -811,7 +811,7 @@ def k_v_s8_2_4_2(*, f_c, a_sv, a_svmin, eta_x, d_v, d_g: float = 20.0):
     return k_v_base
 
 
-def eta_x_s8_2_4_2(
+def s8_2_4_2_eta_x(
     *, mstar, vstar, nstar, d_v, e_s, a_st, e_c: float = 0.0, a_ct: float = 0.0
 ):
     """
@@ -897,7 +897,7 @@ def eta_x_s8_2_4_2(
     return min(max(top / bottom, min_eta_x), max_eta_x)
 
 
-def theta_v_s8_2_4_3(*, return_radians: bool = True):
+def s8_2_4_3_theta_v(*, return_radians: bool = True):
     """
     Determine the compressive strut angle for concrete.
     Uses the simplified method of AS3600 S8.2.4.3.
@@ -924,7 +924,7 @@ def theta_v_s8_2_4_3(*, return_radians: bool = True):
     return theta_v
 
 
-def k_v_s8_2_4_3(*, a_sv, a_svmin, d_v):
+def s8_2_4_3_k_v(*, a_sv, a_svmin, d_v):
     """
     Calculate the concrete shear strength modification factor, k_v.
     As per the simplified method of AS3600 S8.2.4.3.
@@ -957,7 +957,7 @@ def k_v_s8_2_4_3(*, a_sv, a_svmin, d_v):
     return k_v_max
 
 
-def v_us_s8_2_5_2(*, a_sv, f_sy, d_v, theta_v, s: float = 1000, a_v: float = pi / 2):
+def s8_2_5_2_v_us(*, a_sv, f_sy, d_v, theta_v, s: float = 1000, a_v: float = pi / 2):
     """
     Calculate the steel contribution to shear strength, V_us.
     As per AS3600 S8.2.5.2.
@@ -992,7 +992,7 @@ def v_us_s8_2_5_2(*, a_sv, f_sy, d_v, theta_v, s: float = 1000, a_v: float = pi 
     return steel_param * angle_param / 1000
 
 
-def v_interface_s8_4_3(a_sf, f_sy, a_interface, mu, gp, k_co, f_ct):
+def s8_4_3_v_interface(a_sf, f_sy, a_interface, mu, gp, k_co, f_ct):
     """
     Calculate the interface shear capacity as per AS3600 S8.4.3.
 
