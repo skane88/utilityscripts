@@ -6,10 +6,11 @@ from pathlib import Path
 from tkinter import Tk, filedialog
 from typing import List, Tuple
 
-import imagehash
-from imagehash import ImageHash
+import imagehash  # type: ignore
+from imagehash import ImageHash  # type: ignore
 from PIL import Image, ImageFile
-from ui_funcs import get_number_input
+
+from utilityscripts.ui_funcs import get_number_input
 
 DIFFERENCE_THRESHOLD = 20  # how similar should images be?
 

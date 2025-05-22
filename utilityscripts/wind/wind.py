@@ -13,6 +13,7 @@ import polars as pl
 from utilityscripts.wind.as1170_2 import (
     SectionType,
     StandardVersion,
+    WindRegion,
     WindSite,
     m_c_or_f_x,
     m_d_des,
@@ -295,7 +296,7 @@ class SimpleBuilding:
 
     def m_d_on_face(
         self, face: int, version: StandardVersion = StandardVersion.AS1170_2_2021
-    ) -> [float, float]:
+    ) -> tuple[float, float]:
         """
         The value of M_d on a given face.
 
@@ -318,7 +319,7 @@ class SimpleBuilding:
 
     def m_c_or_f_x(
         self,
-        wind_region: str,
+        wind_region: WindRegion | str,
         return_period: float,
         version: StandardVersion = StandardVersion.AS1170_2_2021,
     ):

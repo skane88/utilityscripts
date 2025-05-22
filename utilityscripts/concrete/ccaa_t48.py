@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 from matplotlib import ticker
-from scipy.interpolate import CloughTocher2DInterpolator
+from scipy.interpolate import CloughTocher2DInterpolator  # type: ignore
 
 from utilityscripts.plotting import AGILITUS_COLORS
 
@@ -1306,13 +1306,13 @@ def t_4(*, f_4: float) -> float | np.ndarray:
 
     data = _t_4_data()
 
-    if f_4 < data["f4"].min():
+    if f_4 < data["f4"].min():  # type: ignore
         raise ValueError(
             f"f_4 value of {f_4} is less than "
             + f"the minimum value of {data['f4'].min():.0f}"
         )
 
-    if f_4 > data["f4"].max():
+    if f_4 > data["f4"].max():  # type: ignore
         raise ValueError(
             f"f_4 value of {f_4} is greater than "
             + f"the maximum value of {data['f4'].max():.0f}"

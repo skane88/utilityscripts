@@ -520,7 +520,7 @@ class LugCheck:
         ]
 
         a_e = (
-            np.min(np.asarray([self.lug.slice(angle=a).length for a in check_angles]))
+            np.min(np.asarray([self.lug._slice(angle=a).length for a in check_angles]))
             + dia_pin / 2
         )
 

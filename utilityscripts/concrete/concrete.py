@@ -6,7 +6,7 @@ import re
 from collections import namedtuple
 from math import pi
 
-from humre import (
+from humre import (  # type: ignore
     DIGIT,
     chars,
     exactly,

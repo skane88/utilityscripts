@@ -80,7 +80,7 @@ class SteelGrade:
         self.f_y = np.asarray(f_y)
         self.f_u = np.asarray(f_u)
 
-    def get_f_y(self, thickness):
+    def get_f_y(self, thickness: float) -> float:
         """
         Get the yield strength at a given thickness.
 
@@ -90,9 +90,9 @@ class SteelGrade:
             The thickness to test.
         """
 
-        return np.interp(x=thickness, xp=self.thickness, fp=self.f_y)
+        return float(np.interp(x=thickness, xp=self.thickness, fp=self.f_y))
 
-    def get_f_u(self, thickness):
+    def get_f_u(self, thickness: float) -> float:
         """
         Get the ultimate strength at a given thickness.
 
@@ -102,7 +102,7 @@ class SteelGrade:
             The thickness to test.
         """
 
-        return np.interp(x=thickness, xp=self.thickness, fp=self.f_u)
+        return float(np.interp(x=thickness, xp=self.thickness, fp=self.f_u))
 
     def plot_grade(self, *, strength: str = "both"):
         """
@@ -1199,7 +1199,7 @@ def chs_sections(
 
     chs_sects = {}
 
-    for _, *v in chs_section_df().iterrows():
+    for _, *v in chs_section_df().iter_rows():
         obj = v[0].to_dict()
 
         sg = steel_grade

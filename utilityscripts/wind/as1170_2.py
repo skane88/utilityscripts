@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from enum import StrEnum
 from math import log10
+from numbers import Real
 from pathlib import Path
 
 import numpy as np
@@ -274,7 +275,7 @@ class WindSite:
 
     def m_d(
         self,
-        direction: float | CardinalDirection,
+        direction: str | Real | CardinalDirection,
         version: StandardVersion = StandardVersion.AS1170_2_2021,
     ) -> tuple[float, float]:
         """
@@ -313,7 +314,7 @@ class WindSite:
 
     def m_d_des(
         self,
-        direction: float | str,
+        direction: str | Real | CardinalDirection,
         version: StandardVersion = StandardVersion.AS1170_2_2021,
         tolerance: float = 45.0,
     ):
@@ -471,7 +472,7 @@ def v_r_no_f_x(*, a, b, return_period, k):
 
 def m_c_or_f_x(
     *,
-    wind_region: WindRegion,
+    wind_region: WindRegion | str,
     return_period: float,
     version: StandardVersion = StandardVersion.AS1170_2_2021,
 ):
@@ -556,8 +557,8 @@ def v_r(
 
 def m_d_exact(
     *,
-    wind_region: str,
-    direction: float | CardinalDirection,
+    wind_region: str | WindRegion,
+    direction: str | Real | CardinalDirection,
     version: StandardVersion = StandardVersion.AS1170_2_2021,
 ) -> tuple[float, float]:
     """
@@ -645,7 +646,7 @@ def m_d_exact(
 def m_d_des(
     *,
     wind_region: str,
-    direction: float | str,
+    direction: Real | str | CardinalDirection,
     version: StandardVersion = StandardVersion.AS1170_2_2021,
     tolerance: float = 45.0,
 ) -> tuple[float, float]:
@@ -671,7 +672,7 @@ def m_d_des(
     Consisting of (M_d_struct, M_d_cladding)
     """
 
-    if isinstance(direction, str):
+    if isinstance(direction, (str, CardinalDirection)):
         angles = [direction, direction, direction]
     else:
         angles = [

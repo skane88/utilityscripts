@@ -10,7 +10,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d  # type: ignore
 
 from utilityscripts.result import Result
 
