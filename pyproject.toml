@@ -52,6 +52,9 @@ dev = [
  "pytest-cov",
  "pytest-sugar",
  "pre-commit",
+ "types-shapely",
+ "pandas-stubs",
+ "types-tqdm",
 ]
 
 [tool.pylint]

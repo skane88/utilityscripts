@@ -796,6 +796,19 @@ wheels = [
 ]
 
 [[package]]
+name = "pandas-stubs"
+version = "2.2.3.250308"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "types-pytz" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2e/5a/261f5c67a73e46df2d5984fe7129d66a3ed4864fd7aa9d8721abb3fc802e/pandas_stubs-2.2.3.250308.tar.gz", hash = "sha256:3a6e9daf161f00b85c83772ed3d5cff9522028f07a94817472c07b91f46710fd", size = 103986 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ba/64/ab61d9ca06ff66c07eb804ec27dec1a2be1978b3c3767caaa91e363438cc/pandas_stubs-2.2.3.250308-py3-none-any.whl", hash = "sha256:a377edff3b61f8b268c82499fdbe7c00fdeed13235b8b71d6a1dc347aeddc74d", size = 158053 },
+]
+
+[[package]]
 name = "parso"
 version = "0.8.4"
 source = { registry = "https://pypi.org/simple" }
@@ -1436,6 +1449,51 @@ wheels = [
 ]
 
 [[package]]
+name = "types-pytz"
+version = "2025.2.0.20250516"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bd/72/b0e711fd90409f5a76c75349055d3eb19992c110f0d2d6aabbd6cfbc14bf/types_pytz-2025.2.0.20250516.tar.gz", hash = "sha256:e1216306f8c0d5da6dafd6492e72eb080c9a166171fa80dd7a1990fd8be7a7b3", size = 10940 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c1/ba/e205cd11c1c7183b23c97e4bcd1de7bc0633e2e867601c32ecfc6ad42675/types_pytz-2025.2.0.20250516-py3-none-any.whl", hash = "sha256:e0e0c8a57e2791c19f718ed99ab2ba623856b11620cb6b637e5f62ce285a7451", size = 10136 },
+]
+
+[[package]]
+name = "types-requests"
+version = "2.32.0.20250515"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/06/c1/cdc4f9b8cfd9130fbe6276db574f114541f4231fcc6fb29648289e6e3390/types_requests-2.32.0.20250515.tar.gz", hash = "sha256:09c8b63c11318cb2460813871aaa48b671002e59fda67ca909e9883777787581", size = 23012 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fe/0f/68a997c73a129287785f418c1ebb6004f81e46b53b3caba88c0e03fcd04a/types_requests-2.32.0.20250515-py3-none-any.whl", hash = "sha256:f8eba93b3a892beee32643ff836993f15a785816acca21ea0ffa006f05ef0fb2", size = 20635 },
+]
+
+[[package]]
+name = "types-shapely"
+version = "2.1.0.20250512"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8b/56/286d7ce3459bb764ee6860c1a313147726f69a58abb507adc5e5cf21e47e/types_shapely-2.1.0.20250512.tar.gz", hash = "sha256:15f08bdb7fa937dca0039510c6d8fda72e8464bfd43bd9ac59127a61a38ce7c8", size = 25735 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/16/0f/a07e652433c0df2fcf5407a785368d37a19397579289adec8c1258682d89/types_shapely-2.1.0.20250512-py3-none-any.whl", hash = "sha256:e57b6d30758d717a218e682bc4e32c5a46e3c948008c79f0a653216ca93b65fb", size = 36888 },
+]
+
+[[package]]
+name = "types-tqdm"
+version = "4.67.0.20250516"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "types-requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/bd/07/eb40de2dc2ff2d1a53180330981b1bdb42313ab4e1b11195d8d64c878b3c/types_tqdm-4.67.0.20250516.tar.gz", hash = "sha256:230ccab8a332d34f193fc007eb132a6ef54b4512452e718bf21ae0a7caeb5a6b", size = 17232 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3b/92/df621429f098fc573a63a8ba348e731c3051b397df0cff278f8887f28d24/types_tqdm-4.67.0.20250516-py3-none-any.whl", hash = "sha256:1dd9b2c65273f2342f37e5179bc6982df86b6669b3376efc12aef0a29e35d36d", size = 24032 },
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.12.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1451,6 +1509,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/43/0f/fa4723f22942480be4ca9527bbde8d43f6c3f2fe8412f00e7f5f6746bc8b/tzdata-2025.1.tar.gz", hash = "sha256:24894909e88cdb28bd1636c6887801df64cb485bd593f2fd83ef29075a81d694", size = 194950 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0f/dd/84f10e23edd882c6f968c21c2434fe67bd4a528967067515feca9e611e5e/tzdata-2025.1-py2.py3-none-any.whl", hash = "sha256:7e127113816800496f027041c570f50bcd464a020098a3b6b199517772303639", size = 346762 },
+]
+
+[[package]]
+name = "urllib3"
+version = "2.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/78/16493d9c386d8e60e442a35feac5e00f0913c0f4b7c217c11e8ec2ff53e0/urllib3-2.4.0.tar.gz", hash = "sha256:414bc6535b787febd7567804cc015fee39daab8ad86268f1310a9250697de466", size = 390672 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6b/11/cc635220681e93a0183390e26485430ca2c7b5f9d33b15c74c2861cb8091/urllib3-2.4.0-py3-none-any.whl", hash = "sha256:4e16665048960a0900c702d4a66415956a584919c03361cac9f1df5c5dd7e813", size = 128680 },
 ]
 
 [[package]]
@@ -1485,6 +1552,7 @@ dev = [
     { name = "coverage" },
     { name = "isort" },
     { name = "mypy" },
+    { name = "pandas-stubs" },
     { name = "pre-commit" },
     { name = "pylint" },
     { name = "pytest" },
@@ -1492,6 +1560,8 @@ dev = [
     { name = "pytest-randomly" },
     { name = "pytest-sugar" },
     { name = "ruff" },
+    { name = "types-shapely" },
+    { name = "types-tqdm" },
 ]
 
 [package.metadata]
@@ -1508,6 +1578,7 @@ requires-dist = [
     { name = "numpy" },
     { name = "openpyxl" },
     { name = "pandas" },
+    { name = "pandas-stubs", marker = "extra == 'dev'" },
     { name = "pillow" },
     { name = "pillow-heif" },
     { name = "pint" },
@@ -1527,6 +1598,8 @@ requires-dist = [
     { name = "simplebeam" },
     { name = "sympy" },
     { name = "toml" },
+    { name = "types-shapely", marker = "extra == 'dev'" },
+    { name = "types-tqdm", marker = "extra == 'dev'" },
 ]
 
 [[package]]
