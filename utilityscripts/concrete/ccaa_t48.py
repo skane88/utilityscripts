@@ -1356,6 +1356,75 @@ def plot_t_4():
     plt.show()
 
 
+@lru_cache(maxsize=None)
+def _k_s_data():
+    """
+    Get the k_s data from the spreadsheet and into a dataframe for easy use later.
+
+    Notes
+    -----
+    - The data is interpolated from CCAA T48 Chart C1.
+    - A separate method is used so that the call into the spreadsheet can be cached.
+    """
+
+    return pl.read_excel(_DATA_PATH / Path("ccaa_t48_data.xlsx"), sheet_name="cht_c1")
+
+
+def k_s_from_cbr(cbr: float) -> float:
+    """
+    Get the soil modulus of subgrade reaction from the CBR.
+
+    Parameters
+    ----------
+    cbr : float
+        The CBR value in %.
+
+    Returns
+    -------
+    float
+        The soil modulus of subgrade reaction, in kPa/mm.
+    """
+
+    data = _k_s_data()
+
+    if cbr < data["cbr"].min():  # type: ignore
+        raise ValueError(
+            f"CBR value of {cbr} is less than "
+            + f"the minimum value of {data['cbr'].min():.0f}"
+        )
+
+    if cbr > data["cbr"].max():  # type: ignore
+        raise ValueError(
+            f"CBR value of {cbr} is greater than "
+            + f"the maximum value of {data['cbr'].max():.0f}"
+        )
+
+    return np.interp(cbr, data["cbr"], data["k_s"])
+
+
+def plot_k_s_vs_cbr():
+    """
+    Plot the k_s vs cbr data.
+
+    Primarily useful for debugging.
+    """
+
+    data = _k_s_data()
+
+    fig, ax = plt.subplots()
+
+    ax.plot(data["cbr"], data["k_s"])
+    ax.set_xlabel("CBR (%)")
+    ax.set_ylabel("$k_{s}$ (kPa/mm)")
+    ax.set_title("$k_{s}$ vs CBR")
+    ax.set_xlim(1, 100)
+    ax.set_ylim(0, 220)
+    ax.set_xscale("log")
+    ax.grid(visible=True)
+
+    plt.show()
+
+
 class Load:
     def __init__(
         self,

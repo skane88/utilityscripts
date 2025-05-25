@@ -20,6 +20,7 @@ from utilityscripts.concrete.ccaa_t48 import (
     k_2,
     k_3,
     k_4,
+    k_s_from_cbr,
     t_3,
     t_4,
     t_12,
@@ -560,6 +561,26 @@ def test_t_4(f_4, expected):
 def test_t_4_errors(f_4, expected):
     with pytest.raises(ValueError):
         assert isclose(t_4(f_4=f_4), expected, rel_tol=1e-2)
+
+
+@pytest.mark.parametrize(
+    "cbr, expected",
+    [
+        (2.0, 21.0),
+        (10, 53.0),
+        (20, 68.0),
+        (30, 83.0),
+        (40, 109.0),
+        (50, 135.0),
+        (60, 156.0),
+        (70, 174.0),
+        (80, 189.0),
+        (90, 201.0),
+        (100, 215.0),
+    ],
+)
+def test_k_s_from_cbr(cbr, expected):
+    assert isclose(k_s_from_cbr(cbr=cbr), expected, rel_tol=1e-2)
 
 
 def test_load():
