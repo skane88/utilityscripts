@@ -110,7 +110,7 @@ class Soil:
             f"{type(self).__name__}: "
             + f"e_sl = {self.e_sl:.1f} MPa, "
             + f"e_ss = {self.e_ss:.1f} MPa"
-            + f"{', ' + self.soil_name if self.soil_name + '.' else '.'}"
+            + f"{', ' + self.soil_name if self.soil_name else '.'}"
         )
 
 
@@ -1620,7 +1620,7 @@ class Slab:
         load_location: LoadLocation,
         p_or_q: float,
         normalising_length: float,
-        n_cycles: float,
+        no_cycles: float,
     ):
         """
         Add a load to the Slab object.
@@ -1641,7 +1641,7 @@ class Slab:
             The load magnitude.
         normalising_length : float
             The normalising length.
-        n_cycles: float
+        no_cycles: float
             The no. of cycles in the load.
 
         Returns
@@ -1660,7 +1660,7 @@ class Slab:
             load_location=load_location,
             magnitude=p_or_q,
             normalising_length=normalising_length,
-            no_cycles=n_cycles,
+            no_cycles=no_cycles,
         )
 
         return Slab(
@@ -1713,7 +1713,11 @@ class Slab:
 
         return k_1(loading_type=load.load_type, material_factor=self.material_factor)
 
-    def k_2(self, *, load_id):
+    def k_2(self, *, load_id) -> float:
+        """
+        Calculate the load repetition factor, k_2 as per Table 1.17 of CCAA T48.
+        """
+
         load = self.loads[load_id]
 
         return k_2(no_cycles=load.no_cycles, load_type=load.load_type)

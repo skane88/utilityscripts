@@ -622,7 +622,7 @@ def test_slab():
         load_location=LoadLocation.INTERNAL,
         p_or_q=100.0,
         normalising_length=1.0,
-        n_cycles=1e5,
+        no_cycles=1e5,
     )
     assert slab.loads == {}
     assert slab_2.loads == {
@@ -677,7 +677,7 @@ def test_slab_add_load_error():
         load_location=LoadLocation.INTERNAL,
         p_or_q=100.0,
         normalising_length=1.0,
-        n_cycles=1e5,
+        no_cycles=1e5,
     )
 
     with pytest.raises(ValueError):
@@ -687,7 +687,7 @@ def test_slab_add_load_error():
             load_location=LoadLocation.INTERNAL,
             p_or_q=100.0,
             normalising_length=1.0,
-            n_cycles=1e5,
+            no_cycles=1e5,
         )
 
 
