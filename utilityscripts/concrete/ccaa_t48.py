@@ -1182,7 +1182,8 @@ def plot_t_12_space(load_location: LoadLocation):
         ax.plot(line_data["f"], line_data["t"], color="black", label=f"p = {p} kN")
 
     ax.set_title(
-        f"{'T_1' if load_location == LoadLocation.INTERNAL else 'T_2'} vs {'F_1' if load_location == LoadLocation.INTERNAL else 'F_2'}"
+        f"{'T_1' if load_location == LoadLocation.INTERNAL else 'T_2'} "
+        + f"vs {'F_1' if load_location == LoadLocation.INTERNAL else 'F_2'}"
     )
 
     plt.show()
