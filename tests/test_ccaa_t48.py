@@ -587,13 +587,13 @@ def test_load():
     load = Load(
         load_type=LoadingType.WHEEL,
         load_location=LoadLocation.INTERNAL,
-        p_or_q=100.0,
+        magnitude=100.0,
         normalising_length=1.0,
         no_cycles=1e5,
     )
     assert load.load_type == LoadingType.WHEEL
     assert load.load_location == LoadLocation.INTERNAL
-    assert load.p_or_q == 100.0  # noqa: PLR2004
+    assert load.magnitude == 100.0  # noqa: PLR2004
     assert load.normalising_length == 1.0
     assert load.no_cycles == 1e5  # noqa: PLR2004
 
@@ -629,7 +629,7 @@ def test_slab():
         "load_1": Load(
             load_type=LoadingType.WHEEL,
             load_location=LoadLocation.INTERNAL,
-            p_or_q=100.0,
+            magnitude=100.0,
             normalising_length=1.0,
             no_cycles=1e5,
         )
@@ -640,7 +640,7 @@ def test_slab():
             "load_1": Load(
                 load_type=LoadingType.WHEEL,
                 load_location=LoadLocation.INTERNAL,
-                p_or_q=100.0,
+                magnitude=100.0,
                 normalising_length=1.0,
                 no_cycles=2e5,
             )
@@ -651,7 +651,7 @@ def test_slab():
         "load_1": Load(
             load_type=LoadingType.WHEEL,
             load_location=LoadLocation.INTERNAL,
-            p_or_q=100.0,
+            magnitude=100.0,
             normalising_length=1.0,
             no_cycles=2e5,
         )
@@ -709,7 +709,7 @@ def test_slab_add_loads_error():
             "load_1": Load(
                 load_type=LoadingType.WHEEL,
                 load_location=LoadLocation.INTERNAL,
-                p_or_q=100.0,
+                magnitude=100.0,
                 normalising_length=1.0,
                 no_cycles=1e5,
             ),
@@ -722,7 +722,7 @@ def test_slab_add_loads_error():
                 "load_1": Load(
                     load_type=LoadingType.WHEEL,
                     load_location=LoadLocation.INTERNAL,
-                    p_or_q=100.0,
+                    magnitude=100.0,
                     normalising_length=1.0,
                     no_cycles=1e5,
                 ),
@@ -734,14 +734,14 @@ def test_ccaa_app_d1():
     load_edge = Load(
         load_type=LoadingType.WHEEL,
         load_location=LoadLocation.EDGE,
-        p_or_q=100,
+        magnitude=100,
         normalising_length=1.8,
         no_cycles=20 * 40 * 5 * 52,
     )
     load_internal = Load(
         load_type=LoadingType.WHEEL,
         load_location=LoadLocation.INTERNAL,
-        p_or_q=100,
+        magnitude=100,
         normalising_length=1.8,
         no_cycles=20 * 40 * 5 * 52,
     )

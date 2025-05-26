@@ -1431,7 +1431,7 @@ class Load:
         *,
         load_type: LoadingType,
         load_location: LoadLocation,
-        p_or_q: float,
+        magnitude: float,
         normalising_length: float,
         no_cycles: float,
     ):
@@ -1444,7 +1444,7 @@ class Load:
             The type of load (e.g. wheel load, point load, distributed load).
         load_location : LoadLocation
             The location where the load is applied.
-        p_or_q : float
+        magnitude : float
             The magnitude of the load:
             - For wheel loads or point loads: load in kN
             - For distributed loads: pressure in kPa
@@ -1458,7 +1458,7 @@ class Load:
 
         self._load_type = load_type
         self._load_location = load_location
-        self._p_or_q = p_or_q
+        self._magnitude = magnitude
         self._normalising_length = normalising_length
         self._no_cycles = no_cycles
 
@@ -1479,7 +1479,7 @@ class Load:
         return self._load_location
 
     @property
-    def p_or_q(self) -> float:
+    def magnitude(self) -> float:
         """
         The load magnitude.
 
@@ -1489,7 +1489,7 @@ class Load:
         - For distributed loads this is in kPa.
         """
 
-        return self._p_or_q
+        return self._magnitude
 
     @property
     def normalising_length(self) -> float:
@@ -1519,7 +1519,7 @@ class Load:
         return (
             self.load_type == other.load_type
             and self.load_location == other.load_location
-            and self.p_or_q == other.p_or_q
+            and self.magnitude == other.magnitude
             and self.normalising_length == other.normalising_length
             and self.no_cycles == other.no_cycles
         )
@@ -1529,7 +1529,7 @@ class Load:
             f"{type(self).__name__}: "
             + f"Load Type: {self.load_type}, "
             + f"Load Location: {self.load_location}, "
-            + f"Load Magnitude: {self.p_or_q}"
+            + f"Load Magnitude: {self.magnitude}"
             + f"{'kPa' if self.load_type == LoadingType.DISTRIBUTED else 'kN'}, "
             + f"Normalising Length: {self.normalising_length}, "
             + f"No. cycles: {self.no_cycles}."
@@ -1658,7 +1658,7 @@ class Slab:
         copied_loads[load_id] = Load(
             load_type=load_type,
             load_location=load_location,
-            p_or_q=p_or_q,
+            magnitude=p_or_q,
             normalising_length=normalising_length,
             no_cycles=n_cycles,
         )
