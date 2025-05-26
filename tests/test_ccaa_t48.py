@@ -566,7 +566,7 @@ def test_t_4_errors(f_4, expected):
 @pytest.mark.parametrize(
     "cbr, expected",
     [
-        (2.0, 21.0),
+        (1.8, 21.0),
         (10, 53.0),
         (20, 68.0),
         (30, 83.0),
@@ -589,11 +589,13 @@ def test_load():
         load_location=LoadLocation.INTERNAL,
         p_or_q=100.0,
         normalising_length=1.0,
+        no_cycles=1e5,
     )
     assert load.load_type == LoadingType.WHEEL
     assert load.load_location == LoadLocation.INTERNAL
     assert load.p_or_q == 100.0  # noqa: PLR2004
     assert load.normalising_length == 1.0
+    assert load.no_cycles == 1e5  # noqa: PLR2004
 
 
 def test_slab():
@@ -604,7 +606,12 @@ def test_slab():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(soil_profile=soil_profile, loads={})
+    slab = Slab(
+        soil_profile=soil_profile,
+        f_tf=32.0,
+        material_factor=MaterialFactor.CONSERVATIVE,
+        loads={},
+    )
 
     assert slab.soil_profile == soil_profile
     assert slab.loads == {}
@@ -615,6 +622,7 @@ def test_slab():
         load_location=LoadLocation.INTERNAL,
         p_or_q=100.0,
         normalising_length=1.0,
+        n_cycles=1e5,
     )
     assert slab.loads == {}
     assert slab_2.loads == {
@@ -623,6 +631,7 @@ def test_slab():
             load_location=LoadLocation.INTERNAL,
             p_or_q=100.0,
             normalising_length=1.0,
+            no_cycles=1e5,
         )
     }
 
@@ -633,6 +642,7 @@ def test_slab():
                 load_location=LoadLocation.INTERNAL,
                 p_or_q=100.0,
                 normalising_length=1.0,
+                no_cycles=2e5,
             )
         }
     )
@@ -643,6 +653,7 @@ def test_slab():
             load_location=LoadLocation.INTERNAL,
             p_or_q=100.0,
             normalising_length=1.0,
+            no_cycles=2e5,
         )
     }
 
@@ -655,13 +666,18 @@ def test_slab_add_load_error():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(soil_profile=soil_profile)
+    slab = Slab(
+        soil_profile=soil_profile,
+        f_tf=32.0,
+        material_factor=MaterialFactor.CONSERVATIVE,
+    )
     slab = slab.add_load(
         load_id="load_1",
         load_type=LoadingType.WHEEL,
         load_location=LoadLocation.INTERNAL,
         p_or_q=100.0,
         normalising_length=1.0,
+        n_cycles=1e5,
     )
 
     with pytest.raises(ValueError):
@@ -671,6 +687,7 @@ def test_slab_add_load_error():
             load_location=LoadLocation.INTERNAL,
             p_or_q=100.0,
             normalising_length=1.0,
+            n_cycles=1e5,
         )
 
 
@@ -682,7 +699,11 @@ def test_slab_add_loads_error():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(soil_profile=soil_profile)
+    slab = Slab(
+        soil_profile=soil_profile,
+        f_tf=32.0,
+        material_factor=MaterialFactor.UNCONSERVATIVE,
+    )
     slab = slab.add_loads(
         loads={
             "load_1": Load(
@@ -690,6 +711,7 @@ def test_slab_add_loads_error():
                 load_location=LoadLocation.INTERNAL,
                 p_or_q=100.0,
                 normalising_length=1.0,
+                no_cycles=1e5,
             ),
         }
     )
@@ -702,6 +724,44 @@ def test_slab_add_loads_error():
                     load_location=LoadLocation.INTERNAL,
                     p_or_q=100.0,
                     normalising_length=1.0,
+                    no_cycles=1e5,
                 ),
             }
         )
+
+
+def test_ccaa_app_d():
+    load = Load(
+        load_type=LoadingType.WHEEL,
+        load_location=LoadLocation.EDGE,
+        p_or_q=100,
+        normalising_length=1.8,
+        no_cycles=20 * 40 * 5 * 52,
+    )
+
+    h_layers = [1.5, 2.5, 2.0, 3.0]
+    layer_names = ["Fill", "Sand", "Sandy Clay", "Very Stiff Clay"]
+    e_sl_layers = [20, 42, 37.4, 59.5]
+    b_layers = [1.0, 0.8, 0.7, 0.6]
+    e_ss_layers = [
+        e_ss_from_e_sl(e_sl=e_sl, b=b)
+        for e_sl, b in zip(e_sl_layers, b_layers, strict=True)
+    ]
+
+    soils = [
+        Soil(e_sl=e_sl, e_ss=e_ss, soil_name=soil_name)
+        for e_sl, e_ss, soil_name in zip(
+            e_sl_layers, e_ss_layers, layer_names, strict=True
+        )
+    ]
+
+    soil_profile = SoilProfile(h_layers=h_layers, soils=soils)
+
+    slab = Slab(
+        soil_profile=soil_profile,
+        f_tf=0.7 * (40**0.5),
+        material_factor=MaterialFactor.MIDRANGE,
+        loads={"forklift": load},
+    )
+
+    assert isclose(slab.f_all(load_id="forklift"), 2.15, rel_tol=2e-2)

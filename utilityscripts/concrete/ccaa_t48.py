@@ -172,7 +172,7 @@ class SoilProfile:
         return (
             f"{type(self).__name__}: "
             + f"no. layers = {len(self.h_layers)}, "
-            + f"total thickness = {self.h_total():.1f}."
+            + f"total thickness = {self.h_total:.1f}."
         )
 
 
@@ -1433,11 +1433,34 @@ class Load:
         load_location: LoadLocation,
         p_or_q: float,
         normalising_length: float,
+        no_cycles: float,
     ):
+        """
+        Initialise a Load object.
+
+        Parameters
+        ----------
+        load_type : LoadingType
+            The type of load (e.g. wheel load, point load, distributed load).
+        load_location : LoadLocation
+            The location where the load is applied.
+        p_or_q : float
+            The magnitude of the load:
+            - For wheel loads or point loads: load in kN
+            - For distributed loads: pressure in kPa
+        normalising_length : float
+            The normalising length:
+            - For wheel loads or point loads: spacing between loads
+            - For distributed loads: width of load or aisle
+        no_cycles : float
+            The number of load cycles.
+        """
+
         self._load_type = load_type
         self._load_location = load_location
         self._p_or_q = p_or_q
         self._normalising_length = normalising_length
+        self._no_cycles = no_cycles
 
     @property
     def load_type(self) -> LoadingType:
@@ -1481,6 +1504,14 @@ class Load:
 
         return self._normalising_length
 
+    @property
+    def no_cycles(self) -> float:
+        """
+        The number of cycles or the load.
+        """
+
+        return self._no_cycles
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Load):
             return False
@@ -1490,6 +1521,7 @@ class Load:
             and self.load_location == other.load_location
             and self.p_or_q == other.p_or_q
             and self.normalising_length == other.normalising_length
+            and self.no_cycles == other.no_cycles
         )
 
     def __repr__(self):
@@ -1499,7 +1531,8 @@ class Load:
             + f"Load Location: {self.load_location}, "
             + f"Load Magnitude: {self.p_or_q}"
             + f"{'kPa' if self.load_type == LoadingType.DISTRIBUTED else 'kN'}, "
-            + f"Normalising Length: {self.normalising_length}."
+            + f"Normalising Length: {self.normalising_length}, "
+            + f"No. cycles: {self.no_cycles}."
         )
 
 
@@ -1514,9 +1547,33 @@ class Slab:
     """
 
     def __init__(
-        self, *, soil_profile: SoilProfile, loads: dict[str, Load] | None = None
+        self,
+        *,
+        soil_profile: SoilProfile,
+        f_tf: float,
+        material_factor: MaterialFactor = MaterialFactor.CONSERVATIVE,
+        loads: dict[str, Load] | None = None,
     ):
+        """
+        Initialise a Slab.
+
+        Parameters
+        ----------
+        soil_profile : SoilProfile
+            The soil profile under the slab.
+        f_tf : float
+            The flexural tensile strength of the concrete, in MPa.
+        material_factor : MaterialFactor, optional
+            The material factor used to select k_1 as per Table 1.16 of CCAA T48.
+            Default is MaterialFactor.CONSERVATIVE.
+        loads : dict[str, Load] | None, optional
+            A dictionary of loads to apply to the slab. The keys are load IDs and the
+            values are Load objects. Default is None.
+        """
+
         self._soil_profile = soil_profile
+        self._f_tf = f_tf
+        self._material_factor = material_factor
 
         if loads is None:
             self._loads = {}
@@ -1530,6 +1587,22 @@ class Slab:
         """
 
         return self._soil_profile
+
+    @property
+    def f_tf(self) -> float:
+        """
+        The flexural tensile strength of the concrete. In MPa.
+        """
+
+        return self._f_tf
+
+    @property
+    def material_factor(self) -> MaterialFactor:
+        """
+        The material factor. Used to select k_1 as per Table 1.16 of CCAA T48.
+        """
+
+        return self._material_factor
 
     @property
     def loads(self) -> dict[str, Load]:
@@ -1547,6 +1620,7 @@ class Slab:
         load_location: LoadLocation,
         p_or_q: float,
         normalising_length: float,
+        n_cycles: float,
     ):
         """
         Add a load to the Slab object.
@@ -1567,6 +1641,8 @@ class Slab:
             The load magnitude.
         normalising_length : float
             The normalising length.
+        n_cycles: float
+            The no. of cycles in the load.
 
         Returns
         -------
@@ -1584,9 +1660,15 @@ class Slab:
             load_location=load_location,
             p_or_q=p_or_q,
             normalising_length=normalising_length,
+            no_cycles=n_cycles,
         )
 
-        return Slab(soil_profile=self.soil_profile, loads=copied_loads)
+        return Slab(
+            soil_profile=self.soil_profile,
+            f_tf=self.f_tf,
+            material_factor=self.material_factor,
+            loads=copied_loads,
+        )
 
     def add_loads(self, *, loads: dict[str, Load]) -> "Slab":
         """
@@ -1615,11 +1697,38 @@ class Slab:
 
         copied_loads = copied_loads | loads
 
-        return Slab(soil_profile=self.soil_profile, loads=copied_loads)
+        return Slab(
+            soil_profile=self.soil_profile,
+            f_tf=self.f_tf,
+            material_factor=self.material_factor,
+            loads=copied_loads,
+        )
+
+    def k_1(self, *, load_id) -> float:
+        """
+        Calculate the material factor, k_1 as per Table 1.16 of CCAA T48.
+        """
+
+        load = self.loads[load_id]
+
+        return k_1(loading_type=load.load_type, material_factor=self.material_factor)
+
+    def k_2(self, *, load_id):
+        load = self.loads[load_id]
+
+        return k_2(no_cycles=load.no_cycles, load_type=load.load_type)
+
+    def f_all(self, *, load_id) -> float:
+        """
+        Calculate the allowable concrete stress f_all for a given load case.
+        """
+
+        return self.f_tf * self.k_1(load_id=load_id) * self.k_2(load_id=load_id)
 
     def __repr__(self):
         return (
             f"{type(self).__name__}: "
             + f"Soil Profile: {self.soil_profile}, "
+            + f"f_tf: {self.f_tf:.2f}, "
             + f"With {len(self.loads)} loads."
         )
