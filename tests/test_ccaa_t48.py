@@ -730,10 +730,17 @@ def test_slab_add_loads_error():
         )
 
 
-def test_ccaa_app_d():
-    load = Load(
+def test_ccaa_app_d1():
+    load_edge = Load(
         load_type=LoadingType.WHEEL,
         load_location=LoadLocation.EDGE,
+        p_or_q=100,
+        normalising_length=1.8,
+        no_cycles=20 * 40 * 5 * 52,
+    )
+    load_internal = Load(
+        load_type=LoadingType.WHEEL,
+        load_location=LoadLocation.INTERNAL,
         p_or_q=100,
         normalising_length=1.8,
         no_cycles=20 * 40 * 5 * 52,
@@ -761,7 +768,8 @@ def test_ccaa_app_d():
         soil_profile=soil_profile,
         f_tf=0.7 * (40**0.5),
         material_factor=MaterialFactor.MIDRANGE,
-        loads={"forklift": load},
+        loads={"forklift-edge": load_edge, "forklift-internal": load_internal},
     )
 
-    assert isclose(slab.f_all(load_id="forklift"), 2.15, rel_tol=2e-2)
+    assert isclose(slab.f_all(load_id="forklift-edge"), 2.15, rel_tol=2e-2)
+    assert isclose(slab.f_all(load_id="forklift-internal"), 2.15, rel_tol=2e-2)
