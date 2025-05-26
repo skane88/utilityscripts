@@ -1431,7 +1431,6 @@ class Load:
         self,
         *,
         load_type: LoadingType,
-        load_location: LoadLocation,
         magnitude: float,
         normalising_length: float,
         no_cycles: float,
@@ -1458,7 +1457,6 @@ class Load:
         """
 
         self._load_type = load_type
-        self._load_location = load_location
         self._magnitude = magnitude
         self._normalising_length = normalising_length
         self._no_cycles = no_cycles
@@ -1470,14 +1468,6 @@ class Load:
         """
 
         return self._load_type
-
-    @property
-    def load_location(self) -> LoadLocation:
-        """
-        The location of the load.
-        """
-
-        return self._load_location
 
     @property
     def magnitude(self) -> float:
@@ -1519,7 +1509,6 @@ class Load:
 
         return (
             self.load_type == other.load_type
-            and self.load_location == other.load_location
             and self.magnitude == other.magnitude
             and self.normalising_length == other.normalising_length
             and self.no_cycles == other.no_cycles
@@ -1529,7 +1518,6 @@ class Load:
         return (
             f"{type(self).__name__}: "
             + f"Load Type: {self.load_type}, "
-            + f"Load Location: {self.load_location}, "
             + f"Load Magnitude: {self.magnitude}"
             + f"{'kPa' if self.load_type == LoadingType.DISTRIBUTED else 'kN'}, "
             + f"Normalising Length: {self.normalising_length}, "
@@ -1618,8 +1606,7 @@ class Slab:
         *,
         load_id: str,
         load_type: LoadingType,
-        load_location: LoadLocation,
-        p_or_q: float,
+        magnitude: float,
         normalising_length: float,
         no_cycles: float,
     ):
@@ -1636,10 +1623,9 @@ class Slab:
             The ID of the load.
         load_type : LoadingType
             The type of load.
-        load_location : LoadLocation
-            The location of the load.
-        p_or_q : float
+        magnitude : float
             The load magnitude.
+            Should be kN for wheel and point loads and kPa for distributed loads.
         normalising_length : float
             The normalising length.
         no_cycles: float
@@ -1658,8 +1644,7 @@ class Slab:
 
         copied_loads[load_id] = Load(
             load_type=load_type,
-            load_location=load_location,
-            magnitude=p_or_q,
+            magnitude=magnitude,
             normalising_length=normalising_length,
             no_cycles=no_cycles,
         )
@@ -1726,6 +1711,16 @@ class Slab:
     def f_all(self, *, load_id) -> float:
         """
         Calculate the allowable concrete stress f_all for a given load case.
+
+        Parameters
+        ----------
+        load_id : str
+            The ID of the load.
+
+        Returns
+        -------
+        float
+            The allowable concrete stress f_all. In MPa.
         """
 
         return self.f_tf * self.k_1(load_id=load_id) * self.k_2(load_id=load_id)

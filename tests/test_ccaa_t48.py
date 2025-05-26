@@ -586,13 +586,11 @@ def test_k_s_from_cbr(cbr, expected):
 def test_load():
     load = Load(
         load_type=LoadingType.WHEEL,
-        load_location=LoadLocation.INTERNAL,
         magnitude=100.0,
         normalising_length=1.0,
         no_cycles=1e5,
     )
     assert load.load_type == LoadingType.WHEEL
-    assert load.load_location == LoadLocation.INTERNAL
     assert load.magnitude == 100.0  # noqa: PLR2004
     assert load.normalising_length == 1.0
     assert load.no_cycles == 1e5  # noqa: PLR2004
@@ -619,8 +617,7 @@ def test_slab():
     slab_2 = slab.add_load(
         load_id="load_1",
         load_type=LoadingType.WHEEL,
-        load_location=LoadLocation.INTERNAL,
-        p_or_q=100.0,
+        magnitude=100.0,
         normalising_length=1.0,
         no_cycles=1e5,
     )
@@ -628,7 +625,6 @@ def test_slab():
     assert slab_2.loads == {
         "load_1": Load(
             load_type=LoadingType.WHEEL,
-            load_location=LoadLocation.INTERNAL,
             magnitude=100.0,
             normalising_length=1.0,
             no_cycles=1e5,
@@ -639,7 +635,6 @@ def test_slab():
         loads={
             "load_1": Load(
                 load_type=LoadingType.WHEEL,
-                load_location=LoadLocation.INTERNAL,
                 magnitude=100.0,
                 normalising_length=1.0,
                 no_cycles=2e5,
@@ -650,7 +645,6 @@ def test_slab():
     assert slab_3.loads == {
         "load_1": Load(
             load_type=LoadingType.WHEEL,
-            load_location=LoadLocation.INTERNAL,
             magnitude=100.0,
             normalising_length=1.0,
             no_cycles=2e5,
@@ -674,8 +668,7 @@ def test_slab_add_load_error():
     slab = slab.add_load(
         load_id="load_1",
         load_type=LoadingType.WHEEL,
-        load_location=LoadLocation.INTERNAL,
-        p_or_q=100.0,
+        magnitude=100.0,
         normalising_length=1.0,
         no_cycles=1e5,
     )
@@ -684,8 +677,7 @@ def test_slab_add_load_error():
         slab.add_load(
             load_id="load_1",
             load_type=LoadingType.WHEEL,
-            load_location=LoadLocation.INTERNAL,
-            p_or_q=100.0,
+            magnitude=100.0,
             normalising_length=1.0,
             no_cycles=1e5,
         )
@@ -708,7 +700,6 @@ def test_slab_add_loads_error():
         loads={
             "load_1": Load(
                 load_type=LoadingType.WHEEL,
-                load_location=LoadLocation.INTERNAL,
                 magnitude=100.0,
                 normalising_length=1.0,
                 no_cycles=1e5,
@@ -721,7 +712,6 @@ def test_slab_add_loads_error():
             loads={
                 "load_1": Load(
                     load_type=LoadingType.WHEEL,
-                    load_location=LoadLocation.INTERNAL,
                     magnitude=100.0,
                     normalising_length=1.0,
                     no_cycles=1e5,
@@ -731,16 +721,8 @@ def test_slab_add_loads_error():
 
 
 def test_ccaa_app_d1():
-    load_edge = Load(
+    forklift = Load(
         load_type=LoadingType.WHEEL,
-        load_location=LoadLocation.EDGE,
-        magnitude=100,
-        normalising_length=1.8,
-        no_cycles=20 * 40 * 5 * 52,
-    )
-    load_internal = Load(
-        load_type=LoadingType.WHEEL,
-        load_location=LoadLocation.INTERNAL,
         magnitude=100,
         normalising_length=1.8,
         no_cycles=20 * 40 * 5 * 52,
@@ -768,8 +750,7 @@ def test_ccaa_app_d1():
         soil_profile=soil_profile,
         f_tf=0.7 * (40**0.5),
         material_factor=MaterialFactor.MIDRANGE,
-        loads={"forklift-edge": load_edge, "forklift-internal": load_internal},
+        loads={"forklift": forklift},
     )
 
-    assert isclose(slab.f_all(load_id="forklift-edge"), 2.15, rel_tol=2e-2)
-    assert isclose(slab.f_all(load_id="forklift-internal"), 2.15, rel_tol=2e-2)
+    assert isclose(slab.f_all(load_id="forklift"), 2.15, rel_tol=2e-2)
