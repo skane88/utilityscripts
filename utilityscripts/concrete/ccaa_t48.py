@@ -1799,7 +1799,7 @@ class CCAA_T48:  # noqa: N801
 
         return k_1(loading_type=load.load_type, material_factor=self.material_factor)
 
-    def k_2(self, *, load_id) -> float:
+    def k_2(self, *, load_id) -> float | None:
         """
         Calculate the load repetition factor, k_2 as per Table 1.17 of CCAA T48.
         """
