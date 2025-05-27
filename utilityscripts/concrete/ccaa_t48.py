@@ -1538,8 +1538,8 @@ class Slab:
     def __init__(
         self,
         *,
-        soil_profile: SoilProfile,
         f_tf: float,
+        soil_profile: SoilProfile | None,
         material_factor: MaterialFactor = MaterialFactor.CONSERVATIVE,
         loads: dict[str, Load] | None = None,
     ):
@@ -1560,17 +1560,43 @@ class Slab:
             values are Load objects. Default is None.
         """
 
-        self._soil_profile = soil_profile
         self._f_tf = f_tf
+        self._soil_profile = soil_profile
         self._material_factor = material_factor
+
+        self._k_s = None  # modulus of subgrade reaction.
+        self._e_ss = None  # short term young's modulus.
+        self._e_sl = None  # long term young's modulus
 
         if loads is None:
             self._loads = {}
         else:
             self._loads = loads
 
+    def _copy(self) -> "Slab":
+        """
+        Create a copy of the slab object
+
+        Notes
+        -----
+        The soil_profile and loads are deep copied.
+        """
+
+        slab = Slab(
+            f_tf=self.f_tf,
+            soil_profile=deepcopy(self.soil_profile),
+            material_factor=self.material_factor,
+            loads=deepcopy(self.loads),
+        )
+
+        slab._k_s = self._k_s
+        slab._e_ss = self._e_ss
+        slab._e_sl = self._e_sl
+
+        return slab
+
     @property
-    def soil_profile(self) -> SoilProfile:
+    def soil_profile(self) -> SoilProfile | None:
         """
         The soil profile below the slab.
         """
@@ -1584,6 +1610,55 @@ class Slab:
         """
 
         return self._f_tf
+
+    @property
+    def k_s(self) -> float | None:
+        """
+        The subgrade modulus in kPa / mm or MPa / m.
+        """
+
+        return self._k_s
+
+    def set_k_s(self, *, k_s: float | None = None, cbr: float | None = None) -> "Slab":
+        """
+
+        Parameters
+        ----------
+        k_s : float | None
+
+        cbr : float | None
+
+        Raises
+        ------
+        Raises an error if both k_s and cbr are None.
+        """
+
+        if k_s is None and cbr is None:
+            raise ValueError("Must provide either k_s or cbr. Both were None.")
+
+        copy_slab = self._copy()
+
+        if k_s is None and cbr is not None:
+            k_s = k_s_from_cbr(cbr=cbr)
+
+        copy_slab._k_s = k_s
+        return copy_slab
+
+    def set_e_s(self, *, e_ss: float, e_sl: float) -> "Slab":
+        """
+        Set the Young's modulus values.
+
+        Parameters
+        ----------
+        e_ss : float
+        e_sl : float
+        """
+
+        copy_slab = self._copy
+        copy_slab.e_ss = e_ss
+        copy_slab.e_sl = e_sl
+
+        return copy_slab
 
     @property
     def material_factor(self) -> MaterialFactor:
@@ -1640,21 +1715,15 @@ class Slab:
         if load_id in self._loads:
             raise ValueError(f"Load {load_id} already exists.")
 
-        copied_loads = deepcopy(self._loads)
-
-        copied_loads[load_id] = Load(
+        new_slab = self._copy()
+        new_slab._loads[load_id] = Load(
             load_type=load_type,
             magnitude=magnitude,
             normalising_length=normalising_length,
             no_cycles=no_cycles,
         )
 
-        return Slab(
-            soil_profile=self.soil_profile,
-            f_tf=self.f_tf,
-            material_factor=self.material_factor,
-            loads=copied_loads,
-        )
+        return new_slab
 
     def add_loads(self, *, loads: dict[str, Load]) -> "Slab":
         """
@@ -1679,16 +1748,10 @@ class Slab:
             if load_id in self._loads:
                 raise ValueError(f"Load {load_id} already exists.")
 
-        copied_loads = deepcopy(self._loads)
+        new_slab = self._copy()
+        new_slab._loads = new_slab._loads | loads
 
-        copied_loads = copied_loads | loads
-
-        return Slab(
-            soil_profile=self.soil_profile,
-            f_tf=self.f_tf,
-            material_factor=self.material_factor,
-            loads=copied_loads,
-        )
+        return new_slab
 
     def k_1(self, *, load_id) -> float:
         """
