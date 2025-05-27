@@ -3,6 +3,7 @@ from math import isclose
 import pytest
 
 from utilityscripts.concrete.ccaa_t48 import (
+    CCAA_T48,
     Load,
     LoadingType,
     LoadLocation,
@@ -597,6 +598,31 @@ def test_load():
 
 
 def test_slab():
+    f_tf = 0.7 * (40**0.5)
+    thickness = 0.200
+    slab = Slab(f_tf=f_tf, thickness=thickness)
+
+    assert slab.f_tf == f_tf
+    assert slab.thickness == thickness
+
+
+def test_ccaa():
+    slab = Slab(f_tf=0.7 * (40**0.5), thickness=0.200)
+
+    check_slab = CCAA_T48(
+        slab=slab,
+        material_factor=MaterialFactor.CONSERVATIVE,
+        loads=None,
+        soil_profile=None,
+    )
+
+    assert check_slab.slab == slab
+    assert check_slab.material_factor == MaterialFactor.CONSERVATIVE
+    assert check_slab.loads == {}
+    assert check_slab.soil_profile is None
+
+
+def test_ccaa_add_loads():
     soil_profile = SoilProfile(
         h_layers=[1.0, 1.0],
         soils=[
@@ -604,25 +630,22 @@ def test_slab():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(
-        soil_profile=soil_profile,
-        f_tf=32.0,
-        material_factor=MaterialFactor.CONSERVATIVE,
-        loads={},
-    )
+    slab = Slab(f_tf=0.7 * (40**0.5), thickness=0.200)
 
-    assert slab.soil_profile == soil_profile
-    assert slab.loads == {}
+    check_slab = CCAA_T48(slab=slab, soil_profile=soil_profile)
 
-    slab_2 = slab.add_load(
+    assert check_slab.soil_profile == soil_profile
+    assert check_slab.loads == {}
+
+    check_slab_2 = check_slab.add_load(
         load_id="load_1",
         load_type=LoadingType.WHEEL,
         magnitude=100.0,
         normalising_length=1.0,
         no_cycles=1e5,
     )
-    assert slab.loads == {}
-    assert slab_2.loads == {
+    assert check_slab.loads == {}
+    assert check_slab_2.loads == {
         "load_1": Load(
             load_type=LoadingType.WHEEL,
             magnitude=100.0,
@@ -631,7 +654,7 @@ def test_slab():
         )
     }
 
-    slab_3 = slab.add_loads(
+    check_slab_3 = check_slab.add_loads(
         loads={
             "load_1": Load(
                 load_type=LoadingType.WHEEL,
@@ -641,8 +664,8 @@ def test_slab():
             )
         }
     )
-    assert slab.loads == {}
-    assert slab_3.loads == {
+    assert check_slab.loads == {}
+    assert check_slab_3.loads == {
         "load_1": Load(
             load_type=LoadingType.WHEEL,
             magnitude=100.0,
@@ -652,7 +675,7 @@ def test_slab():
     }
 
 
-def test_slab_add_load_error():
+def test_ccaa_add_load_error():
     soil_profile = SoilProfile(
         h_layers=[1.0, 1.0],
         soils=[
@@ -660,12 +683,13 @@ def test_slab_add_load_error():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(
+    slab = Slab(f_tf=0.7 * (40**0.5), thickness=0.200)
+
+    check_slab = CCAA_T48(
+        slab=slab,
         soil_profile=soil_profile,
-        f_tf=32.0,
-        material_factor=MaterialFactor.CONSERVATIVE,
     )
-    slab = slab.add_load(
+    check_slab = check_slab.add_load(
         load_id="load_1",
         load_type=LoadingType.WHEEL,
         magnitude=100.0,
@@ -674,7 +698,7 @@ def test_slab_add_load_error():
     )
 
     with pytest.raises(ValueError):
-        slab.add_load(
+        check_slab.add_load(
             load_id="load_1",
             load_type=LoadingType.WHEEL,
             magnitude=100.0,
@@ -683,7 +707,7 @@ def test_slab_add_load_error():
         )
 
 
-def test_slab_add_loads_error():
+def test_ccaa_add_loads_error():
     soil_profile = SoilProfile(
         h_layers=[1.0, 1.0],
         soils=[
@@ -691,12 +715,14 @@ def test_slab_add_loads_error():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(
+    slab = Slab(f_tf=0.7 * (40**0.5), thickness=0.200)
+
+    check_slab = CCAA_T48(
+        slab=slab,
         soil_profile=soil_profile,
-        f_tf=32.0,
-        material_factor=MaterialFactor.UNCONSERVATIVE,
     )
-    slab = slab.add_loads(
+
+    check_slab = check_slab.add_loads(
         loads={
             "load_1": Load(
                 load_type=LoadingType.WHEEL,
@@ -708,7 +734,7 @@ def test_slab_add_loads_error():
     )
 
     with pytest.raises(ValueError):
-        slab.add_loads(
+        check_slab.add_loads(
             loads={
                 "load_1": Load(
                     load_type=LoadingType.WHEEL,
@@ -747,10 +773,15 @@ def test_ccaa_app_d1():
     soil_profile = SoilProfile(h_layers=h_layers, soils=soils)
 
     slab = Slab(
-        soil_profile=soil_profile,
         f_tf=0.7 * (40**0.5),
-        material_factor=MaterialFactor.MIDRANGE,
-        loads={"forklift": forklift},
+        thickness=0.200,
     )
 
-    assert isclose(slab.f_all(load_id="forklift"), 2.15, rel_tol=2e-2)
+    check_slab = CCAA_T48(
+        slab=slab,
+        loads={"forklift": forklift},
+        soil_profile=soil_profile,
+        material_factor=MaterialFactor.MIDRANGE,
+    )
+
+    assert isclose(check_slab.f_all(load_id="forklift"), 2.15, rel_tol=2e-2)

@@ -1535,73 +1535,30 @@ class Slab:
       Slab objects.
     """
 
-    def __init__(
-        self,
-        *,
-        f_tf: float,
-        soil_profile: SoilProfile | None,
-        material_factor: MaterialFactor = MaterialFactor.CONSERVATIVE,
-        loads: dict[str, Load] | None = None,
-    ):
+    def __init__(self, *, f_tf: float, thickness: float):
         """
         Initialise a Slab.
 
         Parameters
         ----------
-        soil_profile : SoilProfile
-            The soil profile under the slab.
         f_tf : float
             The flexural tensile strength of the concrete, in MPa.
-        material_factor : MaterialFactor, optional
-            The material factor used to select k_1 as per Table 1.16 of CCAA T48.
-            Default is MaterialFactor.CONSERVATIVE.
-        loads : dict[str, Load] | None, optional
-            A dictionary of loads to apply to the slab. The keys are load IDs and the
-            values are Load objects. Default is None.
+        thickness : float
+            The thickness of the slab. In m.
         """
 
         self._f_tf = f_tf
-        self._soil_profile = soil_profile
-        self._material_factor = material_factor
-
-        self._k_s = None  # modulus of subgrade reaction.
-        self._e_ss = None  # short term young's modulus.
-        self._e_sl = None  # long term young's modulus
-
-        if loads is None:
-            self._loads = {}
-        else:
-            self._loads = loads
+        self._thickness = thickness
 
     def _copy(self) -> "Slab":
         """
         Create a copy of the slab object
-
-        Notes
-        -----
-        The soil_profile and loads are deep copied.
         """
 
-        slab = Slab(
+        return Slab(
             f_tf=self.f_tf,
-            soil_profile=deepcopy(self.soil_profile),
-            material_factor=self.material_factor,
-            loads=deepcopy(self.loads),
+            thickness=self.thickness,
         )
-
-        slab._k_s = self._k_s
-        slab._e_ss = self._e_ss
-        slab._e_sl = self._e_sl
-
-        return slab
-
-    @property
-    def soil_profile(self) -> SoilProfile | None:
-        """
-        The soil profile below the slab.
-        """
-
-        return self._soil_profile
 
     @property
     def f_tf(self) -> float:
@@ -1612,53 +1569,58 @@ class Slab:
         return self._f_tf
 
     @property
-    def k_s(self) -> float | None:
+    def thickness(self) -> float:
         """
-        The subgrade modulus in kPa / mm or MPa / m.
+        The thickness of the slab, in m.
         """
 
-        return self._k_s
+        return self._thickness
 
-    def set_k_s(self, *, k_s: float | None = None, cbr: float | None = None) -> "Slab":
+    def __repr__(self):
+        return (
+            f"{type(self).__name__}: "
+            + f"f_tf: {self.f_tf:.2f}MPa, "
+            + f"t: {self.thickness:.3f}m"
+        )
+
+
+class CCAA_T48:  # noqa: N801
+    """
+    A class to carry out design checks to CCAA T48
+    """
+
+    def __init__(
+        self,
+        *,
+        slab: Slab,
+        material_factor: MaterialFactor = MaterialFactor.CONSERVATIVE,
+        loads: dict[str, Load] | None = None,
+        soil_profile: SoilProfile | None = None,
+    ):
         """
+        Create a design check to CCAA T48.
 
         Parameters
         ----------
-        k_s : float | None
 
-        cbr : float | None
-
-        Raises
-        ------
-        Raises an error if both k_s and cbr are None.
         """
 
-        if k_s is None and cbr is None:
-            raise ValueError("Must provide either k_s or cbr. Both were None.")
+        self._slab = slab
+        self._material_factor = material_factor
+        self._loads = loads if loads is not None else {}
+        self._soil_profile = soil_profile
 
-        copy_slab = self._copy()
+        self._k_s = None  # modulus of subgrade reaction.
+        self._e_ss = None  # short term young's modulus.
+        self._e_sl = None  # long term young's modulus
 
-        if k_s is None and cbr is not None:
-            k_s = k_s_from_cbr(cbr=cbr)
-
-        copy_slab._k_s = k_s
-        return copy_slab
-
-    def set_e_s(self, *, e_ss: float, e_sl: float) -> "Slab":
+    @property
+    def slab(self) -> Slab:
         """
-        Set the Young's modulus values.
-
-        Parameters
-        ----------
-        e_ss : float
-        e_sl : float
+        The soil profile below the slab.
         """
 
-        copy_slab = self._copy
-        copy_slab.e_ss = e_ss
-        copy_slab.e_sl = e_sl
-
-        return copy_slab
+        return self._slab
 
     @property
     def material_factor(self) -> MaterialFactor:
@@ -1670,11 +1632,11 @@ class Slab:
 
     @property
     def loads(self) -> dict[str, Load]:
-        """
-        The loads on the slab.
-        """
-
         return self._loads
+
+    @property
+    def soil_profile(self) -> SoilProfile | None:
+        return self._soil_profile
 
     def add_load(
         self,
@@ -1684,13 +1646,13 @@ class Slab:
         magnitude: float,
         normalising_length: float,
         no_cycles: float,
-    ):
+    ) -> "CCAA_T48":
         """
-        Add a load to the Slab object.
+        Add a load to the CCAA_T48 object.
 
         Notes
         -----
-        - Slab objects are immutable, so this method returns a new Slab object.
+        - CCAA_T48 objects are immutable, so this method returns a new CCAA_T48 object.
 
         Parameters
         ----------
@@ -1708,30 +1670,32 @@ class Slab:
 
         Returns
         -------
-        Slab
-            A new Slab object with the load added.
+        CCAA_T48
+            A new CCAA_T48 object with the load added.
         """
 
-        if load_id in self._loads:
+        new_check = self._copy()
+
+        if load_id in new_check.loads:
             raise ValueError(f"Load {load_id} already exists.")
 
-        new_slab = self._copy()
-        new_slab._loads[load_id] = Load(
+        load = Load(
             load_type=load_type,
             magnitude=magnitude,
             normalising_length=normalising_length,
             no_cycles=no_cycles,
         )
+        new_check.loads[load_id] = load
 
-        return new_slab
+        return new_check
 
-    def add_loads(self, *, loads: dict[str, Load]) -> "Slab":
+    def add_loads(self, *, loads: dict[str, Load]) -> "CCAA_T48":
         """
-        Add multiple loads to the Slab object.
+        Add multiple loads to the CCAA_T48 object.
 
         Notes
         -----
-        - Slab objects are immutable, so this method returns a new Slab object.
+        - CCAA_T48 objects are immutable, so this method returns a new CCAA_T48 object.
 
         Parameters
         ----------
@@ -1740,23 +1704,96 @@ class Slab:
 
         Returns
         -------
-        Slab
-            A new Slab object with the loads added.
+        CCAA_T48
+            A new CCAA_T48 object with the loads added.
         """
 
+        loads = deepcopy(loads)
+
         for load_id in loads:
-            if load_id in self._loads:
+            if load_id in self.loads:
                 raise ValueError(f"Load {load_id} already exists.")
 
         new_slab = self._copy()
-        new_slab._loads = new_slab._loads | loads
+        new_slab._loads = new_slab.loads | loads
 
         return new_slab
 
-    def k_1(self, *, load_id) -> float:
+    def _copy(self) -> "CCAA_T48":
+        return CCAA_T48(
+            slab=deepcopy(self.slab),
+            material_factor=deepcopy(self.material_factor),
+            loads=deepcopy(self.loads),
+            soil_profile=deepcopy(self.soil_profile),
+        )
+
+    @property
+    def k_s(self) -> float | None:
+        """
+        The subgrade modulus in kPa / mm or MPa / m.
+        """
+
+        return self._k_s
+
+    def set_k_s(
+        self, *, k_s: float | None = None, cbr: float | None = None
+    ) -> "CCAA_T48":
+        """
+
+        Parameters
+        ----------
+        k_s : float | None
+            The subgrade modulus in kPa/mm or MPa/m. If provided,
+            this value will be used directly. If not provided and cbr is provided,
+            k_s will be calculated from the CBR value.
+        cbr : float | None
+            The California Bearing Ratio (CBR) value in percent. If provided and k_s is None,
+            k_s will be calculated from this value using the relationship from CCAA T48.
+
+        Returns
+        -------
+        CCAA_T48
+            A new CCAA_T48 object with the k_s value set.
+
+        Raises
+        ------
+        Raises an error if both k_s and cbr are None.
+        """
+
+        if k_s is None and cbr is None:
+            raise ValueError("Must provide either k_s or cbr. Both were None.")
+
+        copy_check = self._copy()
+
+        if k_s is None and cbr is not None:
+            k_s = k_s_from_cbr(cbr=cbr)
+
+        copy_check._k_s = k_s
+        return copy_check
+
+    def set_e_s(self, *, e_ss: float, e_sl: float) -> "Slab":
+        """
+        Set the Young's modulus values.
+
+        Parameters
+        ----------
+        e_ss : float
+        e_sl : float
+        """
+
+        copy_slab = self._copy()
+        copy_slab.e_ss = e_ss
+        copy_slab.e_sl = e_sl
+
+        return copy_slab
+
+    def k_1(self, *, load_id) -> float | None:
         """
         Calculate the material factor, k_1 as per Table 1.16 of CCAA T48.
         """
+
+        if len(self.loads) == 0:
+            return None
 
         load = self.loads[load_id]
 
@@ -1767,11 +1804,14 @@ class Slab:
         Calculate the load repetition factor, k_2 as per Table 1.17 of CCAA T48.
         """
 
+        if len(self.loads) == 0:
+            return None
+
         load = self.loads[load_id]
 
         return k_2(no_cycles=load.no_cycles, load_type=load.load_type)
 
-    def f_all(self, *, load_id) -> float:
+    def f_all(self, *, load_id) -> float | None:
         """
         Calculate the allowable concrete stress f_all for a given load case.
 
@@ -1786,12 +1826,16 @@ class Slab:
             The allowable concrete stress f_all. In MPa.
         """
 
-        return self.f_tf * self.k_1(load_id=load_id) * self.k_2(load_id=load_id)
+        if self.loads is None:
+            return None
 
-    def __repr__(self):
-        return (
-            f"{type(self).__name__}: "
-            + f"Soil Profile: {self.soil_profile}, "
-            + f"f_tf: {self.f_tf:.2f}, "
-            + f"With {len(self.loads)} loads."
-        )
+        if load_id not in self.loads:
+            raise ValueError(f"Load {load_id!r} is not in self.loads")
+
+        k_1_l = self.k_1(load_id=load_id)
+        k_2_l = self.k_2(load_id=load_id)
+
+        if k_1_l is None or k_2_l is None:
+            raise ValueError("Error calculating k_1 and k_2")
+
+        return self.slab.f_tf * k_1_l * k_2_l
