@@ -1731,6 +1731,11 @@ class CCAA_T48:  # noqa: N801
     def k_s(self) -> float | None:
         """
         The subgrade modulus in kPa / mm or MPa / m.
+
+        Returns
+        -------
+        float | None
+            The subgrade modulus in kPa/mm or MPa/m. Returns None if not set.
         """
 
         return self._k_s
@@ -1763,17 +1768,18 @@ class CCAA_T48:  # noqa: N801
         if k_s is None and cbr is None:
             raise ValueError("Must provide either k_s or cbr. Both were None.")
 
-        copy_check = self._copy()
+        check = self._copy()
 
         if k_s is None and cbr is not None:
             k_s = k_s_from_cbr(cbr=cbr)
 
-        copy_check._k_s = k_s
-        return copy_check
+        check._k_s = k_s
+        return check
 
     def set_e_s(self, *, e_ss: float, e_sl: float) -> "Slab":
         """
-        Set the Young's modulus values.
+        Set the Young's modulus values. Overrides the values calculated from the
+        soil_profile class.
 
         Parameters
         ----------
@@ -1781,11 +1787,11 @@ class CCAA_T48:  # noqa: N801
         e_sl : float
         """
 
-        copy_slab = self._copy()
-        copy_slab.e_ss = e_ss
-        copy_slab.e_sl = e_sl
+        check = self._copy()
+        check._e_ss = e_ss
+        check._e_sl = e_sl
 
-        return copy_slab
+        return check
 
     def k_1(self, *, load_id) -> float | None:
         """

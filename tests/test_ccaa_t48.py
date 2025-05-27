@@ -785,3 +785,37 @@ def test_ccaa_app_d1():
     )
 
     assert isclose(check_slab.f_all(load_id="forklift"), 2.15, rel_tol=2e-2)
+
+
+def test_ccaa_set_k_s():
+    slab = Slab(
+        f_tf=0.7 * (40**0.5),
+        thickness=0.200,
+    )
+
+    check = CCAA_T48(slab=slab)
+    assert check.k_s is None
+
+    k_s = 200.0
+    cbr = 50.0
+
+    check = check.set_k_s(k_s=k_s)
+    assert check.k_s == k_s
+
+    check = check.set_k_s(cbr=cbr)
+    assert isclose(check.k_s, 135.0, rel_tol=1e-2)
+
+    check = check.set_k_s(cbr=cbr, k_s=k_s)
+    assert check.k_s == k_s
+
+
+def test_ccaa_set_k_s_error():
+    slab = Slab(
+        f_tf=0.7 * (40**0.5),
+        thickness=0.200,
+    )
+
+    check = CCAA_T48(slab=slab)
+
+    with pytest.raises(ValueError):
+        check.set_k_s()
