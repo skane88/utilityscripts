@@ -5,6 +5,7 @@ import pytest
 from utilityscripts.concrete.ccaa_t48 import (
     CCAA_T48,
     Load,
+    LoadDuration,
     LoadingType,
     LoadLocation,
     MaterialFactor,
@@ -352,14 +353,14 @@ def test_k_4_errors(f_c, expected):
 )
 def test_f_e(e_ss, load_type, load_location, expected):
     assert isclose(
-        f_e(e_ss=e_ss, load_type=load_type, load_location=load_location),
+        f_e(e_sx=e_ss, load_type=load_type, load_location=load_location),
         expected,
         rel_tol=1e-2,
     )
 
 
 @pytest.mark.parametrize(
-    "e_ss, load_type, load_location, expected",
+    "e_sx, load_type, load_location, expected",
     [
         (2.5, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.0),
         (160, LoadingType.WHEEL, LoadLocation.INTERNAL, 1.0),
@@ -375,10 +376,10 @@ def test_f_e(e_ss, load_type, load_location, expected):
         (160, LoadingType.DISTRIBUTED, LoadLocation.EDGE, 1.0),
     ],
 )
-def test_f_e_errors(e_ss, load_type, load_location, expected):
+def test_f_e_errors(e_sx, load_type, load_location, expected):
     with pytest.raises(ValueError):
         assert isclose(
-            f_e(e_ss=e_ss, load_type=load_type, load_location=load_location),
+            f_e(e_sx=e_sx, load_type=load_type, load_location=load_location),
             expected,
             rel_tol=1e-2,
         )
@@ -598,16 +599,18 @@ def test_load():
 
 
 def test_slab():
-    f_tf = 0.7 * (40**0.5)
+    f_c = 40.0
+    f_tf = 0.7 * (f_c**0.5)
     thickness = 0.200
-    slab = Slab(f_tf=f_tf, thickness=thickness)
+    slab = Slab(f_c=f_c, f_tf=f_tf, thickness=thickness)
 
+    assert slab.f_c == f_c
     assert slab.f_tf == f_tf
     assert slab.thickness == thickness
 
 
 def test_ccaa():
-    slab = Slab(f_tf=0.7 * (40**0.5), thickness=0.200)
+    slab = Slab(f_c=40.0, f_tf=0.7 * (40**0.5), thickness=0.200)
 
     check_slab = CCAA_T48(
         slab=slab,
@@ -630,7 +633,7 @@ def test_ccaa_add_loads():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(f_tf=0.7 * (40**0.5), thickness=0.200)
+    slab = Slab(f_c=40.0, f_tf=0.7 * (40**0.5), thickness=0.200)
 
     check_slab = CCAA_T48(slab=slab, soil_profile=soil_profile)
 
@@ -683,7 +686,7 @@ def test_ccaa_add_load_error():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(f_tf=0.7 * (40**0.5), thickness=0.200)
+    slab = Slab(f_c=40.0, f_tf=0.7 * (40**0.5), thickness=0.200)
 
     check_slab = CCAA_T48(
         slab=slab,
@@ -715,7 +718,7 @@ def test_ccaa_add_loads_error():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(f_tf=0.7 * (40**0.5), thickness=0.200)
+    slab = Slab(f_c=40.0, f_tf=0.7 * (40**0.5), thickness=0.200)
 
     check_slab = CCAA_T48(
         slab=slab,
@@ -749,7 +752,7 @@ def test_ccaa_add_loads_error():
 def test_ccaa_app_d1():
     forklift = Load(
         load_type=LoadingType.WHEEL,
-        magnitude=100,
+        magnitude=200.0,
         normalising_length=1.8,
         no_cycles=20 * 40 * 5 * 52,
     )
@@ -773,6 +776,7 @@ def test_ccaa_app_d1():
     soil_profile = SoilProfile(h_layers=h_layers, soils=soils)
 
     slab = Slab(
+        f_c=40.0,
         f_tf=0.7 * (40**0.5),
         thickness=0.200,
     )
@@ -785,10 +789,29 @@ def test_ccaa_app_d1():
     )
 
     assert isclose(check_slab.f_all(load_id="forklift"), 2.15, rel_tol=2e-2)
+    assert isclose(
+        check_slab.t_reqd(
+            load_id="forklift",
+            load_location=LoadLocation.INTERNAL,
+            load_duration=LoadDuration.SHORT,
+        ),
+        225,
+        rel_tol=3e-2,
+    )
+    assert isclose(
+        check_slab.t_reqd(
+            load_id="forklift",
+            load_location=LoadLocation.EDGE,
+            load_duration=LoadDuration.SHORT,
+        ),
+        350,
+        rel_tol=3e-2,
+    )
 
 
 def test_ccaa_set_k_s():
     slab = Slab(
+        f_c=40.0,
         f_tf=0.7 * (40**0.5),
         thickness=0.200,
     )
@@ -811,6 +834,7 @@ def test_ccaa_set_k_s():
 
 def test_ccaa_set_k_s_error():
     slab = Slab(
+        f_c=40.0,
         f_tf=0.7 * (40**0.5),
         thickness=0.200,
     )

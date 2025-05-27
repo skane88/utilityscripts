@@ -49,6 +49,15 @@ class LoadLocation(StrEnum):
     EDGE = "edge"
 
 
+class LoadDuration(StrEnum):
+    """
+    What is the load duration
+    """
+
+    SHORT = "short"
+    LONG = "long"
+
+
 MATERIAL_FACTOR = pl.DataFrame(
     {
         "load_type": [LoadingType.WHEEL, LoadingType.POINT, LoadingType.DISTRIBUTED],
@@ -557,14 +566,15 @@ def _f_e_data() -> dict[LoadingType, dict[LoadLocation, pl.DataFrame]]:
     return data
 
 
-def f_e(e_ss: float, load_type: LoadingType, load_location: LoadLocation) -> float:
+def f_e(e_sx: float, load_type: LoadingType, load_location: LoadLocation) -> float:
     """
-    Calculate the short term Young's modulus factor, f_e as per CCAA T48 section 3.3.8
+    Calculate the Young's modulus factor, f_e as per CCAA T48 section 3.3.8
 
     Parameters
     ----------
-    e_ss : float
-        The short term Young's modulus of the soil
+    e_sx : float
+        The Young's modulus of the soil. Use the short term Young's modulus for short
+        duration loads, the long term young's modulus for long term loads.
     load_type : LoadingType
         The type of loading
     load_location : LoadLocation
@@ -578,19 +588,19 @@ def f_e(e_ss: float, load_type: LoadingType, load_location: LoadLocation) -> flo
 
     data = _f_e_data()[load_type][load_location]
 
-    if e_ss < data["e_ss"].min():
+    if e_sx < data["e_sx"].min():
         raise ValueError(
-            f"e_ss value of {e_ss} is less than "
-            + f"the minimum value of {data['e_ss'].min():.0f}"
+            f"e_ss value of {e_sx} is less than "
+            + f"the minimum value of {data['e_sx'].min():.0f}"
         )
 
-    if e_ss > data["e_ss"].max():
+    if e_sx > data["e_sx"].max():
         raise ValueError(
-            f"e_ss value of {e_ss} is greater than "
-            + f"the maximum value of {data['e_ss'].max():.0f}"
+            f"e_sx value of {e_sx} is greater than "
+            + f"the maximum value of {data['e_sx'].max():.0f}"
         )
 
-    return np.interp(e_ss, data["e_ss"], data["f_e"])
+    return np.interp(e_sx, data["e_sx"], data["f_e"])
 
 
 def plot_f_e():
@@ -1357,6 +1367,38 @@ def plot_t_4():
     plt.show()
 
 
+def t_reqd(
+    *,
+    magnitude: float,
+    x: float,
+    load_type: LoadingType,
+    load_location: LoadLocation,
+    f_c: float,
+    f_all: float,
+    e_sx: float,
+    h: float,
+) -> float:
+    f_e_calc = f_e(e_sx=e_sx, load_type=load_type, load_location=load_location)
+    f_h_calc = f_h(h=h, load_type=load_type, load_location=load_location)
+    f_s_calc = f_s(x=x, load_type=load_type, load_location=load_location)
+    k_3_calc = k_3(load_location=load_location)
+    k_4_calc = k_4(f_c=f_c)
+
+    if load_type == LoadingType.WHEEL:
+        f_12_calc = f_12(
+            f_all=f_all,
+            f_e12=f_e_calc,
+            f_h12=f_h_calc,
+            f_s12=f_s_calc,
+            k_3=k_3_calc,
+            k_4=k_4_calc,
+        )
+
+        return float(t_12(f_12=f_12_calc, p=magnitude, load_location=load_location))
+
+    raise NotImplementedError()
+
+
 @lru_cache(maxsize=None)
 def _k_s_data():
     """
@@ -1535,18 +1577,21 @@ class Slab:
       Slab objects.
     """
 
-    def __init__(self, *, f_tf: float, thickness: float):
+    def __init__(self, *, f_c: float, f_tf: float, thickness: float):
         """
         Initialise a Slab.
 
         Parameters
         ----------
+        f_c : float
+            The characteristic strength of the concrete, in MPa.
         f_tf : float
             The flexural tensile strength of the concrete, in MPa.
         thickness : float
             The thickness of the slab. In m.
         """
 
+        self._f_c = f_c
         self._f_tf = f_tf
         self._thickness = thickness
 
@@ -1556,9 +1601,18 @@ class Slab:
         """
 
         return Slab(
+            f_c=self.f_c,
             f_tf=self.f_tf,
             thickness=self.thickness,
         )
+
+    @property
+    def f_c(self) -> float:
+        """
+        The characteristic strength of hte concrete. in MPa.
+        """
+
+        return self._f_c
 
     @property
     def f_tf(self) -> float:
@@ -1793,6 +1847,26 @@ class CCAA_T48:  # noqa: N801
 
         return check
 
+    def e_ss(self, *, load_id: str):
+        if self._e_ss is not None:
+            return self._e_ss
+
+        load = self.loads[load_id]
+
+        return self.soil_profile.e_ss(
+            normalising_length=load.normalising_length, loading_type=load.load_type
+        )
+
+    def e_sl(self, *, load_id: str):
+        if self._e_sl is not None:
+            return self._e_ss
+
+        load = self.loads[load_id]
+
+        return self.soil_profile.e_sl(
+            normalising_length=load.normalising_length, loading_type=load.load_type
+        )
+
     def k_1(self, *, load_id) -> float | None:
         """
         Calculate the material factor, k_1 as per Table 1.16 of CCAA T48.
@@ -1845,3 +1919,24 @@ class CCAA_T48:  # noqa: N801
             raise ValueError("Error calculating k_1 and k_2")
 
         return self.slab.f_tf * k_1_l * k_2_l
+
+    def t_reqd(
+        self, *, load_id: str, load_location: LoadLocation, load_duration: LoadDuration
+    ) -> float:
+        load = self.loads[load_id]
+        e_sx = (
+            self.e_ss(load_id=load_id)
+            if load_duration == LoadDuration.SHORT
+            else self.e_sl(load_id=load_id)
+        )
+
+        return t_reqd(
+            magnitude=load.magnitude,
+            x=load.normalising_length,
+            load_type=load.load_type,
+            load_location=load_location,
+            f_c=self.slab.f_c,
+            f_all=self.f_all(load_id=load_id),
+            e_sx=e_sx,
+            h=self.soil_profile.h_total,
+        )
