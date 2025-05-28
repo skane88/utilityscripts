@@ -843,3 +843,50 @@ def test_ccaa_app_d1():
         350,
         rel_tol=3e-2,
     )
+
+
+def test_ccaa_app_d2():
+    post_load = Load(
+        load_type=LoadingType.POINT,
+        magnitude=70.0,
+        normalising_length=(1.5 + 2.0) * 0.5,
+        no_cycles=1,
+    )
+
+    e_sl = 30.0
+    soil = Soil(e_sl=e_sl, e_ss=e_sl, soil_name="residual soil")
+    soil_profile = SoilProfile(h_layers=[5.0], soils=[soil])
+
+    f_c = 50.0
+    slab = Slab(
+        f_c=f_c,
+        f_tf=0.7 * (f_c**0.5),
+        thickness=0.200,
+    )
+
+    check_slab = CCAA_T48(
+        slab=slab,
+        loads={"post_load": post_load},
+        soil_profile=soil_profile,
+        material_factor=MaterialFactor.MIDRANGE,
+    )
+
+    assert isclose(check_slab.f_all(load_id="post_load"), 3.96, rel_tol=1e-2)
+    assert isclose(
+        check_slab.t_reqd(
+            load_id="post_load",
+            load_location=LoadLocation.INTERNAL,
+            load_duration=LoadDuration.LONG,
+        ),
+        150.0,
+        rel_tol=3.5e-2,
+    )
+    assert isclose(
+        check_slab.t_reqd(
+            load_id="post_load",
+            load_location=LoadLocation.EDGE,
+            load_duration=LoadDuration.LONG,
+        ),
+        290.0,
+        rel_tol=2.5e-2,
+    )

@@ -1396,6 +1396,13 @@ def t_reqd(
 
         return float(t_12(f_12=f_12_calc, p=magnitude, load_location=load_location))
 
+    if load_type == LoadingType.POINT:
+        f_3_calc = f_3(
+            p=magnitude, f_all=f_all, f_e3=f_e_calc, f_h3=f_h_calc, f_s3=f_s_calc
+        )
+
+        return float(t_3(f_3=f_3_calc, load_location=load_location))
+
     raise NotImplementedError()
 
 
