@@ -488,7 +488,7 @@ def test_f_h_errors(h, load_type, load_location, expected):
 
 
 @pytest.mark.parametrize(
-    "f_12, p, load_location, expected",
+    "f_12, magnitude, load_location, expected",
     [
         (0.5, 50, LoadLocation.INTERNAL, 350),
         (4.0, 50, LoadLocation.INTERNAL, 98),
@@ -506,9 +506,11 @@ def test_f_h_errors(h, load_type, load_location, expected):
         (2.8, 200, LoadLocation.EDGE, 400),
     ],
 )
-def test_t_12(f_12, p, load_location, expected):
+def test_t_12(f_12, magnitude, load_location, expected):
     assert isclose(
-        t_12(f_12=f_12, p=p, load_location=load_location), expected, rel_tol=1e-2
+        t_12(f_12=f_12, magnitude=magnitude, load_location=load_location),
+        expected,
+        rel_tol=1e-2,
     )
 
 

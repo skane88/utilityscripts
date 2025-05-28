@@ -954,7 +954,7 @@ def f_12(
 
 def f_3(
     *,
-    p: float,
+    magnitude: float,
     f_all: float,
     f_e3: float,
     f_h3: float,
@@ -965,7 +965,7 @@ def f_3(
 
     Parameters
     ----------
-    p : float
+    magnitude : float
         The load, in kN
     f_all : float
         The allowable stress in the concrete, in MPa
@@ -982,12 +982,12 @@ def f_3(
         The equivalent stress factor, F_3
     """
 
-    return (1000 / p) * f_all * f_e3 * f_h3 * f_s3
+    return (1000 / magnitude) * f_all * f_e3 * f_h3 * f_s3
 
 
 def f_4(
     *,
-    p: float,
+    magnitude: float,
     f_all: float,
     f_e4: float,
     f_h4: float,
@@ -1000,7 +1000,7 @@ def f_4(
     ----------
     load_location : LoadLocation
         The location of the load
-    P : float
+    magnitude : float
         The distributed load, in kPa
     f_all : float
         The allowable stress in the concrete, in MPa
@@ -1017,7 +1017,7 @@ def f_4(
         The equivalent stress factor, F_4
     """
 
-    return (1000 / p) * f_all * f_e4 * f_h4 * f_s4
+    return (1000 / magnitude) * f_all * f_e4 * f_h4 * f_s4
 
 
 @lru_cache(maxsize=None)
@@ -1068,7 +1068,10 @@ def _t_12_interp(load_location: LoadLocation) -> CloughTocher2DInterpolator:
 
 
 def t_12(
-    *, f_12: float | np.ndarray, p: float | np.ndarray, load_location: LoadLocation
+    *,
+    f_12: float | np.ndarray,
+    magnitude: float | np.ndarray,
+    load_location: LoadLocation,
 ) -> float | np.ndarray:
     """
     Calculate the required slab thickness for wheel loads.
@@ -1087,7 +1090,7 @@ def t_12(
     f_12 : float | np.ndarray
         The equivalent stress factor, F_1 or F_2. If a numpy array is passed in then
         multiple thicknesses will be calculated at once.
-    p : float | np.ndarray
+    magnitude : float | np.ndarray
         The load, in kN. If a numpy array is passed in then multiple thicknesses will
         be calculated at once.
     load_location : LoadLocation
@@ -1099,7 +1102,7 @@ def t_12(
         The required slab thickness, in mm
     """
 
-    return _t_12_interp(load_location)(f_12, p)
+    return _t_12_interp(load_location)(f_12, magnitude)
 
 
 def plot_t_12_data(load_location: LoadLocation):
@@ -1160,7 +1163,7 @@ def plot_t_12_space(load_location: LoadLocation):
     f_space, p_space = np.meshgrid(f_space, p_space)
     f_space = f_space.ravel()
     p_space = p_space.ravel()
-    t_space = t_12(f_12=f_space, p=p_space, load_location=load_location)
+    t_space = t_12(f_12=f_space, magnitude=p_space, load_location=load_location)
 
     mask = np.logical_not(np.isnan(t_space))
 
@@ -1394,11 +1397,17 @@ def t_reqd(
             k_4=k_4_calc,
         )
 
-        return float(t_12(f_12=f_12_calc, p=magnitude, load_location=load_location))
+        return float(
+            t_12(f_12=f_12_calc, magnitude=magnitude, load_location=load_location)
+        )
 
     if load_type == LoadingType.POINT:
         f_3_calc = f_3(
-            p=magnitude, f_all=f_all, f_e3=f_e_calc, f_h3=f_h_calc, f_s3=f_s_calc
+            magnitude=magnitude,
+            f_all=f_all,
+            f_e3=f_e_calc,
+            f_h3=f_h_calc,
+            f_s3=f_s_calc,
         )
 
         return float(t_3(f_3=f_3_calc, load_location=load_location))
