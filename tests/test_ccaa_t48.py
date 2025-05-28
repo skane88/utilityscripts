@@ -173,9 +173,9 @@ def test_k_1(loading_type, material_factor, expected):
         (1e3, LoadingType.WHEEL, 0.73),
         (50, LoadingType.WHEEL, 0.84),
         (1, LoadingType.WHEEL, 1.00),
-        (1e99, LoadingType.DISTRIBUTED, 0.75),
-        (1e5, LoadingType.DISTRIBUTED, 0.75),
-        (1, LoadingType.DISTRIBUTED, 0.75),
+        (1e99, LoadingType.DISTRIBUTED, 0.50),
+        (1e5, LoadingType.DISTRIBUTED, 0.56),
+        (1, LoadingType.DISTRIBUTED, 1.00),
         (1e99, LoadingType.WHEEL, 0.50),
         (4e5, LoadingType.POINT, 0.51),
         (3e5, LoadingType.POINT, 0.52),
@@ -890,5 +890,87 @@ def test_ccaa_app_d2():
             load_duration=LoadDuration.LONG,
         ),
         290.0,
+        rel_tol=2.5e-2,
+    )
+
+
+def test_ccaa_app_d3():
+    dist_load_stack = Load(
+        load_type=LoadingType.DISTRIBUTED,
+        magnitude=30.0,
+        normalising_length=4.0,
+        no_cycles=1000,
+    )
+    dist_load_aisle = Load(
+        load_type=LoadingType.DISTRIBUTED,
+        magnitude=30.0,
+        normalising_length=2.5,
+        no_cycles=1000,
+    )
+
+    soil_fill = Soil(e_sl=30.0, e_ss=30.0, soil_name="fill")
+    soil_clay = Soil(e_sl=18.0, e_ss=18.0, soil_name="clay")
+    soil_profile = SoilProfile(h_layers=[2.0, 5.0], soils=[soil_fill, soil_clay])
+
+    f_c = 40.0
+    slab = Slab(
+        f_c=f_c,
+        f_tf=0.7 * (f_c**0.5),
+        thickness=0.200,
+    )
+
+    check_slab = CCAA_T48(
+        slab=slab,
+        loads={
+            "dist_load_stack": dist_load_stack,
+            "dist_load_aisle": dist_load_aisle,
+        },
+        soil_profile=soil_profile,
+        material_factor=MaterialFactor.MIDRANGE,
+    )
+
+    assert isclose(
+        check_slab.soil_profile.e_sl(
+            normalising_length=4.0, loading_type=LoadingType.DISTRIBUTED
+        ),
+        20.8,
+        rel_tol=1e-2,
+    )
+    assert isclose(check_slab.f_all(load_id="dist_load_stack"), 2.59, rel_tol=1e-2)
+    assert isclose(
+        check_slab.t_reqd(
+            load_id="dist_load_stack",
+            load_location=LoadLocation.INTERNAL,
+            load_duration=LoadDuration.LONG,
+        ),
+        245.0,  # CCAA appears to have calculated f_E too high (1.22 vs 1.19)
+        rel_tol=3.5e-2,
+    )
+    assert isclose(
+        check_slab.t_reqd(
+            load_id="dist_load_stack",
+            load_location=LoadLocation.EDGE,
+            load_duration=LoadDuration.LONG,
+        ),
+        245.0,
+        rel_tol=2.5e-2,
+    )
+
+    assert isclose(
+        check_slab.t_reqd(
+            load_id="dist_load_aisle",
+            load_location=LoadLocation.INTERNAL,
+            load_duration=LoadDuration.LONG,
+        ),
+        150.0,  # CCAA appears to have calculated f_E too high (1.22 vs 1.19)
+        rel_tol=3.5e-2,
+    )
+    assert isclose(
+        check_slab.t_reqd(
+            load_id="dist_load_aisle",
+            load_location=LoadLocation.EDGE,
+            load_duration=LoadDuration.LONG,
+        ),
+        150.0,
         rel_tol=2.5e-2,
     )

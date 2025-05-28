@@ -224,10 +224,12 @@ def k_2(*, no_cycles: float, load_type: LoadingType = LoadingType.WHEEL) -> floa
 
     Notes
     -----
-    CCAA suggests that the equation used is only valid for greater than 50 cycles, and
+    - CCAA suggests that the equation used is only valid for greater than 50 cycles, and
     that at a no_cycles = 1.0 then k_2 = 1.00. It has been decided to use this euquation
     in the range of 1->50 cycles anyway because at 1 cycle k_2 = 0.98, slightly less
     than CCAA's recommended value of 1.00.
+    - CCAA suggests that for distributed loads k_2 = 0.75. This is the equivalent to a
+    minimum of 16 cycles of load & unload.
 
     Parameters
     ----------
@@ -241,9 +243,6 @@ def k_2(*, no_cycles: float, load_type: LoadingType = LoadingType.WHEEL) -> floa
     float
         The load repetition factor k_2
     """
-
-    if load_type == LoadingType.DISTRIBUTED:
-        return 0.75
 
     if no_cycles <= 1.0:
         return 1.00
@@ -1412,7 +1411,15 @@ def t_reqd(
 
         return float(t_3(f_3=f_3_calc, load_location=load_location))
 
-    raise NotImplementedError()
+    f_4_calc = f_4(
+        magnitude=magnitude,
+        f_all=f_all,
+        f_e4=f_e_calc,
+        f_h4=f_h_calc,
+        f_s4=f_s_calc,
+    )
+
+    return float(t_4(f_4=f_4_calc))
 
 
 @lru_cache(maxsize=None)
