@@ -14,6 +14,7 @@ import polars as pl
 from matplotlib import ticker
 from scipy.interpolate import CloughTocher2DInterpolator  # type: ignore
 
+from utilityscripts.concrete.as3600 import Concrete
 from utilityscripts.plotting import AGILITUS_COLORS
 
 _DATA_PATH = Path(Path(__file__).parent) / Path("data")
@@ -56,6 +57,15 @@ class LoadDuration(StrEnum):
 
     SHORT = "short"
     LONG = "long"
+
+
+class FtfMethod(StrEnum):
+    """
+    The method to use to calculate the flexural tensile strength of the concrete.
+    """
+
+    AS3600 = "as3600"
+    CCAA = "ccaa"
 
 
 MATERIAL_FACTOR = pl.DataFrame(
@@ -248,6 +258,29 @@ def k_2(*, no_cycles: float, load_type: LoadingType = LoadingType.WHEEL) -> floa
         return 1.00
 
     return max(0.73 - 0.0846 * (log10(no_cycles) - 3), 0.50)
+
+
+def f_tf_ccaa(*, f_c: float) -> float:
+    """
+    Calculate the flexural tensile strength of the concrete.
+
+    Notes
+    -----
+    - CCAA T48 uses 0.7 x f_c^0.5. This is more conservative than AS3600 which uses
+    0.6 x f_c^0.5.
+
+    Parameters
+    ----------
+    f_c : float
+        The characteristic compressive strength of the concrete. In MPa.
+
+    Returns
+    -------
+    float
+        The flexural tensile strength of the concrete. In MPa.
+    """
+
+    return 0.7 * (f_c**0.5)
 
 
 def f_all(*, k_1, k_2, f_cf):
@@ -1648,7 +1681,7 @@ class Load:
 
 class Slab:
     """
-    A class to handle calculating slab thicknesses
+    A class to store slab properties.
 
     Notes
     -----
@@ -1656,7 +1689,9 @@ class Slab:
       Slab objects.
     """
 
-    def __init__(self, *, f_c: float, f_tf: float, thickness: float):
+    _concrete: Concrete
+
+    def __init__(self, *, f_c: float | Concrete, thickness: float):
         """
         Initialise a Slab.
 
@@ -1664,14 +1699,14 @@ class Slab:
         ----------
         f_c : float
             The characteristic strength of the concrete, in MPa.
-        f_tf : float
-            The flexural tensile strength of the concrete, in MPa.
         thickness : float
             The thickness of the slab. In m.
         """
 
-        self._f_c = f_c
-        self._f_tf = f_tf
+        if isinstance(f_c, float):
+            f_c = Concrete(f_c=f_c)
+
+        self._concrete = f_c
         self._thickness = thickness
 
     def _copy(self) -> "Slab":
@@ -1680,9 +1715,8 @@ class Slab:
         """
 
         return Slab(
-            f_c=self.f_c,
-            f_tf=self.f_tf,
-            thickness=self.thickness,
+            f_c=self._concrete,
+            thickness=self._thickness,
         )
 
     @property
@@ -1691,7 +1725,7 @@ class Slab:
         The characteristic strength of hte concrete. in MPa.
         """
 
-        return self._f_c
+        return self._concrete.f_c
 
     @property
     def f_tf(self) -> float:
@@ -1699,7 +1733,7 @@ class Slab:
         The flexural tensile strength of the concrete. In MPa.
         """
 
-        return self._f_tf
+        return self._concrete.f_ctf
 
     @property
     def thickness(self) -> float:
@@ -1712,7 +1746,7 @@ class Slab:
     def __repr__(self):
         return (
             f"{type(self).__name__}: "
-            + f"f_tf: {self.f_tf:.2f}MPa, "
+            + f"f_c: {self.f_c:.2f}MPa, "
             + f"t: {self.thickness:.3f}m"
         )
 
@@ -1729,19 +1763,31 @@ class CCAA_T48:  # noqa: N801
         material_factor: MaterialFactor = MaterialFactor.CONSERVATIVE,
         loads: dict[str, Load] | None = None,
         soil_profile: SoilProfile | None = None,
+        f_tf_method: FtfMethod = FtfMethod.CCAA,
     ):
         """
         Create a design check to CCAA T48.
 
         Parameters
         ----------
-
+        slab : Slab
+            The slab to design.
+        material_factor : MaterialFactor
+            The material factor to use.
+        loads : dict[str, Load]
+            The loads to apply to the slab.
+        soil_profile : SoilProfile
+            The soil profile to use.
+        f_tf_method : FtfMethod
+            The method to use to calculate the flexural tensile strength of the concrete.
+            CCAA uses 0.7 x f_c^0.5, AS3600 is more conservative and uses 0.6 x f_c^0.5
         """
 
         self._slab = slab
         self._material_factor = material_factor
         self._loads = loads if loads is not None else {}
         self._soil_profile = soil_profile
+        self._f_tf_method = f_tf_method
 
         self._k_s = None  # modulus of subgrade reaction.
         self._e_ss = None  # short term young's modulus.
@@ -1770,6 +1816,17 @@ class CCAA_T48:  # noqa: N801
     @property
     def soil_profile(self) -> SoilProfile | None:
         return self._soil_profile
+
+    @property
+    def f_tf_method(self) -> FtfMethod:
+        return self._f_tf_method
+
+    @property
+    def f_tf(self) -> float:
+        if self.f_tf_method == FtfMethod.CCAA:
+            return f_tf_ccaa(f_c=self.slab.f_c)
+
+        return self.slab.f_tf
 
     def add_load(
         self,
@@ -1863,6 +1920,7 @@ class CCAA_T48:  # noqa: N801
             material_factor=deepcopy(self.material_factor),
             loads=deepcopy(self.loads),
             soil_profile=deepcopy(self.soil_profile),
+            f_tf_method=deepcopy(self.f_tf_method),
         )
 
     @property
@@ -2002,7 +2060,7 @@ class CCAA_T48:  # noqa: N801
         if k_1_l is None or k_2_l is None:
             raise ValueError("Error calculating k_1 and k_2")
 
-        return self.slab.f_tf * k_1_l * k_2_l
+        return self.f_tf * k_1_l * k_2_l
 
     def t_reqd(
         self,

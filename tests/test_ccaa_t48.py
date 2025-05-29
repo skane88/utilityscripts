@@ -2,8 +2,10 @@ from math import isclose
 
 import pytest
 
+from utilityscripts.concrete.as3600 import Concrete
 from utilityscripts.concrete.ccaa_t48 import (
     CCAA_T48,
+    FtfMethod,
     Load,
     LoadDuration,
     LoadingType,
@@ -618,17 +620,22 @@ def test_load():
 
 def test_slab():
     f_c = 40.0
-    f_tf = 0.7 * (f_c**0.5)
     thickness = 0.200
-    slab = Slab(f_c=f_c, f_tf=f_tf, thickness=thickness)
+    slab = Slab(f_c=f_c, thickness=thickness)
 
     assert slab.f_c == f_c
-    assert slab.f_tf == f_tf
+    assert slab.thickness == thickness
+
+    concrete = Concrete(f_c)
+
+    slab = Slab(f_c=concrete, thickness=thickness)
+
+    assert slab.f_c == f_c
     assert slab.thickness == thickness
 
 
 def test_ccaa():
-    slab = Slab(f_c=40.0, f_tf=0.7 * (40**0.5), thickness=0.200)
+    slab = Slab(f_c=40.0, thickness=0.200)
 
     check_slab = CCAA_T48(
         slab=slab,
@@ -651,7 +658,7 @@ def test_ccaa_add_loads():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(f_c=40.0, f_tf=0.7 * (40**0.5), thickness=0.200)
+    slab = Slab(f_c=40.0, thickness=0.200)
 
     check_slab = CCAA_T48(slab=slab, soil_profile=soil_profile)
 
@@ -708,7 +715,7 @@ def test_ccaa_add_load_error():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(f_c=40.0, f_tf=0.7 * (40**0.5), thickness=0.200)
+    slab = Slab(f_c=40.0, thickness=0.200)
 
     check_slab = CCAA_T48(
         slab=slab,
@@ -742,7 +749,7 @@ def test_ccaa_add_loads_error():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(f_c=40.0, f_tf=0.7 * (40**0.5), thickness=0.200)
+    slab = Slab(f_c=40.0, thickness=0.200)
 
     check_slab = CCAA_T48(
         slab=slab,
@@ -775,10 +782,26 @@ def test_ccaa_add_loads_error():
         )
 
 
+def test_ccaa_f_tf():
+    f_c = 40.0
+
+    slab = Slab(
+        f_c=f_c,
+        thickness=0.200,
+    )
+
+    check = CCAA_T48(slab=slab)
+
+    assert isclose(check.f_tf, 0.7 * (f_c**0.5), rel_tol=1e-3)
+
+    check = CCAA_T48(slab=slab, f_tf_method=FtfMethod.AS3600)
+
+    assert isclose(check.f_tf, 0.6 * (f_c**0.5), rel_tol=1e-3)
+
+
 def test_ccaa_set_k_s():
     slab = Slab(
         f_c=40.0,
-        f_tf=0.7 * (40**0.5),
         thickness=0.200,
     )
 
@@ -801,7 +824,6 @@ def test_ccaa_set_k_s():
 def test_ccaa_set_k_s_error():
     slab = Slab(
         f_c=40.0,
-        f_tf=0.7 * (40**0.5),
         thickness=0.200,
     )
 
@@ -840,7 +862,6 @@ def test_ccaa_app_d1():
 
     slab = Slab(
         f_c=40.0,
-        f_tf=0.7 * (40**0.5),
         thickness=0.200,
     )
 
@@ -886,7 +907,6 @@ def test_ccaa_app_d2():
     f_c = 50.0
     slab = Slab(
         f_c=f_c,
-        f_tf=0.7 * (f_c**0.5),
         thickness=0.200,
     )
 
@@ -939,7 +959,6 @@ def test_ccaa_app_d3():
     f_c = 40.0
     slab = Slab(
         f_c=f_c,
-        f_tf=0.7 * (f_c**0.5),
         thickness=0.200,
     )
 
@@ -1024,7 +1043,6 @@ def test_ccaa_app_d4():
     f_c = 50.0
     slab = Slab(
         f_c=f_c,
-        f_tf=0.7 * (f_c**0.5),
         thickness=0.200,
     )
 
