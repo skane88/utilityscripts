@@ -1494,6 +1494,41 @@ def plot_k_s_vs_cbr():
     plt.show()
 
 
+def radius_relative_stiffness(
+    *,
+    e_cm: float,
+    thickness: float,
+    poisson_ratio: float,
+    k_s: float,
+):
+    """
+    Calculate the radius of relative stiffness.
+
+    Parameters
+    ----------
+    e_cm : float
+        The mean modulus of elasticity of the concrete, in MPa.
+    thickness : float
+        The thickness of the slab, in mm.
+    poisson_ratio : float
+        The Poisson's ratio of the concrete.
+    k_s : float
+        The soil modulus of subgrade reaction, in kPa/mm.
+
+    Returns
+    -------
+    float
+        The radius of relative stiffness. In mm.
+    """
+
+    # note the conversion from kPa/mm to MPa/mm below to get the results in the correct
+    # units.
+
+    return (
+        (e_cm * thickness**3) / (12 * (1 - poisson_ratio**2) * (k_s / 1000))
+    ) ** 0.25
+
+
 class Load:
     """
     Represents a load for the slab.

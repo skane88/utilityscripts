@@ -23,6 +23,7 @@ from utilityscripts.concrete.ccaa_t48 import (
     k_3,
     k_4,
     k_s_from_cbr,
+    radius_relative_stiffness,
     t_3,
     t_4,
     t_12,
@@ -585,6 +586,19 @@ def test_t_4_errors(f_4, expected):
 )
 def test_k_s_from_cbr(cbr, expected):
     assert isclose(k_s_from_cbr(cbr=cbr), expected, rel_tol=1e-2)
+
+
+def test_radius_relative_stiffness():
+    assert isclose(
+        radius_relative_stiffness(
+            e_cm=31975.0,
+            thickness=230.0,
+            poisson_ratio=0.2,
+            k_s=38.0,
+        ),
+        971.0,
+        rel_tol=1e-3,
+    )
 
 
 def test_load():
