@@ -27,6 +27,13 @@ class CornerDetail(Enum):
     RADIUS = "radius"
 
 
+class CornerLocation(Enum):
+    TOPLEFT = "topleft"
+    TOPRIGHT = "topright"
+    BOTTOMLEFT = "bottomleft"
+    BOTTOMRIGHT = "bottomright"
+
+
 class RestraintCode(Enum):
     """
     The bending restraint code for the section.
@@ -1410,10 +1417,9 @@ def _make_radius(
     *,
     corner_point: tuple[float, float],
     corner_size: float,
-    right: bool,
-    top: bool,
+    corner_location: CornerLocation,
     n_r: int = 8,
-):
+) -> list[tuple[float, float]]:
     """
     Generate a list of points representing a circle segment radius for a given
     corner based on the specified position (right, top).
@@ -1424,10 +1430,8 @@ def _make_radius(
         The original corner point.
     corner_size : float
         The size of the radius
-    right : bool
-        Indicates if the corner is on the right side.
-    top : bool
-        Indicates if the corner is on the top side.
+    corner_location : CornerLocation
+        The location of the corner.
     n_r : int
         The number of points around the radius
 
@@ -1437,30 +1441,33 @@ def _make_radius(
         A list containing the new corner point coordinates.
     """
 
-    if right and top:
-        corner_point = (
-            corner_point[0] + corner_size,
-            corner_point[1] - corner_size,
-        )
-        limit_angles = (90, 180)
-    elif right and not top:
-        corner_point = (
-            corner_point[0] + corner_size,
-            corner_point[1] + corner_size,
-        )
-        limit_angles = (180, 270)
-    elif not right and top:
-        corner_point = (
-            corner_point[0] - corner_size,
-            corner_point[1] - corner_size,
-        )
-        limit_angles = (0, 90)
-    else:
-        corner_point = (
-            corner_point[0] - corner_size,
-            corner_point[1] + corner_size,
-        )
-        limit_angles = (270, 360)
+    match corner_location:
+        case CornerLocation.TOPRIGHT:
+            corner_point = (
+                corner_point[0] + corner_size,
+                corner_point[1] - corner_size,
+            )
+            limit_angles = (90, 180)
+        case CornerLocation.TOPRIGHT:
+            corner_point = (
+                corner_point[0] + corner_size,
+                corner_point[1] + corner_size,
+            )
+            limit_angles = (180, 270)
+        case CornerLocation.TOPLEFT:
+            corner_point = (
+                corner_point[0] - corner_size,
+                corner_point[1] - corner_size,
+            )
+            limit_angles = (0, 90)
+        case CornerLocation.BOTTOMLEFT:
+            corner_point = (
+                corner_point[0] - corner_size,
+                corner_point[1] + corner_size,
+            )
+            limit_angles = (270, 360)
+        case _:
+            raise ValueError(f"Invalid corner location: {corner_location}")
 
     radius = build_circle(
         centroid=corner_point,
