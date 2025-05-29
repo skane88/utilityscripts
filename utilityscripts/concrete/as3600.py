@@ -117,7 +117,8 @@ class Concrete:
         f_c: float,
         *,
         density: float = 2400,
-        eta_c: float = 0.003,
+        epsilon_c: float = 0.003,
+        poisson_ratio: float = 0.2,
         f_cm: float | None = None,
         f_cmi: float | None = None,
         elastic_modulus: float | None = None,
@@ -133,9 +134,12 @@ class Concrete:
         density : float
             The density of the concrete.
             Default value is 2400 kg/m³.
-        eta_c : float
+        epsilon_c : float
             The maximum compressive strain of the concrete.
             Default value is 0.003.
+        poisson_ratio : float
+            The Poisson's ratio of the concrete.
+            Default value is 0.2.
         f_cm : float
             The mean compressive strength of the concrete.
             If not provided, it is calculated based on the characteristic
@@ -155,7 +159,8 @@ class Concrete:
 
         self._f_c = f_c
         self._density = density
-        self._eta_c = eta_c
+        self._epsilon_c = epsilon_c
+        self._poisson_ratio = poisson_ratio
         self._f_cm = f_cm
         self._f_cmi = f_cmi
         self._elastic_modulus = elastic_modulus
@@ -178,12 +183,20 @@ class Concrete:
         return self._density
 
     @property
-    def eta_c(self):
+    def epsilon_c(self):
         """
         Return the maximum compressive strain of the concrete.
         """
 
-        return self._eta_c
+        return self._epsilon_c
+
+    @property
+    def poisson_ratio(self):
+        """
+        Return the Poisson's ratio of the concrete.
+        """
+
+        return self._poisson_ratio
 
     @property
     def f_cm(self):
@@ -280,7 +293,7 @@ class Concrete:
         Return the minimum strain for the rectangular stress block
         """
 
-        return self.eta_c * (1 - self.gamma)
+        return self.epsilon_c * (1 - self.gamma)
 
     @property
     def _strain_values(self):
@@ -293,7 +306,7 @@ class Concrete:
                 0.0,
                 self.rect_strain - sys.float_info.epsilon,
                 self.rect_strain,
-                self.eta_c,
+                self.epsilon_c,
             ]
         )
 

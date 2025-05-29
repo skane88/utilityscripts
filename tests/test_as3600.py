@@ -13,7 +13,8 @@ def test_concrete_init():
     concrete = Concrete(f_c=20)
     assert concrete.f_c == 20  # noqa: PLR2004
     assert concrete.density == 2400  # noqa: PLR2004
-    assert concrete.eta_c == 0.003  # noqa: PLR2004
+    assert concrete.epsilon_c == 0.003  # noqa: PLR2004
+    assert concrete.poisson_ratio == 0.2  # noqa: PLR2004
     assert isclose(concrete.f_cm, 25, rel_tol=1e-3)
     assert isclose(concrete.f_cmi, 22, rel_tol=1e-3)
     assert isclose(concrete.f_ctf, 2.683, rel_tol=1e-3)
