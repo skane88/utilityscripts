@@ -1090,8 +1090,11 @@ def t_12(
         The equivalent stress factor, F_1 or F_2. If a numpy array is passed in then
         multiple thicknesses will be calculated at once.
     magnitude : float | np.ndarray
-        The load, in kN. If a numpy array is passed in then multiple thicknesses will
-        be calculated at once.
+        The load, in kN.
+        This is the axle load, not the wheel load. If a single wheel is present, use
+        a point load instead.
+        If a numpy array is passed in then multiple thicknesses will be calculated
+        at once.
     load_location : LoadLocation
         The location of the load
 
@@ -1518,6 +1521,7 @@ class Load:
             The magnitude of the load:
             - For wheel loads or point loads: load in kN
             - For distributed loads: pressure in kPa
+            - For wheel loads, the load is the total axle load.
         normalising_length : float
             The normalising length:
             - For wheel loads or point loads: spacing between loads
@@ -1557,6 +1561,7 @@ class Load:
         -----
         - For wheel loads or point loads this is in kN.
         - For distributed loads this is in kPa.
+        - For wheel loads, this is the total axle load.
         """
 
         return self._magnitude
@@ -1759,6 +1764,7 @@ class CCAA_T48:  # noqa: N801
         magnitude : float
             The load magnitude.
             Should be kN for wheel and point loads and kPa for distributed loads.
+            For wheel loads, this is the total axle load.
         normalising_length : float
             The normalising length.
         no_cycles: float
