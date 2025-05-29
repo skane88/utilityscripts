@@ -590,11 +590,13 @@ def test_k_s_from_cbr(cbr, expected):
 def test_load():
     load = Load(
         load_type=LoadingType.WHEEL,
+        load_duration=LoadDuration.SHORT,
         magnitude=100.0,
         normalising_length=1.0,
         no_cycles=1e5,
     )
     assert load.load_type == LoadingType.WHEEL
+    assert load.load_duration == LoadDuration.SHORT
     assert load.magnitude == 100.0  # noqa: PLR2004
     assert load.normalising_length == 1.0
     assert load.no_cycles == 1e5  # noqa: PLR2004
@@ -645,6 +647,7 @@ def test_ccaa_add_loads():
     check_slab_2 = check_slab.add_load(
         load_id="load_1",
         load_type=LoadingType.WHEEL,
+        load_duration=LoadDuration.SHORT,
         magnitude=100.0,
         normalising_length=1.0,
         no_cycles=1e5,
@@ -653,6 +656,7 @@ def test_ccaa_add_loads():
     assert check_slab_2.loads == {
         "load_1": Load(
             load_type=LoadingType.WHEEL,
+            load_duration=LoadDuration.SHORT,
             magnitude=100.0,
             normalising_length=1.0,
             no_cycles=1e5,
@@ -663,6 +667,7 @@ def test_ccaa_add_loads():
         loads={
             "load_1": Load(
                 load_type=LoadingType.WHEEL,
+                load_duration=LoadDuration.SHORT,
                 magnitude=100.0,
                 normalising_length=1.0,
                 no_cycles=2e5,
@@ -673,6 +678,7 @@ def test_ccaa_add_loads():
     assert check_slab_3.loads == {
         "load_1": Load(
             load_type=LoadingType.WHEEL,
+            load_duration=LoadDuration.SHORT,
             magnitude=100.0,
             normalising_length=1.0,
             no_cycles=2e5,
@@ -697,6 +703,7 @@ def test_ccaa_add_load_error():
     check_slab = check_slab.add_load(
         load_id="load_1",
         load_type=LoadingType.WHEEL,
+        load_duration=LoadDuration.SHORT,
         magnitude=100.0,
         normalising_length=1.0,
         no_cycles=1e5,
@@ -706,6 +713,7 @@ def test_ccaa_add_load_error():
         check_slab.add_load(
             load_id="load_1",
             load_type=LoadingType.WHEEL,
+            load_duration=LoadDuration.SHORT,
             magnitude=100.0,
             normalising_length=1.0,
             no_cycles=1e5,
@@ -731,6 +739,7 @@ def test_ccaa_add_loads_error():
         loads={
             "load_1": Load(
                 load_type=LoadingType.WHEEL,
+                load_duration=LoadDuration.SHORT,
                 magnitude=100.0,
                 normalising_length=1.0,
                 no_cycles=1e5,
@@ -743,6 +752,7 @@ def test_ccaa_add_loads_error():
             loads={
                 "load_1": Load(
                     load_type=LoadingType.WHEEL,
+                    load_duration=LoadDuration.SHORT,
                     magnitude=100.0,
                     normalising_length=1.0,
                     no_cycles=1e5,
@@ -790,6 +800,7 @@ def test_ccaa_set_k_s_error():
 def test_ccaa_app_d1():
     forklift = Load(
         load_type=LoadingType.WHEEL,
+        load_duration=LoadDuration.SHORT,
         magnitude=200.0,
         normalising_length=1.8,
         no_cycles=20 * 40 * 5 * 52,
@@ -831,7 +842,6 @@ def test_ccaa_app_d1():
         check_slab.t_reqd(
             load_id="forklift",
             load_location=LoadLocation.INTERNAL,
-            load_duration=LoadDuration.SHORT,
         ),
         225,
         rel_tol=3e-2,
@@ -840,7 +850,6 @@ def test_ccaa_app_d1():
         check_slab.t_reqd(
             load_id="forklift",
             load_location=LoadLocation.EDGE,
-            load_duration=LoadDuration.SHORT,
         ),
         350,
         rel_tol=3e-2,
@@ -850,6 +859,7 @@ def test_ccaa_app_d1():
 def test_ccaa_app_d2():
     post_load = Load(
         load_type=LoadingType.POINT,
+        load_duration=LoadDuration.LONG,
         magnitude=70.0,
         normalising_length=(1.5 + 2.0) * 0.5,
         no_cycles=1,
@@ -878,7 +888,6 @@ def test_ccaa_app_d2():
         check_slab.t_reqd(
             load_id="post_load",
             load_location=LoadLocation.INTERNAL,
-            load_duration=LoadDuration.LONG,
         ),
         150.0,
         rel_tol=3.5e-2,
@@ -887,7 +896,6 @@ def test_ccaa_app_d2():
         check_slab.t_reqd(
             load_id="post_load",
             load_location=LoadLocation.EDGE,
-            load_duration=LoadDuration.LONG,
         ),
         290.0,
         rel_tol=2.5e-2,
@@ -897,12 +905,14 @@ def test_ccaa_app_d2():
 def test_ccaa_app_d3():
     dist_load_stack = Load(
         load_type=LoadingType.DISTRIBUTED,
+        load_duration=LoadDuration.LONG,
         magnitude=30.0,
         normalising_length=4.0,
         no_cycles=1000,
     )
     dist_load_aisle = Load(
         load_type=LoadingType.DISTRIBUTED,
+        load_duration=LoadDuration.LONG,
         magnitude=30.0,
         normalising_length=2.5,
         no_cycles=1000,
@@ -941,7 +951,6 @@ def test_ccaa_app_d3():
         check_slab.t_reqd(
             load_id="dist_load_stack",
             load_location=LoadLocation.INTERNAL,
-            load_duration=LoadDuration.LONG,
         ),
         245.0,  # CCAA appears to have calculated f_E too high (1.22 vs 1.19)
         rel_tol=3.5e-2,
@@ -950,7 +959,6 @@ def test_ccaa_app_d3():
         check_slab.t_reqd(
             load_id="dist_load_stack",
             load_location=LoadLocation.EDGE,
-            load_duration=LoadDuration.LONG,
         ),
         245.0,
         rel_tol=2.5e-2,
@@ -960,7 +968,6 @@ def test_ccaa_app_d3():
         check_slab.t_reqd(
             load_id="dist_load_aisle",
             load_location=LoadLocation.INTERNAL,
-            load_duration=LoadDuration.LONG,
         ),
         150.0,  # CCAA appears to have calculated f_E too high (1.22 vs 1.19)
         rel_tol=3.5e-2,
@@ -969,7 +976,6 @@ def test_ccaa_app_d3():
         check_slab.t_reqd(
             load_id="dist_load_aisle",
             load_location=LoadLocation.EDGE,
-            load_duration=LoadDuration.LONG,
         ),
         150.0,
         rel_tol=2.5e-2,

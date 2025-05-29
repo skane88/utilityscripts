@@ -1492,10 +1492,15 @@ def plot_k_s_vs_cbr():
 
 
 class Load:
+    """
+    Represents a load for the slab.
+    """
+
     def __init__(
         self,
         *,
         load_type: LoadingType,
+        load_duration: LoadDuration,
         magnitude: float,
         normalising_length: float,
         no_cycles: float,
@@ -1507,8 +1512,8 @@ class Load:
         ----------
         load_type : LoadingType
             The type of load (e.g. wheel load, point load, distributed load).
-        load_location : LoadLocation
-            The location where the load is applied.
+        load_duration : LoadDuration
+            The duration of the load. Used to select the correct Young's modulus.
         magnitude : float
             The magnitude of the load:
             - For wheel loads or point loads: load in kN
@@ -1522,6 +1527,7 @@ class Load:
         """
 
         self._load_type = load_type
+        self._load_duration = load_duration
         self._magnitude = magnitude
         self._normalising_length = normalising_length
         self._no_cycles = no_cycles
@@ -1533,6 +1539,14 @@ class Load:
         """
 
         return self._load_type
+
+    @property
+    def load_duration(self) -> LoadDuration:
+        """
+        The duration of the load. Used to select the correct Young's modulus.
+        """
+
+        return self._load_duration
 
     @property
     def magnitude(self) -> float:
@@ -1574,6 +1588,7 @@ class Load:
 
         return (
             self.load_type == other.load_type
+            and self.load_duration == other.load_duration
             and self.magnitude == other.magnitude
             and self.normalising_length == other.normalising_length
             and self.no_cycles == other.no_cycles
@@ -1583,6 +1598,7 @@ class Load:
         return (
             f"{type(self).__name__}: "
             + f"Load Type: {self.load_type}, "
+            + f"Load Duration: {self.load_duration}, "
             + f"Load Magnitude: {self.magnitude}"
             + f"{'kPa' if self.load_type == LoadingType.DISTRIBUTED else 'kN'}, "
             + f"Normalising Length: {self.normalising_length}, "
@@ -1720,6 +1736,7 @@ class CCAA_T48:  # noqa: N801
         *,
         load_id: str,
         load_type: LoadingType,
+        load_duration: LoadDuration,
         magnitude: float,
         normalising_length: float,
         no_cycles: float,
@@ -1737,6 +1754,8 @@ class CCAA_T48:  # noqa: N801
             The ID of the load.
         load_type : LoadingType
             The type of load.
+        load_duration : LoadDuration
+            The duration of the load. Used to select the correct Young's modulus.
         magnitude : float
             The load magnitude.
             Should be kN for wheel and point loads and kPa for distributed loads.
@@ -1758,6 +1777,7 @@ class CCAA_T48:  # noqa: N801
 
         load = Load(
             load_type=load_type,
+            load_duration=load_duration,
             magnitude=magnitude,
             normalising_length=normalising_length,
             no_cycles=no_cycles,
@@ -1944,12 +1964,15 @@ class CCAA_T48:  # noqa: N801
         return self.slab.f_tf * k_1_l * k_2_l
 
     def t_reqd(
-        self, *, load_id: str, load_location: LoadLocation, load_duration: LoadDuration
+        self,
+        *,
+        load_id: str,
+        load_location: LoadLocation,
     ) -> float:
         load = self.loads[load_id]
         e_sx = (
             self.e_ss(load_id=load_id)
-            if load_duration == LoadDuration.SHORT
+            if load.load_duration == LoadDuration.SHORT
             else self.e_sl(load_id=load_id)
         )
 
