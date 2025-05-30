@@ -76,6 +76,15 @@ class FtfMethod(StrEnum):
     CCAA = "ccaa"
 
 
+class DowelType(StrEnum):
+    """
+    Different types of dowels
+    """
+
+    ROUND = "round"
+    SQUARE = "square"
+
+
 MATERIAL_FACTOR = pl.DataFrame(
     {
         "load_type": [LoadingType.WHEEL, LoadingType.POINT, LoadingType.DISTRIBUTED],
@@ -1684,6 +1693,74 @@ class Load:
             + f"{'kPa' if self.load_type == LoadingType.DISTRIBUTED else 'kN'}, "
             + f"Normalising Length: {self.normalising_length}, "
             + f"No. cycles: {self.no_cycles}."
+        )
+
+
+class Dowel:
+    """
+    A class to store properties for round or square dowels for dowelled joints
+    """
+
+    def __init__(
+        self, *, dowel_size: float, f_sy: float, dowel_type: DowelType = DowelType.ROUND
+    ):
+        """
+        Initialise a Dowel object.
+
+        Parameters
+        ----------
+        dowel_size : float
+            The size of the dowel. In mm.
+        f_sy : float
+            The steel yield strength. In MPa.
+        dowel_type : DowelType
+            The type of dowel.
+        """
+        self._dowel_size = dowel_size
+        self._f_sy = f_sy
+        self._dowel_type = dowel_type
+
+    @property
+    def dowel_size(self) -> float:
+        """
+        The dowel size. In mm.
+        """
+
+        return self._dowel_size
+
+    @property
+    def f_sy(self) -> float:
+        """
+        The steel yield strength. In MPa.
+        """
+
+        return self._f_sy
+
+    @property
+    def dowel_type(self) -> DowelType:
+        """
+        The dowel type.
+        """
+
+        return self._dowel_type
+
+    @property
+    def area(self) -> float:
+        """
+        The area of the dowel. In mm^2.
+        """
+
+        if self.dowel_type == DowelType.ROUND:
+            return np.pi * self.dowel_size**2 / 4
+
+        return self.dowel_size**2
+
+    def __repr__(self):
+        return (
+            f"{type(self).__name__}: "
+            + f"Size: {self.dowel_size:.2f}mm, "
+            + f"f_sy: {self.f_sy:.2f}MPa, "
+            + f"Type: {self.dowel_type}"
         )
 
 

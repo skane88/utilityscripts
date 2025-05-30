@@ -1,10 +1,13 @@
 from math import isclose
 
+import numpy as np
 import pytest
 
 from utilityscripts.concrete.as3600 import Concrete
 from utilityscripts.concrete.ccaa_t48 import (
     CCAA_T48,
+    Dowel,
+    DowelType,
     FtfMethod,
     Load,
     LoadDuration,
@@ -616,6 +619,31 @@ def test_load():
     assert load.magnitude == 100.0  # noqa: PLR2004
     assert load.normalising_length == 1.0
     assert load.no_cycles == 1e5  # noqa: PLR2004
+
+
+def test_dowel():
+    f_sy = 300.0
+    dowel_size = 10.0
+
+    dowel = Dowel(
+        dowel_size=dowel_size,
+        f_sy=f_sy,
+        dowel_type=DowelType.ROUND,
+    )
+    assert dowel.dowel_size == dowel_size
+    assert dowel.f_sy == f_sy
+    assert dowel.dowel_type == DowelType.ROUND
+    assert isclose(dowel.area, np.pi * dowel_size**2 / 4, rel_tol=1e-2)
+
+    dowel = Dowel(
+        dowel_size=dowel_size,
+        f_sy=f_sy,
+        dowel_type=DowelType.SQUARE,
+    )
+    assert dowel.dowel_size == dowel_size
+    assert dowel.f_sy == f_sy
+    assert dowel.dowel_type == DowelType.SQUARE
+    assert isclose(dowel.area, dowel_size**2, rel_tol=1e-2)
 
 
 def test_slab():
