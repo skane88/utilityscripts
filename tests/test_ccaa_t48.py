@@ -648,7 +648,7 @@ def test_dowel():
 
 def test_slab():
     f_c = 40.0
-    thickness = 0.200
+    thickness = 200.0
     slab = Slab(f_c=f_c, thickness=thickness)
 
     assert slab.f_c == f_c
@@ -663,7 +663,7 @@ def test_slab():
 
 
 def test_ccaa():
-    slab = Slab(f_c=40.0, thickness=0.200)
+    slab = Slab(f_c=40.0, thickness=200.0)
 
     check_slab = CCAA_T48(
         slab=slab,
@@ -686,7 +686,7 @@ def test_ccaa_add_loads():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(f_c=40.0, thickness=0.200)
+    slab = Slab(f_c=40.0, thickness=200.0)
 
     check_slab = CCAA_T48(slab=slab, soil_profile=soil_profile)
 
@@ -743,7 +743,7 @@ def test_ccaa_add_load_error():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(f_c=40.0, thickness=0.200)
+    slab = Slab(f_c=40.0, thickness=200.0)
 
     check_slab = CCAA_T48(
         slab=slab,
@@ -777,7 +777,7 @@ def test_ccaa_add_loads_error():
             Soil(e_sl=100000.0, e_ss=100000.0, soil_name="soil2"),
         ],
     )
-    slab = Slab(f_c=40.0, thickness=0.200)
+    slab = Slab(f_c=40.0, thickness=200.0)
 
     check_slab = CCAA_T48(
         slab=slab,
@@ -815,7 +815,7 @@ def test_ccaa_f_tf():
 
     slab = Slab(
         f_c=f_c,
-        thickness=0.200,
+        thickness=200.0,
     )
 
     check = CCAA_T48(slab=slab)
@@ -830,7 +830,7 @@ def test_ccaa_f_tf():
 def test_ccaa_set_k_s():
     slab = Slab(
         f_c=40.0,
-        thickness=0.200,
+        thickness=200.0,
     )
 
     check = CCAA_T48(slab=slab)
@@ -852,7 +852,7 @@ def test_ccaa_set_k_s():
 def test_ccaa_set_k_s_error():
     slab = Slab(
         f_c=40.0,
-        thickness=0.200,
+        thickness=200.0,
     )
 
     check = CCAA_T48(slab=slab)
@@ -890,7 +890,7 @@ def test_ccaa_app_d1():
 
     slab = Slab(
         f_c=40.0,
-        thickness=0.200,
+        thickness=200.0,
     )
 
     check_slab = CCAA_T48(
@@ -935,7 +935,7 @@ def test_ccaa_app_d2():
     f_c = 50.0
     slab = Slab(
         f_c=f_c,
-        thickness=0.200,
+        thickness=200.0,
     )
 
     check_slab = CCAA_T48(
@@ -987,7 +987,7 @@ def test_ccaa_app_d3():
     f_c = 40.0
     slab = Slab(
         f_c=f_c,
-        thickness=0.200,
+        thickness=200.0,
     )
 
     check_slab = CCAA_T48(
@@ -1071,7 +1071,7 @@ def test_ccaa_app_d4():
     f_c = 50.0
     slab = Slab(
         f_c=f_c,
-        thickness=0.200,
+        thickness=200.0,
     )
 
     check_slab = CCAA_T48(
