@@ -622,7 +622,7 @@ def test_load():
 
 
 def test_dowel():
-    f_sy = 300.0
+    f_sy = 250.0
     dowel_size = 10.0
 
     dowel = Dowel(
@@ -652,14 +652,34 @@ def test_slab():
     slab = Slab(f_c=f_c, thickness=thickness)
 
     assert slab.f_c == f_c
-    assert slab.thickness == thickness
+    assert slab.t_interior == thickness
 
     concrete = Concrete(f_c)
 
     slab = Slab(f_c=concrete, thickness=thickness)
 
     assert slab.f_c == f_c
-    assert slab.thickness == thickness
+    assert slab.t_interior == thickness
+
+    f_sy = 250.0
+    dowel_size = 10.0
+    dowel = Dowel(dowel_size=dowel_size, f_sy=f_sy, dowel_type=DowelType.ROUND)
+    spacing = 300.0
+
+    t_edge = 300.0
+
+    slab = Slab(
+        f_c=concrete,
+        thickness=thickness,
+        edge_thickening=t_edge,
+        dowels=(dowel, spacing),
+    )
+
+    assert slab.f_c == f_c
+    assert slab.t_interior == thickness
+    assert slab.t_edge == t_edge
+    assert slab.dowels[0] == dowel
+    assert slab.dowels[1] == spacing
 
 
 def test_ccaa():

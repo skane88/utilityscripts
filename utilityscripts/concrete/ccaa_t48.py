@@ -1776,7 +1776,14 @@ class Slab:
 
     _concrete: Concrete
 
-    def __init__(self, *, f_c: float | Concrete, thickness: float):
+    def __init__(
+        self,
+        *,
+        f_c: float | Concrete,
+        thickness: float,
+        edge_thickening: float | None = None,
+        dowels: tuple[Dowel, float] | None = None,
+    ):
         """
         Initialise a Slab.
 
@@ -1785,14 +1792,13 @@ class Slab:
         f_c : float
             The characteristic strength of the concrete, in MPa.
         thickness : float
-            The thickness of the slab. In m.
+            The thickness of the slab. In mm.
         """
 
-        if isinstance(f_c, float):
-            f_c = Concrete(f_c=f_c)
-
-        self._concrete = f_c
+        self._concrete = Concrete(f_c=f_c) if isinstance(f_c, float) else f_c
         self._thickness = thickness
+        self._edge_thickening = edge_thickening
+        self._dowels = dowels
 
     def _copy(self) -> "Slab":
         """
@@ -1802,6 +1808,8 @@ class Slab:
         return Slab(
             f_c=self._concrete,
             thickness=self._thickness,
+            edge_thickening=self._edge_thickening,
+            dowels=self._dowels,
         )
 
     @property
@@ -1821,18 +1829,38 @@ class Slab:
         return self._concrete.f_ctf
 
     @property
-    def thickness(self) -> float:
+    def t_interior(self) -> float:
         """
-        The thickness of the slab, in m.
+        The thickness of the slab interior in mm.
         """
 
         return self._thickness
+
+    @property
+    def t_edge(self) -> float:
+        """
+        The thickness of the slab edge, in mm
+        """
+
+        if self._edge_thickening is None:
+            return self._thickness
+
+        return self._edge_thickening
+
+    @property
+    def dowels(self) -> tuple[Dowel, float] | None:
+        """
+        The dowels used in joints. A tuple of the Dowel and their spacing. If no dowels
+        returns None.
+        """
+
+        return self._dowels
 
     def __repr__(self):
         return (
             f"{type(self).__name__}: "
             + f"f_c: {self.f_c:.2f}MPa, "
-            + f"t: {self.thickness:.3f}m"
+            + f"t: {self.t_interior:.3f}m"
         )
 
 
