@@ -23,6 +23,10 @@ from matplotlib import ticker
 from scipy.interpolate import CloughTocher2DInterpolator  # type: ignore
 
 from utilityscripts.concrete.as3600 import Concrete
+from utilityscripts.concrete.concrete_exceptions import (
+    CCAALoadNotFoundError,
+    CCAANoLoadError,
+)
 from utilityscripts.plotting import AGILITUS_COLORS
 
 _DATA_PATH = Path(Path(__file__).parent) / Path("data")
@@ -2162,10 +2166,10 @@ class CCAA_T48:  # noqa: N801
         """
 
         if self.loads is None:
-            return None
+            raise CCAANoLoadError("No loads have been assigned.")
 
         if load_id not in self.loads:
-            raise ValueError(f"Load {load_id!r} is not in self.loads")
+            raise CCAALoadNotFoundError(f"Load {load_id!r} is not in self.loads")
 
         k_1_l = self.k_1(load_id=load_id)
         k_2_l = self.k_2(load_id=load_id)
