@@ -2126,31 +2126,31 @@ class CCAA_T48:  # noqa: N801
             normalising_length=load.normalising_length, loading_type=load.load_type
         )
 
-    def k_1(self, *, load_id) -> float | None:
+    def k_1(self, *, load_id) -> float:
         """
         Calculate the material factor, k_1 as per Table 1.16 of CCAA T48.
         """
 
         if len(self.loads) == 0:
-            return None
+            raise CCAANoLoadError("No loads have been assigned.")
 
         load = self.loads[load_id]
 
         return k_1(loading_type=load.load_type, material_factor=self.material_factor)
 
-    def k_2(self, *, load_id) -> float | None:
+    def k_2(self, *, load_id) -> float:
         """
         Calculate the load repetition factor, k_2 as per Table 1.17 of CCAA T48.
         """
 
         if len(self.loads) == 0:
-            return None
+            raise CCAANoLoadError("No loads have been assigned.")
 
         load = self.loads[load_id]
 
         return k_2(no_cycles=load.no_cycles, load_type=load.load_type)
 
-    def f_all(self, *, load_id) -> float | None:
+    def f_all(self, *, load_id) -> float:
         """
         Calculate the allowable concrete stress f_all for a given load case.
 
