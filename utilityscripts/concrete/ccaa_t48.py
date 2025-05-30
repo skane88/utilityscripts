@@ -1,5 +1,13 @@
 """
 Implements desing of a concrete slab to CCAA T48
+
+This module will generally assume the following output units, typical of Australian
+engineering practice:
+
+- Concrete strength in MPa
+- Concrete stiffness and soil stiffness in MPa
+- Concrete thickness / lengths in mm
+- Soil depths in m
 """
 
 from copy import deepcopy
