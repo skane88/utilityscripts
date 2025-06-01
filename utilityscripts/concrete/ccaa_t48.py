@@ -2150,7 +2150,7 @@ class CCAA_T48:  # noqa: N801
 
         return k_2(no_cycles=load.no_cycles, load_type=load.load_type)
 
-    def f_all(self, *, load_id) -> float:
+    def f_all(self, *, load_id: str, ftf_method: FtfMethod | None = None) -> float:
         """
         Calculate the allowable concrete stress f_all for a given load case.
 
@@ -2158,6 +2158,9 @@ class CCAA_T48:  # noqa: N801
         ----------
         load_id : str
             The ID of the load.
+        ftf_method : FtfMethod | None
+            The method to use to calculate the flexural tensile strength of the
+            concrete. If provided, it overrides the value saved on the CCAA_T48 object.
 
         Returns
         -------
@@ -2177,7 +2180,14 @@ class CCAA_T48:  # noqa: N801
         if k_1_l is None or k_2_l is None:
             raise ValueError("Error calculating k_1 and k_2")
 
-        return self.f_tf * k_1_l * k_2_l
+        if ftf_method is None:
+            f_tf = self.f_tf
+        elif ftf_method == FtfMethod.CCAA:
+            f_tf = f_tf_ccaa(f_c=self.slab.f_c)
+        else:
+            f_tf = self.slab._concrete.f_ctf
+
+        return f_tf * k_1_l * k_2_l
 
     def t_reqd(
         self,

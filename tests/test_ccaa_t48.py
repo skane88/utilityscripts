@@ -847,6 +847,45 @@ def test_ccaa_f_tf():
     assert isclose(check.f_tf, 0.6 * (f_c**0.5), rel_tol=1e-3)
 
 
+def test_ccaa_f_all():
+    post_load = Load(
+        load_type=LoadingType.POINT,
+        load_duration=LoadDuration.LONG,
+        magnitude=70.0,
+        normalising_length=(1.5 + 2.0) * 0.5,
+        no_cycles=1,
+    )
+
+    e_sl = 30.0
+    soil = Soil(e_sl=e_sl, e_ss=e_sl, soil_name="residual soil")
+    soil_profile = SoilProfile(h_layers=[5.0], soils=[soil])
+
+    f_c = 50.0
+    slab = Slab(
+        f_c=f_c,
+        thickness=200.0,
+    )
+
+    check_slab = CCAA_T48(
+        slab=slab,
+        loads={"post_load": post_load},
+        soil_profile=soil_profile,
+        material_factor=MaterialFactor.MIDRANGE,
+    )
+
+    assert isclose(check_slab.f_all(load_id="post_load"), 3.96, rel_tol=1e-2)
+    assert isclose(
+        check_slab.f_all(load_id="post_load", ftf_method=FtfMethod.CCAA),
+        3.96,
+        rel_tol=1e-2,
+    )
+    assert isclose(
+        check_slab.f_all(load_id="post_load", ftf_method=FtfMethod.AS3600),
+        3.96 * 0.6 / 0.7,
+        rel_tol=1e-2,
+    )
+
+
 def test_ccaa_set_k_s():
     slab = Slab(
         f_c=40.0,
