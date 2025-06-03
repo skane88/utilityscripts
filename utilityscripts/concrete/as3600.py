@@ -45,68 +45,6 @@ class S813SectType(StrEnum):
     OTHER = "other"
 
 
-def s3_1_2_get_f_cm(f_c):
-    """
-    Determine the mean compressive strength, based on the values given in
-    AS3600-2018 Table 3.1.2
-    """
-
-    f_c_vals = np.asarray(STANDARD_GRADES["f_c"])
-    f_cm_vals = np.asarray(STANDARD_GRADES["f_cm"])
-
-    return np.interp(f_c, f_c_vals, f_cm_vals)
-
-
-def s3_1_2_get_f_cmi(f_c):
-    """
-    Determine the mean in-situ compressive strength, based on the values given in
-    AS3600-2018 Table 3.1.2
-    """
-
-    f_c_vals = np.asarray(STANDARD_GRADES["f_c"])
-    f_cmi_vals = np.asarray(STANDARD_GRADES["f_cmi"])
-
-    return np.interp(f_c, f_c_vals, f_cmi_vals)
-
-
-def s3_1_1_3_f_ctf(f_c):
-    """
-    Determine the characteristic flexural strength of the concrete, based on S3.1.1.3 of
-    AS3600-2018.
-
-    Parameters
-    ----------
-    f_c : float
-        The characteristic compressive strength of the concrete.
-
-    Returns
-    -------
-    float
-        The characteristic flexural strength of the concrete.
-    """
-
-    return 0.6 * (f_c**0.5)
-
-
-def s3_1_1_3_f_ct(f_c):
-    """
-    Determine the characteristic tensile strength of the concrete, based on S3.1.1.3 of
-    AS3600-2018.
-
-    Parameters
-    ----------
-    f_c : float
-        The characteristic compressive strength of the concrete.
-
-    Returns
-    -------
-    float
-        The characteristic tensile strength of the concrete.
-    """
-
-    return 0.36 * (f_c**0.5)
-
-
 class Concrete:
     """
     Class to represent a concrete material.
@@ -527,6 +465,68 @@ def circle_area(diameter):
     """
 
     return pi * (diameter**2) / 4
+
+
+def s3_1_2_get_f_cm(f_c):
+    """
+    Determine the mean compressive strength, based on the values given in
+    AS3600-2018 Table 3.1.2
+    """
+
+    f_c_vals = np.asarray(STANDARD_GRADES["f_c"])
+    f_cm_vals = np.asarray(STANDARD_GRADES["f_cm"])
+
+    return np.interp(f_c, f_c_vals, f_cm_vals)
+
+
+def s3_1_2_get_f_cmi(f_c):
+    """
+    Determine the mean in-situ compressive strength, based on the values given in
+    AS3600-2018 Table 3.1.2
+    """
+
+    f_c_vals = np.asarray(STANDARD_GRADES["f_c"])
+    f_cmi_vals = np.asarray(STANDARD_GRADES["f_cmi"])
+
+    return np.interp(f_c, f_c_vals, f_cmi_vals)
+
+
+def s3_1_1_3_f_ctf(f_c):
+    """
+    Determine the characteristic flexural strength of the concrete, based on S3.1.1.3 of
+    AS3600-2018.
+
+    Parameters
+    ----------
+    f_c : float
+        The characteristic compressive strength of the concrete.
+
+    Returns
+    -------
+    float
+        The characteristic flexural strength of the concrete.
+    """
+
+    return 0.6 * (f_c**0.5)
+
+
+def s3_1_1_3_f_ct(f_c):
+    """
+    Determine the characteristic tensile strength of the concrete, based on S3.1.1.3 of
+    AS3600-2018.
+
+    Parameters
+    ----------
+    f_c : float
+        The characteristic compressive strength of the concrete.
+
+    Returns
+    -------
+    float
+        The characteristic tensile strength of the concrete.
+    """
+
+    return 0.36 * (f_c**0.5)
 
 
 def s8_1_3_alpha_2(
