@@ -569,13 +569,19 @@ def s8_1_3_gamma(f_c: float) -> float:
     return max(0.67, 0.97 - 0.0025 * f_c)
 
 
-def generate_rectilinear_block(*, f_c, max_compression_strain: float = 0.003):
+def generate_rectilinear_block(*, f_c: float, max_compression_strain: float = 0.003):
     """
-    Generate a point on a rectilinear stress-strain curve as required by AS3600.
+    Generate a rectilinear stress-strain curve as required by AS3600.
 
-    :param f_c: the characteristic compressive strength of the concrete.
-    :param max_compression_strain: the maximum allowable compressive strain in the
-        concrete. According to AS3600 S8.1.3 this is 0.003.
+    Parameters
+    ----------
+    Parameters
+    ----------
+    f_c : float
+        The characteristic compressive strength of the concrete. In MPa.
+    max_compression_strain : float
+        The maximum allowable compressive strain in the concrete. According to AS3600
+        S8.1.3 this is 0.003.
     """
 
     gamma_val = s8_1_3_gamma(f_c)
