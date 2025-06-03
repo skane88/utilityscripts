@@ -1235,8 +1235,8 @@ class RectBeam:
         *,
         b: float,
         d: float,
-        concrete: Concrete,
-        steel: Steel,
+        concrete: Concrete | float,
+        steel: Steel | float,
         cover: float | dict[str, float],
         bot_dia: float | None = None,
         bot_no: float | None = None,
@@ -1258,10 +1258,10 @@ class RectBeam:
             The width of the beam.
         d : float
             The depth of the beam.
-        concrete : Concrete
-            A Concrete material object.
-        steel : Steel
-            A Steel material object.
+        concrete : Concrete | float
+            A Concrete material object or the characteristic compressive strength.
+        steel : Steel | float
+            A Steel material object or the yield strength.
         cover : float | dict[str, float]
             The cover to the reinforcement.
             If a float is provided, it is assumed to be the same for all reinforcement.
@@ -1291,8 +1291,17 @@ class RectBeam:
 
         self._b = b
         self._d = d
-        self._concrete = concrete
-        self._steel = steel
+
+        if isinstance(concrete, (int, float)):
+            self._concrete = Concrete(f_c=concrete)
+        else:
+            self._concrete = concrete
+
+        if isinstance(steel, (int, float)):
+            self._steel = Steel(f_sy=steel)
+        else:
+            self._steel = steel
+
         self._bot_dia = bot_dia
         self._bot_no = bot_no
         self._top_dia = top_dia
@@ -1568,7 +1577,7 @@ class RectBeam:
         Return the total area of the reinforcement.
         """
 
-        return self.area_steel_top + self.area_steel_bot + self.area_steel_side
+        return self.top_steel_area + self.bot_steel_area + self.side_steel_area
 
     @property
     def shear_dia(self):
