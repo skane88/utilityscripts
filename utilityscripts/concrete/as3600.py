@@ -45,6 +45,16 @@ class S813SectType(StrEnum):
     OTHER = "other"
 
 
+class S816SectType(StrEnum):
+    """
+    An Enum to represent the diferent types of sections in S8.1.6.1
+    """
+
+    RECTANGULAR = "rectangular"
+    TEE_WEB_DOWN = "tee_web_down"
+    TEE_WEB_UP = "tee_web_up"
+
+
 class Concrete:
     """
     Class to represent a concrete material.
@@ -595,19 +605,66 @@ def generate_rectilinear_block(*, f_c: float, max_compression_strain: float = 0.
     ]
 
 
-def m_uo_min(*, z, f_ct_f, p_e=0, a_g=0, e=0):
+def s8_1_6_1_m_uo_min(*, z, f_ct_f, p_e=0, a_g=0, e=0):
     """
-    Calculate the minimum required moment capacity.
+    Calculate the minimum required moment capacity as per AS3600-2018 S8.1.6.1.
 
-    :param z: the uncracked section modulus, taken at the face of the section at which
+    Parameters
+    ----------
+    z : float
+        The uncracked section modulus, taken at the face of the section at which
         cracking occurs.
-    :param f_ct_f: the characteristic flexural strength of the concrete.
-    :param p_e: effective prestress force, accounting for losses.
-    :param a_g: gross area.
-    :param e: prestress eccentricity from the centroid of the uncracked section.
+    f_ct_f : float
+        The characteristic flexural strength of the concrete.
+    p_e : float
+        The effective prestress force, accounting for losses.
+    a_g : float
+        The gross area.
+    e : float
+        The prestress eccentricity from the centroid of the uncracked section.
     """
 
     return 1.2 * (z * (f_ct_f + p_e / a_g) + p_e * e)
+
+
+def s8_1_6_1_a_st_min(
+    *,
+    d_beam,
+    d_reo,
+    b_w,
+    f_ct_f,
+    f_sy,
+    sect_type: S816SectType = S816SectType.RECTANGULAR,
+):
+    """
+    Calculate the deemed-to-comply minimum area of tensile reinforcement required
+    as per AS3600-2018 S8.1.6.1.
+
+    Parameters
+    ----------
+    d_beam : float
+        The depth of the beam. In mm.
+    d_reo : float
+        The centroid of tensile reinforcement. In mm.
+    b_w : float
+        The width of the beam or beam web. In mm.
+    f_ct_f : float
+        The characteristic flexural strength of the concrete. In MPa.
+    f_sy : float
+        The yield strength of the reinforcement. In MPa.
+    sect_type : S816SectType
+        The type of section.
+    """
+
+    match sect_type:
+        case S816SectType.RECTANGULAR:
+            return 0.20 * ((d_beam / d_reo) ** 2) * (f_ct_f / f_sy) * b_w * d_reo
+        case S816SectType.TEE_WEB_DOWN:
+            raise NotImplementedError("Tee web down sections are not yet implemented.")
+        case S816SectType.TEE_WEB_UP:
+            raise NotImplementedError("Tee web up sections are not yet implemented.")
+        case _:
+            raise ValueError(f"Invalid section type: {sect_type}")
 
 
 def m_uo():
