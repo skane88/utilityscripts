@@ -274,24 +274,25 @@ def mesh_mass(
     main_spacing : float
         Spacing of the main bars (in meters).
     secondary_diameter : float, optional
-        Diameter of the secondary bars (in meters), by default None (will use main_diameter).
+        Diameter of the secondary bars (in meters).
+        By default None (will use main_diameter).
     secondary_spacing : float, optional
-        Spacing of the secondary bars (in meters), by default None (will use main_spacing).
+        Spacing of the secondary bars (in meters).
+        By default None (will use main_spacing).
     steel_density : float
-        Density of the steel (in kg/m^3), by default 7850.
+        Density of the steel (in kg/m^3).
+        By default 7850.
     main_width : float, optional
-        Width of the main mesh (in meters), by default 1.
+        Width of the main mesh (in meters).
+        By default 1.000.
     secondary_width : float, optional
-        Width of the secondary mesh (in meters), by default 1.
+        Width of the secondary mesh (in meters).
+        By default 1.000.
 
     Returns
     -------
     float
         The mass of the steel mesh (in kg).
-
-    Notes
-    -----
-    - `circle_area` is a helper function that calculates the area of a circle given its diameter.
 
     Examples
     --------
