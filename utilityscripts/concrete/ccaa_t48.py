@@ -2194,6 +2194,7 @@ class CCAA_T48:  # noqa: N801
         *,
         load_id: str,
         load_location: LoadLocation,
+        ftf_method: FtfMethod | None = None,
     ) -> float:
         load = self.loads[load_id]
         e_sx = (
@@ -2201,6 +2202,19 @@ class CCAA_T48:  # noqa: N801
             if load.load_duration == LoadDuration.SHORT
             else self.e_sl(load_id=load_id)
         )
+        """
+        Calculate the required thickness of the slab.
+
+        Parameters
+        ----------
+        load_id : str
+            The ID of the load to calculate the thickness for.
+        load_location : LoadLocation
+            The location of the load.
+        ftf_method : FtfMethod | None
+            The method to use to calculate the flexural tensile strength of the
+            concrete. If provided, it overrides the value saved on the CCAA_T48 object.
+        """
 
         return t_reqd(
             magnitude=load.magnitude,
