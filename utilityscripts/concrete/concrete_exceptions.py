@@ -17,3 +17,7 @@ class CCAANoLoadError(CCAAError):
 
 class CCAALoadNotFoundError(CCAAError):
     pass
+
+
+class CCAANoDowelError(CCAAError):
+    pass

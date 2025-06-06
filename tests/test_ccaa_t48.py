@@ -1211,3 +1211,23 @@ def test_aic_batch_slab():
         360.0,
         rel_tol=1.0e-2,  # calculated value was 365 but we reduced to 360 for dwgs.
     )
+
+
+def test_dowel_single_shear():
+    slab = Slab(
+        f_c=40.0, thickness=360.0, dowels=(Dowel(dowel_size=24.0, f_sy=300.0), 300.0)
+    )
+    check_slab = CCAA_T48(slab=slab)
+    assert isclose(check_slab.dowel_shear_capacity_single(), 63.7, rel_tol=1e-2)
+
+    slab = Slab(
+        f_c=40.0,
+        thickness=360.0,
+        dowels=(Dowel(dowel_size=24.0, f_sy=300.0, dowel_type=DowelType.SQUARE), 300.0),
+    )
+    check_slab = CCAA_T48(slab=slab)
+    assert isclose(
+        check_slab.dowel_shear_capacity_single(),
+        0.9 * 24 * 24 * 300 * 0.6 / 1.15 / 1000,
+        rel_tol=1e-2,
+    )

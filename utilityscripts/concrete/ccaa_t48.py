@@ -25,6 +25,7 @@ from scipy.interpolate import CloughTocher2DInterpolator  # type: ignore
 from utilityscripts.concrete.as3600 import Concrete
 from utilityscripts.concrete.concrete_exceptions import (
     CCAALoadNotFoundError,
+    CCAANoDowelError,
     CCAANoLoadError,
 )
 from utilityscripts.plotting import AGILITUS_COLORS
@@ -287,7 +288,7 @@ def f_tf_ccaa(*, f_c: float) -> float:
 
     Notes
     -----
-    - CCAA T48 uses 0.7 x f_c^0.5. This is more conservative than AS3600 which uses
+    - CCAA T48 uses 0.7 x f_c^0.5. This is less conservative than AS3600 which uses
     0.6 x f_c^0.5.
 
     Parameters
@@ -1583,6 +1584,51 @@ def radius_relative_stiffness(
     ) ** 0.25
 
 
+def dowel_shear_capacity(
+    *,
+    dowel_area: float,
+    f_sy: float,
+    partial_factor: float = 1.15,
+    area_reduction_factor: float = 0.9,
+):
+    """
+    Calculate the shear capacity of a single dowel.
+
+    Notes
+    -----
+    CCAA takes an approach that appears to be relatied to the typical EuroCode
+    approach to limit state design (dividing by a partial safety factor > 1.00
+    instead of multiplying by a capacity reduction factor <1.00). An additional
+    area reduction factor is used on the dowel area. The approach appears to be an
+    Ultimate Limit States approach shoe-horned into the otherwise working stress
+    design approach. The factors of 0.9x on area and 1 / 1.15 for the partial
+    safety factor give an overall "safety factor" of approximately 1.28.
+    This compares to a typical ULS "safety factor" in Australian approach of
+    approximately 1.5 / 0.9 = 1.67. However for a low consequence failure which a
+    typical ground supported slab would experience (basically a serviceability
+    failure caused by cracking to the point where repairs are required) the lower
+    "safety factor" is reasonable.
+
+    Parameters
+    ----------
+    dowel_area : float
+        The area of the dowel. In mm^2.
+    f_sy : float
+        The steel yield strength. In MPa.
+    partial_factor : float
+        The partial safety factor.
+    area_reduction_factor : float
+        The area reduction factor.
+
+    Returns
+    -------
+    float
+        The shear capacity of a single dowel. In kN.
+    """
+
+    return (0.6 * dowel_area * area_reduction_factor * f_sy / partial_factor) / 1000
+
+
 class Load:
     """
     Represents a load for the slab.
@@ -1859,6 +1905,28 @@ class Slab:
         """
 
         return self._dowels
+
+    @property
+    def single_dowel(self) -> Dowel | None:
+        """
+        The Dowel object with the properties of a single dowel.
+        """
+
+        if self.dowels is None:
+            return None
+
+        return self.dowels[0]
+
+    @property
+    def dowel_spacing(self) -> float | None:
+        """
+        The Dowel spacing (if dowels are provided) in mm.
+        """
+
+        if self.dowels is None:
+            return None
+
+        return self.dowels[1]
 
     def __repr__(self):
         return (
@@ -2225,4 +2293,49 @@ class CCAA_T48:  # noqa: N801
             f_all=self.f_all(load_id=load_id),
             e_sx=e_sx,
             h=self.soil_profile.h_total,
+        )
+
+    def dowel_shear_capacity_single(
+        self, *, partial_factor: float = 1.15, area_reduction_factor: float = 0.9
+    ) -> float:
+        """
+        Calculate the shear capacity of a single dowel.
+
+        Notes
+        -----
+        CCAA takes an approach that appears to be relatied to the typical EuroCode
+        approach to limit state design (dividing by a partial safety factor > 1.00
+        instead of multiplying by a capacity reduction factor <1.00). An additional
+        area reduction factor is used on the dowel area. The approach appears to be an
+        Ultimate Limit States approach shoe-horned into the otherwise working stress
+        design approach. The factors of 0.9x on area and 1 / 1.15 for the partial
+        safety factor give an overall "safety factor" of approximately 1.28.
+        This compares to a typical ULS "safety factor" in Australian approach of
+        approximately 1.5 / 0.9 = 1.67. However for a low consequence failure which a
+        typical ground supported slab would experience (basically a serviceability
+        failure caused by cracking to the point where repairs are required) the lower
+        "safety factor" is reasonable.
+
+        Parameters
+        ----------
+        partial_factor : float
+            The partial safety factor for dowel shear. CCAA T48 gives a value of 1.15.
+        area_reduction_factor : float
+            The reduction factor for the dowel area. CCAA T48 gives a value of 0.9.
+
+        Returns
+        -------
+        float | None
+            The shear capacity of a single dowel. In kN.
+            Returns None if no dowels are provided.
+        """
+
+        if self.slab.single_dowel is None:
+            raise CCAANoDowelError("No dowels assocated with the slab.")
+
+        return dowel_shear_capacity(
+            dowel_area=self.slab.single_dowel.area,
+            f_sy=self.slab.single_dowel.f_sy,
+            partial_factor=partial_factor,
+            area_reduction_factor=area_reduction_factor,
         )
