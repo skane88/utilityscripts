@@ -1174,3 +1174,40 @@ def test_ccaa_app_d4():
         290.0,
         rel_tol=2.5e-2,  # reasonably high tolerance, but engineering is not that exact...
     )
+
+
+def test_aic_batch_slab():
+    """
+    Test against project 25068 batch slab design.
+    """
+
+    assert isclose(e_sl_from_cbr(5.0), 20.0, rel_tol=2.5e-2)
+
+    axle_load = Load(
+        load_type=LoadingType.WHEEL,
+        load_duration=LoadDuration.SHORT,
+        magnitude=250.0,
+        normalising_length=2.0,
+        no_cycles=36500,
+    )
+    soil = Soil(e_sl=23.0, e_ss=30.0, soil_name="in-situ")
+    # back-calculated e_ss from a CBR=5.0, and then used the e_ss to e_sl conversion
+    # given in T1.19
+    soil_profile = SoilProfile(h_layers=[6.0], soils=[soil])
+    slab = Slab(f_c=40.0, thickness=360.0)
+
+    check_slab = CCAA_T48(
+        slab=slab,
+        loads={"axle_load": axle_load},
+        soil_profile=soil_profile,
+        material_factor=MaterialFactor.MIDRANGE,
+    )
+
+    assert isclose(
+        check_slab.t_reqd(
+            load_id="axle_load",
+            load_location=LoadLocation.EDGE,
+        ),
+        360.0,
+        rel_tol=1.0e-2,  # calculated value was 365 but we reduced to 360 for dwgs.
+    )
