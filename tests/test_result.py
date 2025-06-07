@@ -4,27 +4,27 @@ Test the Result class.
 
 import pytest
 
-from utilityscripts.result import Result
+from utilityscripts.result import DeprecatedResult
 
 
 @pytest.mark.parametrize("operation", [str, float, int, bool, complex, bytes])
 def test_result_to_str(operation):
-    r = Result(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
+    r = DeprecatedResult(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
     assert operation(r) == operation(1)
 
 
 def test_result_neg():
-    r = Result(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
+    r = DeprecatedResult(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
     assert -r == -1
 
 
 def test_result_pos():
-    r = Result(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
+    r = DeprecatedResult(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
     assert +r == +1
 
 
 def test_result_invert():
-    r = Result(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
+    r = DeprecatedResult(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
     assert ~r == ~1
 
 
@@ -41,7 +41,7 @@ def test_result_invert():
     ],
 )
 def test_result_add(result, other, expected):
-    result = Result(result)
+    result = DeprecatedResult(result)
     assert result + other == expected
 
 
@@ -58,7 +58,7 @@ def test_result_add(result, other, expected):
     ],
 )
 def test_result_sub(result, other, expected):
-    result = Result(result)
+    result = DeprecatedResult(result)
     assert result - other == expected
 
 
@@ -75,7 +75,7 @@ def test_result_sub(result, other, expected):
     ],
 )
 def test_result_mul(result, other, expected):
-    result = Result(result)
+    result = DeprecatedResult(result)
     assert result * other == expected
     assert other * result == expected
 
@@ -88,7 +88,7 @@ def test_result_mul(result, other, expected):
     ],
 )
 def test_result_truediv(result, other, expected):
-    result = Result(result)
+    result = DeprecatedResult(result)
     assert result / other == expected
 
 
@@ -100,7 +100,7 @@ def test_result_truediv(result, other, expected):
     ],
 )
 def test_result_rtruediv(result, other, expected):
-    result = Result(result)
+    result = DeprecatedResult(result)
     assert other / result == expected
 
 
@@ -112,7 +112,7 @@ def test_result_rtruediv(result, other, expected):
     ],
 )
 def test_result_floordiv(result, other, expected):
-    result = Result(result)
+    result = DeprecatedResult(result)
     assert result // other == expected
 
 
@@ -124,7 +124,7 @@ def test_result_floordiv(result, other, expected):
     ],
 )
 def test_result_rfloordiv(result, other, expected):
-    result = Result(result)
+    result = DeprecatedResult(result)
     assert other // result == expected
 
 
@@ -136,7 +136,7 @@ def test_result_rfloordiv(result, other, expected):
     ],
 )
 def test_result_pow(result, other, expected):
-    result = Result(result)
+    result = DeprecatedResult(result)
     assert result**other == expected
 
 
@@ -148,5 +148,5 @@ def test_result_pow(result, other, expected):
     ],
 )
 def test_result_rpow(result, other, expected):
-    result = Result(result)
+    result = DeprecatedResult(result)
     assert other**result == expected

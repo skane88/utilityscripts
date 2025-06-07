@@ -91,6 +91,19 @@ class Result:
 
         return self._metadata
 
+
+class DeprecatedResult(Result):
+    def __init__(
+        self,
+        value: Any,
+        description: str | None = None,
+        variable: str | None = None,
+        eqn: str | None = None,
+        inputs: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
+    ):
+        super().__init__(value, description, variable, eqn, inputs, metadata)
+
     def __str__(self):
         if isinstance(self._value, str):
             return self._value
