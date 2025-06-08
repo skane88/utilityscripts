@@ -9,22 +9,22 @@ from utilityscripts.result import DeprecatedResult
 
 @pytest.mark.parametrize("operation", [str, float, int, bool, complex, bytes])
 def test_result_to_str(operation):
-    r = DeprecatedResult(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
+    r = DeprecatedResult(1)
     assert operation(r) == operation(1)
 
 
 def test_result_neg():
-    r = DeprecatedResult(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
+    r = DeprecatedResult(1)
     assert -r == -1
 
 
 def test_result_pos():
-    r = DeprecatedResult(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
+    r = DeprecatedResult(1)
     assert +r == +1
 
 
 def test_result_invert():
-    r = DeprecatedResult(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
+    r = DeprecatedResult(1)
     assert ~r == ~1
 
 

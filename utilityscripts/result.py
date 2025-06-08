@@ -23,25 +23,45 @@ class Result:
     Usage
     -----
     >>> r = Result(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
-    >>> r * 2
-    2
+    >>> r.val
+    1
     """
 
     def __init__(
         self,
         value: Any,
+        *,
         description: str | None = None,
         variable: str | None = None,
-        eqn: str | None = None,
-        inputs: dict[str, Any] | None = None,
-        metadata: dict[str, Any] | None = None,
+        data: dict[str, Any] | None = None,
+        text_template: str | None = None,
+        latex_template: str | None = None,
     ):
+        """
+        Initialise a Result object.
+
+        Parameters
+        ----------
+        value : Any
+            The result stored in the Result object.
+        description : str | None, optional
+            A description of the Result object.
+        variable : str | None, optional
+            The variable name of the Result object.
+        data : dict[str, Any] | None, optional
+            Any extra data stored in the Result object.
+        text_template : str | None, optional
+            A template for the text representation of the Result object.
+        latex_template : str | None, optional
+            A template for the LaTeX representation of the Result object.
+        """
+
         self._value = value
         self._description = description
         self._variable = variable
-        self._eqn = eqn
-        self._inputs = inputs
-        self._metadata = metadata
+        self._data = data
+        self._text_template = text_template
+        self._latex_template = latex_template
 
     @property
     def value(self) -> Any:
@@ -68,42 +88,18 @@ class Result:
         return self._variable
 
     @property
-    def eqn(self) -> str | None:
+    def data(self) -> dict[str, Any] | None:
         """
-        The equation used to generate the results
-        """
-
-        return self._eqn
-
-    @property
-    def inputs(self) -> dict[str, Any] | None:
-        """
-        The inputs to the equation.
+        Any extra data stored in the Result object.
         """
 
-        return self._inputs
+        return self._data
 
-    @property
-    def metadata(self) -> dict[str, Any] | None:
-        """
-        The metadata stored in the Result object.
-        """
-
-        return self._metadata
+    def __repr__(self):
+        return f"Result: {self.variable}={self.value}"
 
 
 class DeprecatedResult(Result):
-    def __init__(
-        self,
-        value: Any,
-        description: str | None = None,
-        variable: str | None = None,
-        eqn: str | None = None,
-        inputs: dict[str, Any] | None = None,
-        metadata: dict[str, Any] | None = None,
-    ):
-        super().__init__(value, description, variable, eqn, inputs, metadata)
-
     def __str__(self):
         if isinstance(self._value, str):
             return self._value
@@ -277,10 +273,3 @@ class DeprecatedResult(Result):
         result_str += "=" + result_value
 
         return result_str
-
-    def __repr__(self):
-        return (
-            f"Result(result={self._value}, "
-            + "description="
-            + f"{None if self._description is None else self._description}"
-        )
