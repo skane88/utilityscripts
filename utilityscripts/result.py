@@ -7,64 +7,72 @@ from typing import Any
 from jinja2 import Environment
 
 latex_env = Environment(
-    block_start_string="<<b",
-    block_end_string=">>",
-    variable_start_string="<<",
-    variable_end_string=">>",
-    comment_start_string="<<#",
-    comment_end_string=">>",
+    block_start_string="<b",  # update some control characters to suit latex
+    block_end_string="b>",
+    variable_start_string="<v",
+    variable_end_string="v>",
+    comment_start_string="<#",
+    comment_end_string="#>",
     autoescape=True,
 )
 
 text_env = Environment(autoescape=True)
 
-default_text_template = """{{ variable }}
-========================================
-{%if description is defined%}{{ description }}{% endif %}
-{% for variable in variables.values() %}{{ variable.variable }} = {{ variable.str_value }}{% endfor %}
-{%if eqn is not none %}{{ eqn }} {% else %}value{% endif %}={{ value }}
-"""
+default_text_template = (
+    "{{ variable }}\n"
+    + "----------------------------------------\n"
+    + "{%if description is defined%}{{ description }}\n{% endif %}"
+    + "{% for variable in variables.values() %}{{ variable.symbol }} = {{ variable.report_string }}\n{% endfor %}"
+    + "{%if eqn is not none %}{{ eqn }}{% else %}value{% endif %} = {{ str_value }}"
+)
 
 
 class Variable:
+    """
+    Class to store a simple variable object. Designed to package together a value,
+    a symbol and some information about units and how to display it.
+
+    Notes
+    -----
+    - Intended to be for reporting purposes only. The units functionality is not and
+    will not replace a units package like pint or unyt.
+    """
+
     def __init__(
         self,
-        variable: str,
         value: Any,
-        units: str | None = None,
-        no_places: int | None = None,
+        *,
+        symbol: str | None = None,
+        units: str = "",
+        fmt_string: str = ".3e",
     ):
-        self._variable = variable
         self._value = value
+        self._symbol = symbol
         self._units = units
-        self._no_places = no_places
-
-    @property
-    def variable(self) -> str:
-        return self._variable
+        self._fmt_string = fmt_string
 
     @property
     def value(self) -> Any:
         return self._value
 
     @property
-    def units(self) -> str | None:
+    def symbol(self) -> str | None:
+        return self._symbol
+
+    @property
+    def units(self) -> str:
         return self._units
 
     @property
-    def no_places(self) -> int | None:
-        return self._no_places
+    def fmt_string(self) -> str:
+        return self._fmt_string
 
     @property
     def str_value(self) -> str:
-        return (
-            f"{self.value:.{self.no_places}f}"
-            if self.no_places is not None
-            else f"{self.value}"
-        ) + (f" {self.units}" if self.units is not None else "")
+        return f"{self.value:{self.fmt_string}}" + f"{self.units}"
 
     def __repr__(self):
-        return f"Variable: {self.variable}={self.value}"
+        return f"Variable: {self.symbol}={self.value}"
 
 
 class Result:
@@ -72,21 +80,6 @@ class Result:
     Class to store results along with the equation, inputs,
     and metadata used to generate it. The Result object will also produce formatted
     strings for use in reports etc.
-
-    Notes
-    -----
-    It is intended that native operations on the Result object should act on
-    the stored .result attribute as though it were a stand-alone value.
-    e.g. Result * 2 should be equivalent to Result.result * 2 and so-on.
-    Initially the basic arithmetic operations will be implemented and over time
-    additional operations may be added. Be-aware that if the .result attribute
-    does not support an operation then an error may be raised.
-
-    Usage
-    -----
-    >>> r = Result(1, eqn={"x": 1}, inputs={"x": 1}, metadata={"source": "test"})
-    >>> r.val
-    1
     """
 
     def __init__(
@@ -94,11 +87,11 @@ class Result:
         value: Any,
         *,
         description: str | None = None,
-        variable: str | None = None,
+        symbol: str | None = None,
         eqn: str | None = None,
         data: dict[str, Any] | None = None,
-        units: str | None = None,
-        no_places: int | None = None,
+        units: str = "",
+        fmt_string: str = ".3e",
         text_template: str | None = None,
         latex_template: str | None = None,
     ):
@@ -111,12 +104,16 @@ class Result:
             The result stored in the Result object.
         description : str | None, optional
             A description of the Result object.
-        variable : str | None, optional
-            The variable name of the Result object.
+        symbol : str | None, optional
+            The symbol used for the result.
         eqn : str | None, optional
             The equation used to generate the result.
         data : dict[str, Any] | None, optional
             Any extra data stored in the Result object.
+        units : str, optional
+            The units of the result.
+        fmt_string : str, optional
+            The format string used to display the result.
         text_template : str | None, optional
             A template for the text representation of the Result object.
         latex_template : str | None, optional
@@ -125,11 +122,11 @@ class Result:
 
         self._value = value
         self._description = description
-        self._variable = variable
+        self._symbol = symbol
         self._eqn = eqn
         self._data = data
         self._units = units
-        self._no_places = no_places
+        self._fmt_string = fmt_string
         self._text_template = text_template
         self._latex_template = latex_template
 
@@ -140,6 +137,14 @@ class Result:
         """
 
         return self._value
+
+    @property
+    def str_value(self) -> str:
+        """
+        The string representation of the result.
+        """
+
+        return f"{self.value:{self.fmt_string}}" + f"{self.units}"
 
     @property
     def eqn(self) -> str | None:
@@ -161,12 +166,12 @@ class Result:
         return self._description
 
     @property
-    def variable(self) -> str | None:
+    def symbol(self) -> str | None:
         """
-        The variable name of the Result object.
+        The symbol used for the Result object.
         """
 
-        return self._variable
+        return self._symbol
 
     @property
     def data(self) -> dict[str, Any] | None:
@@ -177,7 +182,7 @@ class Result:
         return self._data
 
     @property
-    def units(self) -> str | None:
+    def units(self) -> str:
         """
         The units of the result.
         """
@@ -185,12 +190,12 @@ class Result:
         return self._units
 
     @property
-    def no_places(self) -> int | None:
+    def fmt_string(self) -> str:
         """
-        The number of decimal places to display for the result.
+        The format string used to display the result.
         """
 
-        return self._no_places
+        return self._fmt_string
 
     @property
     def variables(self) -> dict[str, Variable]:
@@ -222,17 +227,31 @@ class Result:
 
         return text_env.from_string(template).render(
             description=self.description,
-            variable=self.variable,
+            variable=self.symbol,
             eqn=self.eqn,
             variables=self.variables,
-            value=self.value,
+            str_value=self.str_value,
         )
 
     def __repr__(self):
-        return f"Result: {self.variable}={self.value}"
+        return f"Result: {self.symbol}={self.str_value}"
 
 
 class DeprecatedResult(Result):
+    """
+    Deprecated result class. One day it may be rolled back into the master Result class,
+    possibly through a factory function that builds IntResults, FloatResults etc.
+
+    Notes
+    -----
+    It is intended that native operations on the Result object should act on
+    the stored .result attribute as though it were a stand-alone value.
+    e.g. Result * 2 should be equivalent to Result.result * 2 and so-on.
+    Initially the basic arithmetic operations will be implemented and over time
+    additional operations may be added. Be-aware that if the .result attribute
+    does not support an operation then an error may be raised.
+    """
+
     def __str__(self):
         if isinstance(self._value, str):
             return self._value
@@ -402,7 +421,7 @@ class DeprecatedResult(Result):
             else f"{self.value:{result_format}}"
         )
 
-        result_str += self.variable if self.variable is not None else ""
+        result_str += self.symbol if self.symbol is not None else ""
         result_str += "=" + result_value
 
         return result_str
