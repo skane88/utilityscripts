@@ -244,7 +244,7 @@ class EN14015:
             self.d_i / self.h_t,
             description="Ratio of liquid diameter to filling height",
             eqn="d_i / h_t",
-            inputs={"d_i": self.d_i, "h_t": self.h_t},
+            data={"d_i": self.d_i, "h_t": self.h_t},
         )
 
     @property
@@ -264,9 +264,9 @@ class EN14015:
         return Result(
             self.t_1_ratio * self.m_liquid,
             description="Fraction of liquid behaving in an inertial manner",
-            variable="T_1",
+            symbol="T_1",
             eqn="T_1/m_liquid Ratio x m_liquid",
-            inputs={"m_liquid": self.m_liquid, "T_1 / m_liquid Ratio": self.t_1_ratio},
+            data={"m_liquid": self.m_liquid, "T_1 / m_liquid Ratio": self.t_1_ratio},
         )
 
     @property
@@ -338,7 +338,7 @@ class EN14015:
         The sloshing acceleration factor.
         """
 
-        return float(get_ratios(d_h_t_ratio=float(self.d_h_t_ratio))["ks"])
+        return float(get_ratios(d_h_t_ratio=float(self.d_h_t_ratio.value))["ks"])
 
     @property
     def j(self) -> float:
@@ -392,7 +392,7 @@ class EN14015:
         In kN.
         """
 
-        return self.a_seismic * self.t_1 / 1000
+        return self.a_seismic * self.t_1.value / 1000
 
     @property
     def eq_2(self) -> float:
