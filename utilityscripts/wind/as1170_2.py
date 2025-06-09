@@ -617,13 +617,13 @@ def m_d_exact(
     )
 
     # next if the user has provided a text direction (e.g. "NW") get the angle value.
-    if direction in wind_direction_defs["direction"]:
+    if str(direction) in wind_direction_defs["direction"]:
         direction = wind_direction_defs.filter(pl.col("direction") == direction)[
             "angle"
         ][0]
 
     # now check that direction is within the range of 0-360
-    direction = direction % 360
+    direction = float(direction) % 360
 
     # now build a numpy array to use numpy's interp functions.
     m_d_table = [
