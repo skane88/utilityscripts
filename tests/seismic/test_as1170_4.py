@@ -7,7 +7,7 @@ from math import isclose
 import numpy as np
 import pytest
 
-from utilityscripts.earthquake.as1170_4 import (
+from utilityscripts.seismic.as1170_4 import (
     SoilClass,
     cd_t,
     k_p_data,
