@@ -4,6 +4,68 @@ A file to store results along with some reporting information.
 
 from typing import Any
 
+from jinja2 import Environment
+
+latex_env = Environment(
+    block_start_string="<<b",
+    block_end_string=">>",
+    variable_start_string="<<",
+    variable_end_string=">>",
+    comment_start_string="<<#",
+    comment_end_string=">>",
+    autoescape=True,
+)
+
+text_env = Environment(autoescape=True)
+
+default_text_template = """{{ variable }}
+========================================
+{%if description is defined%}{{ description }}{% endif %}
+{% for variable in variables.values() %}{{ variable.variable }} = {{ variable.str_value }}{% endfor %}
+{%if eqn is not none %}{{ eqn }} {% else %}value{% endif %}={{ value }}
+"""
+
+
+class Variable:
+    def __init__(
+        self,
+        variable: str,
+        value: Any,
+        units: str | None = None,
+        no_places: int | None = None,
+    ):
+        self._variable = variable
+        self._value = value
+        self._units = units
+        self._no_places = no_places
+
+    @property
+    def variable(self) -> str:
+        return self._variable
+
+    @property
+    def value(self) -> Any:
+        return self._value
+
+    @property
+    def units(self) -> str | None:
+        return self._units
+
+    @property
+    def no_places(self) -> int | None:
+        return self._no_places
+
+    @property
+    def str_value(self) -> str:
+        return (
+            f"{self.value:.{self.no_places}f}"
+            if self.no_places is not None
+            else f"{self.value}"
+        ) + (f" {self.units}" if self.units is not None else "")
+
+    def __repr__(self):
+        return f"Variable: {self.variable}={self.value}"
+
 
 class Result:
     """
@@ -33,7 +95,10 @@ class Result:
         *,
         description: str | None = None,
         variable: str | None = None,
+        eqn: str | None = None,
         data: dict[str, Any] | None = None,
+        units: str | None = None,
+        no_places: int | None = None,
         text_template: str | None = None,
         latex_template: str | None = None,
     ):
@@ -48,6 +113,8 @@ class Result:
             A description of the Result object.
         variable : str | None, optional
             The variable name of the Result object.
+        eqn : str | None, optional
+            The equation used to generate the result.
         data : dict[str, Any] | None, optional
             Any extra data stored in the Result object.
         text_template : str | None, optional
@@ -59,7 +126,10 @@ class Result:
         self._value = value
         self._description = description
         self._variable = variable
+        self._eqn = eqn
         self._data = data
+        self._units = units
+        self._no_places = no_places
         self._text_template = text_template
         self._latex_template = latex_template
 
@@ -72,10 +142,21 @@ class Result:
         return self._value
 
     @property
-    def description(self) -> str | None:
+    def eqn(self) -> str | None:
+        """
+        The equation used to generate the result.
+        """
+
+        return self._eqn
+
+    @property
+    def description(self) -> str:
         """
         The description of the Result object.
         """
+
+        if self._description is None:
+            return ""
 
         return self._description
 
@@ -94,6 +175,58 @@ class Result:
         """
 
         return self._data
+
+    @property
+    def units(self) -> str | None:
+        """
+        The units of the result.
+        """
+
+        return self._units
+
+    @property
+    def no_places(self) -> int | None:
+        """
+        The number of decimal places to display for the result.
+        """
+
+        return self._no_places
+
+    @property
+    def variables(self) -> dict[str, Variable]:
+        """
+        Variable objects based on the data stored in the object.
+        """
+
+        variables = {}
+
+        if self._data is None:
+            return {}
+
+        for key, value in self._data.items():
+            if isinstance(value, Variable):
+                variables[key] = value
+
+            else:
+                variables[key] = Variable(key, value)
+
+        return variables
+
+    @property
+    def plain_string(self) -> str:
+        template = (
+            default_text_template
+            if self._text_template is None
+            else self._text_template
+        )
+
+        return text_env.from_string(template).render(
+            description=self.description,
+            variable=self.variable,
+            eqn=self.eqn,
+            variables=self.variables,
+            value=self.value,
+        )
 
     def __repr__(self):
         return f"Result: {self.variable}={self.value}"
