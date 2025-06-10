@@ -1158,7 +1158,26 @@ def k_a(
     return np.interp(area, area_vals, k_a_vals)
 
 
-def c_fig_rect_prism(d, b, theta):
+def c_fig_rect_prism(d: float, b: float, theta: float = 0.0) -> tuple[float, float]:
+    """
+    Calculate the external pressure coefficient for a rectangular prism as per
+    AS1170.2 Appendix C Figure C.2
+
+    Parameters
+    ----------
+    d : float
+        The depth of the section into the wind. Units to match b.
+    b : float
+        The width of the section across the wind. Consistent units with d.
+    theta : float
+        The angle of the wind relative to the section. In degrees.
+
+    Returns
+    -------
+    tuple[float, float]
+    The external pressure coefficient (C_fx and C_fy)
+    """
+
     init_standard_data()
 
     c_fig_data = STANDARD_DATA["app_c_fig_c2"]
