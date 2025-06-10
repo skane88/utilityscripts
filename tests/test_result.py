@@ -4,7 +4,7 @@ Test the Result class.
 
 import pytest
 
-from utilityscripts.result import DeprecatedResult, Variable
+from utilityscripts.result import DeprecatedResult, Variable, _sci_not
 
 
 def test_variable():
@@ -176,3 +176,32 @@ def test_result_pow(result, other, expected):
 def test_result_rpow(result, other, expected):
     result = DeprecatedResult(result)
     assert other**result == expected
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (12.3456789, (1.23456789, 1)),
+        (-12.3456789, (-1.23456789, 1)),
+        (-1000000, (-1, 6)),
+        (-100000, (-1, 5)),
+        (-10000, (-1, 4)),
+        (-1000, (-1, 3)),
+        (-100, (-1, 2)),
+        (-10, (-1, 1)),
+        (-1, (-1, 0)),
+        (0, (0, 0)),
+        (1, (1, 0)),
+        (10, (1, 1)),
+        (100, (1, 2)),
+        (1000, (1, 3)),
+        (10000, (1, 4)),
+        (100000, (1, 5)),
+        (1000000, (1, 6)),
+    ],
+)
+def test_sci_not(value, expected):
+    result = _sci_not(value)
+
+    assert result[0] == expected[0]
+    assert result[1] == expected[1]
