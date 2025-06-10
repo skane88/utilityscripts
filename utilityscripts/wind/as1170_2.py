@@ -171,6 +171,7 @@ def init_standard_data(*, file_path: Path | None = None, overwrite: bool = False
             "cpe_t5_2b",
             "cpe_t5_2c",
             "k_a",
+            "app_c_k_ar",
             "app_c_fig_c2",
         }
 
@@ -1156,6 +1157,32 @@ def k_a(
     k_a_vals = np.asarray(k_a_data["k_a"])
 
     return np.interp(area, area_vals, k_a_vals)
+
+
+def k_ar(*, length: float, width: float) -> float:
+    """
+    Calculate the aspect ratio correction factor K_ar as per AS1170.2 Appendix C
+
+    Parameters
+    ----------
+    length : float
+        The length of the section into the wind.
+    width : float
+        The width of the section across the wind.
+
+    Returns
+    -------
+    float
+        The aspect ratio correction factor K_ar.
+    """
+
+    init_standard_data()
+
+    k_ar_data = STANDARD_DATA["app_c_k_ar"]
+
+    l_b_ratio = length / width
+
+    return np.interp(l_b_ratio, k_ar_data["l_b_ratio"], k_ar_data["k_ar"])
 
 
 def c_fig_rect_prism(d: float, b: float, theta: float = 0.0) -> tuple[float, float]:

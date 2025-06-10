@@ -18,6 +18,7 @@ from utilityscripts.wind.as1170_2 import (
     c_pe_l,
     c_pi_open,
     k_a,
+    k_ar,
     k_v,
     m_d_exact,
     v_r,
@@ -580,6 +581,24 @@ def test_k_v(area, vol, expected):
 )
 def test_k_a(area, face_type, z, version, expected):
     assert isclose(k_a(area=area, face_type=face_type, z=z, version=version), expected)
+
+
+@pytest.mark.parametrize(
+    "length, width, expected",
+    [
+        (0.0, 1.0, 0.70),
+        (8.0, 1.0, 0.70),
+        (11.0, 1.0, 0.75),
+        (14.0, 1.0, 0.80),
+        (22.0, 1.0, 0.85),
+        (30.0, 1.0, 0.90),
+        (35.0, 1.0, 0.95),
+        (40.0, 1.0, 1.00),
+        (1000.0, 1.0, 1.00),
+    ],
+)
+def test_k_ar(length, width, expected):
+    assert isclose(k_ar(length=length, width=width), expected, rel_tol=1e-6)
 
 
 @pytest.mark.parametrize(
