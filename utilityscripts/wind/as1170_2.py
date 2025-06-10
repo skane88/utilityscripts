@@ -1060,7 +1060,7 @@ def c_pe_l(
 
     d_b_ratio = d / b
 
-    return interp((roof_pitch, d_b_ratio))
+    return float(interp((roof_pitch, d_b_ratio)))
 
 
 def c_pe_s(
