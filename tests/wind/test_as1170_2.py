@@ -14,6 +14,7 @@ from utilityscripts.wind.as1170_2 import (
     StandardVersion,
     WindRegion,
     WindSite,
+    c_fig_rect_prism,
     c_pe_l,
     c_pi_open,
     k_a,
@@ -579,6 +580,39 @@ def test_k_v(area, vol, expected):
 )
 def test_k_a(area, face_type, z, version, expected):
     assert isclose(k_a(area=area, face_type=face_type, z=z, version=version), expected)
+
+
+@pytest.mark.parametrize(
+    "d, b, theta, expected",
+    [
+        (0.1, 1.00, 0, (2.20, 0.0)),
+        (0.33, 1.00, 0, (2.30, 0.0)),
+        (0.40, 1.00, 0, (2.30, 0.0)),
+        (0.62, 1.00, 0, (2.80, 0.0)),
+        (1.00, 1.00, 0, (2.20, 0.0)),
+        (1.60, 1.00, 0, (1.70, 0.0)),
+        (2.50, 1.00, 0, (1.50, 0.0)),
+        (3.00, 1.00, 0, (1.30, 0.0)),
+        (6.50, 1.00, 0, (1.20, 0.0)),
+        (10.00, 1.00, 0, (1.10, 0.0)),
+        (0.1, 1.00, 45.0, (1.80, -0.11)),
+        (0.33, 1.00, 45.0, (1.70, -0.40)),
+        (0.40, 1.00, 45.0, (1.70, -0.52)),
+        (0.62, 1.00, 45.0, (1.70, -0.93)),
+        (1.00, 1.00, 45.0, (1.50, -1.50)),
+        (1.60, 1.00, 45.0, (1.50, -2.70)),
+        (2.50, 1.00, 45.0, (1.30, -4.2)),
+        (3.00, 1.00, 45.0, (1.20, -5.1)),
+        (6.50, 1.00, 45.0, (1.15, -11.55)),
+        (10.00, 1.00, 45.0, (1.10, -18.0)),
+        (1.00, 1.00, 22.5, (1.85, -0.75)),
+    ],
+)
+def test_c_fig_rect_prism(d, b, theta, expected):
+    res = c_fig_rect_prism(d, b, theta)
+
+    assert isclose(res[0], expected[0], rel_tol=1e-6)
+    assert isclose(res[1], expected[1], rel_tol=1e-6)
 
 
 def test_windsite():
