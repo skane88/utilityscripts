@@ -10,9 +10,11 @@ import toml
 
 from utilityscripts.wind.as1170_2 import (
     FaceType,
+    RoofType,
     StandardVersion,
     WindRegion,
     WindSite,
+    c_pe_l,
     c_pi_open,
     k_a,
     k_v,
@@ -393,6 +395,73 @@ def test_c_pi_open(
 
 def test_c_pi_other():
     raise AssertionError()
+
+
+@pytest.mark.parametrize(
+    "roof_pitch, d, b, roof_type, version, expected",
+    [
+        (0, 0, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (0, 1, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (0, 1.5, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.40),
+        (0, 2, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.30),
+        (0, 3, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.25),
+        (0, 4, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.20),
+        (0, 1000, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.20),
+        (9, 0, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (9, 1, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (9, 2, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.30),
+        (9, 4, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.20),
+        (9, 1000, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.20),
+        (10, 0, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.30),
+        (10, 1, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.30),
+        (10, 2, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.30),
+        (10, 4, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.30),
+        (10, 1000, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.30),
+        (15, 0, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.30),
+        (15, 1, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.30),
+        (15, 2, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.30),
+        (15, 4, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.30),
+        (15, 1000, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.30),
+        (20, 0, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.40),
+        (20, 1, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.40),
+        (20, 2, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.40),
+        (20, 4, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.40),
+        (20, 1000, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.40),
+        (25, 0, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.75),
+        (25, 0.1, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.75),
+        (25, 0.3, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (25, 1, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (25, 2, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (25, 4, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (25, 1000, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (90, 0, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.75),
+        (90, 0.1, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.75),
+        (90, 0.3, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (90, 1, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (90, 2, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (90, 4, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (90, 1000, 1, RoofType.HIP, StandardVersion.AS1170_2_2021, -0.50),
+        (0, 0, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.50),
+        (0, 0.1, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.50),
+        (0, 0.3, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.50),
+        (0, 1, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.50),
+        (0, 2, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.30),
+        (0, 4, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.20),
+        (0, 1000, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.20),
+        (90, 0, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.50),
+        (90, 0.1, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.50),
+        (90, 0.3, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.50),
+        (90, 1, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.50),
+        (90, 2, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.30),
+        (90, 4, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.20),
+        (90, 1000, 1, RoofType.GABLE, StandardVersion.AS1170_2_2021, -0.20),
+    ],
+)
+def test_c_pe_l(roof_pitch, d, b, roof_type, version, expected):
+    assert isclose(
+        c_pe_l(roof_pitch=roof_pitch, d=d, b=b, roof_type=roof_type, version=version),
+        expected,
+    )
 
 
 def k_v_calc(area, volume):

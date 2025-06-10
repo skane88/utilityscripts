@@ -11,6 +11,7 @@ from pathlib import Path
 
 import numpy as np
 import polars as pl
+from scipy.interpolate import RegularGridInterpolator
 
 from utilityscripts.multiinterp import multi_interp
 
@@ -55,6 +56,11 @@ class FaceType(StrEnum):
     LEEWARD = "leeward"
     SIDE = "side"
     ROOF = "roof"
+
+
+class RoofType(StrEnum):
+    HIP = "hip"
+    GABLE = "gable"
 
 
 class SectionType(StrEnum):
@@ -161,6 +167,7 @@ def init_standard_data(*, file_path: Path | None = None, overwrite: bool = False
             "terrain_height_multipliers",
             "cpi_t5a",
             "cpi_t5b",
+            "cpe_t5_2b",
             "cpe_t5_2c",
             "k_a",
             "app_c_fig_c2",
@@ -993,6 +1000,67 @@ def q_basic(v: float, *, rho_air: float = 1.2):
     """
 
     return 0.5 * rho_air * v**2
+
+
+def c_pe_l(
+    *,
+    roof_pitch: float,
+    d: float,
+    b: float,
+    roof_type: RoofType,
+    version: StandardVersion = StandardVersion.AS1170_2_2021,
+) -> float:
+    """
+    Calculate the external pressure coefficient for a leeward wall of a building.
+
+    Parameters
+    ----------
+    roof_pitch : float
+        The pitch of the roof. In degrees.
+    d : float
+        The distance of the point under consideration from the windward end of the building.
+    b : float
+        The width of the building.
+    roof_type : RoofType
+        The type of roof. Note that this is from the direction the wind is blowing.
+    version : StandardVersion, default=StandardVersion.AS1170_2_2021
+        The version of the standard to use.
+
+    Returns
+    -------
+    float
+        The external pressure coefficient.
+    """
+
+    init_standard_data()
+
+    c_pe_data = STANDARD_DATA["cpe_t5_2b"].filter(pl.col("version") == version)
+    c_pe_data = c_pe_data.filter(pl.col("hip_or_gable") == roof_type)
+
+    angles = c_pe_data["roof_pitch"].unique()
+
+    if roof_pitch == angles.max():
+        roof_pitch = roof_pitch - 0.00001
+    if roof_pitch == angles.min():
+        roof_pitch = roof_pitch + 0.00001
+
+    angle_smaller = angles.filter(angles <= roof_pitch).max()
+    angle_larger = angles.filter(angles > roof_pitch).min()
+
+    c_pe_smaller = c_pe_data.filter(pl.col("roof_pitch") == angle_smaller)
+    c_pe_larger = c_pe_data.filter(pl.col("roof_pitch") == angle_larger)
+
+    x = np.asarray([angle_smaller, angle_larger])
+    y = c_pe_smaller["d_b_ratio"].to_numpy()
+    z_small = c_pe_smaller["c_pe"].to_numpy()
+    z_large = c_pe_larger["c_pe"].to_numpy()
+    z = np.vstack([z_small, z_large])
+
+    interp = RegularGridInterpolator((x, y), z, bounds_error=True)
+
+    d_b_ratio = d / b
+
+    return interp((roof_pitch, d_b_ratio))
 
 
 def c_pe_s(
