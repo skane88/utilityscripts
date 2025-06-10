@@ -7,12 +7,13 @@ from typing import Any
 from jinja2 import Environment
 
 latex_env = Environment(
-    block_start_string="<b",  # update some control characters to suit latex
-    block_end_string="b>",
-    variable_start_string="<v",
-    variable_end_string="v>",
-    comment_start_string="<#",
-    comment_end_string="#>",
+    block_start_string=r"\BLOCK{",  # update some control characters to suit latex
+    block_end_string=r"}",
+    variable_start_string=r"\VAR{",
+    variable_end_string=r"}",
+    comment_start_string=r"\#{",
+    comment_end_string=r"}",
+    trim_blocks=True,
     autoescape=True,
 )
 
@@ -21,9 +22,17 @@ text_env = Environment(autoescape=True)
 default_text_template = (
     "{{ variable }}\n"
     + "----------------------------------------\n"
-    + "{%if description is defined%}{{ description }}\n{% endif %}"
+    + "{% if description is defined%}{{ description }}\n{% endif %}"
     + "{% for variable in variables.values() %}{{ variable.symbol }} = {{ variable.report_string }}\n{% endfor %}"
-    + "{%if eqn is not none %}{{ eqn }}{% else %}value{% endif %} = {{ str_value }}"
+    + "{% if eqn is not none %}{{ eqn }}{% else %}value{% endif %} = {{ str_value }}"
+)
+
+default_latex_template = (
+    r"\VAR{variable} \newline"
+    + r"\underline{\hspace{5cm}} \newline"
+    + r"\BLOCK{if description is defined} \VAR{description} \newline \BLOCK{ endif }"
+    + r"\BLOCK{for variable in variables.values()} \VAR{variable.symbol} = \VAR{variable.report_string} \newline \BLOCK{ endfor }"
+    + r"\BLOCK{if eqn is not none} \VAR{eqn} \BLOCK{ else } value \BLOCK{ endif } = \VAR{ str_value }"
 )
 
 
@@ -226,6 +235,22 @@ class Result:
         )
 
         return text_env.from_string(template).render(
+            description=self.description,
+            variable=self.symbol,
+            eqn=self.eqn,
+            variables=self.variables,
+            str_value=self.str_value,
+        )
+
+    @property
+    def latex_string(self) -> str:
+        template = (
+            default_latex_template
+            if self._latex_template is None
+            else self._latex_template
+        )
+
+        return latex_env.from_string(template).render(
             description=self.description,
             variable=self.symbol,
             eqn=self.eqn,
