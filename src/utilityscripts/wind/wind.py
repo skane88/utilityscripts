@@ -454,6 +454,7 @@ class OpenStructure:
         frame_h: float,
         frame_l: float,
         frame_s: float,
+        wind_site: WindSite,
     ):
         """
         Initialise an OpenStructure object.
@@ -467,10 +468,14 @@ class OpenStructure:
         ----------
         frame_h : float
             The height of the frame into the wind. In m.
+            This is not the height above ground, just the height from the lowest level
+            of the frame to the highest.
         frame_l : float
             The length of the frame. In m.
         frame_s : float
             The spacing of the frames. In m.
+        wind_site : WindSite
+            The wind site to use for the open structure.
         """
 
         self._member_data = pl.DataFrame(
@@ -480,15 +485,19 @@ class OpenStructure:
                 "length": pl.Series([], dtype=pl.Float64),
                 "reference_height": pl.Series([], dtype=pl.Float64),
                 "drag_coefficient": pl.Series([], dtype=pl.Float64),
-                "no_unshielded": pl.Series([], dtype=pl.Int64),
-                "no_shielded": pl.Series([], dtype=pl.Int64),
-                "ignore_for_area": pl.Series([], dtype=pl.Boolean),
+                "no_per_frame": pl.Series([], dtype=pl.Int64),
+                "no_unshielded_frames": pl.Series([], dtype=pl.Int64),
+                "no_shielded_frames": pl.Series([], dtype=pl.Int64),
+                "include_in_solidity": pl.Series([], dtype=pl.Boolean),
                 "circular_or_sharp": pl.Series([], dtype=pl.Utf8),
+                "master_component": pl.Series([], dtype=pl.Utf8),
+                "comments": pl.Series([], dtype=pl.Utf8),
             }
         )
         self._frame_h = frame_h
         self._frame_l = frame_l
         self._frame_s = frame_s
+        self._wind_site = wind_site
 
     def _copy_with_new(self, **new_attributes) -> OpenStructure:
         """
@@ -531,11 +540,15 @@ class OpenStructure:
             - length: the length of the section in m
             - reference_height: the reference height of the section in m
             - drag_coefficient: the drag coefficient for each section
-            - no_unshielded: the number of unshielded sections
-            - no_shielded: the number of shielded sections
-            - ignore_for_area: should the sections be ignored for overall
-                area calculations?
+            - no_per_frame: the number of sections per frame
+            - no_unshielded_frames: the number of unshielded frames
+            - no_shielded_frames: the number of shielded frames
+            - include_in_solidity: should the sections be included in overall
+                area solidity calculations?
             - circular_or_sharp: are the sections circular or sharp edged?
+            - master_component: a master component (if any) the member is part of.
+                Included for sorting, filtering purposes.
+            - comments: any text comments to attach.
         """
 
         return self._member_data
@@ -553,6 +566,10 @@ class OpenStructure:
         return self._frame_s
 
     @property
+    def wind_site(self) -> WindSite:
+        return self._wind_site
+
+    @property
     def projected_area(self) -> float:
         """
         The projected area of the open structure.
@@ -568,10 +585,13 @@ class OpenStructure:
         length: float,
         reference_height: float,
         drag_coefficient: float,
-        no_unshielded: int,
-        no_shielded: int,
-        ignore_for_area: bool = False,
+        no_per_frame: int,
+        no_unshielded_frames: int,
+        no_shielded_frames: int,
+        include_in_solidity: bool = True,
         circular_or_sharp: SectionType = SectionType.CIRCULAR,
+        master_component: str = "",
+        comments: str = "",
     ) -> OpenStructure:
         """
         Add a member to the open structure.
@@ -593,14 +613,21 @@ class OpenStructure:
             The reference height of the member.
         drag_coefficient : float
             The drag coefficient for the member.
-        no_unshielded : int
-            The number of unshielded sections.
-        no_shielded : int
-            The number of shielded sections.
-        ignore_for_area : bool, default=False
-            Should the sections be ignored for overall area calculations?
+        no_per_frame : int
+            The number of sections per frame.
+        no_unshielded_frames : int
+            The number of unshielded frames.
+        no_shielded_frames : int
+            The number of shielded frames.
+        include_in_solidity : bool, default=True
+            Should the sections be included in overall area solidity calculations?
         circular_or_sharp : SectionType, default=SectionType.CIRCULAR
             Are the sections circular or sharp edged?
+        master_component : str
+            A master component (if any) the member is part of. Included for sorting,
+            filtering purposes.
+        comments : str, default=""
+            Any text comments to attach.
 
         Returns
         -------
@@ -619,10 +646,13 @@ class OpenStructure:
                             "length": [length],
                             "reference_height": [reference_height],
                             "drag_coefficient": [drag_coefficient],
-                            "no_unshielded": [no_unshielded],
-                            "no_shielded": [no_shielded],
-                            "ignore_for_area": [ignore_for_area],
+                            "no_per_frame": [no_per_frame],
+                            "no_unshielded_frames": [no_unshielded_frames],
+                            "no_shielded_frames": [no_shielded_frames],
+                            "include_in_solidity": [include_in_solidity],
                             "circular_or_sharp": [circular_or_sharp],
+                            "master_component": [master_component],
+                            "comments": [comments],
                         }
                     ),
                 ]
