@@ -499,31 +499,19 @@ class OpenStructure:
         self._frame_s = frame_s
         self._wind_site = wind_site
 
-    def _copy_with_new(self, **new_attributes) -> OpenStructure:
+    def _copy(self) -> OpenStructure:
         """
-        Function to copy the OpenStructure instance but update specific attributes.
+        Function to copy the OpenStructure instance.
 
         The returned copy is a deepcopy.
-        Note that the function replaces _geometry of the new instance with None.
-        The user of the instance is responsible for recreating the geometry.
-
-        Parameters
-        ----------
-        new_attributes : dict
-            Any attributes to update as key:value pairs.
 
         Returns
         -------
         OpenStructure
-            A new instance of an OpenStructure with updated attributes.
+            A new instance of an OpenStructure
         """
 
-        new_structure = copy.deepcopy(self)
-
-        for attr, value in new_attributes.items():
-            setattr(new_structure, attr, value)
-
-        return new_structure
+        return copy.deepcopy(self)
 
     @property
     def member_data(self) -> pl.DataFrame:
@@ -635,29 +623,87 @@ class OpenStructure:
             A new instance of an OpenStructure with the updated member data.
         """
 
-        return self._copy_with_new(
-            _member_data=pl.concat(
+        new_structure = self._copy()
+        new_structure._member_data = pl.concat(
+            [
+                self._member_data,
+                pl.DataFrame(
+                    {
+                        "name": [name],
+                        "depth": [depth],
+                        "length": [length],
+                        "reference_height": [reference_height],
+                        "drag_coefficient": [drag_coefficient],
+                        "no_per_frame": [no_per_frame],
+                        "no_unshielded_frames": [no_unshielded_frames],
+                        "no_shielded_frames": [no_shielded_frames],
+                        "include_in_solidity": [include_in_solidity],
+                        "circular_or_sharp": [str(circular_or_sharp)],
+                        "master_component": [master_component],
+                        "comments": [comments],
+                    }
+                ),
+            ]
+        )
+        return new_structure
+
+    def add_members(self, members: dict[str, list] | pl.DataFrame) -> OpenStructure:
+        """
+        Add multiple members to the open structure.
+
+        Parameters
+        ----------
+        members : dict[str, list]
+            A dictionary of members to add.
+
+            Should have the following keys:
+
+            - name: a name for each section
+            - depth: the depth of the section in m
+            - length: the length of the section in m
+            - reference_height: the reference height of the section in m
+            - drag_coefficient: the drag coefficient for each section
+            - no_per_frame: the number of sections per frame
+            - no_unshielded_frames: the number of unshielded frames
+            - no_shielded_frames: the number of shielded frames
+            - include_in_solidity: should the sections be included in overall
+                area solidity calculations?
+            - circular_or_sharp: are the sections circular or sharp edged? Should be
+                a list of SectionType enums or matching strings.
+            - master_component: a master component (if any) the member is part of.
+                Included for sorting, filtering purposes.
+            - comments: any text comments to attach.
+
+            All lists should have the same length.
+
+            If a Polars Dataframe is provided it should have columns with the same
+            names.
+
+        Returns
+        -------
+        OpenStructure
+            A new instance of an OpenStructure with the updated member data.
+        """
+
+        members["circular_or_sharp"] = [str(s) for s in members["circular_or_sharp"]]
+
+        new_structure = self._copy()
+        new_structure._member_data = (
+            pl.concat(
                 [
                     self._member_data,
-                    pl.DataFrame(
-                        {
-                            "name": [name],
-                            "depth": [depth],
-                            "length": [length],
-                            "reference_height": [reference_height],
-                            "drag_coefficient": [drag_coefficient],
-                            "no_per_frame": [no_per_frame],
-                            "no_unshielded_frames": [no_unshielded_frames],
-                            "no_shielded_frames": [no_shielded_frames],
-                            "include_in_solidity": [include_in_solidity],
-                            "circular_or_sharp": [circular_or_sharp],
-                            "master_component": [master_component],
-                            "comments": [comments],
-                        }
-                    ),
+                    pl.DataFrame(members),
+                ]
+            )
+            if isinstance(members, dict)
+            else pl.concat(
+                [
+                    self._member_data,
+                    members,
                 ]
             )
         )
+        return new_structure
 
 
 def pipe_wind_loads(cd, qz, d_max, d_ave, n_pipes):
