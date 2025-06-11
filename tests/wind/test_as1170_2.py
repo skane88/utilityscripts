@@ -186,8 +186,8 @@ def test_m_d_2011(input_vals):
         version=StandardVersion.AS1170_2_2011,
     )
 
-    assert isclose(m_d_calc[0], expected[0])
-    assert isclose(m_d_calc[1], expected[1])
+    assert isclose(m_d_calc.m_d_struct, expected[0])
+    assert isclose(m_d_calc.m_d_cladding, expected[1])
 
 
 def build_direction_pairs_2021():
@@ -229,8 +229,8 @@ def test_m_d_2021(input_vals):
         version=StandardVersion.AS1170_2_2021,
     )
 
-    assert isclose(m_d_calc[0], expected[0])
-    assert isclose(m_d_calc[1], expected[1])
+    assert isclose(m_d_calc.m_d_struct, expected[0])
+    assert isclose(m_d_calc.m_d_cladding, expected[1])
 
 
 def test_m_zcat_basic():

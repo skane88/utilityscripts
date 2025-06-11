@@ -4,6 +4,7 @@ File to contain some basic AS1170.2 helper methods for working with wind loads
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from enum import StrEnum
 from math import log10
 from numbers import Real
@@ -96,6 +97,16 @@ class WindRegion(StrEnum):
     C = "C"
     D = "D"
     W = "W"
+
+
+@dataclass(slots=True, kw_only=True)
+class M_d:  # noqa: N801
+    """
+    Stores the direction factor for structure and cladding together
+    """
+
+    m_d_struct: float
+    m_d_cladding: float
 
 
 def valid_region(region: WindRegion, version: StandardVersion) -> bool:
@@ -282,11 +293,11 @@ class WindSite:
             version=version,
         )
 
-    def m_d(
+    def m_d_exact(
         self,
         direction: str | Real | CardinalDirection,
         version: StandardVersion = StandardVersion.AS1170_2_2021,
-    ) -> tuple[float, float]:
+    ) -> M_d:
         """
         Return the wind direction multiplier wind direction.
 
@@ -297,8 +308,6 @@ class WindSite:
 
         Parameters
         ----------
-        wind_region : str
-            The wind region where the structure is located.
         direction : float or CardinalDirection
             The direction as an angle between 0 and 360 degrees, where:
             - 0/360 = Wind from North
@@ -313,8 +322,8 @@ class WindSite:
 
         Returns
         -------
-        tuple[float, float]
-            The direction multiplier as (M_d, M_d_cladding)
+        MD
+            The direction multipliers
         """
 
         return m_d_exact(
@@ -326,7 +335,7 @@ class WindSite:
         direction: str | Real | CardinalDirection,
         version: StandardVersion = StandardVersion.AS1170_2_2021,
         tolerance: float = 45.0,
-    ):
+    ) -> M_d:
         """
         Determine the design value of the direction factor M_d,
         within +/- tolderance of direction.
@@ -343,8 +352,8 @@ class WindSite:
 
         Returns
         -------
-        tuple[float, float]
-        Consisting of (M_d_struct, M_d_cladding)
+        MD
+            The direction multipliers
         """
 
         return m_d_des(
@@ -442,7 +451,7 @@ class WindSite:
             return_period=return_period, ignore_f_x=ignore_f_x, version=version
         )
         if use_exact_m_d:
-            m_d = self.m_d(direction=direction, version=version)
+            m_d = self.m_d_exact(direction=direction, version=version)
         else:
             m_d = self.m_d_des(
                 direction=direction, version=version, tolerance=tolerance
@@ -455,7 +464,7 @@ class WindSite:
 
         base_v = v_r * m_zcat * m_s * m_t * m_lee
 
-        return base_v * m_d[0], base_v * m_d[1]
+        return base_v * m_d.m_d_struct, base_v * m_d.m_d_cladding
 
     def __repr__(self):
         return (
@@ -569,7 +578,7 @@ def m_d_exact(
     wind_region: str | WindRegion,
     direction: str | Real | CardinalDirection,
     version: StandardVersion = StandardVersion.AS1170_2_2021,
-) -> tuple[float, float]:
+) -> M_d:
     """
     Return the wind direction multiplier for a given region and wind direction.
 
@@ -596,8 +605,8 @@ def m_d_exact(
 
     Returns
     -------
-    tuple[float, float]
-        The direction multiplier as (M_d, M_d_cladding)
+    MD
+        The direction multiplier
     """
 
     # first load some required data
@@ -618,7 +627,7 @@ def m_d_exact(
     if direction == "ANY":
         m_d_clad = filtered_df.filter(pl.col("direction") == direction)["m_d"][0]
         m_d = m_d_clad * f_not_clad
-        return m_d, m_d_clad
+        return M_d(m_d_struct=m_d, m_d_cladding=m_d_clad)
 
     # now throw away unneeded rows from the dataframe.
     filtered_df = filtered_df.filter(
@@ -649,7 +658,7 @@ def m_d_exact(
     m_d_clad = np.interp(direction, m_d_table[:, 0], m_d_table[:, 1])
     m_d = m_d_clad * f_not_clad
 
-    return m_d, m_d_clad
+    return M_d(m_d_struct=m_d, m_d_cladding=m_d_clad)
 
 
 def m_d_des(
@@ -658,7 +667,7 @@ def m_d_des(
     direction: Real | str | CardinalDirection,
     version: StandardVersion = StandardVersion.AS1170_2_2021,
     tolerance: float = 45.0,
-) -> tuple[float, float]:
+) -> M_d:
     """
     Determine the design value of the direction factor M_d,
     within +/- tolderance of direction.
@@ -677,8 +686,8 @@ def m_d_des(
 
     Returns
     -------
-    tuple[float, float]
-    Consisting of (M_d_struct, M_d_cladding)
+    MD
+        The direction multiplier
     """
 
     if isinstance(direction, (str, CardinalDirection)):
@@ -694,10 +703,10 @@ def m_d_des(
         m_d_exact(wind_region=wind_region, direction=a, version=version) for a in angles
     ]
 
-    m_d_struct = max([m[0] for m in m_d_vals])
-    m_d_clad = max([m[1] for m in m_d_vals])
+    m_d_struct = max([m.m_d_struct for m in m_d_vals])
+    m_d_clad = max([m.m_d_cladding for m in m_d_vals])
 
-    return (m_d_struct, m_d_clad)
+    return M_d(m_d_struct=m_d_struct, m_d_cladding=m_d_clad)
 
 
 def m_zcat_basic(
