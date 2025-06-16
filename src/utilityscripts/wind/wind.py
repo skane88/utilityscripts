@@ -499,6 +499,8 @@ class OpenStructure:
             {
                 "component_id": pl.Series([], dtype=pl.Utf8),
                 "name": pl.Series([], dtype=pl.Utf8),
+                "master_component": pl.Series([], dtype=pl.Utf8),
+                "comments": pl.Series([], dtype=pl.Utf8),
                 "depth": pl.Series([], dtype=pl.Float64),
                 "length": pl.Series([], dtype=pl.Float64),
                 "reference_height": pl.Series([], dtype=pl.Float64),
@@ -508,8 +510,8 @@ class OpenStructure:
                 "no_shielded_frames": pl.Series([], dtype=pl.Int64),
                 "include_in_solidity": pl.Series([], dtype=pl.Boolean),
                 "circular_or_sharp": pl.Series([], dtype=pl.Utf8),
-                "master_component": pl.Series([], dtype=pl.Utf8),
-                "comments": pl.Series([], dtype=pl.Utf8),
+                "inclination": pl.Series([], dtype=pl.Float64),
+                "k_sh": pl.Series([], dtype=pl.Float64),
             }
         )
         self._frame_h = frame_h
@@ -549,6 +551,9 @@ class OpenStructure:
         A dataframe with the following columns:
             - id: a unique identifier for each section
             - name: a name for each section
+            - master_component: a master component (if any) the member is part of.
+                Included for sorting, filtering purposes.
+            - comments: any text comments to attach.
             - depth: the depth of the section in m
             - length: the length of the section in m
             - reference_height: the reference height of the section in m
@@ -559,9 +564,8 @@ class OpenStructure:
             - include_in_solidity: should the sections be included in overall
                 area solidity calculations?
             - circular_or_sharp: are the sections circular or sharp edged?
-            - master_component: a master component (if any) the member is part of.
-                Included for sorting, filtering purposes.
-            - comments: any text comments to attach.
+            - inclination: the inclination of the section to the wind, in degrees
+            - k_sh: the shielding factor for the section
         """
 
         return self._member_data
@@ -678,6 +682,8 @@ class OpenStructure:
         circular_or_sharp: SectionType = SectionType.CIRCULAR,
         master_component: str = "",
         comments: str = "",
+        inclination: float = 90.0,
+        k_sh: float = 1.0,
     ) -> OpenStructure:
         """
         Add a member to the open structure.
@@ -693,6 +699,11 @@ class OpenStructure:
             A unique identifier for the member.
         name : str
             The name of the member.
+        master_component : str
+            A master component (if any) the member is part of. Included for sorting,
+            filtering purposes.
+        comments : str, default=""
+            Any text comments to attach.
         depth : float
             The depth of the member.
         length : float
@@ -711,11 +722,10 @@ class OpenStructure:
             Should the sections be included in overall area solidity calculations?
         circular_or_sharp : SectionType, default=SectionType.CIRCULAR
             Are the sections circular or sharp edged?
-        master_component : str
-            A master component (if any) the member is part of. Included for sorting,
-            filtering purposes.
-        comments : str, default=""
-            Any text comments to attach.
+        inclination : float, default=90.0
+            The inclination of the section to the wind, in degrees
+        k_sh : float, default=1.0
+            The shielding factor for the section
 
         Returns
         -------
@@ -731,6 +741,8 @@ class OpenStructure:
                     {
                         "component_id": [component_id],
                         "name": [name],
+                        "master_component": [master_component],
+                        "comments": [comments],
                         "depth": [depth],
                         "length": [length],
                         "reference_height": [reference_height],
@@ -740,8 +752,8 @@ class OpenStructure:
                         "no_shielded_frames": [no_shielded_frames],
                         "include_in_solidity": [include_in_solidity],
                         "circular_or_sharp": [str(circular_or_sharp)],
-                        "master_component": [master_component],
-                        "comments": [comments],
+                        "inclination": [inclination],
+                        "k_sh": [k_sh],
                     }
                 ),
             ]

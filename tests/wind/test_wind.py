@@ -54,6 +54,8 @@ def test_open_structure():
         {
             "component_id": ["002"],
             "name": ["member2"],
+            "master_component": ["comp1"],
+            "comments": ["test"],
             "depth": [1.0],
             "length": [1.0],
             "reference_height": [1.0],
@@ -63,8 +65,8 @@ def test_open_structure():
             "no_shielded_frames": [1],
             "include_in_solidity": [True],
             "circular_or_sharp": [SectionType.CIRCULAR],
-            "master_component": ["comp1"],
-            "comments": ["test"],
+            "inclination": [90.0],
+            "k_sh": [0.20],
         }
     )
 
@@ -96,6 +98,8 @@ def test_open_structure_example():
                 "65x6EA Verticals",
                 "125PFC Verticals",
             ],
+            "master_component": ["Gantry", "Gantry", "Gantry", "Gantry"],
+            "comments": ["test", "test", "test", "test"],
             "depth": [0.125, 0.125, 0.065, 0.065],
             "length": [14.335, 14.335, 2.286, 2.286],
             "reference_height": [23.104, 20.818, 21.961, 21.961],
@@ -110,8 +114,8 @@ def test_open_structure_example():
                 SectionType.SHARP,
                 SectionType.SHARP,
             ],
-            "master_component": ["Gantry", "Gantry", "Gantry", "Gantry"],
-            "comments": ["test", "test", "test", "test"],
+            "inclination": [90.0, 90.0, 90.0, 90.0],
+            "k_sh": [0.20, 0.20, 0.20, 0.20],
         }
     )
 
