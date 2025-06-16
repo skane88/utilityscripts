@@ -117,86 +117,38 @@ def test_open_structure_example():
 
     assert len(structure.member_data) == 4  # noqa: PLR2004
 
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0001")["M_zcat"][0],
-        1.0924,
-        rel_tol=1e-4,
-    )
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0002")["M_zcat"][0],
-        1.0833,
-        rel_tol=1e-4,
-    )
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0003")["M_zcat"][0],
-        1.0878,
-        rel_tol=1e-4,
-    )
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0004")["M_zcat"][0],
-        1.0878,
-        rel_tol=1e-4,
+    expected = pl.DataFrame(
+        {
+            "component_id": ["0001", "0002", "0003", "0004"],
+            "M_zcat": [1.0924, 1.0833, 1.0878, 1.0878],
+            "V_des": [68.274, 67.702, 67.988, 67.988],
+            "q": [2.797, 2.750, 2.7734, 2.7734],
+            "K_ar": [1.0, 1.0, 0.9517, 0.9517],
+        }
     )
 
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0001")["V_des"][0],
-        68.274,
-        rel_tol=1e-4,
-    )
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0002")["V_des"][0],
-        67.702,
-        rel_tol=1e-4,
-    )
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0003")["V_des"][0],
-        67.988,
-        rel_tol=1e-4,
-    )
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0004")["V_des"][0],
-        67.988,
-        rel_tol=1e-4,
-    )
-
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0001")["q"][0],
-        2.797,
-        rel_tol=1e-4,
-    )
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0002")["q"][0],
-        2.750,
-        rel_tol=1e-4,
-    )
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0003")["q"][0],
-        2.7734,
-        rel_tol=1e-4,
-    )
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0004")["q"][0],
-        2.7734,
-        rel_tol=1e-4,
-    )
-
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0001")["K_ar"][0],
-        1.0,
-        rel_tol=1e-4,
-    )
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0002")["K_ar"][0],
-        1.0,
-        rel_tol=1e-4,
-    )
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0003")["K_ar"][0],
-        0.9517,
-        rel_tol=1e-4,
-    )
-    assert isclose(
-        structure.results.filter(pl.col("component_id") == "0004")["K_ar"][0],
-        0.9517,
-        rel_tol=1e-4,
-    )
+    for component_id in expected["component_id"]:
+        assert isclose(
+            structure.results.filter(pl.col("component_id") == component_id)["M_zcat"][
+                0
+            ],
+            expected.filter(pl.col("component_id") == component_id)["M_zcat"][0],
+            rel_tol=1e-4,
+        )
+        assert isclose(
+            structure.results.filter(pl.col("component_id") == component_id)["V_des"][
+                0
+            ],
+            expected.filter(pl.col("component_id") == component_id)["V_des"][0],
+            rel_tol=1e-4,
+        )
+        assert isclose(
+            structure.results.filter(pl.col("component_id") == component_id)["q"][0],
+            expected.filter(pl.col("component_id") == component_id)["q"][0],
+            rel_tol=1e-4,
+        )
+        assert isclose(
+            structure.results.filter(pl.col("component_id") == component_id)["K_ar"][0],
+            expected.filter(pl.col("component_id") == component_id)["K_ar"][0],
+            rel_tol=1e-4,
+        )
