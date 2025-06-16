@@ -4,7 +4,7 @@ Contains some calculations for wind loads.
 
 from __future__ import annotations
 
-import copy
+from copy import deepcopy
 from math import radians, tan
 
 import numpy as np
@@ -17,6 +17,7 @@ from utilityscripts.wind.as1170_2 import (
     WindSite,
     m_c_or_f_x,
     m_d_des,
+    m_zcat_basic,
 )
 
 
@@ -158,7 +159,7 @@ class SimpleBuilding:
         return self._version
 
     def add_opening(self, opening: tuple[int, float]) -> "SimpleBuilding":
-        new_building = copy.deepcopy(self)
+        new_building = deepcopy(self)
         new_building._openings.append(opening)
 
         return new_building
@@ -454,7 +455,11 @@ class OpenStructure:
         frame_h: float,
         frame_l: float,
         frame_s: float,
-        wind_site: WindSite,
+        v_r: float,
+        terrain_category: float,
+        m_s: float = 1.0,
+        m_t: float = 1.0,
+        m_d: float = 1.0,
     ):
         """
         Initialise an OpenStructure object.
@@ -468,18 +473,29 @@ class OpenStructure:
         ----------
         frame_h : float
             The height of the frame into the wind. In m.
-            This is not the height above ground, just the height from the lowest level
-            of the frame to the highest.
+            This is not the height above ground, just the relative height from the
+            lowest level of the frame to the highest.
         frame_l : float
             The length of the frame. In m.
         frame_s : float
             The spacing of the frames. In m.
-        wind_site : WindSite
-            The wind site to use for the open structure.
+        v_r : float
+            The design windspeed at a given return period. In m/s.
+        terrain_category : float
+            The terrain category of the site. A float between 1.0 and 4.0. Intermediate
+            values are linearly interpolated between the values given in AS1170.2 for
+            the integer values.
+        m_s : float
+            The shielding factor for the structure.
+        m_t : float
+            The terrain factor for the structure.
+        m_d : float
+            The wind direction factor for the structure.
         """
 
         self._member_data = pl.DataFrame(
             {
+                "component_id": pl.Series([], dtype=pl.Utf8),
                 "name": pl.Series([], dtype=pl.Utf8),
                 "depth": pl.Series([], dtype=pl.Float64),
                 "length": pl.Series([], dtype=pl.Float64),
@@ -497,7 +513,13 @@ class OpenStructure:
         self._frame_h = frame_h
         self._frame_l = frame_l
         self._frame_s = frame_s
-        self._wind_site = wind_site
+        self._v_r = v_r
+        self._terrain_category = terrain_category
+        self._m_s = m_s
+        self._m_t = m_t
+        self._m_d = m_d
+
+        self._results = deepcopy(self._member_data)
 
     def _copy(self) -> OpenStructure:
         """
@@ -511,7 +533,7 @@ class OpenStructure:
             A new instance of an OpenStructure
         """
 
-        return copy.deepcopy(self)
+        return deepcopy(self)
 
     @property
     def member_data(self) -> pl.DataFrame:
@@ -523,6 +545,7 @@ class OpenStructure:
         pl.DataFrame
 
         A dataframe with the following columns:
+            - id: a unique identifier for each section
             - name: a name for each section
             - depth: the depth of the section in m
             - length: the length of the section in m
@@ -543,19 +566,75 @@ class OpenStructure:
 
     @property
     def frame_h(self) -> float:
+        """
+        The height of the frame into the wind. In m.
+        This is not the height above ground, just the relative height from the
+        lowest level of the frame to the highest.
+
+        Returns
+        -------
+        float
+        """
+
         return self._frame_h
 
     @property
     def frame_l(self) -> float:
+        """
+        The length of the frame. In m.
+        """
+
         return self._frame_l
 
     @property
     def frame_s(self) -> float:
+        """
+        The spacing of the frames. In m.
+        """
+
         return self._frame_s
 
     @property
-    def wind_site(self) -> WindSite:
-        return self._wind_site
+    def v_r(self) -> float:
+        """
+        The design windspeed at a given return period.
+        """
+
+        return self._v_r
+
+    @property
+    def terrain_category(self) -> float:
+        """
+        The terrain category of the site. A float between 1.0 and 4.0. Intermediate
+        values are linearly interpolated between the values given in AS1170.2 for
+        the integer values.
+        """
+
+        return self._terrain_category
+
+    @property
+    def m_s(self) -> float:
+        """
+        The shielding factor for the structure.
+        """
+
+        return self._m_s
+
+    @property
+    def m_t(self) -> float:
+        """
+        The terrain factor for the structure.
+        """
+
+        return self._m_t
+
+    @property
+    def m_d(self) -> float:
+        """
+        The wind direction factor for the structure.
+        """
+
+        return self._m_d
 
     @property
     def projected_area(self) -> float:
@@ -565,9 +644,26 @@ class OpenStructure:
 
         return self.frame_l * self.frame_h
 
+    @property
+    def results(self) -> pl.DataFrame:
+        """
+        Returns the results of the wind load calculations.
+
+        Returns
+        -------
+        pl.DataFrame
+            A dataframe with the member-by-member calculations.
+        """
+
+        if self._results.is_empty():
+            self._calculate()
+
+        return self._results
+
     def add_member(
         self,
         *,
+        component_id: str,
         name: str,
         depth: float,
         length: float,
@@ -591,6 +687,8 @@ class OpenStructure:
 
         Parameters
         ----------
+        component_id : str
+            A unique identifier for the member.
         name : str
             The name of the member.
         depth : float
@@ -629,6 +727,7 @@ class OpenStructure:
                 self._member_data,
                 pl.DataFrame(
                     {
+                        "component_id": [component_id],
                         "name": [name],
                         "depth": [depth],
                         "length": [length],
@@ -658,6 +757,7 @@ class OpenStructure:
 
             Should have the following keys:
 
+            - component_id: a unique identifier for each section
             - name: a name for each section
             - depth: the depth of the section in m
             - length: the length of the section in m
@@ -704,6 +804,26 @@ class OpenStructure:
             )
         )
         return new_structure
+
+    def _calculate(self):
+        """
+        Calculate the resulting wind loads.
+        """
+
+        self._results = self._member_data.with_columns(
+            (
+                pl.col("reference_height").map_elements(
+                    lambda x: m_zcat_basic(z=x, terrain_category=self.terrain_category),
+                    return_dtype=pl.Float64,
+                )
+            ).alias("M_zcat")
+        )
+
+        self._results = self._results.with_columns(
+            (self.v_r * self.m_s * self.m_t * self.m_d * pl.col("M_zcat")).alias(
+                "V_des"
+            )
+        )
 
 
 def pipe_wind_loads(cd, qz, d_max, d_ave, n_pipes):
