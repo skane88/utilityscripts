@@ -1007,10 +1007,10 @@ def q_basic(v: float, *, rho_air: float = 1.2):
     Returns
     -------
     float
-    The basic wind pressure in Pa.
+    The basic wind pressure in kPa.
     """
 
-    return 0.5 * rho_air * v**2
+    return 0.5 * rho_air * v**2 / 1000.0
 
 
 def c_pe_l(

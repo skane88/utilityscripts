@@ -15,9 +15,11 @@ from utilityscripts.wind.as1170_2 import (
     StandardVersion,
     WindRegion,
     WindSite,
+    k_ar,
     m_c_or_f_x,
     m_d_des,
     m_zcat_basic,
+    q_basic,
 )
 
 
@@ -823,6 +825,27 @@ class OpenStructure:
             (self.v_r * self.m_s * self.m_t * self.m_d * pl.col("M_zcat")).alias(
                 "V_des"
             )
+        )
+
+        self._results = self._results.with_columns(
+            (
+                pl.col("V_des").map_elements(
+                    lambda x: q_basic(x), return_dtype=pl.Float64
+                )
+            ).alias("q")
+        )
+
+        self._results = self._results.with_columns(
+            (pl.col("length") / pl.col("depth")).alias("aspect_ratio")
+        )
+
+        self._results = self._results.with_columns(
+            (
+                pl.struct(["length", "depth"]).map_elements(
+                    lambda x: k_ar(length=x["length"], width=x["depth"]),
+                    return_dtype=pl.Float64,
+                )
+            ).alias("K_ar")
         )
 
 

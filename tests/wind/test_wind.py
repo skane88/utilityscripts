@@ -72,7 +72,7 @@ def test_open_structure():
     assert len(structure.member_data) == 2  # noqa: PLR2004
 
 
-def test_example():
+def test_open_structure_example():
     height = 2.286
     length = 14.335
     spacing = 1.400
@@ -156,5 +156,47 @@ def test_example():
     assert isclose(
         structure.results.filter(pl.col("component_id") == "0004")["V_des"][0],
         67.988,
+        rel_tol=1e-4,
+    )
+
+    assert isclose(
+        structure.results.filter(pl.col("component_id") == "0001")["q"][0],
+        2.797,
+        rel_tol=1e-4,
+    )
+    assert isclose(
+        structure.results.filter(pl.col("component_id") == "0002")["q"][0],
+        2.750,
+        rel_tol=1e-4,
+    )
+    assert isclose(
+        structure.results.filter(pl.col("component_id") == "0003")["q"][0],
+        2.7734,
+        rel_tol=1e-4,
+    )
+    assert isclose(
+        structure.results.filter(pl.col("component_id") == "0004")["q"][0],
+        2.7734,
+        rel_tol=1e-4,
+    )
+
+    assert isclose(
+        structure.results.filter(pl.col("component_id") == "0001")["K_ar"][0],
+        1.0,
+        rel_tol=1e-4,
+    )
+    assert isclose(
+        structure.results.filter(pl.col("component_id") == "0002")["K_ar"][0],
+        1.0,
+        rel_tol=1e-4,
+    )
+    assert isclose(
+        structure.results.filter(pl.col("component_id") == "0003")["K_ar"][0],
+        0.9517,
+        rel_tol=1e-4,
+    )
+    assert isclose(
+        structure.results.filter(pl.col("component_id") == "0004")["K_ar"][0],
+        0.9517,
         rel_tol=1e-4,
     )
