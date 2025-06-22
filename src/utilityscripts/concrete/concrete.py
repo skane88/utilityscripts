@@ -3,7 +3,8 @@ File to contain some utilities for working with concrete.
 """
 
 import re
-from collections import namedtuple
+from dataclasses import dataclass
+from enum import StrEnum
 from math import pi
 
 from humre import (  # type: ignore
@@ -91,38 +92,56 @@ def is_mesh(bar_spec: str) -> bool:
     return reo_prop(bar_spec).is_mesh
 
 
-def reo_prop(bar_spec: str, *, main_width=1000.0, secondary_width=1000.0):
-    """
-    Returns a dictionary with a number of properties from a standard bar specification.
+class BarSpec(StrEnum):
+    F = "F"
+    L = "L"
+    N = "N"
+    R = "R"
+    Y = "Y"
+    RL = "RL"
+    SL = "SL"
 
-    :param bar_spec: a standard Australian bar specification code.
-    :param main_width: the width over which to calculate the area of the main bars.
-    :param secondary_width:
-        the width over which to calculate the area of the secondary bars.
-    """
 
-    ReoProperties = namedtuple(
-        "ReoProperties",
-        [
-            "is_bar",
-            "is_mesh",
-            "bar_type",
-            "main_dia",
-            "secondary_dia",
-            "main_spacing",
-            "secondary_spacing",
-            "no_main",
-            "no_secondary",
-            "main_bar_area",
-            "secondary_bar_area",
-            "main_area_total",
-            "secondary_area_total",
-            "main_area_unit",
-            "secondary_area_unit",
-            "main_width",
-            "secondary_width",
-        ],
-    )
+@dataclass(slots=True, kw_only=True)
+class ReoProperties:
+    is_bar: bool
+    is_mesh: bool
+    bar_type: BarSpec
+    main_dia: int
+    secondary_dia: int | None
+    main_spacing: float | None
+    secondary_spacing: float | None
+    no_main: int | float
+    no_secondary: int | float | None
+    main_bar_area: float
+    secondary_bar_area: float | None
+    main_area_total: float
+    secondary_area_total: float | None
+    main_area_unit: float
+    secondary_area_unit: float | None
+    main_width: float
+    secondary_width: float | None
+
+
+def reo_prop(
+    bar_spec: str, *, main_width=1000.0, secondary_width=1000.0
+) -> ReoProperties:
+    """
+    Returns reinforcement properties from a standard bar specification.
+
+    Parameters
+    ----------
+    bar_spec: str
+        A standard Australian bar specification code. Can be a single bar (e.g. 'N12'),
+        multiple bars (e.g. '2-N12'), bars with spacing (e.g. 'N12@200'), or mesh
+        designation (e.g. 'SL82', 'F82').
+    main_width: float, default=1000.0
+        The width in mm over which to calculate the area of the main bars.
+        Used for calculating bar spacing and total area of reinforcement.
+    secondary_width: float, default=1000.0
+        The width in mm over which to calculate the area of the secondary bars.
+        Only used for mesh reinforcement to calculate cross bar spacing and area.
+    """
 
     no_bars = re.compile(
         (zero_or_more(group(f"{one_or_more_group(DIGIT)}(-)")) + BAR_RE)
@@ -155,7 +174,7 @@ def reo_prop(bar_spec: str, *, main_width=1000.0, secondary_width=1000.0):
         )
 
     if is_no_bars:
-        bar_type = is_no_bars[4][:1]
+        bar_type = BarSpec(is_no_bars[4][:1])
         main_dia = int(is_no_bars[4][1:])
 
         main_bar_area = 0.25 * pi * main_dia**2
@@ -186,7 +205,7 @@ def reo_prop(bar_spec: str, *, main_width=1000.0, secondary_width=1000.0):
         )
 
     if is_bars_spacing:
-        bar_type = is_bars_spacing[1][:1]
+        bar_type = BarSpec(is_bars_spacing[1][:1])
         main_dia = int(is_bars_spacing[1][1:])
         bar_spacing = float(is_bars_spacing[4])
 
@@ -231,11 +250,13 @@ def reo_prop(bar_spec: str, *, main_width=1000.0, secondary_width=1000.0):
         main_area_total = main_bar_area * no_main
         secondary_area_total = secondary_bar_area * no_secondary
 
+        barspec = BarSpec(mesh[2] if len(mesh[2]) == 1 else mesh[2][1:])
+
         ret_val = ReoProperties(
             is_bar=False,
             is_mesh=True,
             main_dia=main_dia,
-            bar_type=mesh[2],
+            bar_type=barspec,
             main_spacing=pitch,
             secondary_dia=secondary_dia,
             secondary_spacing=cross_pitch,
