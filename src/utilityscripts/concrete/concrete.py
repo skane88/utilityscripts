@@ -55,7 +55,7 @@ MESH_DATA = {
 # Regular expressions for bar and mesh specifications.
 BAR_RE = exactly(
     1,
-    group(chars(*("L", "N", "R", "Y")) + one_or_more(DIGIT)),
+    group(chars(*("C", "L", "N", "R", "S", "Y")) + one_or_more(DIGIT)),
 )
 MESH_RE = exactly(
     1,
@@ -93,10 +93,12 @@ def is_mesh(bar_spec: str) -> bool:
 
 
 class BarSpec(StrEnum):
+    C = "C"
     F = "F"
     L = "L"
     N = "N"
     R = "R"
+    S = "S"
     Y = "Y"
     RL = "RL"
     SL = "SL"
@@ -104,6 +106,7 @@ class BarSpec(StrEnum):
 
 @dataclass(slots=True, kw_only=True)
 class ReoProperties:
+    bar_spec: str
     is_bar: bool
     is_mesh: bool
     bar_type: BarSpec
@@ -113,14 +116,52 @@ class ReoProperties:
     secondary_spacing: float | None
     no_main: int | float
     no_secondary: int | float | None
-    main_bar_area: float
-    secondary_bar_area: float | None
-    main_area_total: float
-    secondary_area_total: float | None
-    main_area_unit: float
-    secondary_area_unit: float | None
     main_width: float
     secondary_width: float | None
+
+    @property
+    def main_bar_area(self):
+        return circle_area(self.main_dia)
+
+    @property
+    def main_area_total(self):
+        return self.main_bar_area * self.no_main
+
+    @property
+    def main_area_unit(self):
+        return self.main_area_total / (self.main_width / 1000)
+
+    @property
+    def secondary_bar_area(self):
+        if self.secondary_dia is None:
+            return None
+        return circle_area(self.secondary_dia)
+
+    @property
+    def secondary_area_total(self):
+        if self.secondary_bar_area is None:
+            return None
+        return self.secondary_bar_area * self.no_secondary
+
+    @property
+    def secondary_area_unit(self):
+        if self.secondary_area_total is None or self.secondary_width is None:
+            return None
+        return self.secondary_area_total / (self.secondary_width / 1000)
+
+    @property
+    def area_mass(self):
+        if self.main_width is None or self.secondary_width is None:
+            return None
+
+        return mesh_mass(
+            main_diameter=self.main_dia,
+            main_spacing=self.main_spacing,
+            secondary_diameter=self.secondary_dia,
+            secondary_spacing=self.secondary_spacing,
+            main_width=self.main_width,
+            secondary_width=self.secondary_width,
+        )
 
 
 def reo_prop(
@@ -142,6 +183,9 @@ def reo_prop(
         The width in mm over which to calculate the area of the secondary bars.
         Only used for mesh reinforcement to calculate cross bar spacing and area.
     """
+
+    # TODO: move as much of this into the ReoProperties class as possible,
+    #  as a classmethod.
 
     no_bars = re.compile(
         (zero_or_more(group(f"{one_or_more_group(DIGIT)}(-)")) + BAR_RE)
@@ -177,14 +221,11 @@ def reo_prop(
         bar_type = BarSpec(is_no_bars[4][:1])
         main_dia = int(is_no_bars[4][1:])
 
-        main_bar_area = 0.25 * pi * main_dia**2
-
         no_main = 1 if is_no_bars[1] is None else is_no_bars[1][:-1]
         no_main = 1 if no_bars is None else int(no_main)
 
-        main_area_total = main_bar_area * no_main
-
         ret_val = ReoProperties(
+            bar_spec=bar_spec,
             is_bar=True,
             is_mesh=False,
             main_dia=main_dia,
@@ -194,12 +235,6 @@ def reo_prop(
             secondary_spacing=None,
             no_main=no_main,
             no_secondary=None,
-            main_bar_area=main_bar_area,
-            secondary_bar_area=None,
-            main_area_total=main_area_total,
-            secondary_area_total=None,
-            main_area_unit=main_area_total / (main_width / 1000),
-            secondary_area_unit=None,
             main_width=main_width,
             secondary_width=None,
         )
@@ -210,10 +245,9 @@ def reo_prop(
         bar_spacing = float(is_bars_spacing[4])
 
         no_main = main_width / bar_spacing
-        main_bar_area = 0.25 * pi * main_dia**2
-        main_area_total = main_bar_area * no_main
 
         ret_val = ReoProperties(
+            bar_spec=bar_spec,
             is_bar=True,
             is_mesh=False,
             main_dia=main_dia,
@@ -223,12 +257,6 @@ def reo_prop(
             secondary_spacing=None,
             no_main=no_main,
             no_secondary=None,
-            main_bar_area=main_bar_area,
-            secondary_bar_area=None,
-            main_area_total=main_area_total,
-            secondary_area_total=None,
-            main_area_unit=main_area_total / (main_width / 1000),
-            secondary_area_unit=None,
             main_width=main_width,
             secondary_width=None,
         )
@@ -244,15 +272,10 @@ def reo_prop(
         cross_pitch = mesh_data["cross_pitch"]
         no_secondary = secondary_width / cross_pitch
 
-        main_bar_area = 0.25 * pi * main_dia**2
-        secondary_bar_area = 0.25 * pi * secondary_dia**2
-
-        main_area_total = main_bar_area * no_main
-        secondary_area_total = secondary_bar_area * no_secondary
-
         barspec = BarSpec(mesh[2] if len(mesh[2]) == 1 else mesh[2][1:])
 
         ret_val = ReoProperties(
+            bar_spec=bar_spec,
             is_bar=False,
             is_mesh=True,
             main_dia=main_dia,
@@ -262,12 +285,6 @@ def reo_prop(
             secondary_spacing=cross_pitch,
             no_main=no_main,
             no_secondary=no_secondary,
-            main_bar_area=main_bar_area,
-            secondary_bar_area=secondary_bar_area,
-            main_area_total=main_area_total,
-            secondary_area_total=secondary_area_total,
-            main_area_unit=main_area_total / (main_width / 1000),
-            secondary_area_unit=secondary_area_total / (secondary_width / 1000),
             main_width=main_width,
             secondary_width=secondary_width,
         )
@@ -276,9 +293,9 @@ def reo_prop(
 
 
 def mesh_mass(
+    *,
     main_diameter: float,
     main_spacing: float,
-    *,
     secondary_diameter: float | None = None,
     secondary_spacing: float | None = None,
     steel_density: float = 7850,

@@ -23,10 +23,21 @@ REL_TOL = 0.01
         ("N20-200", 1570),
         ("N16-380", 526),
         ("N36-160", 6375),
+        ("Y12", 113),
+        ("3-Y12", 339),
+        ("S12", 113),
+        ("3-S12", 339),
+        ("C12", 113),
+        ("3-C12", 339),
+        ("R6", 28.3),
+        ("R10", 78.5),
     ],
 )
 def test_bar_area(bar_spec, area):
-    assert isclose(reo_prop(bar_spec).main_area_total, area, rel_tol=REL_TOL)
+    result = reo_prop(bar_spec)
+
+    assert isclose(result.main_area_total, area, rel_tol=REL_TOL)
+    assert result.bar_spec == bar_spec
 
 
 @pytest.mark.parametrize(
@@ -53,15 +64,14 @@ def test_bar_area(bar_spec, area):
     ],
 )
 def test_bar_area_mesh(bar_spec, area, main_direction):
+    result = reo_prop(bar_spec)
+
     assert isclose(
-        (
-            reo_prop(bar_spec).main_area_total
-            if main_direction
-            else reo_prop(bar_spec).secondary_area_total
-        ),
+        (result.main_area_total if main_direction else result.secondary_area_total),
         area,
         rel_tol=REL_TOL,
     )
+    assert result.bar_spec == bar_spec
 
 
 @pytest.mark.parametrize(
@@ -124,6 +134,7 @@ def test_bar_area_full(bar_spec, width, main_direction, expected):
         secondary_width=1000.0 if main_direction else width,
     )
 
+    assert return_vals.bar_spec == bar_spec
     assert isclose(
         return_vals.main_bar_area if main_direction else return_vals.secondary_bar_area,
         expected["single_bar_area"],
