@@ -6,7 +6,13 @@ from math import isclose
 
 import pytest
 
-from utilityscripts.math_utils import m_ceil, m_floor, m_round, round_significant
+from utilityscripts.math_utils import (
+    m_ceil,
+    m_floor,
+    m_round,
+    round_significant,
+    sci_not,
+)
 
 
 @pytest.mark.parametrize(
@@ -99,3 +105,32 @@ def test_m_ceil(x, base, float_tolerance, expected):
 )
 def test_round_significant(x, s, expected):
     assert isclose(round_significant(x, s), expected, abs_tol=1e-9)
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (12.3456789, (1.23456789, 1)),
+        (-12.3456789, (-1.23456789, 1)),
+        (-1000000, (-1, 6)),
+        (-100000, (-1, 5)),
+        (-10000, (-1, 4)),
+        (-1000, (-1, 3)),
+        (-100, (-1, 2)),
+        (-10, (-1, 1)),
+        (-1, (-1, 0)),
+        (0, (0, 0)),
+        (1, (1, 0)),
+        (10, (1, 1)),
+        (100, (1, 2)),
+        (1000, (1, 3)),
+        (10000, (1, 4)),
+        (100000, (1, 5)),
+        (1000000, (1, 6)),
+    ],
+)
+def test_sci_not(value, expected):
+    result = sci_not(value)
+
+    assert result[0] == expected[0]
+    assert result[1] == expected[1]

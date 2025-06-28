@@ -2,7 +2,6 @@
 A file to store results along with some reporting information.
 """
 
-from math import log10
 from typing import Any
 
 from jinja2 import Environment
@@ -83,9 +82,11 @@ class Variable:
 
     @property
     def latex_string(self) -> str:
-        mantissa, exponent = _sci_not(self.value)
+        # TODO: update this to use python's format strings to build a latex
+        #  string - in particuar, need a function to use the .#e format string
+        #  to determine the scientific notation.
 
-        return f"{mantissa:.3f} \\times 10^{{{exponent}}} {self.units}"
+        pass
 
     def __repr__(self):
         return f"Variable: {self.symbol}={self.value}"
@@ -457,20 +458,3 @@ class DeprecatedResult(Result):
         result_str += "=" + result_value
 
         return result_str
-
-
-def _sci_not(value: float) -> tuple[float, int]:
-    """
-    Convert a number to a tuple of (mantissa, exponent) in scientific notation.
-    """
-
-    if value == 0:
-        return 0, 0
-
-    sign = -1 if value < 0 else 1
-    value = abs(value)
-
-    exponent = int(log10(value))
-    mantissa = value / 10**exponent
-
-    return sign * mantissa, exponent

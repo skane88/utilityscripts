@@ -4,6 +4,7 @@ Some basic math utilities
 
 import math
 from decimal import Decimal
+from math import log10
 
 
 def m_round(x, base):
@@ -121,3 +122,20 @@ def round_significant(x, s: int = 3):
 
     # drop it back down to the original power of 10 & return
     return round(floated) * sig10pow * xsign
+
+
+def sci_not(value: float) -> tuple[float, int]:
+    """
+    Convert a number to a tuple of (mantissa, exponent) in scientific notation.
+    """
+
+    if value == 0:
+        return 0, 0
+
+    sign = -1 if value < 0 else 1
+    value = abs(value)
+
+    exponent = int(log10(value))
+    mantissa = value / 10**exponent
+
+    return sign * mantissa, exponent
