@@ -478,6 +478,12 @@ def q_basic(v: float, *, rho_air: float = 1.2):
     """
     Calculate the basic wind pressure caused by a certain wind velocity.
 
+    Notes
+    -----
+    - Not named consistently with the standard. This function will be called so often
+    that having to remember the Standard's clause will cause issues. Also, the function
+    is based on basic wind pressure theory, and is not specific to AS1170.2.
+
     Parameters
     ----------
     v : float
