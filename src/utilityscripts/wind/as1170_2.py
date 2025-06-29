@@ -1022,11 +1022,10 @@ def c_pi_other():
     raise NotImplementedError()
 
 
-def c_pe_l(
+def t5_2b_c_pe_l(
     *,
     roof_pitch: float,
-    d: float,
-    b: float,
+    d_b_ratio: float | tuple[float, float],
     roof_type: RoofType,
     version: StandardVersion = StandardVersion.AS1170_2_2021,
 ) -> float:
@@ -1037,10 +1036,9 @@ def c_pe_l(
     ----------
     roof_pitch : float
         The pitch of the roof. In degrees.
-    d : float
-        The depth of the building into the wind.
-    b : float
-        The width of the building across the wind.
+    d_b_ratio : float | tuple[float, float]
+        The depth to breadth of the building relative to the wind.
+        Either the ratio, or a tuple of the form (depth, breadth)
     roof_type : RoofType
         The type of roof. Note that this is from the direction the wind is blowing.
     version : StandardVersion, default=StandardVersion.AS1170_2_2021
@@ -1066,7 +1064,10 @@ def c_pe_l(
 
     interp = RegularGridInterpolator((x, y), z, bounds_error=True)
 
-    return float(interp((roof_pitch, d / b)))
+    if isinstance(d_b_ratio, tuple):
+        d_b_ratio = d_b_ratio[0] / d_b_ratio[1]
+
+    return float(interp((roof_pitch, d_b_ratio)))
 
 
 def c_pe_s(

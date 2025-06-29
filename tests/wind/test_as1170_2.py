@@ -15,13 +15,13 @@ from utilityscripts.wind.as1170_2 import (
     WindRegion,
     WindSite,
     c_fig_rect_prism,
-    c_pe_l,
     c_pi_open,
     k_a,
     k_ar,
     k_v,
     s3_2_v_r,
     s3_3_m_d_exact,
+    t5_2b_c_pe_l,
     valid_region,
 )
 
@@ -460,8 +460,15 @@ def test_c_pi_other():
     ],
 )
 def test_c_pe_l(roof_pitch, d, b, roof_type, version, expected):
+    d_b_ratio = (d, b)
+
     assert isclose(
-        c_pe_l(roof_pitch=roof_pitch, d=d, b=b, roof_type=roof_type, version=version),
+        t5_2b_c_pe_l(
+            roof_pitch=roof_pitch,
+            d_b_ratio=d_b_ratio,
+            roof_type=roof_type,
+            version=version,
+        ),
         expected,
     )
 
