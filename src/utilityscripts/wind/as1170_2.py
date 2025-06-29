@@ -105,8 +105,8 @@ class M_d:  # noqa: N801
     Stores the direction factor for structure and cladding together
     """
 
-    m_d_struct: float
-    m_d_cladding: float
+    struct: float
+    cladding: float
 
 
 def valid_region(region: WindRegion, version: StandardVersion) -> bool:
@@ -464,7 +464,7 @@ class WindSite:
 
         base_v = v_r * m_zcat * m_s * m_t * m_lee
 
-        return base_v * m_d.m_d_struct, base_v * m_d.m_d_cladding
+        return base_v * m_d.struct, base_v * m_d.cladding
 
     def __repr__(self):
         return (
@@ -627,7 +627,7 @@ def m_d_exact(
     if direction == "ANY":
         m_d_clad = filtered_df.filter(pl.col("direction") == direction)["m_d"][0]
         m_d = m_d_clad * f_not_clad
-        return M_d(m_d_struct=m_d, m_d_cladding=m_d_clad)
+        return M_d(struct=m_d, cladding=m_d_clad)
 
     # now throw away unneeded rows from the dataframe.
     filtered_df = filtered_df.filter(
@@ -658,7 +658,7 @@ def m_d_exact(
     m_d_clad = np.interp(direction, m_d_table[:, 0], m_d_table[:, 1])
     m_d = m_d_clad * f_not_clad
 
-    return M_d(m_d_struct=m_d, m_d_cladding=m_d_clad)
+    return M_d(struct=m_d, cladding=m_d_clad)
 
 
 def m_d_des(
@@ -703,10 +703,10 @@ def m_d_des(
         m_d_exact(wind_region=wind_region, direction=a, version=version) for a in angles
     ]
 
-    m_d_struct = max([m.m_d_struct for m in m_d_vals])
-    m_d_clad = max([m.m_d_cladding for m in m_d_vals])
+    m_d_struct = max([m.struct for m in m_d_vals])
+    m_d_clad = max([m.cladding for m in m_d_vals])
 
-    return M_d(m_d_struct=m_d_struct, m_d_cladding=m_d_clad)
+    return M_d(struct=m_d_struct, cladding=m_d_clad)
 
 
 def m_zcat_basic(
