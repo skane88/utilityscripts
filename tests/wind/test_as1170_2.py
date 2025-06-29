@@ -16,12 +16,12 @@ from utilityscripts.wind.as1170_2 import (
     WindSite,
     c_fig_rect_prism,
     c_pi_open,
-    k_a,
     k_ar,
     k_v,
     s3_2_v_r,
     s3_3_m_d_exact,
     t5_2b_c_pe_l,
+    t5_4_k_a,
     valid_region,
 )
 
@@ -587,7 +587,9 @@ def test_k_v(area, vol, expected):
     ],
 )
 def test_k_a(area, face_type, z, version, expected):
-    assert isclose(k_a(area=area, face_type=face_type, z=z, version=version), expected)
+    assert isclose(
+        t5_4_k_a(area=area, face_type=face_type, z=z, version=version), expected
+    )
 
 
 @pytest.mark.parametrize(

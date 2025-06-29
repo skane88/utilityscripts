@@ -1124,7 +1124,7 @@ def k_v(*, open_area, volume):
     return 1.01 + 0.15 * log10(alpha)
 
 
-def k_a(
+def t5_4_k_a(
     area: float,
     face_type: FaceType,
     z: float | None = None,
