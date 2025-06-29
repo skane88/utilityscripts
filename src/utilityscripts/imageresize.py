@@ -146,7 +146,8 @@ def compress_image(
     quality_max: int = 95,
     save_larger_than_target: bool = False,
     delete_orig: bool = True,
-    missing_ok: bool = True,
+    missing_ok: bool = False,
+    convert_heic: bool = False,
 ) -> Optional[Path]:
     """
     Uses the PILlow library to compress an image to below a target file size.
@@ -179,13 +180,15 @@ def compress_image(
         Delete the original if it has a different file extension.
     missing_ok : bool
         Is it ok to ignore missing files?
+    convert_heic : bool
+        Convert HEIC files to JPEGs?
 
     Returns
     -------
     Optional[Path]
     """
 
-    if not _validate_file(file_path=file_path, missing_ok=False):
+    if not _validate_file(file_path=file_path, missing_ok=missing_ok):
         return None
 
     current_size = file_path.stat().st_size  # file size in bytes
@@ -193,7 +196,27 @@ def compress_image(
     if current_size <= target_size:
         # don't resize if already acceptable
 
-        return file_path
+        if convert_heic and file_path.suffix.lower() == ".heic":
+            # however we do need to convert to a jpg though.
+            # note this could be done before the current size check,
+            # but that may result in the image being saved twice, once to convert
+            # HEIC to JPG, and once to resize down to below the target size.
+            # If the file is larger than the target size it's better just to resize it,
+            # knowing we'll end up with a jpg.
+            # If smaller, we convert to a jpg and in the rare case the file size
+            # increases we resize it then.
+
+            file_path = convert_heic_to_jpg(
+                file_path=file_path, delete_original=delete_orig
+            )
+
+            current_size = file_path.stat().st_size  # file size in bytes
+
+            if current_size <= target_size:
+                return file_path
+
+        else:
+            return file_path
 
     original_quality_min = quality_min  # keep a record of the original minimum quality
 
@@ -255,6 +278,42 @@ def compress_image(
                 + f"minimum allowable = {original_quality_min}"
             )
         )
+
+    return new_file_path
+
+
+def convert_heic_to_jpg(
+    *,
+    file_path: Path,
+    delete_original: bool = False,
+) -> Path:
+    """
+    Convert a HEIC file to a JPEG file.
+
+    Parameters
+    ----------
+    file_path : Path
+        The path of the photo to convert.
+    delete_original : bool, optional
+        Should the original file be deleted?
+
+    Returns
+    -------
+    Path
+        The path of the converted file.
+    """
+
+    if file_path.suffix.lower() != ".heic":
+        raise ValueError("File is not a HEIC file.")
+
+    image = _open_image(file_path)
+
+    new_file_path = file_path.with_suffix(".jpg")
+
+    image.save(fp=new_file_path, format="JPEG")
+
+    if delete_original and new_file_path != file_path and file_path.exists():
+        file_path.unlink()
 
     return new_file_path
 
@@ -348,7 +407,7 @@ def _help_resize(input_vals):
     input_vals : tuple
         A tuple with the following values:
         (original_path, target_size, quality_min, quality_max, save_larger_than_target,
-        delete_orig, missing_ok, verbose, ignore_errors)
+        delete_orig, missing_ok, verbose, ignore_errors, convert_heic)
 
     Returns
     -------
@@ -371,6 +430,7 @@ def _help_resize(input_vals):
         missing_ok,
         verbose,
         ignore_errors,
+        convert_heic,
     ) = input_vals
 
     warning = None
@@ -385,6 +445,7 @@ def _help_resize(input_vals):
                 save_larger_than_target=save_larger_than_target,
                 delete_orig=delete_orig,
                 missing_ok=missing_ok,
+                convert_heic=convert_heic,
             )
 
         except UnidentifiedImageError as err:
@@ -462,6 +523,7 @@ def compress_all_in_folder(
     delete_orig: bool = True,
     missing_ok: bool = True,
     ignore_errors: bool = True,
+    convert_heic: bool = False,
 ) -> Tuple[List[Optional[Path]], List[str]]:
     """
     Compress all images in a folder to below a target file size.
@@ -488,7 +550,9 @@ def compress_all_in_folder(
         Is it OK to ignore missing files?
     ignore_errors : bool
         Is it OK to ignore certain errors? Currently only the
-        ``UnidentifiedImageError`` is ignored.
+        `UnidentifiedImageError` is ignored.
+    convert_heic : bool
+        Convert HEIC files to JPEGs?
 
     Returns
     -------
@@ -525,6 +589,7 @@ def compress_all_in_folder(
         missing_ok_list = [missing_ok] * total
         verbose_list = [True] * total
         ignore_errors_list = [ignore_errors] * total
+        convert_heic_list = [convert_heic] * total
 
         input_vals = zip(
             files_to_resize,
@@ -536,6 +601,7 @@ def compress_all_in_folder(
             missing_ok_list,
             verbose_list,
             ignore_errors_list,
+            convert_heic_list,
             strict=True,
         )
 
@@ -602,6 +668,7 @@ def main():
         return
 
     subfolders = Confirm.ask(prompt="Do you want to resize images in subfolders")
+    convert_heic = Confirm.ask(prompt="Do you want to convert HEIC files to JPEGs?")
 
     print()
     max_size = get_number_input(
@@ -638,6 +705,7 @@ def main():
             save_larger_than_target=True,
             ignore_errors=True,
             quality_min=min_quality,
+            convert_heic=convert_heic,
         )
 
         if len(warnings) > 0:
