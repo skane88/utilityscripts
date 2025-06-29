@@ -20,8 +20,8 @@ from utilityscripts.wind.as1170_2 import (
     k_a,
     k_ar,
     k_v,
-    m_d_exact,
-    v_r,
+    s3_2_v_r,
+    s3_3_m_d_exact,
     valid_region,
 )
 
@@ -66,7 +66,7 @@ def test_v_r_no_f_x_2011(region, r, v_r_exp):
     """
 
     v_r_calc = round(
-        v_r(
+        s3_2_v_r(
             wind_region=region,
             return_period=int(r),
             ignore_m_c=True,
@@ -85,7 +85,7 @@ def test_v_r_2011(region, r, v_r_exp):
     Basic test of the V_R method.
     """
 
-    v_r_calc = v_r(
+    v_r_calc = s3_2_v_r(
         wind_region=region,
         return_period=int(r),
         ignore_m_c=False,
@@ -115,7 +115,7 @@ def test_v_r_2021_no_mc(region, r, v_r_expected):
     Basic test of the V_R method.
     """
 
-    v_r_calc = v_r(
+    v_r_calc = s3_2_v_r(
         wind_region=region,
         return_period=int(r),
         ignore_m_c=True,
@@ -135,7 +135,7 @@ def test_v_r_2021(region, r, v_r_expected):
     Basic test of the V_R method.
     """
 
-    v_r_calc = v_r(
+    v_r_calc = s3_2_v_r(
         wind_region=region,
         return_period=int(r),
         ignore_m_c=False,
@@ -180,7 +180,7 @@ def test_m_d_2011(input_vals):
     direction = input_vals[0][1]
     expected = input_vals[1]
 
-    m_d_calc = m_d_exact(
+    m_d_calc = s3_3_m_d_exact(
         wind_region=wind_region,
         direction=direction,
         version=StandardVersion.AS1170_2_2011,
@@ -223,7 +223,7 @@ def test_m_d_2021(input_vals):
     direction = input_vals[0][1]
     expected = input_vals[1]
 
-    m_d_calc = m_d_exact(
+    m_d_calc = s3_3_m_d_exact(
         wind_region=wind_region,
         direction=direction,
         version=StandardVersion.AS1170_2_2021,

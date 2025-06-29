@@ -286,7 +286,7 @@ class WindSite:
         float
         """
 
-        return v_r(
+        return s3_2_v_r(
             wind_region=self.wind_region,
             return_period=return_period,
             ignore_m_c=ignore_f_x,
@@ -326,7 +326,7 @@ class WindSite:
             The direction multipliers
         """
 
-        return m_d_exact(
+        return s3_3_m_d_exact(
             direction=direction, wind_region=self.wind_region, version=version
         )
 
@@ -356,7 +356,7 @@ class WindSite:
             The direction multipliers
         """
 
-        return m_d_des(
+        return s3_3_m_d_des(
             wind_region=self.wind_region,
             direction=direction,
             version=version,
@@ -383,7 +383,7 @@ class WindSite:
         float
         """
 
-        return m_zcat_basic(
+        return s4_2_2_m_zcat_basic(
             z=z, terrain_category=self.terrain_category, version=version
         )
 
@@ -474,7 +474,27 @@ class WindSite:
         )
 
 
-def v_r_no_f_x(*, a, b, return_period, k):
+def q_basic(v: float, *, rho_air: float = 1.2):
+    """
+    Calculate the basic wind pressure caused by a certain wind velocity.
+
+    Parameters
+    ----------
+    v : float
+        The wind velocity. Must be in m/s.
+    rho_air : float, default=1.2
+        The density of air. Must be in kg / m³.
+
+    Returns
+    -------
+    float
+    The basic wind pressure in kPa.
+    """
+
+    return 0.5 * rho_air * v**2 / 1000.0
+
+
+def s3_2_v_r_no_f_x(*, a, b, return_period, k):
     """
     Calculate the basic windspeed for a wind region. Ignores parameters F_C or F_D,
     for those use method V_R
@@ -488,44 +508,7 @@ def v_r_no_f_x(*, a, b, return_period, k):
     return a - b * return_period**-k
 
 
-def m_c_or_f_x(
-    *,
-    wind_region: WindRegion | str,
-    return_period: float,
-    version: StandardVersion = StandardVersion.AS1170_2_2021,
-):
-    """
-    Calculate the climate change factor M_C
-    (2021 edition of standard) or F_C / F_D (2011 edition).
-
-    Parameters
-    ----------
-    wind_region : WindRegion
-        The wind region.
-    return_period : float
-        The Average Recurrence Interval (ARI) of the windspeed.
-    version : StandardVersion, default=StandardVersion.AS1170_2_2021
-        The version of the standard to look up.
-
-    Returns
-    -------
-    float
-        The climate change factor.
-    """
-
-    filtered_df = STANDARD_DATA["region_windspeed_parameters"].filter(
-        (pl.col("standard") == version) & (pl.col("region") == wind_region)
-    )
-
-    m_c, m_c_min_r = filtered_df.select(["m_c", "m_c_min_r"]).row(0)
-
-    if return_period < m_c_min_r:
-        return 1.0
-
-    return m_c
-
-
-def v_r(
+def s3_2_v_r(
     *,
     wind_region: WindRegion,
     return_period,
@@ -557,7 +540,7 @@ def v_r(
     f = (
         1.0
         if ignore_m_c
-        else m_c_or_f_x(
+        else s3_4_m_c_or_f_x(
             wind_region=wind_region, return_period=return_period, version=version
         )
     )
@@ -570,10 +553,12 @@ def v_r(
     # Extracting the required values from the filtered DataFrame
     a, b, k, v_min = filtered_df.select(["a", "b", "k", "v_min"]).row(0)
 
-    return max(f * v_min, f * v_r_no_f_x(a=a, b=b, return_period=return_period, k=k))
+    return max(
+        f * v_min, f * s3_2_v_r_no_f_x(a=a, b=b, return_period=return_period, k=k)
+    )
 
 
-def m_d_exact(
+def s3_3_m_d_exact(
     *,
     wind_region: str | WindRegion,
     direction: str | Real | CardinalDirection,
@@ -661,7 +646,7 @@ def m_d_exact(
     return M_d(struct=m_d, cladding=m_d_clad)
 
 
-def m_d_des(
+def s3_3_m_d_des(
     *,
     wind_region: str,
     direction: Real | str | CardinalDirection,
@@ -700,7 +685,8 @@ def m_d_des(
         ]
 
     m_d_vals = [
-        m_d_exact(wind_region=wind_region, direction=a, version=version) for a in angles
+        s3_3_m_d_exact(wind_region=wind_region, direction=a, version=version)
+        for a in angles
     ]
 
     m_d_struct = max([m.struct for m in m_d_vals])
@@ -709,7 +695,44 @@ def m_d_des(
     return M_d(struct=m_d_struct, cladding=m_d_clad)
 
 
-def m_zcat_basic(
+def s3_4_m_c_or_f_x(
+    *,
+    wind_region: WindRegion | str,
+    return_period: float,
+    version: StandardVersion = StandardVersion.AS1170_2_2021,
+):
+    """
+    Calculate the climate change factor M_C
+    (2021 edition of standard) or F_C / F_D (2011 edition).
+
+    Parameters
+    ----------
+    wind_region : WindRegion
+        The wind region.
+    return_period : float
+        The Average Recurrence Interval (ARI) of the windspeed.
+    version : StandardVersion, default=StandardVersion.AS1170_2_2021
+        The version of the standard to look up.
+
+    Returns
+    -------
+    float
+        The climate change factor.
+    """
+
+    filtered_df = STANDARD_DATA["region_windspeed_parameters"].filter(
+        (pl.col("standard") == version) & (pl.col("region") == wind_region)
+    )
+
+    m_c, m_c_min_r = filtered_df.select(["m_c", "m_c_min_r"]).row(0)
+
+    if return_period < m_c_min_r:
+        return 1.0
+
+    return m_c
+
+
+def s4_2_2_m_zcat_basic(
     *, z, terrain_category, version: StandardVersion = StandardVersion.AS1170_2_2021
 ) -> float:
     """
@@ -779,7 +802,7 @@ def m_zcat_basic(
     return float(np.interp(z, xp=heights, fp=m_zcat_for_terrain))
 
 
-def m_zcat_ave():
+def s4_2_3_m_zcat_ave():
     """
     Calculate the terrain height factor M_zcat for the averaged case.
 
@@ -790,7 +813,7 @@ def m_zcat_ave():
     raise NotImplementedError()
 
 
-def shielding_parameter(
+def s4_3_2_shielding_parameter(
     *,
     h: float,
     building_data: list[tuple[float, float]],
@@ -816,7 +839,7 @@ def shielding_parameter(
     return l_s / ((h_s * b_s) ** 0.5)
 
 
-def m_s(shielding_parameter):
+def s4_3_1_m_s(shielding_parameter):
     """
     Determine the shielding multiplier.
 
@@ -991,26 +1014,6 @@ def c_pi_open(
 
 def c_pi_other():
     raise NotImplementedError()
-
-
-def q_basic(v: float, *, rho_air: float = 1.2):
-    """
-    Calculate the basic wind pressure caused by a certain wind velocity.
-
-    Parameters
-    ----------
-    v : float
-        The wind velocity. Must be in m/s.
-    rho_air : float, default=1.2
-        The density of air. Must be in kg / m³.
-
-    Returns
-    -------
-    float
-    The basic wind pressure in kPa.
-    """
-
-    return 0.5 * rho_air * v**2 / 1000.0
 
 
 def c_pe_l(

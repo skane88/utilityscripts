@@ -16,10 +16,10 @@ from utilityscripts.wind.as1170_2 import (
     WindRegion,
     WindSite,
     k_ar,
-    m_c_or_f_x,
-    m_d_des,
-    m_zcat_basic,
     q_basic,
+    s3_3_m_d_des,
+    s3_4_m_c_or_f_x,
+    s4_2_2_m_zcat_basic,
 )
 
 
@@ -291,7 +291,7 @@ class SimpleBuilding:
         """
 
         return [
-            m_d_des(
+            s3_3_m_d_des(
                 wind_region=self.wind_site.wind_region, direction=a, version=version
             )
             for a in self.design_angles
@@ -314,7 +314,7 @@ class SimpleBuilding:
         -------
         [float, float]
         """
-        return m_d_des(
+        return s3_3_m_d_des(
             wind_region=self.wind_site.wind_region,
             direction=self.face_angle(face=face),
             version=version,
@@ -342,7 +342,7 @@ class SimpleBuilding:
         -------
         float
         """
-        return m_c_or_f_x(
+        return s3_4_m_c_or_f_x(
             wind_region=wind_region, return_period=return_period, version=version
         )
 
@@ -827,7 +827,9 @@ class OpenStructure:
         self._results = self._member_data.with_columns(
             (
                 pl.col("reference_height").map_elements(
-                    lambda x: m_zcat_basic(z=x, terrain_category=self.terrain_category),
+                    lambda x: s4_2_2_m_zcat_basic(
+                        z=x, terrain_category=self.terrain_category
+                    ),
                     return_dtype=pl.Float64,
                 )
             ).alias("M_zcat")
