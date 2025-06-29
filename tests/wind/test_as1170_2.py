@@ -646,3 +646,20 @@ def test_windsite():
     assert site.wind_region == WindRegion.A1
     assert site.terrain_category == 1.0
     assert site.shielding_data is None
+
+
+@pytest.mark.parametrize(
+    "region, r, v_r_expected", build_v_r_pairs_2021("regional_windspeeds")
+)
+def test_windsite_v_r(region, r, v_r_expected):
+    """
+    Test the windsite calculates the correct v_r
+    """
+
+    windsite = WindSite(wind_region=region, terrain_category=1.0, shielding_data=None)
+
+    v_r_calc = windsite.v_r(return_period=float(r))
+
+    v_r_calc = round(v_r_calc)  # round because the data from AS1170 is rounded
+
+    assert v_r_calc == v_r_expected
