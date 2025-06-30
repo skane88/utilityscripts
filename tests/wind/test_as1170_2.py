@@ -19,6 +19,7 @@ from utilityscripts.wind.as1170_2 import (
     s3_2_v_r,
     s3_3_m_d_exact,
     s5_3_4_k_v,
+    s5_4_c_pe_us,
     t5_1_b_c_pi_open,
     t5_2b_c_pe_l,
     t5_4_k_a,
@@ -397,6 +398,17 @@ def test_c_pi_open(
 
 def test_c_pi_other():
     raise AssertionError()
+
+
+@pytest.mark.parametrize(
+    "h_us, h, min_expected, max_expected",
+    [(0, 1, 0.0, 0.0), (1, 1, -0.60, 0.80), (1, 3, -0.60, 0.80), (1, 6, -0.30, 0.40)],
+)
+def test_c_pe_us(h_us, h, min_expected, max_expected):
+    c_pe = s5_4_c_pe_us(h=h, h_us=h_us)
+
+    assert isclose(c_pe.c_pe_max, max_expected)
+    assert isclose(c_pe.c_pe_min, min_expected)
 
 
 @pytest.mark.parametrize(

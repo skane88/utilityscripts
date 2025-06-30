@@ -109,6 +109,16 @@ class M_d:  # noqa: N801
     cladding: float
 
 
+@dataclass(slots=True, kw_only=True)
+class C_pe:  # noqa: N801
+    """
+    Stores pressure coefficients (max, min)
+    """
+
+    c_pe_min: float
+    c_pe_max: float
+
+
 def valid_region(region: WindRegion, version: StandardVersion) -> bool:
     """
     Check if a wind region is valid for a given version of the standard.
@@ -1039,6 +1049,32 @@ def s5_3_4_k_v(*, open_area, volume):
         return 1.085
 
     return 1.01 + 0.15 * log10(alpha)
+
+
+def s5_4_c_pe_us(*, h: float, h_us: float) -> C_pe:
+    """
+    Calculate the pressure coefficient on the U/S of a building as per AS1170.2 Section 5.4.
+
+    Parameters
+    ----------
+    h : float
+        The building reference height, in m.
+    h_us : float
+        The height to the U/S of the building.
+
+    Returns
+    -------
+    The pressure coefficients.
+    """
+
+    x = np.asarray([0.0, 1 / 3])
+    y_min = np.asarray([0.0, -0.60])
+    y_max = np.asarray([0.0, 0.80])
+
+    c_pe_min = np.interp(h_us / h, x, y_min)
+    c_pe_max = np.interp(h_us / h, x, y_max)
+
+    return C_pe(c_pe_min=c_pe_min, c_pe_max=c_pe_max)
 
 
 def t5_2b_c_pe_l(
