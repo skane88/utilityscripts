@@ -912,7 +912,7 @@ def c_pi(
     init_standard_data()
 
     if wall_type == WallType.OPEN:
-        return c_pi_open(
+        return t5_1_b_c_pi_open(
             area_ratio=area_ratio,
             wind_region=wind_region,
             governing_face=governing_face,
@@ -927,7 +927,7 @@ def c_pi(
     return c_pi_other()
 
 
-def c_pi_open(
+def t5_1_b_c_pi_open(
     *,
     area_ratio: float,
     wind_region: WindRegion,
@@ -988,7 +988,7 @@ def c_pi_open(
             .otherwise(pl.col("max_factor"))
         ).alias("max_factor")
     )
-    k_v_val = k_v(open_area=open_area, volume=volume)
+    k_v_val = s5_3_4_k_v(open_area=open_area, volume=volume)
 
     c_pi_data = c_pi_data.with_columns(
         (
@@ -1020,6 +1020,25 @@ def c_pi_open(
 
 def c_pi_other():
     raise NotImplementedError()
+
+
+def s5_3_4_k_v(*, open_area, volume):
+    """
+    Calculate the volume coefficient K_v as per AS1170.2 Section 5.3.4.
+
+    :param open_area: The open area on the critical face.
+    :param volume: The volume of the enclosed space.
+    """
+
+    alpha = 100 * (open_area ** (3 / 2)) / volume
+
+    if alpha < 0.09:  # noqa: PLR2004
+        return 0.85
+
+    if alpha > 3:  # noqa: PLR2004
+        return 1.085
+
+    return 1.01 + 0.15 * log10(alpha)
 
 
 def t5_2b_c_pe_l(
@@ -1070,7 +1089,7 @@ def t5_2b_c_pe_l(
     return float(interp((roof_pitch, d_b_ratio)))
 
 
-def c_pe_s(
+def t5_2c_c_pe_s(
     *, h_ref, d_edge, version: StandardVersion = StandardVersion.AS1170_2_2021
 ) -> tuple[float, float]:
     """
@@ -1103,25 +1122,6 @@ def c_pe_s(
     c_pe = np.interp(distance_ratio, distances, c_pe_vals)
 
     return c_pe, c_pe
-
-
-def k_v(*, open_area, volume):
-    """
-    Calculate the volume coefficient K_v as per AS1170.2
-
-    :param open_area: The open area on the critical face.
-    :param volume: The volume of the enclosed space.
-    """
-
-    alpha = 100 * (open_area ** (3 / 2)) / volume
-
-    if alpha < 0.09:  # noqa: PLR2004
-        return 0.85
-
-    if alpha > 3:  # noqa: PLR2004
-        return 1.085
-
-    return 1.01 + 0.15 * log10(alpha)
 
 
 def t5_4_k_a(

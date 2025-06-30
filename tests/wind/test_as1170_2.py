@@ -15,11 +15,11 @@ from utilityscripts.wind.as1170_2 import (
     WindRegion,
     WindSite,
     c_fig_rect_prism,
-    c_pi_open,
     k_ar,
-    k_v,
     s3_2_v_r,
     s3_3_m_d_exact,
+    s5_3_4_k_v,
+    t5_1_b_c_pi_open,
     t5_2b_c_pe_l,
     t5_4_k_a,
     valid_region,
@@ -376,7 +376,7 @@ def test_c_pi_open(
     version,
     expected,
 ):
-    result = c_pi_open(
+    result = t5_1_b_c_pi_open(
         area_ratio=area_ratio,
         wind_region=wind_region,
         governing_face=governing_face,
@@ -498,7 +498,7 @@ def k_v_calc(area, volume):
     ],
 )
 def test_k_v(area, vol, expected):
-    assert isclose(k_v(open_area=area, volume=vol), expected)
+    assert isclose(s5_3_4_k_v(open_area=area, volume=vol), expected)
 
 
 @pytest.mark.parametrize(
