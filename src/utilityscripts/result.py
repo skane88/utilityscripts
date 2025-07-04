@@ -83,10 +83,20 @@ class Variable:
     @property
     def latex_string(self) -> str:
         # TODO: update this to use python's format strings to build a latex
-        #  string - in particuar, need a function to use the .#e format string
+        #  string - in particular, need a function to use the .#e format string
         #  to determine the scientific notation.
 
-        pass
+        unit_str = f" \text{{{self.units}}}" if self.units else ""
+
+        if "e" in self.fmt_string:
+            formatted = f"{self.value:{self.fmt_string}}"
+
+            mantissa, exponent = formatted.split("e")
+            exponent = int(exponent)
+
+            return f"{mantissa} \\times 10^{{{exponent}}}" + unit_str
+
+        return f"{self.value:{self.fmt_string}}" + unit_str
 
     def __repr__(self):
         return f"Variable: {self.symbol}={self.value}"

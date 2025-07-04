@@ -176,3 +176,15 @@ def test_result_pow(result, other, expected):
 def test_result_rpow(result, other, expected):
     result = DeprecatedResult(result)
     assert other**result == expected
+
+
+@pytest.mark.parametrize(
+    "val, expected",
+    [
+        (Variable(1), "1.000 \\times 10^{0}"),
+    ],
+)
+def test_latex_string(val, expected):
+    # TODO: more tests required
+
+    assert val.latex_string == expected
