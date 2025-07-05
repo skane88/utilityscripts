@@ -131,7 +131,12 @@ class Variable:
         return symbol_str + value_str + unit_str
 
     def __repr__(self):
-        return "Variable: " + self.__str__()
+        return (
+            f"{type(self).__name__}({self.value!r}"
+            + f", symbol={self.symbol!r}"
+            + f", units={self.units!r}"
+            + f", fmt_string={self.fmt_string!r})"
+        )
 
 
 class Result:
