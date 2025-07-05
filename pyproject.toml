@@ -55,6 +55,7 @@ dev = [
  "types-shapely",
  "pandas-stubs",
  "types-tqdm",
+ "jupyterlab",
 ]
 
 [tool.uv]
