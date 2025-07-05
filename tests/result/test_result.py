@@ -88,6 +88,7 @@ def test_result_error():
         ),
         (Variable(0.123, symbol="a", fmt_string=".3%"), "\\text{a} = 12.300\\%"),
         (Variable(0.00123, symbol="a", fmt_string=".3%"), "\\text{a} = 0.123\\%"),
+        (Variable("abc", symbol="a"), "\\text{a} = abc"),
     ],
 )
 def test_latex_string(val, expected):
