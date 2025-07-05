@@ -114,6 +114,15 @@ class Variable:
         return symbol_str + value_str + unit_str
 
     def _repr_mimebundle_(self, include=None, exclude=None):
+    """
+    Provide a mimebundle as required by
+    https://ipython.readthedocs.io/en/stable/config/integrating.html
+    to allow for simple outputs from Jupyter notebooks and similar.
+    
+    Notes
+    -----
+    - the '$' augns are only added to the latex output in this method so that the user can get a plain latex output from the other methods.  
+    """ 
         return {
             "text/plain": self.__str__(),
             "text/latex": "$" + self.latex_string + "$",
