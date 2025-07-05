@@ -52,7 +52,7 @@ class Variable:
         value: Any,
         *,
         symbol: str | None = None,
-        units: str = "",
+        units: str | None = None,
         fmt_string: str = ".3e",
     ):
         self._value = value
@@ -78,7 +78,9 @@ class Variable:
 
     @property
     def str_value(self) -> str:
-        return f"{self.value:{self.fmt_string}}" + f"{self.units}"
+        return f"{self.value:{self.fmt_string}}" + (
+            f" {self.units}" if self.units is not None else ""
+        )
 
     @property
     def latex_string(self) -> str:
@@ -97,6 +99,9 @@ class Variable:
             return f"{mantissa} \\times 10^{{{exponent}}}" + unit_str
 
         return f"{self.value:{self.fmt_string}}" + unit_str
+
+    def __str__(self):
+        return f"{self.symbol}={self.str_value}"
 
     def __repr__(self):
         return f"Variable: {self.symbol}={self.value}"

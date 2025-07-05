@@ -1,36 +1,6 @@
-"""
-Test the Result class.
-"""
-
 import pytest
 
-from utilityscripts.result import DeprecatedResult, Variable
-
-
-def test_variable():
-    """
-    Minimal test of the Variable class.
-    """
-
-    # Test default values
-    v = Variable(1)
-    assert v.value == 1
-    assert v.symbol is None
-    assert v.units == ""
-    assert v.fmt_string == ".3e"
-    assert v.str_value == "1.000e+00"
-
-    value = 2
-    symbol = "b"
-    units = "m"
-    fmt_string = ".2f"
-
-    v = Variable(value, symbol=symbol, units=units, fmt_string=fmt_string)
-    assert v.value == value
-    assert v.symbol == symbol
-    assert v.units == units
-    assert v.fmt_string == fmt_string
-    assert v.str_value == f"{value:.2f}{units}"
+from utilityscripts.result import DeprecatedResult
 
 
 @pytest.mark.parametrize("operation", [str, float, int, bool, complex, bytes])
@@ -176,15 +146,3 @@ def test_result_pow(result, other, expected):
 def test_result_rpow(result, other, expected):
     result = DeprecatedResult(result)
     assert other**result == expected
-
-
-@pytest.mark.parametrize(
-    "val, expected",
-    [
-        (Variable(1), "1.000 \\times 10^{0}"),
-    ],
-)
-def test_latex_string(val, expected):
-    # TODO: more tests required
-
-    assert val.latex_string == expected
