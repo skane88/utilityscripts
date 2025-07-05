@@ -113,6 +113,12 @@ class Variable:
 
         return symbol_str + value_str + unit_str
 
+    def _repr_mimebundle_(self, include=None, exclude=None):
+        return {
+            "text/plain": self.__str__(),
+            "text/latex": "$" + self.latex_string + "$",
+        }
+
     def __str__(self):
         symbol_str = f"{self.symbol}=" if self.symbol else ""
         value_str = (
@@ -125,7 +131,7 @@ class Variable:
         return symbol_str + value_str + unit_str
 
     def __repr__(self):
-        return f"Variable: {self.symbol}={self.value:{self.fmt_string}}{self.units if self.units else ''}"
+        return "Variable: " + self.__str__()
 
 
 class Result:
