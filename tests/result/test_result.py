@@ -17,8 +17,7 @@ def test_variable():
     assert v.value == 1
     assert v.symbol is None
     assert v.units is None
-    assert v.fmt_string == ".3e"
-    assert v.str_value == "1.000e+00"
+    assert v.fmt_string is None
 
     value = 2
     symbol = "b"
@@ -30,20 +29,21 @@ def test_variable():
     assert v.symbol == symbol
     assert v.units == units
     assert v.fmt_string == fmt_string
-    assert v.str_value == f"{value:.2f} {units}"
 
 
 @pytest.mark.parametrize(
     "val, expected",
     [
-        (Variable(2), "None=2.000e+00"),
-        (Variable(1, units="m"), "None=1.000e+00 m"),
-        (Variable(1, units="m", fmt_string=".2f"), "None=1.00 m"),
-        (Variable(1, units="m", fmt_string=".2e"), "None=1.00e+00 m"),
-        (Variable(2, symbol="a"), "a=2.000e+00"),
-        (Variable(1, symbol="a", units="m"), "a=1.000e+00 m"),
+        (Variable(2), "2"),
+        (Variable(1, units="m"), "1 m"),
+        (Variable(1, units="m", fmt_string=".2f"), "1.00 m"),
+        (Variable(1, units="m", fmt_string=".2e"), "1.00e+00 m"),
+        (Variable(2, symbol="a"), "a=2"),
+        (Variable(1, symbol="a", units="m"), "a=1 m"),
         (Variable(1, symbol="a", units="m", fmt_string=".2f"), "a=1.00 m"),
         (Variable(1, symbol="a", units="m", fmt_string=".2e"), "a=1.00e+00 m"),
+        (Variable(2, fmt_string=None), "2"),
+        (Variable("abc"), "abc"),
     ],
 )
 def test_variable_string(val, expected):
@@ -58,10 +58,10 @@ def test_result_error():
 @pytest.mark.parametrize(
     "val, expected",
     [
-        (Variable(1), "1.000 \\times 10^{0}"),
+        (Variable(1), "1"),
         (Variable(1, fmt_string=".3E"), "1.000 \\times 10^{0}"),
-        (Variable(1, units="m"), "1.000 \\times 10^{0} \\text{m}"),
-        (Variable(1, symbol="a"), "\\text{a} = 1.000 \\times 10^{0}"),
+        (Variable(1, units="m"), "1 \\text{m}"),
+        (Variable(1, symbol="a"), "\\text{a} = 1"),
         (
             Variable(1, symbol="a", units="m", fmt_string=".2f"),
             "\\text{a} = 1.00 \\text{m}",

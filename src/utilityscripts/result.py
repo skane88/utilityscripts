@@ -58,14 +58,18 @@ class Variable:
         *,
         symbol: str | None = None,
         units: str | None = None,
-        fmt_string: str = ".3e",
+        fmt_string: str | None = None,
     ):
         self._value = value
         self._symbol = symbol
         self._units = units
         self._fmt_string = fmt_string
 
-        if "%" in self._fmt_string and self._units is not None:
+        if (
+            self._fmt_string is not None
+            and "%" in self._fmt_string
+            and self._units is not None
+        ):
             raise ResultError("Using units with % formatting does not make sense.")
 
     @property
@@ -85,12 +89,6 @@ class Variable:
         return self._fmt_string
 
     @property
-    def str_value(self) -> str:
-        return f"{self.value:{self.fmt_string}}" + (
-            f" {self.units}" if self.units is not None else ""
-        )
-
-    @property
     def latex_string(self) -> str:
         # TODO: update this to use python's format strings to build a latex
         #  string - in particular, need a function to use the .#e format string
@@ -99,7 +97,11 @@ class Variable:
         unit_str = f" \\text{{{self.units}}}" if self.units else ""
         symbol_str = f"\\text{{{self.symbol}}} = " if self.symbol else ""
 
-        value_str = f"{self.value:{self.fmt_string}}"
+        value_str = (
+            f"{self.value:{self.fmt_string}}"
+            if self.fmt_string is not None
+            else f"{self.value}"
+        )
 
         if "e" in value_str.lower():
             mantissa, exponent = value_str.lower().split("e")
@@ -112,7 +114,15 @@ class Variable:
         return symbol_str + value_str + unit_str
 
     def __str__(self):
-        return f"{self.symbol}={self.str_value}"
+        symbol_str = f"{self.symbol}=" if self.symbol else ""
+        value_str = (
+            f"{self.value:{self.fmt_string}}"
+            if self.fmt_string is not None
+            else f"{self.value}"
+        )
+        unit_str = f" {self.units}" if self.units else ""
+
+        return symbol_str + value_str + unit_str
 
     def __repr__(self):
         return f"Variable: {self.symbol}={self.value:{self.fmt_string}}{self.units if self.units else ''}"
