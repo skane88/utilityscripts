@@ -6,6 +6,11 @@ from typing import Any
 
 from jinja2 import Environment
 
+
+class ResultError(Exception):
+    pass
+
+
 latex_env = Environment(
     block_start_string=r"\BLOCK{",  # update some control characters to suit latex
     block_end_string=r"}",
@@ -60,6 +65,9 @@ class Variable:
         self._units = units
         self._fmt_string = fmt_string
 
+        if "%" in self._fmt_string and self._units is not None:
+            raise ResultError("Using units with % formatting does not make sense.")
+
     @property
     def value(self) -> Any:
         return self._value
@@ -88,23 +96,26 @@ class Variable:
         #  string - in particular, need a function to use the .#e format string
         #  to determine the scientific notation.
 
-        unit_str = f" \text{{{self.units}}}" if self.units else ""
+        unit_str = f" \\text{{{self.units}}}" if self.units else ""
+        symbol_str = f"\\text{{{self.symbol}}} = " if self.symbol else ""
 
-        if "e" in self.fmt_string:
-            formatted = f"{self.value:{self.fmt_string}}"
+        value_str = f"{self.value:{self.fmt_string}}"
 
-            mantissa, exponent = formatted.split("e")
+        if "e" in value_str.lower():
+            mantissa, exponent = value_str.lower().split("e")
             exponent = int(exponent)
 
-            return f"{mantissa} \\times 10^{{{exponent}}}" + unit_str
+            value_str = f"{mantissa} \\times 10^{{{exponent}}}"
 
-        return f"{self.value:{self.fmt_string}}" + unit_str
+        value_str = value_str.replace("%", "\\%")
+
+        return symbol_str + value_str + unit_str
 
     def __str__(self):
         return f"{self.symbol}={self.str_value}"
 
     def __repr__(self):
-        return f"Variable: {self.symbol}={self.value}"
+        return f"Variable: {self.symbol}={self.value:{self.fmt_string}}{self.units if self.units else ''}"
 
 
 class Result:
