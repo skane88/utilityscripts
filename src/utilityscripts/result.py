@@ -121,9 +121,37 @@ class Variable:
 
         Notes
         -----
+        - the method first checks if self.value defines a _repr_mimebundle_ method, or
+          any of the other _repr_*_ methods in the iPython standard.
+          If so, it returns the results of those methods in a mimebundle.
+        - If the value does not define a _repr_*_ method, then it returns a custom
+          mimebundle containing the text and latex representations of the result.
         - the '$' signs are only added to the latex output in this method
-        so that the user can get a plain latex output from the other methods.
+          so that the user can get a plain latex output from the other methods.
         """
+
+        if hasattr(self.value, "_repr_mimebundle_"):
+            return self.value._repr_mimebundle_(include, exclude)
+
+        bundle = {}
+
+        reprs = {
+            "_repr_pretty_": "text/plain",
+            "_repr_svg_": "image/svg+xml",
+            "_repr_jpeg_": "image/jpeg",
+            "_repr_png_": "image/png",
+            "_repr_html_": "text/html",
+            "_repr_javascript_": "application/javascript",
+            "_repr_markdown_": "text/markdown",
+            "_repr_latex_": "text/latex",
+        }
+
+        for method, mimetype in reprs.items():
+            if hasattr(self.value, method):
+                bundle[mimetype] = getattr(self.value, method)()
+
+        if len(bundle) > 0:
+            return bundle
 
         return {
             "text/plain": self.__str__(),
