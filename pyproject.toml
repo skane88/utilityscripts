@@ -54,6 +54,7 @@ dev = [
  "pre-commit",
  "types-shapely",
  "pandas-stubs",
+ "scipy-stubs",
  "types-tqdm",
  "jupyterlab",
  "marimo",
