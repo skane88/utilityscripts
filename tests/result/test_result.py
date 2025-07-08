@@ -44,6 +44,9 @@ def test_variable():
         (Variable(1, symbol="a", units="m", fmt_string=".2e"), "a=1.00e+00 m"),
         (Variable(2, fmt_string=None), "2"),
         (Variable("abc"), "abc"),
+        (Variable([1, 2, 3]), "[1, 2, 3]"),
+        (Variable({"a": 1, "b": 2, "c": 3}), "{'a': 1, 'b': 2, 'c': 3}"),
+        (Variable({1, 2, 3}), "{1, 2, 3}"),
     ],
 )
 def test_variable_string(val, expected):
@@ -89,6 +92,9 @@ def test_result_error():
         (Variable(0.123, symbol="a", fmt_string=".3%"), "\\text{a} = 12.300\\%"),
         (Variable(0.00123, symbol="a", fmt_string=".3%"), "\\text{a} = 0.123\\%"),
         (Variable("abc", symbol="a"), "\\text{a} = abc"),
+        (Variable([1, 2, 3]), ""),
+        (Variable({"a": 1, "b": 2, "c": 3}), ""),
+        (Variable({1, 2, 3}), ""),
     ],
 )
 def test_latex_string(val, expected):
