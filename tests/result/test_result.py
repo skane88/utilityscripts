@@ -48,6 +48,7 @@ def test_variable():
         (Variable(list(range(0, 100))), "[1, 2, 3, ..., 99]"),
         (Variable({"a": 1, "b": 2, "c": 3}), "{'a': 1, 'b': 2, 'c': 3}"),
         (Variable({1, 2, 3}), "{1, 2, 3}"),
+        (Variable(set(range(0, 100))), "{1, 2, 3, ..., 99}"),
     ],
 )
 def test_variable_string(val, expected):
