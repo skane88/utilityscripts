@@ -63,7 +63,7 @@ class EN14015:
             The density of the liquid. In kg/m^3.
         a_seismic : float
             The seismic acceleration coefficient for inertial movement of the tank.
-            In m/s^2.
+            In m/s².
         soil_profile: str
             The soil profile type. Should be one of:
             A, B, C

@@ -1029,13 +1029,13 @@ class Bolt:
             If None is provided, it is calculated based on the grade and the rules in
             AS1275. If the grade is not found in the grade data an error will be raised.
         a_c : float | None
-            The minor diameter area of the bolt. In m^2. If None is provided, it is
+            The minor diameter area of the bolt. In m². If None is provided, it is
             calculated based on the diameter and the rules in AS1275.
         a_o : float | None
-            The nominal plain shank area of the bolt. In m^2. If None is provided, it is
+            The nominal plain shank area of the bolt. In m². If None is provided, it is
             calculated based on the diameter and the rules in AS1275.
         a_s : float | None
-            The tensile stress area of the bolt. In m^2. If None is provided, it is
+            The tensile stress area of the bolt. In m². If None is provided, it is
             calculated based on the diameter and the rules in AS1275.
         """
 
@@ -1089,7 +1089,7 @@ class Bolt:
     @property
     def a_c(self) -> float:
         """
-        The minor diameter area of the bolt. In m^2.
+        The minor diameter area of the bolt. In m².
         """
 
         return self._a_c
@@ -1097,7 +1097,7 @@ class Bolt:
     @property
     def a_o(self) -> float:
         """
-        The nominal plain shank area of the bolt. In m^2.
+        The nominal plain shank area of the bolt. In m².
         """
 
         return self._a_o
@@ -1105,7 +1105,7 @@ class Bolt:
     @property
     def a_s(self) -> float:
         """
-        The tensile stress area of the bolt. In m^2.
+        The tensile stress area of the bolt. In m².
         """
 
         return self._a_s

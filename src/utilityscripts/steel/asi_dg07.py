@@ -16,7 +16,7 @@ def a_no(*, h_ef: float) -> float:
     Returns
     -------
     float
-        The projected tearout area of a single bolt, in mm^2.
+        The projected tearout area of a single bolt, in mm².
     """
 
     return 9 * h_ef**2
@@ -41,7 +41,7 @@ def a_n_group(*, h_ef: float, s_p: float, s_g: float, t_c: float) -> float:
     Returns
     -------
     float
-        The projected tearout area of the bolt group, in mm^2.
+        The projected tearout area of the bolt group, in mm².
     """
 
     x_0 = max(s_p - 3 * (t_c - h_ef), 0.0)

@@ -212,13 +212,13 @@ class ReoProperties:
             + f" {'Mesh' if self.is_mesh else 'Bar'}"
             + f", bar type: {self.bar_type}.\n"
             + f"Main diameter: {self.main_dia}mm"
-            + f", bar area: {self.main_bar_area:.1f}mm^2"
-            + f", total area: {self.main_area_total:.1f}mm^2 {' (unit)' if self.main_is_unit else ''}."
+            + f", bar area: {self.main_bar_area:.1f}mm²"
+            + f", total area: {self.main_area_total:.1f}mm² {' (unit)' if self.main_is_unit else ''}."
             + (
                 (
                     f"\nSecondary Diameter: {self.secondary_dia}mm"
-                    + f", bar area: {self.secondary_bar_area:.1f}mm^2"
-                    + f", total area: {self.secondary_area_total:.1f}mm^2 {' (unit)' if self.secondary_is_unit else ''}."
+                    + f", bar area: {self.secondary_bar_area:.1f}mm²"
+                    + f", total area: {self.secondary_area_total:.1f}mm² {' (unit)' if self.secondary_is_unit else ''}."
                 )
                 if self.is_mesh
                 else ""

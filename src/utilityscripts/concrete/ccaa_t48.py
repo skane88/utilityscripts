@@ -1612,7 +1612,7 @@ def dowel_shear_capacity(
     Parameters
     ----------
     dowel_area : float
-        The area of the dowel. In mm^2.
+        The area of the dowel. In mm².
     f_sy : float
         The steel yield strength. In MPa.
     partial_factor : float
@@ -1797,7 +1797,7 @@ class Dowel:
     @property
     def area(self) -> float:
         """
-        The area of the dowel. In mm^2.
+        The area of the dowel. In mm².
         """
 
         if self.dowel_type == DowelType.ROUND:

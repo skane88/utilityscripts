@@ -164,7 +164,7 @@ def as5222_s5_2_a_h(*, m_h: float) -> float:
     Returns
     -------
     float
-        The nominal area. In m^2.
+        The nominal area. In m².
     """
 
     return 0.0005 * m_h
@@ -181,7 +181,7 @@ def as5222_s5_2_f_h(*, q_z: float, a_h: float, c_h: float = 2.40) -> float:
         Typically the reference height is the highest point of the crane during the
         lift.
     a_h : float
-        The nominal area of the hoisted load. In m^2.
+        The nominal area of the hoisted load. In m².
     c_h : float, optional
         The wind drag coefficient for the hoisted load. Default is 2.40.
 
