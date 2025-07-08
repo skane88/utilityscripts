@@ -45,6 +45,7 @@ def test_variable():
         (Variable(2, fmt_string=None), "2"),
         (Variable("abc"), "abc"),
         (Variable([1, 2, 3]), "[1, 2, 3]"),
+        (Variable(list(range(0, 100))), "[1, 2, 3, ..., 99]"),
         (Variable({"a": 1, "b": 2, "c": 3}), "{'a': 1, 'b': 2, 'c': 3}"),
         (Variable({1, 2, 3}), "{1, 2, 3}"),
     ],
