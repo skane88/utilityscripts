@@ -94,24 +94,12 @@ class Variable:
         #  string - in particular, need a function to use the .#e format string
         #  to determine the scientific notation.
 
-        unit_str = f" \\text{{{self.units}}}" if self.units else ""
-        symbol_str = f"\\text{{{self.symbol}}} = " if self.symbol else ""
+        if isinstance(self.value, list | dict | set):
+            raise NotImplementedError("Latex strings not yet supported for lists.")
 
-        value_str = (
-            f"{self.value:{self.fmt_string}}"
-            if self.fmt_string is not None
-            else f"{self.value}"
+        return _simple_latex_format(
+            self.value, symbol=self.symbol, units=self.units, fmt_string=self.fmt_string
         )
-
-        if "e" in value_str.lower():
-            mantissa, exponent = value_str.lower().split("e")
-            exponent = int(exponent)
-
-            value_str = f"{mantissa} \\times 10^{{{exponent}}}"
-
-        value_str = value_str.replace("%", "\\%")
-
-        return symbol_str + value_str + unit_str
 
     def _repr_mimebundle_(self, include=None, exclude=None):
         """
@@ -176,6 +164,51 @@ class Variable:
             + f", units={self.units!r}"
             + f", fmt_string={self.fmt_string!r})"
         )
+
+
+def _simple_latex_format(
+    value: Any,
+    *,
+    symbol: str | None = None,
+    units: str | None = None,
+    fmt_string: str | None = None,
+) -> str:
+    """
+    Format a simple value (integer, float, str or similar) into a latex string.
+
+    Parameters
+    ----------
+    value
+        The value to format.
+        Must be something that can be converted into a string using an f-string.
+        Must also make sense to format into a simple latex string (e.g. 'a=123').
+    symbol : str | None, optional
+        A symbol to use in the variable display
+    units : str | None, optional
+        Units to use in the variable display
+    fmt_string : str | None, optional
+        A valid format string to use in the variable display.
+        Must be compatible with the type of value.
+
+    Returns
+    -------
+    str
+        A latex string representing the value.
+    """
+
+    unit_str = f" \\text{{{units}}}" if units else ""
+    symbol_str = f"\\text{{{symbol}}} = " if symbol else ""
+    value_str = f"{value:{fmt_string}}" if fmt_string is not None else f"{value}"
+
+    # next format scientific notation nicely.
+    if "e" in value_str.lower():
+        mantissa, exponent = value_str.lower().split("e")
+        exponent = int(exponent)
+
+        value_str = f"{mantissa} \\times 10^{{{exponent}}}"
+
+    value_str = value_str.replace("%", "\\%")
+    return symbol_str + value_str + unit_str
 
 
 class Result:
