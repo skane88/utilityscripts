@@ -116,8 +116,24 @@ class ReoProperties:
     secondary_spacing: float | None
     no_main: int | float
     no_secondary: int | float | None
-    main_width: float
-    secondary_width: float | None
+    main_width: float | None = None
+    secondary_width: float | None = None
+
+    @property
+    def main_is_unit(self) -> bool:
+        """
+        Is the main area a unit area?
+        """
+
+        return self.no_main is None and self.main_width is None
+
+    @property
+    def secondary_is_unit(self) -> bool:
+        """
+        Is the secondary area a unit area?
+        """
+
+        return self.no_secondary is None and self.secondary_width is None
 
     @property
     def main_bar_area(self):
@@ -125,7 +141,20 @@ class ReoProperties:
 
     @property
     def main_area_total(self):
-        return self.main_bar_area * self.no_main
+        """
+        Calculate the total area of the main bars.
+        If the total number of bars has not been provided and no width has been given,
+        this is calculated based on a unit width.
+        """
+
+        if self.no_main is None:
+            width = 1000 if self.main_width is None else self.main_width
+            no_main = width / self.main_spacing
+
+        else:
+            no_main = self.no_main
+
+        return self.main_bar_area * no_main
 
     @property
     def main_area_unit(self):
@@ -139,9 +168,23 @@ class ReoProperties:
 
     @property
     def secondary_area_total(self):
+        """
+        Calculate the total area of the secondary bars.
+        If the total number of bars has not been provided and no width has been given,
+        this is calculated based on a unit width.
+        """
+
         if self.secondary_bar_area is None:
             return None
-        return self.secondary_bar_area * self.no_secondary
+
+        if self.no_secondary is None:
+            width = 1000 if self.secondary_width is None else self.secondary_width
+            no_secondary = width / self.secondary_spacing
+
+        else:
+            no_secondary = self.no_secondary
+
+        return self.secondary_bar_area * no_secondary
 
     @property
     def secondary_area_unit(self):
@@ -163,9 +206,31 @@ class ReoProperties:
             secondary_width=self.secondary_width,
         )
 
+    def __repr__(self):
+        return (
+            f"{type(self).__name__}: {self.bar_spec}."
+            + f" {'Mesh' if self.is_mesh else 'Bar'}"
+            + f", bar type: {self.bar_type}.\n"
+            + f"Main diameter: {self.main_dia}mm"
+            + f", bar area: {self.main_bar_area:.1f}mm^2"
+            + f", total area: {self.main_area_total:.1f}mm^2 {' (unit)' if self.main_is_unit else ''}."
+            + (
+                (
+                    f"\nSecondary Diameter: {self.secondary_dia}mm"
+                    + f", bar area: {self.secondary_bar_area:.1f}mm^2"
+                    + f", total area: {self.secondary_area_total:.1f}mm^2 {' (unit)' if self.secondary_is_unit else ''}."
+                )
+                if self.is_mesh
+                else ""
+            )
+        )
+
 
 def reo_prop(
-    bar_spec: str, *, main_width=1000.0, secondary_width=1000.0
+    bar_spec: str,
+    *,
+    main_width: float | None = None,
+    secondary_width: float | None = None,
 ) -> ReoProperties:
     """
     Returns reinforcement properties from a standard bar specification.
@@ -176,12 +241,15 @@ def reo_prop(
         A standard Australian bar specification code. Can be a single bar (e.g. 'N12'),
         multiple bars (e.g. '2-N12'), bars with spacing (e.g. 'N12@200'), or mesh
         designation (e.g. 'SL82', 'F82').
-    main_width: float, default=1000.0
+    main_width: float | None, default = None
         The width in mm over which to calculate the area of the main bars.
         Used for calculating bar spacing and total area of reinforcement.
-    secondary_width: float, default=1000.0
+        If None is provided, main bar area is a unit area for mesh and bars that
+        only have a spacing.
+    secondary_width: float | None, default = None
         The width in mm over which to calculate the area of the secondary bars.
         Only used for mesh reinforcement to calculate cross bar spacing and area.
+        If None is provided, the secondary bar area is a unit area.
     """
 
     # TODO: move as much of this into the ReoProperties class as possible,
@@ -244,7 +312,10 @@ def reo_prop(
         main_dia = int(is_bars_spacing[1][1:])
         bar_spacing = float(is_bars_spacing[4])
 
-        no_main = main_width / bar_spacing
+        # TODO: this logic can be moved into the ReoProperties object if a private
+        #  _no_main property is implemented to allow no-size specs, along with
+        #  a calculated no_main property.
+        no_main = main_width / bar_spacing if main_width is not None else None
 
         ret_val = ReoProperties(
             bar_spec=bar_spec,
@@ -266,11 +337,13 @@ def reo_prop(
 
         main_dia = mesh_data["bar_dia"]
         pitch = mesh_data["pitch"]
-        no_main = main_width / pitch
+        no_main = main_width / pitch if main_width is not None else None
 
         secondary_dia = mesh_data["cross_bar_dia"]
         cross_pitch = mesh_data["cross_pitch"]
-        no_secondary = secondary_width / cross_pitch
+        no_secondary = (
+            secondary_width / cross_pitch if secondary_width is not None else None
+        )
 
         barspec = BarSpec(mesh[2] if len(mesh[2]) == 1 else mesh[2][1:])
 
