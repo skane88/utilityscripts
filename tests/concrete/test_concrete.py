@@ -31,6 +31,7 @@ REL_TOL = 0.01
         ("3-C12", 339),
         ("R6", 28.3),
         ("R10", 78.5),
+        ("W6", 28.3),
     ],
 )
 def test_bar_area(bar_spec, area):

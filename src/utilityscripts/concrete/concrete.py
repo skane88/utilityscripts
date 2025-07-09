@@ -55,7 +55,7 @@ MESH_DATA = {
 # Regular expressions for bar and mesh specifications.
 BAR_RE = exactly(
     1,
-    group(chars(*("C", "L", "N", "R", "S", "Y")) + one_or_more(DIGIT)),
+    group(chars(*("C", "L", "N", "R", "S", "W", "Y")) + one_or_more(DIGIT)),
 )
 MESH_RE = exactly(
     1,
@@ -99,6 +99,7 @@ class BarSpec(StrEnum):
     N = "N"
     R = "R"
     S = "S"
+    W = "W"
     Y = "Y"
     RL = "RL"
     SL = "SL"
