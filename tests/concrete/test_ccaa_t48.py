@@ -1220,6 +1220,65 @@ def test_aic_batch_slab():
     )
 
 
+def test_lv_slab():
+    """
+    Test against design check for a light vehicle slab.
+    """
+
+    axle_load = Load(
+        load_type=LoadingType.WHEEL,
+        load_duration=LoadDuration.SHORT,
+        magnitude=25.0,
+        normalising_length=2.0,
+        no_cycles=36500,
+    )
+    soil = Soil(e_sl=20.0, e_ss=20.0, soil_name="in-situ")
+    # back-calculated e_sl from a CBR=5.0, and then used the e_ss to e_sl conversion
+    # given in T1.19
+    soil_profile = SoilProfile(h_layers=[2.0], soils=[soil])
+    slab = Slab(f_c=32.0, thickness=150.0)
+
+    check_slab = CCAA_T48(
+        slab=slab,
+        loads={"axle_load": axle_load},
+        soil_profile=soil_profile,
+        material_factor=MaterialFactor.MIDRANGE,
+    )
+
+    assert isclose(
+        check_slab.t_reqd(
+            load_id="axle_load",
+            load_location=LoadLocation.EDGE,
+        ),
+        150.0,
+        rel_tol=1.0e-2,
+    )
+
+    axle_load = Load(
+        load_type=LoadingType.WHEEL,
+        load_duration=LoadDuration.SHORT,
+        magnitude=50.0,
+        normalising_length=2.0,
+        no_cycles=36500,
+    )
+
+    check_slab = CCAA_T48(
+        slab=slab,
+        loads={"axle_load": axle_load},
+        soil_profile=soil_profile,
+        material_factor=MaterialFactor.MIDRANGE,
+    )
+
+    assert isclose(
+        check_slab.t_reqd(
+            load_id="axle_load",
+            load_location=LoadLocation.EDGE,
+        ),
+        160.0,
+        rel_tol=1.0e-2,
+    )
+
+
 def test_dowel_single_shear():
     slab = Slab(
         f_c=40.0, thickness=360.0, dowels=(Dowel(dowel_size=24.0, f_sy=300.0), 300.0)
