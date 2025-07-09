@@ -1845,7 +1845,7 @@ class Slab:
             The thickness of the slab. In mm.
         """
 
-        self._concrete = Concrete(f_c=f_c) if isinstance(f_c, float) else f_c
+        self._concrete = Concrete(f_c=f_c) if isinstance(f_c, float | int) else f_c
         self._thickness = thickness
         self._edge_thickening = edge_thickening
         self._dowels = dowels
@@ -1865,7 +1865,7 @@ class Slab:
     @property
     def f_c(self) -> float:
         """
-        The characteristic strength of hte concrete. in MPa.
+        The characteristic strength of the concrete. in MPa.
         """
 
         return self._concrete.f_c

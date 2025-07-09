@@ -647,6 +647,13 @@ def test_dowel():
 
 
 def test_slab():
+    f_c = 40
+    thickness = 200
+    slab = Slab(f_c=f_c, thickness=thickness)
+
+    assert slab.f_c == f_c
+    assert slab.t_interior == thickness
+
     f_c = 40.0
     thickness = 200.0
     slab = Slab(f_c=f_c, thickness=thickness)
