@@ -59,11 +59,30 @@ class Variable:
         symbol: str | None = None,
         units: str | None = None,
         fmt_string: str | None = None,
+        disable_latex: bool = False,
     ):
+        """
+        Initialise a Variable object.
+
+        Parameters
+        ----------
+        value : Any
+            The value the variable represents.
+        symbol : str | None, optional
+            The symbol used for the variable.
+        units : str | None, optional
+            The units used for the variable.
+        fmt_string : str | None, optional
+            A valid format string to use in the variable display.
+        disable_latex : bool, optional
+            Should the latex output options be disabled?
+        """
+
         self._value = value
         self._symbol = symbol
         self._units = units
         self._fmt_string = fmt_string
+        self._disable_latex = disable_latex
 
         if (
             self._fmt_string is not None
@@ -74,25 +93,57 @@ class Variable:
 
     @property
     def value(self) -> Any:
+        """
+        The value of the variable.
+        """
+
         return self._value
 
     @property
     def symbol(self) -> str | None:
+        """
+        The symbol, if any, used for the variable.
+        """
+
         return self._symbol
 
     @property
-    def units(self) -> str:
+    def units(self) -> str | None:
+        """
+        The units, if any, for the variable.
+        """
+
         return self._units
 
     @property
-    def fmt_string(self) -> str:
+    def fmt_string(self) -> str | None:
+        """
+        A format string for use when displaying the variable.
+        """
+
         return self._fmt_string
 
     @property
-    def latex_string(self) -> str:
-        # TODO: update this to use python's format strings to build a latex
-        #  string - in particular, need a function to use the .#e format string
-        #  to determine the scientific notation.
+    def disable_latex(self) -> bool:
+        """
+        Disable latex output for the variable.
+        """
+
+        return self._disable_latex
+
+    @property
+    def latex_string(self) -> str | None:
+        """
+        A string in Latex format representing the variable.
+
+        Returns
+        -------
+        Returns a latex formatted string if self.disable_latex is False.
+        Returns None if self.disable_latex is True.
+        """
+
+        if self.disable_latex:
+            return None
 
         if isinstance(self.value, list | dict | set):
             raise NotImplementedError("Latex strings not yet supported for lists.")
@@ -138,13 +189,19 @@ class Variable:
             if hasattr(self.value, method):
                 bundle[mimetype] = getattr(self.value, method)()
 
+        if self.disable_latex and "text/latex" in bundle:
+            bundle.pop("text/latex")
+
         if len(bundle) > 0:
             return bundle
 
-        return {
-            "text/plain": self.__str__(),
-            "text/latex": "$" + self.latex_string + "$",
-        }
+        # if bundle is empty, build it from scratch
+        bundle["text/plain"] = self.__str__()
+
+        if not self.disable_latex:
+            bundle["text/latex"] = "$" + self.latex_string + "$"
+
+        return bundle
 
     def __str__(self):
         symbol_str = f"{self.symbol}=" if self.symbol else ""

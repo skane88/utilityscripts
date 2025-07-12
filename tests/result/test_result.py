@@ -101,3 +101,14 @@ def test_result_error():
 )
 def test_latex_string(val, expected):
     assert val.latex_string == expected
+
+
+def test_latex_disabled():
+    val = Variable(1, units="m", fmt_string=".2f")
+    assert val.latex_string == "1.00 \\text{m}"
+    assert "text/latex" in val._repr_mimebundle_()
+
+    val = Variable(1, units="m", fmt_string=".2f", disable_latex=True)
+
+    assert val.latex_string is None
+    assert "text/latex" not in val._repr_mimebundle_()
