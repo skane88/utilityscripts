@@ -264,7 +264,7 @@ class Variable:
             if self.fmt_string is not None
             else f"{self.value}"
         )
-        unit_str = f" {self.units}" if self.units else ""
+        unit_str = f"{self.units}" if self.units else ""
 
         return symbol_str + value_str + unit_str
 
@@ -307,7 +307,7 @@ def _simple_latex_format(
         A latex string representing the value.
     """
 
-    unit_str = f" \\text{{{units}}}" if units else ""
+    unit_str = f"\\text{{{units}}}" if units else ""
     symbol_str = f"\\text{{{symbol}}} = " if symbol else ""
     value_str = f"{value:{fmt_string}}" if fmt_string is not None else f"{value}"
 
@@ -324,6 +324,9 @@ def _simple_latex_format(
 
     if isinstance(value, str):
         value_str = "\\text{" + value_str + "}"
+
+        if units is not None:
+            value_str += "\\ "  # add a space between units and text.
 
     value_str = value_str.replace("%", "\\%")
     return "$" + symbol_str + value_str + unit_str + "$"
