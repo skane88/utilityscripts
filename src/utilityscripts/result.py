@@ -167,6 +167,10 @@ class Variable:
         Returns a latex formatted string if self.disable_latex is False.
         Returns None if self.disable_latex is True.
         """
+        
+        # TODO: need to add list formatting - should be recursive to a limited depth
+        #  Need to use an object's _repr_mimebundle_ where
+        #  one exists.
 
         if self.disable_latex:
             return None
