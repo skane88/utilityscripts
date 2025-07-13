@@ -312,11 +312,18 @@ def _simple_latex_format(
     value_str = f"{value:{fmt_string}}" if fmt_string is not None else f"{value}"
 
     # next format scientific notation nicely.
-    if "e" in value_str.lower():
+    if (
+        fmt_string is not None
+        and ("e" in fmt_string.lower() or "g" in fmt_string.lower())
+        and "e" in value_str.lower()
+    ):
         mantissa, exponent = value_str.lower().split("e")
         exponent = int(exponent)
 
         value_str = f"{mantissa} \\times 10^{{{exponent}}}"
+
+    if isinstance(value, str):
+        value_str = "\\text{" + value_str + "}"
 
     value_str = value_str.replace("%", "\\%")
     return "$" + symbol_str + value_str + unit_str + "$"
