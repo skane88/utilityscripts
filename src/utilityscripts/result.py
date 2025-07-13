@@ -50,6 +50,8 @@ class Variable:
     -----
     - Intended to be for reporting purposes only. The units functionality is not and
     will not replace a units package like pint or unyt.
+    - Where items already define an iPython-like _repr_mimebundle_ this
+    is used to provide latex and other (eg html) representations.
     """
 
     def __init__(
@@ -60,6 +62,7 @@ class Variable:
         units: str | None = None,
         fmt_string: str | None = None,
         disable_latex: bool = False,
+        shorten_list: int | None = 6,
     ):
         """
         Initialise a Variable object.
@@ -76,6 +79,14 @@ class Variable:
             A valid format string to use in the variable display.
         disable_latex : bool, optional
             Should the latex output options be disabled?
+        shorten_list : int | None, optional
+            Should lists, sets and dicts be displayed in shortend form?
+            If a number, n, is provided lists are shortened to only
+            display n elements. The typical output would be:
+            [1, 2, 3, ..., x]
+            {1, 2, 3, ..., x}
+            {1: 1, 2: 2, 3: 3, ..., x=x}
+            If None is provided the full list, set or dict is displayed.
         """
 
         self._value = value
@@ -83,6 +94,7 @@ class Variable:
         self._units = units
         self._fmt_string = fmt_string
         self._disable_latex = disable_latex
+        self._shorten_list = shorten_list
 
         if (
             self._fmt_string is not None
@@ -130,6 +142,20 @@ class Variable:
         """
 
         return self._disable_latex
+        
+    @property
+    def shorten_list(self) -> int | None:
+        """
+        Should lists, sets and dicts be displayed in shortend form?
+        If a number, n, is provided lists are shortened to only
+        display n elements. The typical output would be:
+        [1, 2, 3, ..., x]
+        {1, 2, 3, ..., x}
+        {1: 1, 2: 2, 3: 3, ..., x=x}
+        If None is provided the full list, set or dict is displayed.
+        """
+        
+        return self._shorten_list    
 
     @property
     def latex_string(self) -> str | None:
