@@ -63,6 +63,7 @@ class Variable:
         fmt_string: str | None = None,
         disable_latex: bool = False,
         shorten_list: int | None = 6,
+        use_repr_latex: bool = True,
     ):
         """
         Initialise a Variable object.
@@ -87,6 +88,9 @@ class Variable:
             {1, 2, 3, ..., x}
             {1: 1, 2: 2, 3: 3, ..., x=x}
             If None is provided the full list, set or dict is displayed.
+        use_repr_latex : bool, optional
+            Use an existing _repr_latex_ or _repr_mimebundle_()['text/latex'] method
+            if one exists?
         """
 
         self._value = value
@@ -95,6 +99,7 @@ class Variable:
         self._fmt_string = fmt_string
         self._disable_latex = disable_latex
         self._shorten_list = shorten_list
+        self._use_repr_latex = use_repr_latex
 
         if (
             self._fmt_string is not None
@@ -142,7 +147,7 @@ class Variable:
         """
 
         return self._disable_latex
-        
+
     @property
     def shorten_list(self) -> int | None:
         """
@@ -154,26 +159,47 @@ class Variable:
         {1: 1, 2: 2, 3: 3, ..., x=x}
         If None is provided the full list, set or dict is displayed.
         """
-        
-        return self._shorten_list    
+
+        return self._shorten_list
+
+    @property
+    def use_repr_latex(self) -> bool:
+        """
+        Use an existing _repr_latex_ or _repr_mimebundle_()['text/latex'] method
+        if one exists?
+        """
+
+        return self._use_repr_latex
 
     @property
     def latex_string(self) -> str | None:
         """
         A string in Latex format representing the variable.
 
+        Notes
+        -----
+        - String will be wrapped in $$ - the caller may need to strip them off if the
+        string is to be combined with other latex strings.
+
         Returns
         -------
         Returns a latex formatted string if self.disable_latex is False.
         Returns None if self.disable_latex is True.
         """
-        
+
         # TODO: need to add list formatting - should be recursive to a limited depth
-        #  Need to use an object's _repr_mimebundle_ where
-        #  one exists.
 
         if self.disable_latex:
             return None
+
+        if hasattr(self.value, "_repr_latex_"):
+            return self.value._repr_latex_()
+
+        if (
+            hasattr(self.value, "_repr_mimebundle_")
+            and "text/latex" in self.value._repr_mimebundle_()
+        ):
+            return self.value._repr_mimebundle_()["text/latex"]
 
         if isinstance(self.value, list | dict | set):
             raise NotImplementedError("Latex strings not yet supported for lists.")
@@ -195,8 +221,6 @@ class Variable:
           If so, it returns the results of those methods in a mimebundle.
         - If the value does not define a _repr_*_ method, then it returns a custom
           mimebundle containing the text and latex representations of the result.
-        - the '$' signs are only added to the latex output in this method
-          so that the user can get a plain latex output from the other methods.
         """
 
         if hasattr(self.value, "_repr_mimebundle_"):
@@ -229,7 +253,7 @@ class Variable:
         bundle["text/plain"] = self.__str__()
 
         if not self.disable_latex:
-            bundle["text/latex"] = "$" + self.latex_string + "$"
+            bundle["text/latex"] = self.latex_string
 
         return bundle
 
@@ -295,7 +319,7 @@ def _simple_latex_format(
         value_str = f"{mantissa} \\times 10^{{{exponent}}}"
 
     value_str = value_str.replace("%", "\\%")
-    return symbol_str + value_str + unit_str
+    return "$" + symbol_str + value_str + unit_str + "$"
 
 
 class Result:

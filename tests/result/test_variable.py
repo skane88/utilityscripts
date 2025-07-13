@@ -63,37 +63,37 @@ def test_result_error():
 @pytest.mark.parametrize(
     "val, expected",
     [
-        (Variable(1), "1"),
-        (Variable(1, fmt_string=".3E"), "1.000 \\times 10^{0}"),
-        (Variable(1, units="m"), "1 \\text{m}"),
-        (Variable(1, symbol="a"), "\\text{a} = 1"),
+        (Variable(1), "$1$"),
+        (Variable(1, fmt_string=".3E"), "$1.000 \\times 10^{0}$"),
+        (Variable(1, units="m"), "$1 \\text{m}$"),
+        (Variable(1, symbol="a"), "$\\text{a} = 1$"),
         (
             Variable(1, symbol="a", units="m", fmt_string=".2f"),
-            "\\text{a} = 1.00 \\text{m}",
+            "$\\text{a} = 1.00 \\text{m}$",
         ),
         (
             Variable(2.12345, symbol="a", units="m", fmt_string=".5g"),
-            "\\text{a} = 2.1235 \\text{m}",
+            "$\\text{a} = 2.1235 \\text{m}$",
         ),
         (
             Variable(0.0012, symbol="a", units="m", fmt_string=".2g"),
-            "\\text{a} = 0.0012 \\text{m}",
+            "$\\text{a} = 0.0012 \\text{m}$",
         ),
         (
             Variable(0.000012, symbol="a", units="m", fmt_string=".2g"),
-            "\\text{a} = 1.2 \\times 10^{-5} \\text{m}",
+            "$\\text{a} = 1.2 \\times 10^{-5} \\text{m}$",
         ),
         (
             Variable(214, symbol="a", units="m", fmt_string=".4g"),
-            "\\text{a} = 214 \\text{m}",
+            "$\\text{a} = 214 \\text{m}$",
         ),
         (
             Variable(2145, symbol="a", units="m", fmt_string=".3g"),
-            "\\text{a} = 2.14 \\times 10^{3} \\text{m}",
+            "$\\text{a} = 2.14 \\times 10^{3} \\text{m}$",
         ),
-        (Variable(0.123, symbol="a", fmt_string=".3%"), "\\text{a} = 12.300\\%"),
-        (Variable(0.00123, symbol="a", fmt_string=".3%"), "\\text{a} = 0.123\\%"),
-        (Variable("abc", symbol="a"), "\\text{a} = abc"),
+        (Variable(0.123, symbol="a", fmt_string=".3%"), "$\\text{a} = 12.300\\%$"),
+        (Variable(0.00123, symbol="a", fmt_string=".3%"), "$\\text{a} = 0.123\\%$"),
+        (Variable("abc", symbol="a"), "$\\text{a} = abc$"),
         (Variable([1, 2, 3]), ""),
         (Variable({"a": 1, "b": 2, "c": 3}), ""),
         (Variable({1, 2, 3}), ""),
@@ -105,7 +105,7 @@ def test_latex_string(val, expected):
 
 def test_latex_disabled():
     val = Variable(1, units="m", fmt_string=".2f")
-    assert val.latex_string == "1.00 \\text{m}"
+    assert val.latex_string == "$1.00 \\text{m}$"
     assert "text/latex" in val._repr_mimebundle_()
 
     val = Variable(1, units="m", fmt_string=".2f", disable_latex=True)
