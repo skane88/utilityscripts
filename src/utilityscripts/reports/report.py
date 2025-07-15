@@ -6,6 +6,8 @@ from typing import Any
 
 from jinja2 import Environment
 
+from utilityscripts.reports._greek_chars import GREEK_CHAR_MAP
+
 
 class ResultError(Exception):
     pass
@@ -75,6 +77,7 @@ class Variable:
             The value the variable represents.
         symbol : str | None, optional
             The symbol used for the variable.
+            If the symbol contains a backslash, it is assumed to be in latex format.
         units : str | None, optional
             The units used for the variable.
         fmt_string : str | None, optional
@@ -93,7 +96,8 @@ class Variable:
             Use an existing _repr_latex_ or _repr_mimebundle_()['text/latex'] method
             if one exists?
         greek_symbols : bool, optional
-            Convert greek character names into their latex equivalents. Eg 'alpha' to '\\alpha'
+            Convert greek character names into their latex equivalents.
+            Eg 'alpha' to '\\alpha'
         """
 
         self._value = value
@@ -103,7 +107,7 @@ class Variable:
         self._disable_latex = disable_latex
         self._shorten_list = shorten_list
         self._use_repr_latex = use_repr_latex
-        self._greek_stmbols = greek_symbols
+        self._greek_symbols = greek_symbols
 
         if (
             self._fmt_string is not None
@@ -124,6 +128,10 @@ class Variable:
     def symbol(self) -> str | None:
         """
         The symbol, if any, used for the variable.
+
+        Notes
+        -----
+        - If the symbol contains a backslash, it is assumed to be in latex format.
         """
 
         return self._symbol
@@ -174,16 +182,78 @@ class Variable:
         """
 
         return self._use_repr_latex
-    
+
     @property
     def greek_symbols(self) -> bool:
         """
-        Convert greek character names into their latex equivalents. Eg 'alpha' to '\\alpha'
+        Convert greek character names into their latex equivalents.
+        Eg 'alpha' to '\\alpha'
         """
-        
-        # TODO: use this property!
-        
+
         return self._greek_symbols
+
+    @property
+    def _latex_value(self) -> str:
+        """
+        Returns the value formatted into latex format.
+        """
+
+        if self.value is None:
+            return "\\text{None}"
+
+        value_str = (
+            f"{self.value:{self.fmt_string}}"
+            if self.fmt_string is not None
+            else f"{self.value}"
+        )
+
+        # next format scientific notation nicely.
+        if (
+            self.fmt_string is not None
+            and ("e" in self.fmt_string.lower() or "g" in self.fmt_string.lower())
+            and "e" in value_str.lower()
+        ):
+            mantissa, exponent = value_str.lower().split("e")
+            exponent = int(exponent)
+
+            value_str = f"{mantissa} \\times 10^{{{exponent}}}"
+
+        if isinstance(self.value, str):
+            # TODO: Need to handle the case that the user has an escape character (\ etc.)
+            #  In their string.
+            #  Probably raise a warning?
+
+            value_str = "\\text{" + value_str + "}"
+
+            if self.units is not None:
+                value_str += "\\ "  # add a space between units and text.
+
+        return value_str.replace("%", "\\%")
+
+    @property
+    def _latex_symbol(self) -> str:
+        """
+        The symbol for the variable, in latex format.
+        """
+
+        if self.symbol is None:
+            return ""
+
+        if self.greek_symbols and self.symbol in GREEK_CHAR_MAP:
+            return GREEK_CHAR_MAP[self.symbol][1]
+
+        if "\\" in self.symbol:
+            return self.symbol
+
+        return f"\\text{{{self.symbol}}}"
+
+    @property
+    def _latex_units(self) -> str:
+        """
+        The units for the variable, in latex format.
+        """
+
+        return f"\\text{{{self.units}}}" if self.units else ""
 
     @property
     def latex_string(self) -> str | None:
@@ -218,9 +288,9 @@ class Variable:
         if isinstance(self.value, list | dict | set):
             raise NotImplementedError("Latex strings not yet supported for lists.")
 
-        return _simple_latex_format(
-            self.value, symbol=self.symbol, units=self.units, fmt_string=self.fmt_string
-        )
+        symbol = self._latex_symbol + " = " if self._latex_symbol != "" else ""
+
+        return "$" + symbol + self._latex_value + self._latex_units + "$"
 
     def _repr_mimebundle_(self, include=None, exclude=None):
         """
@@ -289,68 +359,6 @@ class Variable:
             + f", units={self.units!r}"
             + f", fmt_string={self.fmt_string!r})"
         )
-
-
-def _simple_latex_format(
-    value: Any,
-    *,
-    symbol: str | None = None,
-    units: str | None = None,
-    fmt_string: str | None = None,
-) -> str:
-    """
-    Format a simple value (integer, float, str or similar) into a latex string.
-
-    Parameters
-    ----------
-    value
-        The value to format.
-        Must be something that can be converted into a string using an f-string.
-        Must also make sense to format into a simple latex string (e.g. 'a=123').
-    symbol : str | None, optional
-        A symbol to use in the variable display
-    units : str | None, optional
-        Units to use in the variable display
-    fmt_string : str | None, optional
-        A valid format string to use in the variable display.
-        Must be compatible with the type of value.
-
-    Returns
-    -------
-    str
-        A latex string representing the value.
-    """
-
-    unit_str = f"\\text{{{units}}}" if units else ""
-    symbol_str = f"\\text{{{symbol}}} = " if symbol else ""
-
-    # TODO: handle the case that the symbol string is a greek character
-
-    value_str = f"{value:{fmt_string}}" if fmt_string is not None else f"{value}"
-
-    # next format scientific notation nicely.
-    if (
-        fmt_string is not None
-        and ("e" in fmt_string.lower() or "g" in fmt_string.lower())
-        and "e" in value_str.lower()
-    ):
-        mantissa, exponent = value_str.lower().split("e")
-        exponent = int(exponent)
-
-        value_str = f"{mantissa} \\times 10^{{{exponent}}}"
-
-    if isinstance(value, str):
-        # TODO: Need to handle the case that the user has an escape character (\ etc.)
-        #  In their string.
-        #  Probably raise a warning?
-
-        value_str = "\\text{" + value_str + "}"
-
-        if units is not None:
-            value_str += "\\ "  # add a space between units and text.
-
-    value_str = value_str.replace("%", "\\%")
-    return "$" + symbol_str + value_str + unit_str + "$"
 
 
 class Result:
