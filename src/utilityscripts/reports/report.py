@@ -64,6 +64,7 @@ class Variable:
         disable_latex: bool = False,
         shorten_list: int | None = 6,
         use_repr_latex: bool = True,
+        greek_symbols: bool = True,
     ):
         """
         Initialise a Variable object.
@@ -91,6 +92,8 @@ class Variable:
         use_repr_latex : bool, optional
             Use an existing _repr_latex_ or _repr_mimebundle_()['text/latex'] method
             if one exists?
+        greek_symbols : bool, optional
+            Convert greek character names into their latex equivalents. Eg 'alpha' to '\\alpha'
         """
 
         self._value = value
@@ -100,6 +103,7 @@ class Variable:
         self._disable_latex = disable_latex
         self._shorten_list = shorten_list
         self._use_repr_latex = use_repr_latex
+        self._greek_stmbols = greek_symbols
 
         if (
             self._fmt_string is not None
@@ -170,6 +174,14 @@ class Variable:
         """
 
         return self._use_repr_latex
+    
+    @property
+    def greek_symbols(self) -> bool:
+        """
+        Convert greek character names into their latex equivalents. Eg 'alpha' to '\\alpha'
+        """
+        
+        return self._greek_symbols
 
     @property
     def latex_string(self) -> str | None:
