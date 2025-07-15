@@ -181,6 +181,8 @@ class Variable:
         Convert greek character names into their latex equivalents. Eg 'alpha' to '\\alpha'
         """
         
+        # TODO: use this property!
+        
         return self._greek_symbols
 
     @property
