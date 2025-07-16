@@ -200,7 +200,8 @@ class Variable:
         Notes
         -----
         - if value is None, 'None' is returned.
-        - If balue is a str and '\' detected it is assumed the value contains latex formatting and it is returned unchanged.
+        - If balue is a str and '\' detected it is assumed to be a
+          latex formatted string and returned unchanged.
         """
 
         if self.value is None:
@@ -259,7 +260,18 @@ class Variable:
     def _latex_units(self) -> str:
         """
         The units for the variable, in latex format.
+        
+        Notes
+        -----
+        - If '\' is detected in units it is assumed to be a
+            latex formatted string and returned unchanged.
         """
+        
+        if self.units is None:
+            return ''
+            
+        if '\\' in self.units:
+            return self.units 
 
         return f"\\text{{{self.units}}}" if self.units else ""
 
