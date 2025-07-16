@@ -196,10 +196,18 @@ class Variable:
     def _latex_value(self) -> str:
         """
         Returns the value formatted into latex format.
+        
+        Notes
+        -----
+        - if value is None, 'None' is returned.
+        - If balue is a str and '\' detected it is assumed the value contains latex formatting and it is returned unchanged.
         """
 
         if self.value is None:
             return "\\text{None}"
+            
+        if isinstance(self.value, str) and '\\' in self.value:
+            return self.value
 
         value_str = (
             f"{self.value:{self.fmt_string}}"
