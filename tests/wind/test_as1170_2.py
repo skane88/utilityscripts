@@ -684,3 +684,6 @@ def test_windsite_v_r(region, r, v_r_expected):
     v_r_calc = round(v_r_calc)  # round because the data from AS1170 is rounded
 
     assert v_r_calc == v_r_expected
+    assert windsite.m_d_des(
+        direction="ANY", version=StandardVersion.AS1170_2_2021
+    ).struct
