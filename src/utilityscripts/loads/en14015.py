@@ -12,7 +12,7 @@ import numpy as np
 import polars as pl
 from scipy.interpolate import interp1d  # type: ignore
 
-from utilityscripts.result import Result
+from utilityscripts.reports.report import Result
 
 
 class SoilType(StrEnum):
