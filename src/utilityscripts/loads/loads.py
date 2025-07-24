@@ -39,7 +39,7 @@ def pipe_load(*, pipe_density, content_density, outer_diameter, inner_diameter):
     }
 
 
-def roof_load_as1170_1(
+def as1170_1_roof_load(
     roof_type: RoofType | str, area: float | None
 ) -> tuple[float, float]:
     """
