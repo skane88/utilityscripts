@@ -205,7 +205,7 @@ class Variable:
         """
 
         if isinstance(self.value, Iterable) and not isinstance(self.value, str):
-            return _latex_string_iterables(self.value, max_elements=self.shorten_list)
+            return _format_iterable(self.value, max_elements=self.shorten_list)
 
         return _latex_string_single(self.value, fmt_string=self.fmt_string)
 
@@ -402,15 +402,14 @@ def _latex_string_single(value: Any, fmt_string: str | None = None) -> str:
     return value_str.replace("%", "\\%")
 
 
-def _latex_string_iterables(value: Iterable, *, max_elements: int | None = 6) -> str:
+def _format_iterable(value: Iterable, *, max_elements: int | None = 6) -> str:
     """
-    Generate a latex formatted string to represent an iterable.
+    Generate a formatted string to represent an iterable.
 
     Parameters
     ----------
     value : Iterable
-        The iterable object to convert to a latex string.
-        Supported types are lists, sets and dictionaries.
+        The iterable object to convert to a string.
     max_elements : int, optional
         Maximum number of elements to show in the output string.
         If the iterable has more elements than this, the string will be
@@ -420,11 +419,13 @@ def _latex_string_iterables(value: Iterable, *, max_elements: int | None = 6) ->
     Returns
     -------
     str
-        A latex formatted string representing the iterable.
+        A formatted string representing the iterable.
         For lists: [1, 2, 3, ..., n]
         For sets: {1, 2, 3, ..., n}
         For dicts: {1: a, 2: b, 3: c, ..., n: x}
     """
+
+    # TODO: Update to be used for both string & latex.
 
     if isinstance(value, list):
         left_bracket = "\\left["
