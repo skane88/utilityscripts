@@ -280,9 +280,6 @@ class Variable:
         ):
             return self.value._repr_mimebundle_()["text/latex"]
 
-        if isinstance(self.value, list | dict | set):
-            raise NotImplementedError("Latex strings not yet supported for lists.")
-
         symbol = self._latex_symbol + " = " if self._latex_symbol != "" else ""
 
         return "$" + symbol + self._latex_value + self._latex_units + "$"
@@ -405,7 +402,7 @@ def _latex_string_single(value: Any, fmt_string: str | None = None) -> str:
     return value_str.replace("%", "\\%")
 
 
-def _latex_string_iterables(value: Iterable, *, max_elements: int = 6) -> str:
+def _latex_string_iterables(value: Iterable, *, max_elements: int | None = 6) -> str:
     """
     Generate a latex formatted string to represent an iterable.
 
@@ -429,7 +426,80 @@ def _latex_string_iterables(value: Iterable, *, max_elements: int = 6) -> str:
         For dicts: {1: a, 2: b, 3: c, ..., n: x}
     """
 
-    pass
+    if isinstance(value, list):
+        left_bracket = "\\left["
+        right_bracket = "\\right]"
+    else:
+        left_bracket = "\\left{"
+        right_bracket = "\\right}"
+
+    if max_elements is None:
+        max_elements = len(value)
+
+    if len(value) == 0:
+        return left_bracket + right_bracket
+
+    values_str = ""
+
+    if isinstance(value, dict):
+        values_str = _latex_format_dict(value, max_elements=max_elements)
+    else:
+        for i, v in enumerate(value):
+            val_str = f"{v}"
+
+            if i == 0:
+                values_str = val_str
+            elif i < max_elements - 1:
+                values_str += ", " + val_str
+            elif i == len(value) - 1 and len(value) > max_elements:
+                values_str += ", ..., " + val_str
+            else:
+                continue
+
+    return left_bracket + values_str + right_bracket
+
+
+def _latex_format_dict(value: dict[Any, Any], *, max_elements: int | None) -> str:
+    """
+    Generate a latex formatted string to represent a dictionary.
+
+    Parameters
+    ----------
+    value : dict[Any, Any]
+        The dictionary to convert to a latex string.
+    max_elements : int | None
+        Maximum number of elements to show in the output string.
+        If the dictionary has more elements than this, the string will be
+        truncated with '...' and show the last element.
+
+    Returns
+    -------
+    str
+        A latex formatted string representing the dictionary in the format:
+        {key1: value1, key2: value2, ..., keyN: valueN}
+    """
+
+    if max_elements is None:
+        max_elements = len(value)
+
+    values_str = ""
+
+    for i, kv in enumerate(value.items()):
+        key, val = kv
+
+        key_str = f"\\text{{{key}}}" if isinstance(key, str) else f"{key}"
+        val_str = key_str + f": {val}"
+
+        if i == 0:
+            values_str = val_str
+        elif i < max_elements - 1:
+            values_str += ", " + val_str
+        elif i == len(value) - 1 and len(value) > max_elements:
+            values_str += ", ..., " + val_str
+        else:
+            continue
+
+    return values_str
 
 
 class Result:
