@@ -2,7 +2,7 @@
 A file to store results along with some reporting information.
 """
 
-from typing import Any
+from typing import Any, Iterable
 
 from jinja2 import Environment
 
@@ -196,7 +196,7 @@ class Variable:
     def _latex_value(self) -> str:
         """
         Returns the value formatted into latex format.
-        
+
         Notes
         -----
         - if value is None, 'None' is returned.
@@ -204,40 +204,10 @@ class Variable:
           latex formatted string and returned unchanged.
         """
 
-        if self.value is None:
-            return "\\text{None}"
-            
-        if isinstance(self.value, str) and '\\' in self.value:
-            return self.value
+        if isinstance(self.value, Iterable) and not isinstance(self.value, str):
+            return _latex_string_iterables(self.value, max_elements=self.shorten_list)
 
-        value_str = (
-            f"{self.value:{self.fmt_string}}"
-            if self.fmt_string is not None
-            else f"{self.value}"
-        )
-
-        # next format scientific notation nicely.
-        if (
-            self.fmt_string is not None
-            and ("e" in self.fmt_string.lower() or "g" in self.fmt_string.lower())
-            and "e" in value_str.lower()
-        ):
-            mantissa, exponent = value_str.lower().split("e")
-            exponent = int(exponent)
-
-            value_str = f"{mantissa} \\times 10^{{{exponent}}}"
-
-        if isinstance(self.value, str):
-            # TODO: Need to handle the case that the user has an escape character (\ etc.)
-            #  In their string.
-            #  Probably raise a warning?
-
-            value_str = "\\text{" + value_str + "}"
-
-            if self.units is not None:
-                value_str += "\\ "  # add a space between units and text.
-
-        return value_str.replace("%", "\\%")
+        return _latex_string_single(self.value, fmt_string=self.fmt_string)
 
     @property
     def _latex_symbol(self) -> str:
@@ -260,20 +230,25 @@ class Variable:
     def _latex_units(self) -> str:
         """
         The units for the variable, in latex format.
-        
+
         Notes
         -----
         - If '\' is detected in units it is assumed to be a
             latex formatted string and returned unchanged.
         """
-        
-        if self.units is None:
-            return ''
-            
-        if '\\' in self.units:
-            return self.units 
 
-        return f"\\text{{{self.units}}}" if self.units else ""
+        if self.units is None:
+            return ""
+
+        if "\\" in self.units:
+            return self.units
+
+        unit_str = ""
+
+        if isinstance(self.value, str):
+            unit_str += "\\ "
+
+        return unit_str + f"\\text{{{self.units}}}"
 
     @property
     def latex_string(self) -> str | None:
@@ -379,6 +354,82 @@ class Variable:
             + f", units={self.units!r}"
             + f", fmt_string={self.fmt_string!r})"
         )
+
+
+def _latex_string_single(value: Any, fmt_string: str | None = None) -> str:
+    """
+    Returns the value formatted into latex format.
+
+    Notes
+    -----
+    - if value is None, 'None' is returned.
+    - If balue is a str and '\' detected it is assumed to be a
+      latex formatted string and returned unchanged.
+
+    Parameters
+    ----------
+    value : Any
+        The value to format into latex format.
+    fmt_string : str | None, optional
+        A format string to use for formatting the value.
+        If None, str() is used on the value.
+
+    Returns
+    -------
+    str
+        The value formatted as a latex string.
+    """
+
+    if value is None:
+        return "\\text{None}"
+
+    if isinstance(value, str) and "\\" in value:
+        return value
+
+    value_str = f"{value:{fmt_string}}" if fmt_string is not None else f"{value}"
+
+    # next format scientific notation nicely.
+    if (
+        fmt_string is not None
+        and ("e" in fmt_string.lower() or "g" in fmt_string.lower())
+        and "e" in value_str.lower()
+    ):
+        mantissa, exponent = value_str.lower().split("e")
+        exponent = int(exponent)
+
+        value_str = f"{mantissa} \\times 10^{{{exponent}}}"
+
+    if isinstance(value, str):
+        value_str = "\\text{" + value_str + "}"
+
+    return value_str.replace("%", "\\%")
+
+
+def _latex_string_iterables(value: Iterable, *, max_elements: int = 6) -> str:
+    """
+    Generate a latex formatted string to represent an iterable.
+
+    Parameters
+    ----------
+    value : Iterable
+        The iterable object to convert to a latex string.
+        Supported types are lists, sets and dictionaries.
+    max_elements : int, optional
+        Maximum number of elements to show in the output string.
+        If the iterable has more elements than this, the string will be
+        truncated with '...' and show the last element.
+        Default is 6.
+
+    Returns
+    -------
+    str
+        A latex formatted string representing the iterable.
+        For lists: [1, 2, 3, ..., n]
+        For sets: {1, 2, 3, ..., n}
+        For dicts: {1: a, 2: b, 3: c, ..., n: x}
+    """
+
+    pass
 
 
 class Result:
