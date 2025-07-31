@@ -1075,7 +1075,7 @@ def s5_4_c_pe_us(*, h: float, h_us: float) -> C_pe:
     c_pe_min = np.interp(h_us / h, x, y_min)
     c_pe_max = np.interp(h_us / h, x, y_max)
 
-    return C_pe(c_pe_min=c_pe_min, c_pe_max=c_pe_max)
+    return C_pe(c_pe_min=float(c_pe_min), c_pe_max=float(c_pe_max))
 
 
 def t5_2b_c_pe_l(
@@ -1084,7 +1084,7 @@ def t5_2b_c_pe_l(
     d_b_ratio: float | tuple[float, float],
     roof_type: RoofType,
     version: StandardVersion = StandardVersion.AS1170_2_2021,
-) -> float:
+) -> C_pe:
     """
     Calculate the external pressure coefficient for a leeward wall of a building.
 
@@ -1102,8 +1102,8 @@ def t5_2b_c_pe_l(
 
     Returns
     -------
-    float
-        The external pressure coefficient.
+    C_pe
+        The external pressure coefficients.
     """
 
     init_standard_data()
@@ -1123,12 +1123,14 @@ def t5_2b_c_pe_l(
     if isinstance(d_b_ratio, tuple):
         d_b_ratio = d_b_ratio[0] / d_b_ratio[1]
 
-    return float(interp((roof_pitch, d_b_ratio)))
+    c_pe = float(interp((roof_pitch, d_b_ratio)))
+
+    return C_pe(c_pe_min=c_pe, c_pe_max=c_pe)
 
 
 def t5_2c_c_pe_s(
     *, h_ref, d_edge, version: StandardVersion = StandardVersion.AS1170_2_2021
-) -> tuple[float, float]:
+) -> C_pe:
     """
     Calculate the external pressure coefficient for a side-wall of a building
 
@@ -1158,16 +1160,16 @@ def t5_2c_c_pe_s(
 
     c_pe = np.interp(distance_ratio, distances, c_pe_vals)
 
-    return c_pe, c_pe
+    return C_pe(c_pe_min=c_pe, c_pe_max=c_pe)
 
 
-def t5_3ab_c_pe(
+def t5_3ab_c_pe_r(
     *,
     h_ref: float,
     d_ref: float,
     alpha: float,
     d_edge: float,
-):
+) -> C_pe:
     """
     Calculate the external pressure coefficient for a roof as per Table 5.3a and 5.3b of AS1170.2.
 

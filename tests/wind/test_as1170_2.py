@@ -23,7 +23,7 @@ from utilityscripts.wind.as1170_2 import (
     s5_4_c_pe_us,
     t5_1_b_c_pi_open,
     t5_2b_c_pe_l,
-    t5_3ab_c_pe,
+    t5_3ab_c_pe_r,
     t5_4_k_a,
     valid_region,
 )
@@ -476,15 +476,15 @@ def test_c_pe_us(h_us, h, min_expected, max_expected):
 def test_c_pe_l(roof_pitch, d, b, roof_type, version, expected):
     d_b_ratio = (d, b)
 
-    assert isclose(
-        t5_2b_c_pe_l(
-            roof_pitch=roof_pitch,
-            d_b_ratio=d_b_ratio,
-            roof_type=roof_type,
-            version=version,
-        ),
-        expected,
+    c_pe = t5_2b_c_pe_l(
+        roof_pitch=roof_pitch,
+        d_b_ratio=d_b_ratio,
+        roof_type=roof_type,
+        version=version,
     )
+
+    assert isclose(c_pe.c_pe_max, expected)
+    assert isclose(c_pe.c_pe_min, expected)
 
 
 @pytest.mark.parametrize(
@@ -528,7 +528,7 @@ def test_c_pe_l(roof_pitch, d, b, roof_type, version, expected):
     ],
 )
 def test_c_pe_r(h_ref, d_ref, alpha, d_edge, expected):
-    calculated = t5_3ab_c_pe(h_ref=h_ref, d_ref=d_ref, alpha=alpha, d_edge=d_edge)
+    calculated = t5_3ab_c_pe_r(h_ref=h_ref, d_ref=d_ref, alpha=alpha, d_edge=d_edge)
 
     assert isclose(calculated.c_pe_min, expected.c_pe_min, rel_tol=1e-3)
     assert isclose(calculated.c_pe_max, expected.c_pe_max, rel_tol=1e-3)
