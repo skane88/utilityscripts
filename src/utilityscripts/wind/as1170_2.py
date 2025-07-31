@@ -191,6 +191,7 @@ def init_standard_data(*, file_path: Path | None = None, overwrite: bool = False
             "cpi_t5b",
             "cpe_t5_2b",
             "cpe_t5_2c",
+            "cpe_t5_3",
             "k_a",
             "app_c_k_ar",
             "app_c_fig_c2",
@@ -1158,6 +1159,76 @@ def t5_2c_c_pe_s(
     c_pe = np.interp(distance_ratio, distances, c_pe_vals)
 
     return c_pe, c_pe
+
+
+def t5_3ab_c_pe(
+    *,
+    h_ref: float,
+    d_ref: float,
+    alpha: float,
+    d_edge: float,
+):
+    """
+    Calculate the external pressure coefficient for a roof as per Table 5.3a and 5.3b of AS1170.2.
+
+    Notes
+    -----
+    - This is for flat roofs or the upwind slope only.
+
+    Parameters
+    ----------
+    h_ref : float
+        The reference height of the roof.
+    d_ref : float
+        The reference depth into the wind of the roof.
+    alpha : float
+        The slope of the roof. In degrees.
+    d_edge : float
+        The distance of the point under consideration from the windward end of the building.
+
+    Returns
+    -------
+    C_pe
+    The external pressure coefficients.
+    """
+
+    init_standard_data()
+
+    c_pe_data = STANDARD_DATA["cpe_t5_3"]
+
+    loc_ratio = d_edge / h_ref
+    h_d_ratio = h_ref / d_ref
+
+    # get unique values for each of the first data values.
+    alpha_vals = c_pe_data["alpha"].unique().to_numpy()
+    distance_vals = c_pe_data["distance_h"].unique().to_numpy()
+    h_d_vals = c_pe_data["h_d_ratio"].unique().to_numpy()
+
+    # map values to indices in the result in numpy array
+    alpha_map = {v: i for i, v in enumerate(alpha_vals)}
+    distance_map = {v: i for i, v in enumerate(distance_vals)}
+    h_d_map = {v: i for i, v in enumerate(h_d_vals)}
+
+    # the shape of the array:
+    shape = (len(alpha_vals), len(distance_vals), len(h_d_vals), 2)
+
+    # create an empty numpy array:
+    array = np.full(shape, np.nan)
+
+    # populate the array:
+    for row in c_pe_data.iter_rows():
+        i = alpha_map[row[0]]
+        j = distance_map[row[1]]
+        k = h_d_map[row[2]]
+
+        array[i, j, k, 0] = row[3]
+        array[i, j, k, 1] = row[4]
+
+    interp = RegularGridInterpolator((alpha_vals, distance_vals, h_d_vals), array)
+
+    c_pe_vals = interp((alpha, loc_ratio, h_d_ratio))
+
+    return C_pe(c_pe_min=c_pe_vals[0], c_pe_max=c_pe_vals[1])
 
 
 def t5_4_k_a(

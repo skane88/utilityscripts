@@ -9,6 +9,7 @@ import pytest
 import toml
 
 from utilityscripts.wind.as1170_2 import (
+    C_pe,
     FaceType,
     RoofType,
     StandardVersion,
@@ -22,6 +23,7 @@ from utilityscripts.wind.as1170_2 import (
     s5_4_c_pe_us,
     t5_1_b_c_pi_open,
     t5_2b_c_pe_l,
+    t5_3ab_c_pe,
     t5_4_k_a,
     valid_region,
 )
@@ -483,6 +485,53 @@ def test_c_pe_l(roof_pitch, d, b, roof_type, version, expected):
         ),
         expected,
     )
+
+
+@pytest.mark.parametrize(
+    "h_ref, d_ref, alpha, d_edge, expected",
+    [
+        (10.0, 20.0, 0.0, 0.0, C_pe(c_pe_min=-0.9, c_pe_max=-0.4)),
+        (10.0, 20.0, 0.0, 5.0, C_pe(c_pe_min=-0.9, c_pe_max=-0.4)),
+        (10.0, 20.0, 0.0, 5.1, C_pe(c_pe_min=-0.9, c_pe_max=-0.4)),
+        (10.0, 20.0, 0.0, 10.1, C_pe(c_pe_min=-0.5, c_pe_max=0.0)),
+        (10.0, 20.0, 0.0, 20.1, C_pe(c_pe_min=-0.3, c_pe_max=0.1)),
+        (10.0, 20.0, 0.0, 30.1, C_pe(c_pe_min=-0.2, c_pe_max=0.2)),
+        (10.0, 20.0, 0.0, 100.1, C_pe(c_pe_min=-0.2, c_pe_max=0.2)),
+        (10.0, 10.0, 0.0, 0.0, C_pe(c_pe_min=-1.3, c_pe_max=-0.6)),
+        (10.0, 10.0, 0.0, 5.0, C_pe(c_pe_min=-1.3, c_pe_max=-0.6)),
+        (10.0, 10.0, 0.0, 5.1, C_pe(c_pe_min=-0.7, c_pe_max=-0.3)),
+        (10.0, 10.0, 0.0, 10.1, C_pe(c_pe_min=-0.7, c_pe_max=-0.3)),
+        (10.0, 10.0, 0.0, 20.1, C_pe(c_pe_min=-0.7, c_pe_max=-0.3)),
+        (10.0, 10.0, 0.0, 30.1, C_pe(c_pe_min=-0.7, c_pe_max=-0.3)),
+        (10.0, 10.0, 0.0, 100.1, C_pe(c_pe_min=-0.7, c_pe_max=-0.3)),
+        (5.0, 20.0, 10.0, 10.0, C_pe(c_pe_min=-0.7, c_pe_max=-0.3)),
+        (10.0, 20.0, 10.0, 10.0, C_pe(c_pe_min=-0.9, c_pe_max=-0.4)),
+        (20.0, 20.0, 10.0, 10.0, C_pe(c_pe_min=-1.3, c_pe_max=-0.6)),
+        (5.0, 20.0, 15.0, 10.0, C_pe(c_pe_min=-0.50, c_pe_max=0.0)),
+        (10.0, 20.0, 15.0, 10.0, C_pe(c_pe_min=-0.7, c_pe_max=-0.3)),
+        (20.0, 20.0, 15.0, 10.0, C_pe(c_pe_min=-1.0, c_pe_max=-0.5)),
+        (5.0, 20.0, 20.0, 10.0, C_pe(c_pe_min=-0.3, c_pe_max=0.2)),
+        (10.0, 20.0, 20.0, 10.0, C_pe(c_pe_min=-0.4, c_pe_max=0.0)),
+        (20.0, 20.0, 20.0, 10.0, C_pe(c_pe_min=-0.7, c_pe_max=-0.3)),
+        (5.0, 20.0, 25.0, 10.0, C_pe(c_pe_min=-0.2, c_pe_max=0.3)),
+        (10.0, 20.0, 25.0, 10.0, C_pe(c_pe_min=-0.3, c_pe_max=0.2)),
+        (20.0, 20.0, 25.0, 10.0, C_pe(c_pe_min=-0.5, c_pe_max=0.0)),
+        (5.0, 20.0, 30.0, 10.0, C_pe(c_pe_min=-0.2, c_pe_max=0.4)),
+        (10.0, 20.0, 30.0, 10.0, C_pe(c_pe_min=-0.2, c_pe_max=0.3)),
+        (20.0, 20.0, 30.0, 10.0, C_pe(c_pe_min=-0.3, c_pe_max=0.2)),
+        (5.0, 20.0, 35.0, 10.0, C_pe(c_pe_min=0.0, c_pe_max=0.5)),
+        (10.0, 20.0, 35.0, 10.0, C_pe(c_pe_min=-0.2, c_pe_max=0.4)),
+        (20.0, 20.0, 35.0, 10.0, C_pe(c_pe_min=-0.2, c_pe_max=0.3)),
+        (5.0, 20.0, 45.0, 10.0, C_pe(c_pe_min=0.0, c_pe_max=0.56568542)),
+        (10.0, 20.0, 45.0, 10.0, C_pe(c_pe_min=0.0, c_pe_max=0.56568542)),
+        (20.0, 20.0, 45.0, 10.0, C_pe(c_pe_min=0.0, c_pe_max=0.56568542)),
+    ],
+)
+def test_c_pe_r(h_ref, d_ref, alpha, d_edge, expected):
+    calculated = t5_3ab_c_pe(h_ref=h_ref, d_ref=d_ref, alpha=alpha, d_edge=d_edge)
+
+    assert isclose(calculated.c_pe_min, expected.c_pe_min, rel_tol=1e-3)
+    assert isclose(calculated.c_pe_max, expected.c_pe_max, rel_tol=1e-3)
 
 
 def k_v_calc(area, volume):
