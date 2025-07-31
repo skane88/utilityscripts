@@ -1148,7 +1148,7 @@ def t5_2c_c_pe_s(
 
     init_standard_data()
 
-    c_pe_data = STANDARD_DATA["cpe_t5_2c"].filter(pl.col("version") == int(version))
+    c_pe_data = STANDARD_DATA["cpe_t5_2c"].filter(pl.col("version") == version)
 
     distance_ratio = d_edge / h_ref
 
