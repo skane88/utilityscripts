@@ -57,6 +57,7 @@ dev = [
  "types-tqdm",
  "jupyterlab",
  "marimo",
+ "pre-commit",
 ]
 
 [tool.uv]
