@@ -2,7 +2,7 @@
 Contains some tests for the AS1170.2 module.
 """
 
-from math import isclose, log10
+from math import isclose, log10, radians
 from pathlib import Path
 
 import pytest
@@ -15,6 +15,7 @@ from utilityscripts.wind.as1170_2 import (
     StandardVersion,
     WindRegion,
     WindSite,
+    a5_2_1_c_pb,
     c_fig_rect_prism,
     k_ar,
     s3_2_v_r,
@@ -650,6 +651,27 @@ def test_k_v(area, vol, expected):
 def test_k_a(area, face_type, z, version, expected):
     assert isclose(
         t5_4_k_a(area=area, face_type=face_type, z=z, version=version), expected
+    )
+
+
+@pytest.mark.parametrize(
+    "theta, c, b, use_radians, expected",
+    [
+        (0, 1.0, 1.0, False, 0.85),
+        (38.5, 1.0, 1.0, False, 0.00),
+        (85, 1.0, 1.0, False, -1.45),
+        (180, 1.0, 1.0, False, -0.45),
+        (radians(0), 1.0, 1.0, True, 0.85),
+        (radians(38.5), 1.0, 1.0, True, 0.00),
+        (radians(85), 1.0, 1.0, True, -1.45),
+        (radians(180), 1.0, 1.0, True, -0.45),
+    ],
+)
+def test_a5_2_1_c_pb(theta, c, b, use_radians, expected):
+    assert isclose(
+        a5_2_1_c_pb(theta=theta, c=c, b=b, use_radians=use_radians),
+        expected,
+        abs_tol=1e-2,
     )
 
 

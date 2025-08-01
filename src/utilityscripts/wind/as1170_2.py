@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from math import log10
+from math import cos, log10, radians
 from numbers import Real
 from pathlib import Path
 
@@ -1285,6 +1285,46 @@ def t5_4_k_a(
     k_a_vals = np.asarray(k_a_data["k_a"])
 
     return np.interp(area, area_vals, k_a_vals)
+
+
+def a5_2_1_c_pb(
+    *, theta: float, c: float, b: float, use_radians: bool = False
+) -> float:
+    """
+    Calculate the coefficient for normal pressure on a circular bin or tank wall.
+
+    Parameters
+    ----------
+    theta : float
+        The angle of the point under consideration. 0degrees is the windward location.
+    c : float
+        The height of the tank or bin.
+    b : float
+        The diameter of the tank or bin.
+    use_radians : bool, default=False
+        Is the angle in radians or not?
+    """
+
+    if c / b < 0.25 or c / b > 4.0:  # noqa: PLR2004
+        raise ValueError(
+            f"Invalid c / b ratio - ratio must satisfy 0.25 < c / b < 4.0. Current ratio is {c / b:.3f}"
+        )
+
+    if not use_radians:
+        theta = radians(theta)
+
+    c_p1 = (
+        -0.5
+        + 0.4 * cos(theta)
+        + 0.8 * cos(2 * theta)
+        + 0.3 * cos(3 * theta)
+        - 0.1 * cos(4 * theta)
+        - 0.05 * cos(5 * theta)
+    )
+
+    k_b = 1.0 if c_p1 >= -0.15 else 1.0 - 0.55 * (c_p1 + 0.15) * log10(c / b)  # noqa: PLR2004
+
+    return k_b * c_p1
 
 
 def k_ar(*, length: float, width: float) -> float:
