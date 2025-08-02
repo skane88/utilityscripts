@@ -231,13 +231,9 @@ class Variable:
         if self.symbol is None:
             return ""
 
-        if self.greek_symbols and self.symbol in GREEK_CHAR_MAP:
-            return GREEK_CHAR_MAP[self.symbol][1]
-
-        if "\\" in self.symbol:
-            return self.symbol
-
-        return f"\\text{{{self.symbol}}}"
+        return _str_single_latex(
+            self.symbol, greek_symbols=self.greek_symbols, str_type=StrType.LATEX
+        )
 
     @property
     def _latex_units(self) -> str:
@@ -253,15 +249,12 @@ class Variable:
         if self.units is None:
             return ""
 
-        if "\\" in self.units:
-            return self.units
-
-        unit_str = ""
+        unit_str = _str_single_latex(self.units, str_type=StrType.LATEX)
 
         if isinstance(self.value, str):
-            unit_str += "\\ "
+            unit_str = "\\ " + unit_str
 
-        return unit_str + f"\\text{{{self.units}}}"
+        return unit_str
 
     @property
     def latex_string(self) -> str | None:
