@@ -215,7 +215,7 @@ class Variable:
                 self.value, max_elements=self.shorten_list, str_type=StrType.LATEX
             )
 
-        return _str_single_latex(
+        return _str_simple(
             self.value,
             fmt_string=self.fmt_string,
             str_type=StrType.LATEX,
@@ -231,7 +231,7 @@ class Variable:
         if self.symbol is None:
             return ""
 
-        return _str_single_latex(
+        return _str_simple(
             self.symbol, greek_symbols=self.greek_symbols, str_type=StrType.LATEX
         )
 
@@ -249,7 +249,7 @@ class Variable:
         if self.units is None:
             return ""
 
-        unit_str = _str_single_latex(self.units, str_type=StrType.LATEX)
+        unit_str = _str_simple(self.units, str_type=StrType.LATEX)
 
         if isinstance(self.value, str):
             unit_str = "\\ " + unit_str
@@ -371,7 +371,7 @@ def _str_single(value, *, fmt_string: str | None = None) -> str:
     return f"{value:{fmt_string}}" if fmt_string is not None else f"{value}"
 
 
-def _str_single_latex(
+def _str_simple(
     value: Any,
     *,
     fmt_string: str | None = None,
@@ -379,7 +379,7 @@ def _str_single_latex(
     str_type: StrType = StrType.TEXT,
 ) -> str:
     """
-    Returns the value formatted into latex format.
+    Returns a simple value formatted as required.
 
     Notes
     -----
