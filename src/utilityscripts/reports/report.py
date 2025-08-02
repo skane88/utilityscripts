@@ -2,6 +2,7 @@
 A file to store results along with some reporting information.
 """
 
+from enum import StrEnum
 from typing import Any, Iterable
 
 from jinja2 import Environment
@@ -41,6 +42,11 @@ DEFAULT_LATEX_TEMPLATE = (
     + r"\BLOCK{for variable in variables.values()} \VAR{variable.symbol} = \VAR{variable.report_string} \newline \BLOCK{ endfor }"
     + r"\BLOCK{if eqn is not none} \VAR{eqn} \BLOCK{ else } value \BLOCK{ endif } = \VAR{ str_value }"
 )
+
+
+class StrType(StrEnum):
+    LATEX = "latex"
+    TEXT = "text"
 
 
 class Variable:
@@ -205,9 +211,16 @@ class Variable:
         """
 
         if isinstance(self.value, Iterable) and not isinstance(self.value, str):
-            return _format_iterable(self.value, max_elements=self.shorten_list)
+            return _format_iterable(
+                self.value, max_elements=self.shorten_list, str_type=StrType.LATEX
+            )
 
-        return _latex_string_single(self.value, fmt_string=self.fmt_string)
+        return _str_single_latex(
+            self.value,
+            fmt_string=self.fmt_string,
+            str_type=StrType.LATEX,
+            greek_symbols=self.greek_symbols,
+        )
 
     @property
     def _latex_symbol(self) -> str:
@@ -353,7 +366,25 @@ class Variable:
         )
 
 
-def _latex_string_single(value: Any, fmt_string: str | None = None) -> str:
+def _str_single(value, *, fmt_string: str | None = None) -> str:
+    """
+    Format a value for display.
+
+    Notes
+    -----
+    - Helper method for use later.
+    """
+
+    return f"{value:{fmt_string}}" if fmt_string is not None else f"{value}"
+
+
+def _str_single_latex(
+    value: Any,
+    *,
+    fmt_string: str | None = None,
+    greek_symbols: bool = False,
+    str_type: StrType = StrType.TEXT,
+) -> str:
     """
     Returns the value formatted into latex format.
 
@@ -370,6 +401,10 @@ def _latex_string_single(value: Any, fmt_string: str | None = None) -> str:
     fmt_string : str | None, optional
         A format string to use for formatting the value.
         If None, str() is used on the value.
+    greek_symbols : bool, optional
+        Should greek characters be replaced with appropriate alternatives?
+    str_type : StrType, optional
+        What sort of string is being returned? A text string or a latex string?
 
     Returns
     -------
@@ -379,6 +414,11 @@ def _latex_string_single(value: Any, fmt_string: str | None = None) -> str:
 
     if value is None:
         return "\\text{None}"
+
+    if greek_symbols and value in GREEK_CHAR_MAP:
+        if str_type == StrType.LATEX:
+            return GREEK_CHAR_MAP[value][1]
+        return GREEK_CHAR_MAP[value][0]
 
     if isinstance(value, str) and "\\" in value:
         return value
@@ -402,7 +442,9 @@ def _latex_string_single(value: Any, fmt_string: str | None = None) -> str:
     return value_str.replace("%", "\\%")
 
 
-def _format_iterable(value: Iterable, *, max_elements: int | None = 6) -> str:
+def _format_iterable(
+    value: Iterable, *, max_elements: int | None = 6, str_type: StrType = StrType.TEXT
+) -> str:
     """
     Generate a formatted string to represent an iterable.
 
@@ -415,6 +457,8 @@ def _format_iterable(value: Iterable, *, max_elements: int | None = 6) -> str:
         If the iterable has more elements than this, the string will be
         truncated with '...' and show the last element.
         Default is 6.
+    str_type : StrType, optional
+        What sort of string is being returned? A text string or a latex string?
 
     Returns
     -------
@@ -428,11 +472,15 @@ def _format_iterable(value: Iterable, *, max_elements: int | None = 6) -> str:
     # TODO: Update to be used for both string & latex.
 
     if isinstance(value, list):
-        left_bracket = "\\left["
-        right_bracket = "\\right]"
+        left_bracket = "["
+        right_bracket = "]"
     else:
-        left_bracket = "\\left{"
-        right_bracket = "\\right}"
+        left_bracket = "{"
+        right_bracket = "}"
+
+    if str_type == StrType.LATEX:
+        left_bracket = "\\left" + left_bracket
+        right_bracket = "\\right" + right_bracket
 
     if max_elements is None:
         max_elements = len(value)
@@ -443,7 +491,7 @@ def _format_iterable(value: Iterable, *, max_elements: int | None = 6) -> str:
     values_str = ""
 
     if isinstance(value, dict):
-        values_str = _latex_format_dict(value, max_elements=max_elements)
+        values_str = _format_dict(value, max_elements=max_elements, str_type=str_type)
     else:
         for i, v in enumerate(value):
             val_str = f"{v}"
@@ -460,9 +508,11 @@ def _format_iterable(value: Iterable, *, max_elements: int | None = 6) -> str:
     return left_bracket + values_str + right_bracket
 
 
-def _latex_format_dict(value: dict[Any, Any], *, max_elements: int | None) -> str:
+def _format_dict(
+    value: dict[Any, Any], *, max_elements: int | None, str_type: StrType = StrType.TEXT
+) -> str:
     """
-    Generate a latex formatted string to represent a dictionary.
+    Generate a formatted string to represent a dictionary.
 
     Parameters
     ----------
@@ -472,6 +522,8 @@ def _latex_format_dict(value: dict[Any, Any], *, max_elements: int | None) -> st
         Maximum number of elements to show in the output string.
         If the dictionary has more elements than this, the string will be
         truncated with '...' and show the last element.
+    str_type : StrType, optional
+        What sort of string is being returned? A text string or a latex string?
 
     Returns
     -------
@@ -488,7 +540,11 @@ def _latex_format_dict(value: dict[Any, Any], *, max_elements: int | None) -> st
     for i, kv in enumerate(value.items()):
         key, val = kv
 
-        key_str = f"\\text{{{key}}}" if isinstance(key, str) else f"{key}"
+        key_str = f"{key}"
+
+        if str_type == StrType.LATEX and isinstance(key, str):
+            key_str = "\\text{" + key_str + "}"
+
         val_str = key_str + f": {val}"
 
         if i == 0:
