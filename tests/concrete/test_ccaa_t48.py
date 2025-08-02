@@ -1245,6 +1245,8 @@ def test_lv_slab():
         material_factor=MaterialFactor.MIDRANGE,
     )
 
+    # note the below fails because the load is too light.
+    # TODO: Update code to handle case of loads too low.
     assert isclose(
         check_slab.t_reqd(
             load_id="axle_load",
