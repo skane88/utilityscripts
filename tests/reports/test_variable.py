@@ -44,6 +44,7 @@ def test_variable():
         (Variable(1, symbol="a", units="m", fmt_string=".2e"), "a=1.00e+00m"),
         (Variable(2, fmt_string=None), "2"),
         (Variable("abc"), "abc"),
+        (Variable("abc", units="m"), "abc m"),
         (Variable(None, symbol="a"), "a=None"),
         (Variable([]), "[]"),
         (Variable(set()), "{}"),
@@ -56,7 +57,7 @@ def test_variable():
             Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, shorten_list=4),
             "{a: 1, b: 2, c: 3, ..., f: 6}",
         ),
-        (Variable(set(range(0, 100))), "$\\left{0, 1, 2, 3, 4, ..., 99\\right}$"),
+        (Variable(set(range(0, 100))), "{0, 1, 2, 3, 4, ..., 99}"),
         (Variable(set(range(0, 100))), "{1, 2, 3, ..., 99}"),
     ],
 )

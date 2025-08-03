@@ -350,6 +350,9 @@ class Variable:
 
         unit_str = f"{self.units}" if self.units else ""
 
+        if isinstance(self.value, str) and unit_str != "":
+            unit_str = " " + unit_str
+
         return symbol_str + value_str + unit_str
 
     def __repr__(self):
