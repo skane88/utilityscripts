@@ -215,7 +215,7 @@ class Variable:
                 self.value, max_elements=self.shorten_list, str_type=StrType.LATEX
             )
 
-        return _str_simple(
+        return _format_string(
             self.value,
             fmt_string=self.fmt_string,
             str_type=StrType.LATEX,
@@ -231,7 +231,7 @@ class Variable:
         if self.symbol is None:
             return ""
 
-        return _str_simple(
+        return _format_string(
             self.symbol, greek_symbols=self.greek_symbols, str_type=StrType.LATEX
         )
 
@@ -249,7 +249,7 @@ class Variable:
         if self.units is None:
             return ""
 
-        unit_str = _str_simple(self.units, str_type=StrType.LATEX)
+        unit_str = _format_string(self.units, str_type=StrType.LATEX)
 
         if isinstance(self.value, str):
             unit_str = "\\ " + unit_str
@@ -341,11 +341,13 @@ class Variable:
 
     def __str__(self):
         symbol_str = f"{self.symbol}=" if self.symbol else ""
+
         value_str = (
             f"{self.value:{self.fmt_string}}"
             if self.fmt_string is not None
             else f"{self.value}"
         )
+
         unit_str = f"{self.units}" if self.units else ""
 
         return symbol_str + value_str + unit_str
@@ -359,7 +361,7 @@ class Variable:
         )
 
 
-def _str_simple(
+def _format_string(
     value: Any,
     *,
     fmt_string: str | None = None,
