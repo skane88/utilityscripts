@@ -359,18 +359,6 @@ class Variable:
         )
 
 
-def _str_single(value, *, fmt_string: str | None = None) -> str:
-    """
-    Format a value for display.
-
-    Notes
-    -----
-    - Helper method for use later.
-    """
-
-    return f"{value:{fmt_string}}" if fmt_string is not None else f"{value}"
-
-
 def _str_simple(
     value: Any,
     *,
