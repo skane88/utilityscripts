@@ -2,9 +2,24 @@
 Python file to determine steel design properties based on AS4600
 """
 
+from enum import StrEnum
 from math import pi
 
 import numpy as np
+
+
+class S5342ConnType(StrEnum):
+    SINGLE_SHEAR_BOTH_WASHERS = "single shear both washers"
+    SINGLE_SHEAR_ONE_WASHER = "single shear one washer"
+    SINGLE_SHEAR_OVERSIZED_HOLES = "single shear oversized holes"
+    SINGLE_SHEAR_OVERSIZED_HOLES_PERPENDICULAR = (
+        "single shear oversized holes perpendicular"
+    )
+    DOUBLE_SHEAR_INNER = "double shear inner"
+    DOUBLE_SHEAR_INNER_OVERSIZED_HOLES = "double shear inner oversized holes"
+    DOUBLE_SHEAR_INNER_OVERSIZED_HOLES_PERPENDICULAR = (
+        "double shear inner oversized holes perpendicular"
+    )
 
 
 def f_cr_plate(*, k, elastic_modulus, thickness, width, poisson_ratio=0.3):
@@ -149,6 +164,30 @@ def s5_3_4_2_v_b(*, alpha, c, d_f, t, f_u):
     """
 
     return alpha * c * d_f * t * f_u
+
+
+def t5_3_4_2_alpha(conn_type: S5342ConnType) -> float:
+    """
+    Calculate the modification factor (alpha) for connection beearing type as per
+    AS4600 Table 5.3.4.2(a)
+
+    Parameters
+    ----------
+    conn_type : S5342ConnType
+        The connection type.
+    """
+
+    data = {
+        S5342ConnType.SINGLE_SHEAR_BOTH_WASHERS: 1.00,
+        S5342ConnType.SINGLE_SHEAR_ONE_WASHER: 0.75,
+        S5342ConnType.SINGLE_SHEAR_OVERSIZED_HOLES: 0.70,
+        S5342ConnType.SINGLE_SHEAR_OVERSIZED_HOLES_PERPENDICULAR: 0.55,
+        S5342ConnType.DOUBLE_SHEAR_INNER: 1.33,
+        S5342ConnType.DOUBLE_SHEAR_INNER_OVERSIZED_HOLES: 1.10,
+        S5342ConnType.DOUBLE_SHEAR_INNER_OVERSIZED_HOLES_PERPENDICULAR: 0.90,
+    }
+
+    return data[conn_type]
 
 
 def t5_3_4_2_c(*, d_f, t):
