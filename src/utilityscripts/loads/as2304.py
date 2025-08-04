@@ -428,6 +428,13 @@ class Tank:
             y=y, d=self.d, h_w=self.h_w, kp=k_p, z=z, s=s, gamma_l=self.gamma_l
         )
 
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__} d={self.d:.3f}m, height={self.height:.3f}m, "
+            + f"h_w={self.h_w:.3f}m, liquid density: {self.gamma_l}kN/m^3.\n"
+            + f"Liquid volume {self.v:.1f}m^3, contents weight: {self.w_t:.1f}kN."
+        )
+
 
 def s4_6_2_1_alpha_1(*, d: float, h_w: float) -> float:
     """
