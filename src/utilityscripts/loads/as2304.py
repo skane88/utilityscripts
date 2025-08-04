@@ -419,14 +419,84 @@ class Tank:
         return m_i + m_c
 
     def s4_6_3_p_1(self, *, y: float, k_p: float, z: float):
+        """
+        The additional hoop tension due to inertial loads from the liquid in an earthquake.
+
+        Parameters
+        ----------
+        y : float
+            The height at which the pressure is considered. Taken from the surface of the liquid.
+            In m.
+        k_p : float
+            The probability factor for earthquake events as per AS1170.4
+        z : float
+            The acceleration coefficient or hazard design factor as per AS1170.4
+
+        Returns
+        -------
+        float
+            The total additional hoop tension due to earthquake inertial loads.
+            In kN/m provided units are met.
+        """
+
         return s4_6_3_p1(
             y=y, d=self.d, h_w=self.h_w, k_p=k_p, z=z, gamma_l=self.gamma_l
         )
 
     def s4_6_3_p_2(self, *, y: float, k_p: float, z: float, s: float):
+        """
+        The total additional hoop tension due convective loads from the liquid in an earthquake.
+
+        Parameters
+        ----------
+        y : float
+            The height at which the pressure is considered. Taken from the surface of the liquid.
+            In m.
+        k_p : float
+            The probability factor for earthquake events as per AS1170.4
+        z : float
+            The acceleration coefficient or hazard design factor as per AS1170.4
+        s : float
+            The site factor as per AS2304.
+
+        Returns
+        -------
+        float
+            The total additional hoop tension due to earthquake convective loads.
+            In kN/m provided units are met.
+        """
+
         return s4_6_3_p2(
             y=y, d=self.d, h_w=self.h_w, kp=k_p, z=z, s=s, gamma_l=self.gamma_l
         )
+
+    def s4_6_3_p_t(self, *, y: float, k_p: float, z: float, s: float):
+        """
+        The total additional hoop tension due to earthquake loads.
+
+        Parameters
+        ----------
+        y : float
+            The height at which the pressure is considered. Taken from the surface of the liquid.
+            In m.
+        k_p : float
+            The probability factor for earthquake events as per AS1170.4
+        z : float
+            The acceleration coefficient or hazard design factor as per AS1170.4
+        s : float
+            The site factor as per AS2304.
+
+        Returns
+        -------
+        float
+            The total additional hoop tension due to earthquake loads.
+            In kN/m provided units are met.
+        """
+
+        p1 = self.s4_6_3_p_1(y=y, k_p=k_p, z=z)
+        p2 = self.s4_6_3_p_2(y=y, k_p=k_p, z=z, s=s)
+
+        return p1 + p2
 
     def __repr__(self):
         return (
