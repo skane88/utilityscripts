@@ -197,9 +197,9 @@ def t5_3_4_2_c(*, d_f, t):
     Parameters
     ----------
     d_f : float
-        The nominal fastener diameter.
+        The nominal fastener diameter. In m.
     t : float
-        The thickness of the plate. Given in metres.
+        The thickness of the plate. In m.
     """
 
     if not (0.00042 <= t <= 0.00476):  # noqa: PLR2004
