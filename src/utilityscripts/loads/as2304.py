@@ -22,6 +22,24 @@ class Tank:
         """
         Initialise a tank.
 
+        Parameters
+        ----------
+        diameter : float
+            The diameter of the tank. In m.
+        height : float
+            The height of the tank. In m.
+        freeboard : float
+            The freeboard of the tank. In m.
+        w_shell : float
+            The weight of the shell. In kN.
+        x_shell : float
+            The height of the shell's COG. In m.
+        w_roof : float
+            The weight of the roof. In kN.
+        x_roof : float
+            The height of the roof's COG. In m.
+        gamma_l : float, optional
+            The weight density of the water, in kN/m^3. By default, GAMMA_L_WATER = 10.0kN/m^3.
         """
 
         self._diameter = diameter
@@ -59,52 +77,92 @@ class Tank:
 
     @property
     def height(self):
+        """
+        The height of the tank. In m.
+        """
+
         return self._height
 
     @property
     def freeboard(self):
+        """
+        The freeboard of the tank. In m.
+        """
+
         return self._freeboard
 
     @property
     def w_shell(self):
+        """
+        The weight of the shell. In kN.
+        """
+
         return self._w_shell
 
     @property
     def x_shell(self):
+        """
+        The height of the shell's COG. In m.
+        """
+
         return self._x_shell
 
     @property
     def w_roof(self):
+        """
+        The weight of the roof. In kN.
+        """
+
         return self._w_roof
 
     @property
     def x_roof(self):
+        """
+        The height of the roof's COG. In m.
+        """
+
         return self._x_roof
 
     @property
     def gamma_l(self):
         """
-        The weight density of the liquid.
+        The weight density of the liquid. In kN/m^3.
         """
 
         return self._gamma_l
 
     @property
     def h_w(self):
+        """
+        The height to the liquid's free surface. In m.
+        """
+
         return self.height - self.freeboard
 
     @property
     def area(self):
+        """
+        The tank floor area. In m^2.
+        """
+
         return pi * self.radius**2
 
     @property
     def v_total(self):
+        """
+        The total volume. In m^3.
+
+        Notes
+        -----
+        - If freeboard is not 0.0 this will be different from the liquid volume, v.
+        """
+
         return self.height * self.area
 
     @property
     def v(self):
         """
-        The liquid volume after accounting for any freeboard.
+        The liquid volume after accounting for any freeboard. In m^3.
         """
 
         return self.h_w * self.area
@@ -112,7 +170,7 @@ class Tank:
     @property
     def w_t(self):
         """
-        The weight of the tank contents.
+        The weight of the tank contents. In kN.
         """
 
         return self.v * self.gamma_l
