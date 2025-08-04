@@ -380,11 +380,52 @@ class Tank:
             This is similar to the different soil categories in AS1170.4
         """
 
+        return self._v_b1(k_p=k_p, z=z) + self._v_b2(k_p=k_p, z=z, s=s)
+
+    def _v_b1(self, *, k_p: float, z: float):
+        """
+        Calculate the base shear due to inertial earthquake actions.
+
+        Notes
+        -----
+        - The earthquake load is calculated in a manner similar to AS1170.4-1993, but with some modifications.
+
+        Parameters
+        ----------
+        k_p : float
+            Probability factors for earthquake events as per AS1170.4
+        z : float
+            The acceleration coefficient or hazard design factor as per AS1170.4
+        """
+
         acc = 4 * k_p * z
         acc_i = acc * 0.14
+
+        return acc_i * self.w_i
+
+    def _v_b2(self, *, k_p: float, z: float, s: float):
+        """
+        Calculate the base shear due to convective earthquake actions.
+
+        Notes
+        -----
+        - The earthquake load is calculated in a manner similar to AS1170.4-1993, but with some modifications.
+
+        Parameters
+        ----------
+        k_p : float
+            Probability factors for earthquake events as per AS1170.4
+        z : float
+            The acceleration coefficient or hazard design factor as per AS1170.4
+        s : float
+            A site factor as per AS2304.
+            This is similar to the different soil categories in AS1170.4
+        """
+
+        acc = 4 * k_p * z
         acc_c = acc * s * self.c_1
 
-        return acc_i * self.w_i + acc_c * self.w_c
+        return acc_c * self.w_c
 
     def m_b(self, *, k_p: float, z: float, s: float) -> float:
         """
@@ -405,18 +446,56 @@ class Tank:
             This is similar to the different soil categories in AS1170.4
         """
 
+        return self._m_bi(k_p=k_p, z=z) + self._m_bc(k_p=k_p, z=z, s=s)
+
+    def _m_bi(self, *, k_p: float, z: float) -> float:
+        """
+        Calculate the base overturning moment due to inertial earthquake actions.
+
+        Notes
+        -----
+        - The earthquake load is calculated in a manner similar to AS1170.4-1993, but with some modifications.
+
+        Parameters
+        ----------
+        k_p : float
+            Probability factors for earthquake events as per AS1170.4
+        z : float
+            The acceleration coefficient or hazard design factor as per AS1170.4
+        """
+
         acc = 4 * k_p * z
         acc_i = acc * 0.14
-        acc_c = acc * s * self.c_1
 
-        m_i = acc_i * (
+        return acc_i * (
             self.w_shell * self.x_shell
             + self.w_roof * self.x_roof
             + self.w_1 * self.x_1
         )
-        m_c = acc_c * self.w_2 * self.x_2
 
-        return m_i + m_c
+    def _m_bc(self, *, k_p: float, z: float, s: float) -> float:
+        """
+        Calculate the base overturning moment due to convective earthquake actions.
+
+        Notes
+        -----
+        - The earthquake load is calculated in a manner similar to AS1170.4-1993, but with some modifications.
+
+        Parameters
+        ----------
+        k_p : float
+            Probability factors for earthquake events as per AS1170.4
+        z : float
+            The acceleration coefficient or hazard design factor as per AS1170.4
+        s : float
+            A site factor as per AS2304.
+            This is similar to the different soil categories in AS1170.4
+        """
+
+        acc = 4 * k_p * z
+        acc_c = acc * s * self.c_1
+
+        return acc_c * self.w_2 * self.x_2
 
     def s4_6_3_p_1(self, *, y: float, k_p: float, z: float):
         """
