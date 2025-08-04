@@ -127,3 +127,41 @@ def test_s4_6_2_1_x_1(tank, expected):
 )
 def test_s4_6_2_1_x_2(tank, expected):
     assert isclose(tank.x_2, expected, rel_tol=1e-2)
+
+
+@pytest.mark.parametrize(
+    "tank, y, k_p, z, expected",
+    [
+        (tank_50_30, 0.0, 1.25, 0.12, 0.0),
+        (tank_50_30, 3.0, 1.25, 0.12, 90.8),
+        (tank_50_30, 15.0, 1.25, 0.12, 359),
+        (tank_50_30, 27.0, 1.25, 0.12, 473),
+        (tank_50_30, 30.0, 1.25, 0.12, 478),
+        (tank_30_30, 0.0, 1.25, 0.12, 0.0),
+        (tank_30_30, 3.0, 1.25, 0.12, 49.1),
+        (tank_30_30, 15.0, 1.25, 0.12, 175),
+        (tank_30_30, 27.0, 1.25, 0.12, 198),
+        (tank_30_30, 30.0, 1.25, 0.12, 198),
+    ],
+)
+def test_s4_6_3_p1(tank, y, k_p, z, expected):
+    assert isclose(tank.s4_6_3_p_1(y=y, k_p=k_p, z=z), expected, rel_tol=1e-2)
+
+
+@pytest.mark.parametrize(
+    "tank, y, k_p, z, s, expected",
+    [
+        (tank_50_30, 0.0, 1.25, 0.12, 1.00, 36.8),
+        (tank_50_30, 3.0, 1.25, 0.12, 1.00, 29.7),
+        (tank_50_30, 15.0, 1.25, 0.12, 1.00, 13.4),
+        (tank_50_30, 27.0, 1.25, 0.12, 1.00, 8.19),
+        (tank_50_30, 30.0, 1.25, 0.12, 1.00, 8.00),
+        (tank_30_30, 0.0, 1.25, 0.12, 1.00, 22.6),
+        (tank_30_30, 3.0, 1.25, 0.12, 1.00, 15.7),
+        (tank_30_30, 15.0, 1.25, 0.12, 1.00, 3.68),
+        (tank_30_30, 27.0, 1.25, 0.12, 1.00, 1.22),
+        (tank_30_30, 30.0, 1.25, 0.12, 1.00, 1.14),
+    ],
+)
+def test_s4_6_3_p2(tank, y, k_p, z, s, expected):
+    assert isclose(tank.s4_6_3_p_2(y=y, k_p=k_p, z=z, s=s), expected, rel_tol=1e-2)

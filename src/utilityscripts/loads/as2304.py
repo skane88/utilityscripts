@@ -4,6 +4,8 @@ Python code for liquid retaining tanks to AS2304
 
 from math import cosh, pi, sinh, tanh
 
+GAMMA_L_WATER = 10.0  # nominal density of water
+
 
 class Tank:
     def __init__(
@@ -15,7 +17,7 @@ class Tank:
         x_shell: float,
         w_roof: float,
         x_roof: float,
-        gamma_l: float = 10,
+        gamma_l: float = GAMMA_L_WATER,
     ):
         """
         Initialise a tank.
@@ -288,6 +290,16 @@ class Tank:
 
         return m_i + m_c
 
+    def s4_6_3_p_1(self, *, y: float, k_p: float, z: float):
+        return s4_6_3_p1(
+            y=y, d=self.d, h_w=self.h_w, k_p=k_p, z=z, gamma_l=self.gamma_l
+        )
+
+    def s4_6_3_p_2(self, *, y: float, k_p: float, z: float, s: float):
+        return s4_6_3_p2(
+            y=y, d=self.d, h_w=self.h_w, kp=k_p, z=z, s=s, gamma_l=self.gamma_l
+        )
+
 
 def s4_6_2_1_alpha_1(*, d: float, h_w: float) -> float:
     """
@@ -418,3 +430,106 @@ def s4_6_2_1_c1(*, d: float, h_w=float) -> float:
         return 1 / (6 * t_w)
 
     return 0.75 / (t_w**2)
+
+
+def s4_6_3_p1(
+    y, *, d: float, h_w: float, k_p: float, z: float, gamma_l: float = GAMMA_L_WATER
+) -> float:
+    """
+    The impulsive pressure in the tank wall due to inertial behaviour of the fluid.
+
+    Parameters
+    ----------
+    y : float
+        The height at which the pressure is considered.  In m.
+    d : float
+        The diameter of the tank. In m.
+    h_w : float
+        The height of the liquid in the tank during the earthquake. In m.
+    k_p : float
+        The probability factor for earthquake events as per AS1170.4
+    z : float
+        The acceleration coefficient or hazard design factor as per AS1170.4
+    gamma_l : float, optional
+        The density of the liquid, by default GAMMA_L_WATER.
+
+    Returns
+    -------
+    float
+        The impulsive pressure in the tank wall due to inertial behaviour of the fluid.
+        In kN/m provided units are met.
+    """
+
+    sg = gamma_l / GAMMA_L_WATER
+
+    d_h_w = d / h_w
+
+    p_base = sg * k_p * z
+
+    if d_h_w > 4 / 3:
+        return (
+            4.751
+            * p_base
+            * d
+            * h_w
+            * ((y / h_w) - 0.5 * (y / h_w) ** 2)
+            * tanh(0.866 * d_h_w)
+        )
+
+    if y < 0.75 * d:
+        return 2.9237 * p_base * d**2 * ((y / (0.75 * d)) - 0.5 * (y / (0.75 * d)) ** 2)
+
+    return 1.4666 * p_base * d**2
+
+
+def s4_6_3_p2(
+    y,
+    *,
+    d: float,
+    h_w: float,
+    kp: float,
+    z: float,
+    s: float,
+    gamma_l: float = GAMMA_L_WATER,
+) -> float:
+    """
+    The impulsive pressure in the tank wall due to convective behaviour of the fluid.
+
+    Parameters
+    ----------
+    y : float
+        The height at which the pressure is considered.  In m.
+    d : float
+        The diameter of the tank. In m.
+    h_w : float
+        The height of the liquid in the tank during the earthquake. In m.
+    k_p : float
+        The probability factor for earthquake events as per AS1170.4
+    z : float
+        The acceleration coefficient or hazard design factor as per AS1170.4
+    s : float
+        The site factor as per AS2304.
+    gamma_l : float, optional
+        The density of the liquid, by default GAMMA_L_WATER.
+
+    Returns
+    -------
+    float
+        The impulsive pressure in the tank wall due to inertial behaviour of the fluid.
+        In kN/m provided units are met.
+    """
+
+    sg = gamma_l / GAMMA_L_WATER
+    c1 = s4_6_2_1_c1(d=d, h_w=h_w)
+
+    return (
+        7.3479
+        * sg
+        * kp
+        * z
+        * s
+        * c1
+        * d**2
+        * cosh((3.68 * (h_w - y)) / d)
+        / cosh(3.68 * h_w / d)
+    )
