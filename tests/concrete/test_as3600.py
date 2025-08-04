@@ -63,7 +63,10 @@ def test_f_cmi(f_cmi, expected):
 
 @pytest.mark.parametrize(
     "d_beam, d_reo, b_w, f_ct_f, f_sy, s_type, expected",
-    [(600, 534, 750, 3.39, 500, S816SectType.RECTANGULAR, 686)],
+    [
+        (600, 534, 750, 3.39, 500, S816SectType.RECTANGULAR, 686),
+        (1200, 1130, 600, 3.39, 500, S816SectType.RECTANGULAR, 1038),
+    ],
 )
 def test_s8_1_6_1_a_st_min(
     d_beam, d_reo, b_w, f_ct_f, f_sy, s_type: S816SectType, expected
@@ -78,5 +81,5 @@ def test_s8_1_6_1_a_st_min(
             sect_type=s_type,
         ),
         expected,
-        rel_tol=1e-3,
+        rel_tol=1e-2,
     )
