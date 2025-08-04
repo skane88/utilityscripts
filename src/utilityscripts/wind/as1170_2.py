@@ -1327,6 +1327,10 @@ def a5_2_1_c_pb(
     return k_b * c_p1
 
 
+def a5_2_3_c_pi(*, c: float, b: float) -> float:
+    return -0.9 - 0.35 * log10(c / b)
+
+
 def k_ar(*, length: float, width: float) -> float:
     """
     Calculate the aspect ratio correction factor K_ar as per AS1170.2 Appendix C

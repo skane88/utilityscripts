@@ -16,6 +16,7 @@ from utilityscripts.wind.as1170_2 import (
     WindRegion,
     WindSite,
     a5_2_1_c_pb,
+    a5_2_3_c_pi,
     c_fig_rect_prism,
     k_ar,
     s3_2_v_r,
@@ -673,6 +674,13 @@ def test_a5_2_1_c_pb(theta, c, b, use_radians, expected):
         expected,
         abs_tol=1e-2,
     )
+
+
+@pytest.mark.parametrize(
+    "c, b, expected", [(1, 1, -0.9), (10, 1, -1.25), (0.1, 1, -0.55)]
+)
+def test_a5_2_3_c_pi(c, b, expected):
+    assert isclose(a5_2_3_c_pi(c=c, b=b), expected, abs_tol=1e-2)
 
 
 @pytest.mark.parametrize(
