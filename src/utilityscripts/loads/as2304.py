@@ -149,6 +149,19 @@ class Tank:
         return pi * self.d
 
     @property
+    def i_xx_force(self):
+        """
+        The section moment of inertia about the x-axis. In m^3.
+
+        Notes
+        -----
+        - This is the unit force moment of inertia, similar to a weld moment of inertia.
+          Use it to determine forces, not stresses.
+        """
+
+        return (pi / 8) * self.d**3
+
+    @property
     def area(self):
         """
         The tank floor area. In m^2.
