@@ -26,6 +26,15 @@ tank_30_30 = Tank(
     w_roof=100,
     x_roof=30.0,
 )
+tank_10_20 = Tank(
+    diameter=5.093 * 2,
+    height=20.0,
+    freeboard=0.0,
+    w_shell=100,
+    x_shell=15.0,
+    w_roof=100,
+    x_roof=30.0,
+)  # based on test model in Strand7 with a radius of 32/pi/2
 
 
 def test_tank():
@@ -165,3 +174,18 @@ def test_s4_6_3_p1(tank, y, k_p, z, expected):
 )
 def test_s4_6_3_p2(tank, y, k_p, z, s, expected):
     assert isclose(tank.s4_6_3_p_2(y=y, k_p=k_p, z=z, s=s), expected, rel_tol=1e-2)
+
+
+@pytest.mark.parametrize(
+    "tank, y, expected",
+    [
+        (tank_30_30, 0.0, 0.0),
+        (tank_30_30, 5.0, 750.0),
+        (tank_30_30, 15.0, 2250.0),
+        (tank_30_30, 30.0, 4500.0),
+        (tank_10_20, 0, 0),
+        (tank_10_20, 20.0, 1016.56),  # calculated in Strand7
+    ],
+)
+def test_p_hydrostatic(tank, y, expected):
+    assert isclose(tank.p_hydrostatic(y=y), expected, rel_tol=1e-2)

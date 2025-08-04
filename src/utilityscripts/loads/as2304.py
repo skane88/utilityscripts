@@ -38,6 +38,7 @@ class Tank:
             The weight of the roof. In kN.
         x_roof : float
             The height of the roof's COG. In m.
+
         gamma_l : float, optional
             The weight density of the water, in kN/m^3. By default, GAMMA_L_WATER = 10.0kN/m^3.
         """
@@ -174,6 +175,54 @@ class Tank:
         """
 
         return self.v * self.gamma_l
+
+    def p_hydrostatic_liquid(self, *, y: float) -> float:
+        """
+        Calculate the hydrostatic pressure in the tank liquid.
+
+        Parameters
+        ----------
+        y : float
+            The height at which the pressure is considered, taken from the surface of the liquid.
+            In m.
+
+        Returns
+        -------
+        float
+            The hydrostatic pressure in the liquid. In kN/m^2 / kPa provided units are met.
+        """
+
+        return self.gamma_l * y
+
+    def p_hydrostatic(self, y: float) -> float:
+        """
+        Calculate the hydrostatic pressure in the tank wall.
+
+        Parameters
+        ----------
+        y : float
+            The height at which the pressure is considered, taken from the surface of the liquid.
+            In m.
+
+        Returns
+        -------
+        float
+            The hydrostatic pressure in the tank wall. In kN/m provided units are met.
+        """
+
+        if y > self.h_w:
+            raise ValueError(
+                "y must be within the tank. "
+                + f"{y=:.3e} > {self.h_w=:.3e}, implying the point is below the tank bottom"
+            )
+
+        if y < 0:
+            raise ValueError(
+                "y must be positive. "
+                + f"{y=:.3e} < 0, implying the point is above the water level"
+            )
+
+        return self.radius * self.p_hydrostatic_liquid(y=y)
 
     @property
     def alpha_1(self):
