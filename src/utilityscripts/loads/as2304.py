@@ -125,10 +125,7 @@ class Tank:
         - using alpha_1 as the standard does not have a specific symbol
         """
 
-        if self.d / self.h_w >= 4 / 3:
-            return tanh(0.866 * self.d / self.h_w) / (0.866 * self.d / self.h_w)
-
-        return 1.0 - 0.218 * self.d / self.h_w
+        return s4_6_2_1_alpha_1(d=self.d, h_w=self.h_w)
 
     @property
     def alpha_2(self):
@@ -140,9 +137,15 @@ class Tank:
         - Using alpha_2 as the standard does not have a specific symbol
         """
 
-        d_h_w = self.d / self.h_w
+        return s4_6_2_1_alpha_2(d=self.d, h_w=self.h_w)
 
-        return 0.230 * d_h_w * tanh(3.67 / d_h_w)
+    @property
+    def x_1_ratio(self):
+        """
+        The height of the liquid inertial action as a ratio of h_w.
+        """
+
+        return s4_6_2_1_x1_ratio(d=self.d, h_w=self.h_w)
 
     @property
     def x_1(self):
@@ -150,10 +153,15 @@ class Tank:
         The height of the liquid inertial action.
         """
 
-        if self.d / self.h_w >= 4 / 3:
-            return 0.375 * self.h_w
+        return self.x_1_ratio * self.h_w
 
-        return (0.5 - 0.094 * (self.d / self.h_w)) * self.h_w
+    @property
+    def x_2_ratio(self):
+        """
+        The height of the liquid convective action as a ratio of h_w.
+        """
+
+        return s4_6_2_1_x2_ratio(d=self.d, h_w=self.h_w)
 
     @property
     def x_2(self):
@@ -161,12 +169,7 @@ class Tank:
         The height of the liquid convective action.
         """
 
-        d_h_w = self.d / self.h_w
-
-        a = cosh(3.67 / d_h_w) - 1.0
-        b = (3.67 / d_h_w) * sinh(3.67 / d_h_w)
-
-        return (1.0 - a / b) * self.h_w
+        return self.x_2_ratio * self.h_w
 
     @property
     def w_1(self):
@@ -210,7 +213,7 @@ class Tank:
         The period factor for earthquake actions.
         """
 
-        return 0.578 / (tanh(3.67 / (self.d / self.h_w))) ** 0.5
+        return s4_6_2_1_k(d=self.d, h_w=self.h_w)
 
     @property
     def t_w(self):
@@ -218,7 +221,7 @@ class Tank:
         The sloshing wave period, in s.
         """
 
-        return 1.811 * self.k * (self.diameter**0.5)
+        return s4_6_2_1_tw(d=self.d, h_w=self.h_w)
 
     @property
     def c_1(self):
@@ -226,10 +229,7 @@ class Tank:
         The sloshing coefficient.
         """
 
-        if self.t_w < 4.5:  # noqa: PLR2004
-            return 1 / (6 * self.t_w)
-
-        return 0.75 / (self.t_w**2)
+        return s4_6_2_1_c1(d=self.d, h_w=self.h_w)
 
     def v_b(self, *, k_p: float, z: float, s: float):
         """
@@ -287,3 +287,134 @@ class Tank:
         m_c = acc_c * self.w_2 * self.x_2
 
         return m_i + m_c
+
+
+def s4_6_2_1_alpha_1(*, d: float, h_w: float) -> float:
+    """
+    Calculate the portion of the liquid that acts inertially in an earthquake.
+
+    Parameters
+    ----------
+    d : float
+        The diameter of the tank.
+    h_w : float
+        The height of the liquid in the tank during the earthquake.
+    """
+
+    d_h_w = d / h_w
+
+    if d_h_w >= 4 / 3:
+        return tanh(0.866 * d_h_w) / (0.866 * d_h_w)
+
+    return 1.0 - 0.218 * d_h_w
+
+
+def s4_6_2_1_alpha_2(*, d: float, h_w: float) -> float:
+    """
+    The portion of the liquid that acts in a convective fashion during an earthquake.
+
+    Parameters
+    ----------
+    d : float
+        The diameter of the tank.
+    h_w : float
+        The height of the liquid in the tank during the earthquake.
+    """
+
+    d_h_w = d / h_w
+    return 0.230 * d_h_w * tanh(3.67 / d_h_w)
+
+
+def s4_6_2_1_x1_ratio(*, d: float, h_w: float) -> float:
+    """
+    The equivalent height of the liquid inertial action.
+    As a ratio of x1 / h_w.
+
+    Parameters
+    ----------
+    d : float
+        The diameter of the tank.
+    h_w : float
+        The height of the liquid in the tank during the earthquake.
+    """
+
+    if d / h_w >= 4 / 3:
+        return 0.375
+
+    return 0.5 - 0.094 * (d / h_w)
+
+
+def s4_6_2_1_x2_ratio(*, d: float, h_w: float) -> float:
+    """
+    The equivalent height of the liquid convective action.
+    As a ratio of x2 / h_w
+
+    Parameters
+    ----------
+    d : float
+        The diameter of the tank.
+    h_w : float
+        The height of the liquid in the tank during the earthquake.
+    """
+
+    d_h_w = d / h_w
+
+    a = cosh(3.67 / d_h_w) - 1.0
+    b = (3.67 / d_h_w) * sinh(3.67 / d_h_w)
+
+    return 1.0 - a / b
+
+
+def s4_6_2_1_k(*, d: float, h_w: float) -> float:
+    """
+    The sloshing period factor.
+
+    Parameters
+    ----------
+    d : float
+        The diameter of the tank.
+    h_w : float
+        The height of the liquid in the tank during the earthquake.
+    """
+
+    return 0.578 / (tanh(3.67 / (d / h_w))) ** 0.5
+
+
+def s4_6_2_1_tw(*, d: float, h_w: float) -> float:
+    """
+    The first mode sloshing period.
+
+    Parameters
+    ----------
+    d : float
+        The diameter of the tank.
+    h_w : float
+        The height of the liquid in the tank during the earthquake.
+
+    Returns
+    -------
+    float
+        The first mode sloshing period. In s if units for inputs are m.
+    """
+
+    return 1.811 * s4_6_2_1_k(d=d, h_w=h_w) * (d**0.5)
+
+
+def s4_6_2_1_c1(*, d: float, h_w=float) -> float:
+    """
+    The sloshing coefficient.
+
+    Parameters
+    ----------
+    d : float
+        The diameter of the tank.
+    h_w : float
+        The height of the liquid in the tank during the earthquake.
+    """
+
+    t_w = s4_6_2_1_tw(d=d, h_w=h_w)
+
+    if t_w < 4.5:  # noqa: PLR2004
+        return 1 / (6 * t_w)
+
+    return 0.75 / (t_w**2)
