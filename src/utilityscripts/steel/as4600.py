@@ -71,7 +71,7 @@ def rho(*, slenderness):
     return min(1.0, (1 - 0.22 / slenderness) / slenderness)
 
 
-def phi_v_f_tearout_s5_3_2(*, f_u, f_y):
+def s5_3_2_v_f_phi(*, f_u, f_y):
     """
     Calculate the partial safety factor for the tearout capacity of a bolt hole,
     as per AS4600 S5.3.2
@@ -90,7 +90,7 @@ def phi_v_f_tearout_s5_3_2(*, f_u, f_y):
     return 0.60
 
 
-def v_f_tearout_s5_3_2(*, t, e, f_u):
+def s5_3_2_v_f(*, t, e, f_u):
     """
     Calculate the tearout capacity of a bolt hole, ignoring deformation,
     as per AS4600 S5.3.2
@@ -108,7 +108,7 @@ def v_f_tearout_s5_3_2(*, t, e, f_u):
     return t * e * f_u
 
 
-def n_f_s5_3_3(*, d_f, s_f, a_n, f_u):
+def s5_3_3_n_f(*, d_f, s_f, a_n, f_u):
     """
     Calculate the net tension capacity of the section at bolt holes,
     as per AS4600 S5.3.3
@@ -129,7 +129,7 @@ def n_f_s5_3_3(*, d_f, s_f, a_n, f_u):
     return (0.9 + (0.1 * d_f / s_f)) * a_n * f_u
 
 
-def v_b_s5_3_4_2(*, alpha, c, d_f, t, f_u):
+def s5_3_4_2_v_b(*, alpha, c, d_f, t, f_u):
     """
     Calculate the bearing capacity of a bolt hole, ignoring deformation,
     as per AS4600 S5.4.3.2
@@ -151,7 +151,7 @@ def v_b_s5_3_4_2(*, alpha, c, d_f, t, f_u):
     return alpha * c * d_f * t * f_u
 
 
-def c_t5_3_4_2(*, d_f, t):
+def t5_3_4_2_c(*, d_f, t):
     """
     Calculate the bearing factor for a bolt hole as per AS4600 Table 5.3.4.2
 
@@ -175,7 +175,7 @@ def c_t5_3_4_2(*, d_f, t):
     return 1.8
 
 
-def n_t_s5_4_2_3(*, d_f, s_f, a_n, f_u, no_rows):
+def s5_4_2_3_n_t(*, d_f, s_f, a_n, f_u, no_rows):
     """
     Calculate the net tension capacity of a screwed connection,
     as per AS4600 S5.4.2.3.
@@ -203,7 +203,7 @@ def n_t_s5_4_2_3(*, d_f, s_f, a_n, f_u, no_rows):
     return min((2.5 * d_f / s_f) * n_t_net, n_t_net)
 
 
-def v_b_s5_4_2_4(*, d_f, t_1, t_2, f_u_1, f_u_2):
+def s5_4_2_4_v_b(*, d_f, t_1, t_2, f_u_1, f_u_2):
     """
     Calculate the bearing capacity of a screwed connection,
     as per AS4600 S5.4.2.4.
@@ -222,8 +222,8 @@ def v_b_s5_4_2_4(*, d_f, t_1, t_2, f_u_1, f_u_2):
         The ultimate tensile strength of the part not in contact with the screw head.
     """
 
-    c_1 = c_5_4_2_4(d_f=d_f, t=t_1)
-    c_2 = c_5_4_2_4(d_f=d_f, t=t_2)
+    c_1 = t5_4_2_4_c(d_f=d_f, t=t_1)
+    c_2 = t5_4_2_4_c(d_f=d_f, t=t_2)
 
     v_b_1 = c_1 * t_1 * d_f * f_u_1
     v_b_2 = c_2 * t_2 * d_f * f_u_2
@@ -237,7 +237,7 @@ def v_b_s5_4_2_4(*, d_f, t_1, t_2, f_u_1, f_u_2):
     return np.interp(t_ratio, ratio, vals)
 
 
-def c_5_4_2_4(*, d_f, t):
+def t5_4_2_4_c(*, d_f, t):
     """
     Calculate the bearing factor for a screw hole, as per AS4600 S5.4.2.4
     """
@@ -253,7 +253,7 @@ def c_5_4_2_4(*, d_f, t):
     return 2.0
 
 
-def phi_v_f_tearout_s5_4_2_5(*, f_u, f_y):
+def s5_4_2_5_v_fv_phi(*, f_u, f_y):
     """
     Calculate the partial safety factor for the tearout capacity of a
     screwed connection, as per AS4600 S5.4.2.5
@@ -272,7 +272,7 @@ def phi_v_f_tearout_s5_4_2_5(*, f_u, f_y):
     return 0.60
 
 
-def v_f_tearout_s5_4_2_5(*, t, e, f_u):
+def s5_4_2_5_v_fv(*, t, e, f_u):
     """
     Calculate the tearout capacity of a screwed connection,
     as per AS4600 S5.4.2.5
