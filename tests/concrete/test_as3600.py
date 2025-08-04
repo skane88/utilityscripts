@@ -6,7 +6,7 @@ from math import isclose
 
 import pytest
 
-from utilityscripts.concrete.as3600 import Concrete
+from utilityscripts.concrete.as3600 import Concrete, S816SectType, s8_1_6_1_a_st_min
 
 
 def test_concrete_init():
@@ -59,3 +59,24 @@ def test_f_cm(f_c, expected):
 )
 def test_f_cmi(f_cmi, expected):
     assert isclose(Concrete(f_c=f_cmi).f_cmi, expected, rel_tol=1e-6)
+
+
+@pytest.mark.parametrize(
+    "d_beam, d_reo, b_w, f_ct_f, f_sy, s_type, expected",
+    [(600, 534, 750, 3.39, 500, S816SectType.RECTANGULAR, 686)],
+)
+def test_s8_1_6_1_a_st_min(
+    d_beam, d_reo, b_w, f_ct_f, f_sy, s_type: S816SectType, expected
+):
+    assert isclose(
+        s8_1_6_1_a_st_min(
+            d_beam=d_beam,
+            d_reo=d_reo,
+            b_w=b_w,
+            f_ct_f=f_ct_f,
+            f_sy=f_sy,
+            sect_type=s_type,
+        ),
+        expected,
+        rel_tol=1e-3,
+    )
