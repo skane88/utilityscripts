@@ -141,6 +141,14 @@ class Tank:
         return self.height - self.freeboard
 
     @property
+    def perimeter(self) -> float:
+        """
+        The perimeter of the tank. In m.
+        """
+
+        return pi * self.d
+
+    @property
     def area(self):
         """
         The tank floor area. In m^2.
