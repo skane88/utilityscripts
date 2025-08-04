@@ -441,7 +441,8 @@ def s4_6_3_p1(
     Parameters
     ----------
     y : float
-        The height at which the pressure is considered.  In m.
+        The height at which the pressure is considered, taken from the surface of the liquid.
+        In m.
     d : float
         The diameter of the tank. In m.
     h_w : float
@@ -459,6 +460,18 @@ def s4_6_3_p1(
         The impulsive pressure in the tank wall due to inertial behaviour of the fluid.
         In kN/m provided units are met.
     """
+
+    if y > h_w:
+        raise ValueError(
+            "y must be within the tank. "
+            + f"{y=:.3e} > {h_w=:.3e}, implying the point is below the tank bottom"
+        )
+
+    if y < 0:
+        raise ValueError(
+            "y must be positive. "
+            + f"{y=:.3e} < 0, implying the point is above the water level"
+        )
 
     sg = gamma_l / GAMMA_L_WATER
 
@@ -498,7 +511,8 @@ def s4_6_3_p2(
     Parameters
     ----------
     y : float
-        The height at which the pressure is considered.  In m.
+        The height at which the pressure is considered. Taken from the surface of the liquid.
+        In m.
     d : float
         The diameter of the tank. In m.
     h_w : float
@@ -518,6 +532,18 @@ def s4_6_3_p2(
         The impulsive pressure in the tank wall due to inertial behaviour of the fluid.
         In kN/m provided units are met.
     """
+
+    if y > h_w:
+        raise ValueError(
+            "y must be within the tank. "
+            + f"{y=:.3e} > {h_w=:.3e}, implying the point is below the tank bottom"
+        )
+
+    if y < 0:
+        raise ValueError(
+            "y must be positive. "
+            + f"{y=:.3e} < 0, implying the point is above the water level"
+        )
 
     sg = gamma_l / GAMMA_L_WATER
     c1 = s4_6_2_1_c1(d=d, h_w=h_w)
