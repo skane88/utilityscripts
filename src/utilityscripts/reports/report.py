@@ -198,61 +198,82 @@ class Variable:
 
         return self._greek_symbols
 
-    @property
-    def _latex_value(self) -> str:
+    def _formatted_value(self, *, str_type: StrType) -> str:
         """
         Returns the value formatted into latex format.
 
         Notes
         -----
         - if value is None, 'None' is returned.
-        - If balue is a str and '\' detected it is assumed to be a
-          latex formatted string and returned unchanged.
+        - If value is a str and '\' detected it is assumed to be a
+          latex-formatted string and returned unchanged.
+
+        Parameters
+        ----------
+        str_type : StrType
+            The type of string to return. A text string or a latex string?
         """
 
         if isinstance(self.value, Iterable) and not isinstance(self.value, str):
             return _format_iterable(
-                self.value, max_elements=self.shorten_list, str_type=StrType.LATEX
+                self.value, max_elements=self.shorten_list, str_type=str_type
             )
 
         return _format_string(
             self.value,
             fmt_string=self.fmt_string,
-            str_type=StrType.LATEX,
+            str_type=str_type,
             greek_symbols=self.greek_symbols,
         )
 
-    @property
-    def _latex_symbol(self) -> str:
+    def _formatted_symbol(self, *, str_type: StrType) -> str:
         """
-        The symbol for the variable, in latex format.
+        The symbol for the variable formatted appropriately.
+
+        Notes
+        -----
+        - if symbol is None, '' is returned.
+        - If symbol is a str and '\' is detected it is assumed to be a
+          latex-formatted string and returned unchanged.
+
+        Parameters
+        ----------
+        str_type : StrType
+            The type of string to return. A text string or a latex string?
         """
 
         if self.symbol is None:
             return ""
 
         return _format_string(
-            self.symbol, greek_symbols=self.greek_symbols, str_type=StrType.LATEX
+            self.symbol, greek_symbols=self.greek_symbols, str_type=str_type
         )
 
-    @property
-    def _latex_units(self) -> str:
+    def _formatted_units(self, str_type: StrType) -> str:
         """
-        The units for the variable, in latex format.
+        The units for the variable formatted appropriately.
 
         Notes
         -----
-        - If '\' is detected in units it is assumed to be a
-            latex formatted string and returned unchanged.
+        - if units is None, '' is returned.
+        - If units is a str and '\' is detected it is assumed to be a
+          latex-formatted string and returned unchanged.
+
+        Parameters
+        ----------
+        str_type : StrType
+            The type of string to return. A text string or a latex string?
         """
 
         if self.units is None:
             return ""
 
-        unit_str = _format_string(self.units, str_type=StrType.LATEX)
+        unit_str = _format_string(self.units, str_type=str_type)
 
         if isinstance(self.value, str):
-            unit_str = "\\ " + unit_str
+            # add a space before the units where values are strings.
+
+            unit_str = "\\ " + unit_str if str_type == StrType.LATEX else " " + unit_str
 
         return unit_str
 
@@ -286,9 +307,19 @@ class Variable:
         ):
             return self.value._repr_mimebundle_()["text/latex"]
 
-        symbol = self._latex_symbol + " = " if self._latex_symbol != "" else ""
+        symbol = (
+            self._formatted_symbol(str_type=StrType.LATEX) + " = "
+            if self._formatted_symbol(str_type=StrType.LATEX) != ""
+            else ""
+        )
 
-        return "$" + symbol + self._latex_value + self._latex_units + "$"
+        return (
+            "$"
+            + symbol
+            + self._formatted_value(str_type=StrType.LATEX)
+            + self._formatted_units(str_type=StrType.LATEX)
+            + "$"
+        )
 
     def _repr_mimebundle_(self, include=None, exclude=None):
         """
