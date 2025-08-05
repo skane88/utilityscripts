@@ -214,6 +214,28 @@ def t5_3_4_2_c(*, d_f, t):
     return 1.8
 
 
+def s5_3_4_3(*, t, d_f, f_u):
+    """
+    Calculate the bearing capacity at a nominal 6mm deflection.
+
+    Parameters
+    ----------
+    t : float
+        The thickness of the plate, in m.
+    d_f : float
+        The nominal fastener diameter, in m.
+    f_u : float
+        The ultimate strength of the plate, in MPa.
+
+    Returns
+    -------
+    float
+        The capacity in kN
+    """
+
+    return (0.183 * t * 1000 + 1.53) * d_f * t * f_u * 1000
+
+
 def s5_4_2_3_n_t(*, d_f, s_f, a_n, f_u, no_rows):
     """
     Calculate the net tension capacity of a screwed connection,
