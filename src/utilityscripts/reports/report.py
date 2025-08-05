@@ -372,7 +372,7 @@ class Variable:
 
     def __str__(self):
         symbol = (
-            self._formatted_symbol(str_type=StrType.TEXT) + " = "
+            self._formatted_symbol(str_type=StrType.TEXT) + "="
             if self._formatted_symbol(str_type=StrType.TEXT) != ""
             else ""
         )
@@ -427,7 +427,7 @@ def _format_string(
     """
 
     if value is None:
-        return "\\text{None}"
+        return "\\text{None}" if str_type == StrType.LATEX else "None"
 
     if greek_symbols and value in GREEK_CHAR_MAP:
         if str_type == StrType.LATEX:
@@ -442,6 +442,7 @@ def _format_string(
     # next format scientific notation nicely.
     if (
         fmt_string is not None
+        and str_type == StrType.LATEX
         and ("e" in fmt_string.lower() or "g" in fmt_string.lower())
         and "e" in value_str.lower()
     ):
@@ -556,8 +557,12 @@ def _format_dict(
 
         key_str = f"{key}"
 
-        if str_type == StrType.LATEX and isinstance(key, str):
-            key_str = "\\text{" + key_str + "}"
+        if isinstance(key, str):
+            key_str = (
+                "\\text{" + key_str + "}"
+                if str_type == StrType.LATEX
+                else "'" + key_str + "'"
+            )
 
         val_str = key_str + f": {val}"
 
