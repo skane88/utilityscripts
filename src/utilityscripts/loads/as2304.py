@@ -4,6 +4,8 @@ Python code for liquid retaining tanks to AS2304
 
 from math import cosh, pi, sinh, tanh
 
+import numpy as np
+
 GAMMA_L_WATER = 10.0  # nominal density of water
 
 
@@ -107,6 +109,10 @@ class Tank:
         """
 
         return self._x_shell
+
+    @property
+    def t_shell(self):
+        return self._t_shell
 
     @property
     def w_roof(self):
@@ -577,6 +583,92 @@ class Tank:
 
         return p1 + p2
 
+    def s5_3_2_1_p_cr_wind(
+        self,
+        *,
+        t: float,
+        m: int,
+        buckling_length: float | None = None,
+        e: float = 200_000_000,
+        nu: float = 0.30,
+    ) -> float:
+        """
+        Calculate the critical wind buckling pressure on the tank.
+
+        Notes
+        -----
+        - The pressure is the external pressure at which buckling occurs, not the internal stresses.
+        - This should be iterated until the critical pressure is determined.
+
+        Parameters
+        ----------
+        m : float, optional
+            The number of buckling wavelengths around the tank.
+            If None, all m between 1 and max_m are trialled.
+        buckling_length : float, optional
+            The height of the buckle. Typically the height between stiffeners or the total tank height.
+            If None, the total height of the tank is used.
+            In m.
+        t : float
+            The thickness of the tank. In m.
+        e : float, optional
+            The Young's modulus of the tank. In kPa. For steel this is 200,000,000 kPa
+        nu : float, optional
+            Poisson's ratio of the tank. For steel this is 0.30.
+        max_m : int, optional
+            The maximum no. of wavelengths to consider. By default the first 1000.
+        """
+
+        if buckling_length is None:
+            buckling_length = self.height
+
+        return s5_3_2_1_p_c_wind_uniform(
+            m=m, buckling_length=buckling_length, r=self.radius, t=t, e=e, nu=nu
+        )
+
+    def s5_3_2_1_p_cr_space(
+        self,
+        *,
+        t: float,
+        buckling_length: float | None = None,
+        e: float = 200_000_000,
+        nu: float = 0.30,
+        max_m: int = 1000,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Calculate the critical wind buckling pressure for a range of m values.
+
+        Notes
+        -----
+        - The pressure is the external pressure at which buckling occurs, not the internal stresses.
+        - This calculates the pressure for multiple m values.
+
+        Parameters
+        ----------
+        buckling_length : float, optional
+            The height of the buckle. Typically the height between stiffeners or the total tank height.
+            If None, the total height of the tank is used.
+            In m.
+        t : float
+            The thickness of the tank. In m.
+        e : float, optional
+            The Young's modulus of the tank. In kPa. For steel this is 200,000,000 kPa
+        nu : float, optional
+            Poisson's ratio of the tank. For steel this is 0.30.
+        max_m : int, optional
+            The maximum no. of wavelengths to consider. By default the first 1000.
+        """
+
+        if buckling_length is None:
+            buckling_length = self.height
+
+        m_space = np.asarray(range(0, max_m)) + 1
+        p_cr_space = s5_3_2_1_p_c_wind_uniform(
+            m=m_space, buckling_length=buckling_length, r=self.radius, t=t, e=e, nu=nu
+        )
+
+        return m_space, p_cr_space
+
     def __repr__(self):
         return (
             f"{self.__class__.__name__} d={self.d:.3f}m, height={self.height:.3f}m, "
@@ -843,3 +935,52 @@ def s4_6_3_p2(
         * cosh((3.68 * (h_w - y)) / d)
         / cosh(3.68 * h_w / d)
     )
+
+
+def s5_3_2_1_p_c_wind_uniform(
+    *,
+    m: float,
+    buckling_length: float,
+    r: float,
+    t: float,
+    e: float = 200_000_000,
+    nu: float = 0.30,
+) -> float:
+    """
+    Calculate the critical buckling pressure of the tank under external compressive loading.
+
+    Notes
+    -----
+    - The pressure is the external pressure at which buckling occurs, not the internal stresses.
+    - This should be iterated until the critical pressure is determined.
+
+    Parameters
+    ----------
+    m : float
+        The number of buckling wavelengths around the tank.
+    buckling_length : float
+        The height of the buckle. Typically the height between stiffeners or the total tank height.
+        In m.
+    r : float
+        The radius of the tank. In m.
+    t : float
+        The thickness of the tank. In m.
+    e : float, optional
+        The Young's modulus of the tank. In kPa. For steel this is 200,000,000 kPa
+    nu : float, optional
+        Poisson's ratio of the tank. For steel this is 0.30.
+    """
+
+    r = r * 1000
+    t = t * 1000
+    buckling_length = buckling_length * 1000
+
+    alpha = (pi * r) / (m * buckling_length)
+    aa = (e * t**3) / (12 * (1 - nu**2) * r**3)
+    bb = (pi * r / buckling_length) ** 2
+    cc = (alpha + 1 / alpha) ** 2
+    dd = e * t / r
+    ee = (buckling_length / (pi * r)) ** 2
+    ff = alpha**4 / (alpha + 1 / alpha) ** 2
+
+    return aa * bb * cc + dd * ee * ff

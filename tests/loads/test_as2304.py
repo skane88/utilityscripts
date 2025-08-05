@@ -4,6 +4,7 @@ Tests of the AS2304 module
 
 from math import isclose
 
+import numpy as np
 import pytest
 
 from utilityscripts.loads.as2304 import Tank
@@ -189,3 +190,105 @@ def test_s4_6_3_p2(tank, y, k_p, z, s, expected):
 )
 def test_p_hydrostatic(tank, y, expected):
     assert isclose(tank.p_hydrostatic(y=y), expected, rel_tol=1e-2)
+
+
+app_e1_tank = Tank(
+    diameter=9.024 * 2,
+    height=7.000,
+    freeboard=0.000,
+    w_shell=100,
+    x_shell=3.500,
+    w_roof=10.0,
+    x_roof=7.000,
+)
+
+
+@pytest.mark.parametrize(
+    "tank, t, m, buckling_length, expected",
+    [
+        (
+            app_e1_tank,
+            0.0048,
+            20,
+            7.0,
+            1.61,
+        ),
+        (
+            app_e1_tank,
+            0.0048,
+            23,
+            7.0,
+            1.73,
+        ),
+        (
+            app_e1_tank,
+            0.0048,
+            22,
+            7.0,
+            1.66,
+        ),
+        (
+            app_e1_tank,
+            0.0048,
+            21,
+            7.0,
+            1.62,
+        ),
+        (
+            app_e1_tank,
+            0.0048,
+            19,
+            7.0,
+            1.64,
+        ),
+        (
+            app_e1_tank,
+            0.0048,
+            20,
+            None,
+            1.61,
+        ),
+    ],
+)
+def test_p_cr_wind(tank, t, m, buckling_length, expected):
+    assert isclose(
+        tank.s5_3_2_1_p_cr_wind(t=t, m=m, buckling_length=buckling_length),
+        expected,
+        rel_tol=1e-2,
+    )
+
+
+def test_p_cr_space():
+    m_space, p_space = app_e1_tank.s5_3_2_1_p_cr_space(
+        t=0.0048, buckling_length=7.0, max_m=1000
+    )
+
+    assert len(m_space) == 1000  # noqa: PLR2004
+    assert len(p_space) == 1000  # noqa: PLR2004
+
+    assert np.min(m_space) == 1
+    assert np.max(m_space) == 1000  # noqa: PLR2004
+
+    assert isclose(np.min(p_space), 1.61, rel_tol=1e-2)
+    assert isclose(p_space[19], 1.61, rel_tol=1e-2)
+    assert isclose(p_space[22], 1.73, rel_tol=1e-2)
+    assert isclose(p_space[21], 1.66, rel_tol=1e-2)
+    assert isclose(p_space[20], 1.62, rel_tol=1e-2)
+    assert isclose(p_space[18], 1.64, rel_tol=1e-2)
+
+    m_space, p_space = app_e1_tank.s5_3_2_1_p_cr_space(
+        t=0.0048, buckling_length=None, max_m=1000
+    )
+
+    assert len(m_space) == 1000  # noqa: PLR2004
+    assert len(p_space) == 1000  # noqa: PLR2004
+
+    assert np.min(m_space) == 1
+    assert np.max(m_space) == 1000  # noqa: PLR2004
+
+    assert isclose(np.min(p_space), 1.61, rel_tol=1e-2)
+    assert isclose(p_space[19], 1.61, rel_tol=1e-2)
+    assert isclose(p_space[22], 1.73, rel_tol=1e-2)
+    assert isclose(p_space[21], 1.66, rel_tol=1e-2)
+    assert isclose(p_space[20], 1.62, rel_tol=1e-2)
+    assert isclose(p_space[18], 1.64, rel_tol=1e-2)
