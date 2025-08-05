@@ -111,10 +111,6 @@ class Tank:
         return self._x_shell
 
     @property
-    def t_shell(self):
-        return self._t_shell
-
-    @property
     def w_roof(self):
         """
         The weight of the roof. In kN.
