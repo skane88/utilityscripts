@@ -984,3 +984,58 @@ def s5_3_2_1_p_c_wind_uniform(
     ff = alpha**4 / (alpha + 1 / alpha) ** 2
 
     return aa * bb * cc + dd * ee * ff
+
+
+def s5_3_3_lambda(*, r: float, t: float) -> float:
+    """
+    Calculate the meridional bending half wavelength for a circumferential stiffener.
+
+    Parameters
+    ----------
+    r : float
+        The tank radius. In m.
+    t : float
+        The tank thickness. In m.
+    """
+
+    return 2.4 * (r * t) ** 0.5
+
+
+def s5_3_3_f_des(*, p_t: float, r: float, h_s: float) -> float:
+    """
+    Calculate the design force for a circumferential stiffener.
+
+    Parameters
+    ----------
+    p_t : float
+        The design wind pressure on the tank. In kPa.
+    r : float
+        The tank radius. In m.
+    h_s : float
+        The effective wall height to include with the stiffener.
+    """
+
+    return p_t * r * h_s
+
+
+def s5_3_3_f_capacity(*, i_z: float, r_r: float, e: float = 200_000_000):
+    """
+    The elastic buckling capacity of a stiffener.
+
+    Parameters
+    ----------
+    i_z : float
+        The section moment of inertia about the vertical axis, of the stiffener element.
+        In m^4.
+    r_r : float
+        The radius to the centroid of the stiffener. In m.
+    e : float
+        The Young's modulus of the stiffener. In kPa.
+
+    Returns
+    -------
+    float
+        The buckling capacity of the stiffener, in kN.
+    """
+
+    return 3 * e * i_z / (r_r**2)

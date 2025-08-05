@@ -7,7 +7,12 @@ from math import isclose
 import numpy as np
 import pytest
 
-from utilityscripts.loads.as2304 import Tank
+from utilityscripts.loads.as2304 import (
+    Tank,
+    s5_3_3_f_capacity,
+    s5_3_3_f_des,
+    s5_3_3_lambda,
+)
 
 tank_50_30 = Tank(
     diameter=50.0,
@@ -292,3 +297,20 @@ def test_p_cr_space():
     assert isclose(p_space[21], 1.66, rel_tol=1e-2)
     assert isclose(p_space[20], 1.62, rel_tol=1e-2)
     assert isclose(p_space[18], 1.64, rel_tol=1e-2)
+
+
+def test_s5_3_3():
+    r = 4.395
+    t = 0.0029
+
+    assert isclose(s5_3_3_lambda(r=r, t=t), 0.271, rel_tol=1e-2)
+
+    h_s = 0.1725
+
+    assert isclose(s5_3_3_f_des(p_t=1.13, r=r, h_s=h_s), 0.857, rel_tol=1e-2)
+
+    i_z = 2.8e-8
+    r_r = r + 0.025
+    e = 200_000_000
+
+    assert isclose(s5_3_3_f_capacity(i_z=i_z, r_r=r_r, e=e), 0.857, rel_tol=1e-2)
