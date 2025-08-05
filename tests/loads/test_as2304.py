@@ -194,7 +194,7 @@ def test_s4_6_3_p2(tank, y, k_p, z, s, expected):
     ],
 )
 def test_p_hydrostatic(tank, y, expected):
-    assert isclose(tank.p_hydrostatic(y=y), expected, rel_tol=1e-2)
+    assert isclose(tank.hs_hydrostatic(y=y), expected, rel_tol=1e-2)
 
 
 app_e1_tank = Tank(

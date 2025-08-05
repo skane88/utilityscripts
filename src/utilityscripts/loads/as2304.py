@@ -221,9 +221,14 @@ class Tank:
 
         return self.gamma_l * y
 
-    def p_hydrostatic(self, y: float) -> float:
+    def hs_hydrostatic(self, y: float) -> float:
         """
-        Calculate the hydrostatic pressure in the tank wall.
+        Calculate the hydrostatic hoop force (stress) in the tank wall.
+
+        Notes
+        -----
+        - This is a force / length, not a true stress.
+        - To get the hoop stress divide by the wall thickness.
 
         Parameters
         ----------
