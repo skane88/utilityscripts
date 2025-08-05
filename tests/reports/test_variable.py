@@ -52,13 +52,13 @@ def test_variable():
         (Variable([1, 2, 3]), "[1, 2, 3]"),
         (Variable({"a": 1, "b": 2, "c": 3}), "{'a': 1, 'b': 2, 'c': 3}"),
         (Variable({1, 2, 3}), "{1, 2, 3}"),
-        (Variable(list(range(0, 100))), "[1, 2, 3, ..., 99]"),
+        (Variable(list(range(0, 100))), "[0, 1, 2, 3, 4, ..., 99]"),
         (
             Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, shorten_list=4),
             "{a: 1, b: 2, c: 3, ..., f: 6}",
         ),
         (Variable(set(range(0, 100))), "{0, 1, 2, 3, 4, ..., 99}"),
-        (Variable(set(range(0, 100))), "{1, 2, 3, ..., 99}"),
+        (Variable(set(range(0, 100)), shorten_list=3), "{0, 1, ..., 99}"),
     ],
 )
 def test_variable_string(val, expected):

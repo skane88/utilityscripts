@@ -371,20 +371,17 @@ class Variable:
         return bundle
 
     def __str__(self):
-        symbol_str = f"{self.symbol}=" if self.symbol else ""
-
-        value_str = (
-            f"{self.value:{self.fmt_string}}"
-            if self.fmt_string is not None
-            else f"{self.value}"
+        symbol = (
+            self._formatted_symbol(str_type=StrType.TEXT) + " = "
+            if self._formatted_symbol(str_type=StrType.TEXT) != ""
+            else ""
         )
 
-        unit_str = f"{self.units}" if self.units else ""
+        value = self._formatted_value(str_type=StrType.TEXT)
 
-        if isinstance(self.value, str) and unit_str != "":
-            unit_str = " " + unit_str
+        unit = self._formatted_units(str_type=StrType.TEXT)
 
-        return symbol_str + value_str + unit_str
+        return symbol + value + unit
 
     def __repr__(self):
         return (
@@ -453,7 +450,7 @@ def _format_string(
 
         value_str = f"{mantissa} \\times 10^{{{exponent}}}"
 
-    if isinstance(value, str):
+    if isinstance(value, str) and str_type == StrType.LATEX:
         value_str = "\\text{" + value_str + "}"
 
     return value_str.replace("%", "\\%")
