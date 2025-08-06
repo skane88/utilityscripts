@@ -57,10 +57,23 @@ def test_variable():
             Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}),
             "{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}",
         ),
+        (Variable(list(range(0, 7))), "[0, 1, 2, 3, 4, ..., 6]"),
+        (
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}),
+            "{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}",
+        ),
         (Variable(list(range(0, 100))), "[0, 1, 2, 3, 4, ..., 99]"),
         (
             Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, shorten_list=4),
             "{'a': 1, 'b': 2, 'c': 3, ..., 'f': 6}",
+        ),
+        (
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5}, shorten_list=4),
+            "{'a': 1, 'b': 2, 'c': 3, ..., 'e': 5}",
+        ),
+        (
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4}, shorten_list=4),
+            "{'a': 1, 'b': 2, 'c': 3, 'd': 4}",
         ),
         (Variable(set(range(0, 100))), "{0, 1, 2, 3, 4, ..., 99}"),
         (Variable(set(range(0, 100)), shorten_list=3), "{0, 1, ..., 99}"),

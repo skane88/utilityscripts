@@ -513,10 +513,10 @@ def _format_iterable(
 
             if i == 0:
                 values_str = val_str
-            elif i + 1 <= max_elements:
+            elif i + 1 < max_elements or i + 1 == len(value):
                 values_str += ", " + val_str
-            elif i + 1 == len(value) and len(value) > max_elements:
-                values_str += ", ..., " + val_str
+            elif i + 1 == max_elements and len(value) >= max_elements:
+                values_str += ", ..."
             else:
                 continue
 
@@ -568,10 +568,10 @@ def _format_dict(
 
         if i == 0:
             values_str = val_str
-        elif i + 1 <= max_elements:
+        elif i + 1 < max_elements or i + 1 == len(value):
             values_str += ", " + val_str
-        elif i + 1 == len(value) and len(value) > max_elements:
-            values_str += ", ..., " + val_str
+        elif i + 1 == max_elements and len(value) >= max_elements:
+            values_str += ", ..."
         else:
             continue
 
