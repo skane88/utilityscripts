@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from math import cos, log10, radians
+from math import cos, degrees, log10, radians
 from numbers import Real
 from pathlib import Path
 
@@ -1297,6 +1297,7 @@ def a5_2_1_c_pb(
     ----------
     theta : float
         The angle of the point under consideration. 0degrees is the windward location.
+        Valid in the range 0-180deg.
     c : float
         The height of the tank or bin.
     b : float
@@ -1312,6 +1313,11 @@ def a5_2_1_c_pb(
 
     if not use_radians:
         theta = radians(theta)
+
+    if theta < 0.0 or theta > radians(180.0):
+        raise ValueError(
+            f"Angle must be in the range of 0-180deg. Current angle is {degrees(theta):.1f}."
+        )
 
     c_p1 = (
         -0.5
