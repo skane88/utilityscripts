@@ -500,8 +500,12 @@ def _format_iterable(
         right_bracket = "}"
 
     if str_type == StrType.LATEX:
-        left_bracket = "\\left" + left_bracket
-        right_bracket = "\\right" + right_bracket
+        left_bracket = (
+            "\\left" + ("" if isinstance(value, list) else "\\") + left_bracket
+        )
+        right_bracket = (
+            "\\right" + ("" if isinstance(value, list) else "\\") + right_bracket
+        )
 
     if max_elements is None:
         max_elements = len(value)

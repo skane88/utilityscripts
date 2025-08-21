@@ -126,25 +126,25 @@ def test_result_error():
         (Variable("abc", units="m"), "$\\text{abc}\\ \\text{m}$"),
         (Variable(None, symbol="a"), "$\\text{a} = \\text{None}$"),
         (Variable([]), "$\\left[\\right]$"),
-        (Variable(set()), "$\\left{\\right}$"),
-        (Variable({}), "$\\left{\\right}$"),
+        (Variable(set()), "$\\left\\{\\right\\}$"),
+        (Variable({}), "$\\left\\{\\right\\}$"),
         (Variable([1, 2, 3]), "$\\left[1, 2, 3\\right]$"),
         (Variable(list(range(0, 6))), "$\\left[0, 1, 2, 3, 4, 5\\right]$"),
         (
             Variable({"a": 1, "b": 2, "c": 3}),
-            "$\\left{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3\\right}$",
+            "$\\left\\{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3\\right\\}$",
         ),
         (
             Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}),
-            "$\\left{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3, \\text{d}: 4, \\text{e}: 5, \\text{f}: 6\\right}$",
+            "$\\left\\{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3, \\text{d}: 4, \\text{e}: 5, \\text{f}: 6\\right\\}$",
         ),
-        (Variable({1, 2, 3}), "$\\left{1, 2, 3\\right}$"),
+        (Variable({1, 2, 3}), "$\\left\\{1, 2, 3\\right\\}$"),
         (Variable(list(range(0, 100))), "$\\left[0, 1, 2, 3, 4, ..., 99\\right]$"),
         (
             Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, shorten_list=4),
-            "$\\left{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3, ..., \\text{f}: 6\\right}$",
+            "$\\left\\{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3, ..., \\text{f}: 6\\right\\}$",
         ),
-        (Variable(set(range(0, 100))), "$\\left{0, 1, 2, 3, 4, ..., 99\\right}$"),
+        (Variable(set(range(0, 100))), "$\\left\\{0, 1, 2, 3, 4, ..., 99\\right\\}$"),
     ],
 )
 def test_latex_string(val, expected):
