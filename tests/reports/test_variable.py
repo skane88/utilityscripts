@@ -77,7 +77,7 @@ def test_variable():
         ),
         (Variable(set(range(0, 100))), "{0, 1, 2, 3, 4, ..., 99}"),
         (Variable(set(range(0, 100)), shorten_list=3), "{0, 1, ..., 99}"),
-        (Variable("alpha"), "α"),
+        (Variable("alpha"), "α"),  # noqa: RUF001
     ],
 )
 def test_variable_string(val, expected):
@@ -147,7 +147,7 @@ def test_result_error():
         ),
         (Variable(set(range(0, 100))), "$\\left\\{0, 1, 2, 3, 4, ..., 99\\right\\}$"),
         (Variable("alpha"), "$\\alpha$"),
-        (Variable("Rho"), "$Ρ$"),
+        (Variable("Rho"), "$Ρ$"),  # noqa: RUF001
     ],
 )
 def test_latex_string(val, expected):
