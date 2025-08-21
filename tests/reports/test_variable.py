@@ -78,6 +78,12 @@ def test_variable():
         (Variable(set(range(0, 100))), "{0, 1, 2, 3, 4, ..., 99}"),
         (Variable(set(range(0, 100)), shorten_list=3), "{0, 1, ..., 99}"),
         (Variable("alpha"), "α"),  # noqa: RUF001
+        (Variable([["a", "b", "c"], "d"]), "[['a', 'b', 'c'], 'd']"),
+        (Variable([[["a", "b"], "c"], "d"]), "[[[...], 'c'], 'd']"),
+        (
+            Variable([[[["a"], "b"], "c"], "d"], max_depth=5),
+            "[[[['a'], 'b'], 'c'], 'd']",
+        ),
     ],
 )
 def test_variable_string(val, expected):
