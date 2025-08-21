@@ -51,72 +51,72 @@ GREEK_CHAR_MAP = {
     "\\psi": ("ψ", "\\psi"),
     "omega": ("ω", "\\omega"),
     "\\omega": ("ω", "\\omega"),
-    "Alpha": ("Α", "\\Alpha"),  # noqa: RUF001
-    "ALPHA": ("Α", "\\Alpha"),  # noqa: RUF001
-    "\\Alpha": ("Α", "\\Alpha"),  # noqa: RUF001
-    "Beta": ("Β", "\\Beta"),  # noqa: RUF001
-    "BETA": ("Β", "\\Beta"),  # noqa: RUF001
-    "\\Beta": ("Β", "\\Beta"),  # noqa: RUF001
+    "Alpha": ("Α"),  # noqa: RUF001
+    "ALPHA": ("Α"),  # noqa: RUF001
+    "\\Alpha": ("Α"),  # noqa: RUF001
+    "Beta": ("Β"),  # noqa: RUF001
+    "BETA": ("Β"),  # noqa: RUF001
+    "\\Beta": ("Β"),  # noqa: RUF001
     "Gamma": ("Γ", "\\Gamma"),
     "GAMMA": ("Γ", "\\Gamma"),
     "\\Gamma": ("Γ", "\\Gamma"),
     "Delta": ("Δ", "\\Delta"),
     "DELTA": ("Δ", "\\Delta"),
     "\\Delta": ("Δ", "\\Delta"),
-    "Epsilon": ("Ε", "\\Epsilon"),  # noqa: RUF001
-    "EPSILON": ("Ε", "\\Epsilon"),  # noqa: RUF001
-    "\\Epsilon": ("Ε", "\\Epsilon"),  # noqa: RUF001
-    "Zeta": ("Ζ", "\\Zeta"),  # noqa: RUF001
-    "ZETA": ("Ζ", "\\Zeta"),  # noqa: RUF001
-    "\\Zeta": ("Ζ", "\\Zeta"),  # noqa: RUF001
-    "Eta": ("Η", "\\Eta"),  # noqa: RUF001
-    "ETA": ("Η", "\\Eta"),  # noqa: RUF001
-    "\\Eta": ("Η", "\\Eta"),  # noqa: RUF001
+    "Epsilon": ("Ε"),  # noqa: RUF001
+    "EPSILON": ("Ε"),  # noqa: RUF001
+    "\\Epsilon": ("Ε"),  # noqa: RUF001
+    "Zeta": ("Ζ"),  # noqa: RUF001
+    "ZETA": ("Ζ"),  # noqa: RUF001
+    "\\Zeta": ("Ζ"),  # noqa: RUF001
+    "Eta": ("Η"),  # noqa: RUF001
+    "ETA": ("Η"),  # noqa: RUF001
+    "\\Eta": ("Η"),  # noqa: RUF001
     "Theta": ("Θ", "\\Theta"),
     "THETA": ("Θ", "\\Theta"),
     "\\Theta": ("Θ", "\\Theta"),
-    "Iota": ("Ι", "\\Iota"),  # noqa: RUF001
-    "IOTA": ("Ι", "\\Iota"),  # noqa: RUF001
-    "\\Iota": ("Ι", "\\Iota"),  # noqa: RUF001
-    "Kappa": ("Κ", "\\Kappa"),  # noqa: RUF001
-    "KAPPA": ("Κ", "\\Kappa"),  # noqa: RUF001
-    "\\Kappa": ("Κ", "\\Kappa"),  # noqa: RUF001
+    "Iota": ("Ι"),  # noqa: RUF001
+    "IOTA": ("Ι"),  # noqa: RUF001
+    "\\Iota": ("Ι"),  # noqa: RUF001
+    "Kappa": ("Κ"),  # noqa: RUF001
+    "KAPPA": ("Κ"),  # noqa: RUF001
+    "\\Kappa": ("Κ"),  # noqa: RUF001
     "Lambda": ("Λ", "\\Lambda"),
     "LAMBDA": ("Λ", "\\Lambda"),
     "\\Lambda": ("Λ", "\\Lambda"),
-    "Mu": ("Μ", "\\Mu"),  # noqa: RUF001
-    "MU": ("Μ", "\\Mu"),  # noqa: RUF001
-    "\\Mu": ("Μ", "\\Mu"),  # noqa: RUF001
-    "Nu": ("Ν", "\\Nu"),  # noqa: RUF001
-    "NU": ("Ν", "\\Nu"),  # noqa: RUF001
-    "\\Nu": ("Ν", "\\Nu"),  # noqa: RUF001
+    "Mu": ("Μ"),  # noqa: RUF001
+    "MU": ("Μ"),  # noqa: RUF001
+    "\\Mu": ("Μ"),  # noqa: RUF001
+    "Nu": ("Ν"),  # noqa: RUF001
+    "NU": ("Ν"),  # noqa: RUF001
+    "\\Nu": ("Ν"),  # noqa: RUF001
     "Xi": ("Ξ", "\\Xi"),
     "XI": ("Ξ", "\\Xi"),
     "\\Xi": ("Ξ", "\\Xi"),
-    "Omicron": ("Ο", "\\Omicron"),  # noqa: RUF001
-    "OMICRON": ("Ο", "\\Omicron"),  # noqa: RUF001
-    "\\Omicron": ("Ο", "\\Omicron"),  # noqa: RUF001
+    "Omicron": ("Ο"),  # noqa: RUF001
+    "OMICRON": ("Ο"),  # noqa: RUF001
+    "\\Omicron": ("Ο"),  # noqa: RUF001
     "Pi": ("Π", "\\Pi"),
     "PI": ("Π", "\\Pi"),
     "\\Pi": ("Π", "\\Pi"),
-    "Rho": ("Ρ", "\\Rho"),  # noqa: RUF001
-    "RHO": ("Ρ", "\\Rho"),  # noqa: RUF001
-    "\\Rho": ("Ρ", "\\Rho"),  # noqa: RUF001
+    "Rho": ("Ρ"),  # noqa: RUF001
+    "RHO": ("Ρ"),  # noqa: RUF001
+    "\\Rho": ("Ρ"),  # noqa: RUF001
     "Sigma": ("Σ", "\\Sigma"),
     "SIGMA": ("Σ", "\\Sigma"),
     "\\Sigma": ("Σ", "\\Sigma"),
-    "Tau": ("Τ", "\\Tau"),  # noqa: RUF001
-    "TAU": ("Τ", "\\Tau"),  # noqa: RUF001
-    "\\Tau": ("Τ", "\\Tau"),  # noqa: RUF001
+    "Tau": ("Τ"),  # noqa: RUF001
+    "TAU": ("Τ"),  # noqa: RUF001
+    "\\Tau": ("Τ"),  # noqa: RUF001
     "Upsilon": ("Υ", "\\Upsilon"),  # noqa: RUF001
     "UPSIGMA": ("Υ", "\\Upsilon"),  # noqa: RUF001
     "\\Upsilon": ("Υ", "\\Upsilon"),  # noqa: RUF001
     "Phi": ("Φ", "\\Phi"),
     "PHI": ("Φ", "\\Phi"),
     "\\Phi": ("Φ", "\\Phi"),
-    "Chi": ("Χ", "\\Chi"),  # noqa: RUF001
-    "CHI": ("Χ", "\\Chi"),  # noqa: RUF001
-    "\\Chi": ("Χ", "\\Chi"),  # noqa: RUF001
+    "Chi": ("Χ"),  # noqa: RUF001
+    "CHI": ("Χ"),  # noqa: RUF001
+    "\\Chi": ("Χ"),  # noqa: RUF001
     "Psi": ("Ψ", "\\Psi"),
     "PSI": ("Ψ", "\\Psi"),
     "\\Psi": ("Ψ", "\\Psi"),

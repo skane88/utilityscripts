@@ -430,9 +430,15 @@ def _format_string(
         return "\\text{None}" if str_type == StrType.LATEX else "None"
 
     if greek_symbols and value in GREEK_CHAR_MAP:
+        mapping = GREEK_CHAR_MAP[value]
+
+        if len(mapping) == 1:
+            return mapping[0]
+
         if str_type == StrType.LATEX:
-            return GREEK_CHAR_MAP[value][1]
-        return GREEK_CHAR_MAP[value][0]
+            return mapping[1]
+
+        return mapping[0]
 
     if isinstance(value, str) and "\\" in value:
         return value
