@@ -599,12 +599,12 @@ class Result:
         self,
         value: Any,
         *,
-        description: str | None = None,
         symbol: str | None = None,
-        eqn: str | None = None,
-        data: dict[str, Any] | None = None,
         units: str = "",
         fmt_string: str = ".3e",
+        description: str | None = None,
+        eqn: str | None = None,
+        data: list[Any] | None = None,
         text_template: str | None = None,
         latex_template: str | None = None,
     ):
@@ -615,18 +615,18 @@ class Result:
         ----------
         value : Any
             The result stored in the Result object.
-        description : str | None, optional
-            A description of the Result object.
         symbol : str | None, optional
             The symbol used for the result.
-        eqn : str | None, optional
-            The equation used to generate the result.
-        data : dict[str, Any] | None, optional
-            Any extra data stored in the Result object.
         units : str, optional
             The units of the result.
         fmt_string : str, optional
             The format string used to display the result.
+        description : str | None, optional
+            A description of the Result object.
+        eqn : str | None, optional
+            The equation used to generate the result.
+        data : list[Any] | None, optional
+            Any extra data stored in the Result object.
         text_template : str | None, optional
             A template for the text representation of the Result object.
         latex_template : str | None, optional
@@ -650,6 +650,30 @@ class Result:
         """
 
         return self._value
+
+    @property
+    def symbol(self) -> str | None:
+        """
+        The symbol used for the Result object.
+        """
+
+        return self._symbol
+
+    @property
+    def units(self) -> str:
+        """
+        The units of the result.
+        """
+
+        return self._units
+
+    @property
+    def fmt_string(self) -> str:
+        """
+        The format string used to display the result.
+        """
+
+        return self._fmt_string
 
     @property
     def str_value(self) -> str:
@@ -679,36 +703,12 @@ class Result:
         return self._description
 
     @property
-    def symbol(self) -> str | None:
-        """
-        The symbol used for the Result object.
-        """
-
-        return self._symbol
-
-    @property
-    def data(self) -> dict[str, Any] | None:
+    def data(self) -> list[Variable] | None:
         """
         Any extra data stored in the Result object.
         """
 
         return self._data
-
-    @property
-    def units(self) -> str:
-        """
-        The units of the result.
-        """
-
-        return self._units
-
-    @property
-    def fmt_string(self) -> str:
-        """
-        The format string used to display the result.
-        """
-
-        return self._fmt_string
 
     @property
     def variables(self) -> dict[str, Variable]:
