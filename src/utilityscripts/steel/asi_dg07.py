@@ -97,3 +97,67 @@ def phi_n_c2(
     beta = 1.5 if h_ef < 280.0 else 1.67  # noqa: PLR2004
 
     return phi_po * alpha * (f_c**0.5) * (h_ef**beta) * (a_n / a_no_calc) * 1e-3
+
+
+def chk08_y2_pfc(*, b_fc1: float, d_h: float) -> float:
+    """
+    Calculate the yield line parameter y_2 for a PFC.
+
+    Parameters
+    ----------
+    b_fc1 : float
+        The clear flange width of the PFC
+    d_h : float
+        The hole diameter in the baseplate.
+    """
+
+    return ((2 * b_fc1 - d_h) * b_fc1) ** 0.5
+
+
+def chk08_alpha_pfc(
+    *, b_fc1: float, d_h: float, x_2: float, a_b: float, s_p: float
+) -> float:
+    """
+    Calculate the yield line parameter alpha for a PFC.
+
+    Parameters
+    ----------
+    b_fc1 : float
+        The clear flange width of the PFC
+    d_h : float
+        The hole diameter in the baseplate.
+    x_2 : float
+        The distance from the face of the PFC web to the centreline of the bolthole
+    a_b : float
+        The distance from the bolthole to the inside face of the flange
+    s_p : float
+        The pitch of the bolts.
+    """
+
+    y_2 = chk08_y2_pfc(b_fc1=b_fc1, d_h=d_h)
+    y_c = min(a_b, y_2)
+
+    alpha_a = (2 * b_fc1**2 - b_fc1 * d_h + y_2**2) / (y_2 * x_2)
+    alpha_b = (b_fc1 * (2 * b_fc1 - d_h) * (a_b + y_2) + (y_2 + a_b) * a_b * y_2) / (
+        2 * a_b * y_2 * x_2
+    )
+
+    if y_2 < s_p / 2 and y_2 > a_b:
+        return alpha_b
+
+    if y_2 < s_p / 2:
+        return min(alpha_a, alpha_b)
+
+    y_d = min(a_b, ((2 * b_fc1 - d_h) / 2) ** 0.5)
+
+    alpha_c = (4 * b_fc1**2 - 2 * d_h * b_fc1 + 2 * y_c**2 + s_p * y_c) / (
+        4 * y_c * x_2
+    )
+    alpha_d = (2 * b_fc1 * x_2 - d_h * x_2 + 2 * y_d**2 + s_p * y_d - d_h * y_d) / (
+        2 * y_d * x_2
+    )
+    alpha_e = (b_fc1 * x_2 - d_h * x_2 + 2 * a_b**2 + a_b * s_p - a_b * d_h) / (
+        2 * a_b * x_2
+    )
+
+    return min(alpha_c, alpha_d, alpha_e)
