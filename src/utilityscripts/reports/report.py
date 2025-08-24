@@ -73,6 +73,7 @@ class Variable:
         shorten_list: int | None = 6,
         use_repr_latex: bool = True,
         greek_symbols: bool = True,
+        max_depth: int = 2,
     ):
         """
         Initialise a Variable object.
@@ -104,6 +105,9 @@ class Variable:
         greek_symbols : bool, optional
             Convert greek character names into their latex equivalents.
             Eg 'alpha' to '\\alpha'
+        max_depth : int, optional
+            How deep should iterables be formated before their contents are replaced
+            with `...`
         """
 
         self._value = value
@@ -114,6 +118,7 @@ class Variable:
         self._shorten_list = shorten_list
         self._use_repr_latex = use_repr_latex
         self._greek_symbols = greek_symbols
+        self._max_depth = max_depth
 
         if (
             self._fmt_string is not None
@@ -197,6 +202,15 @@ class Variable:
         """
 
         return self._greek_symbols
+
+    @property
+    def max_depth(self) -> int:
+        """
+        How deep should iterables be formatted before their contents are replaced with
+        '...'
+        """
+
+        return self._max_depth
 
     def _formatted_value(self, *, str_type: StrType) -> str:
         """
