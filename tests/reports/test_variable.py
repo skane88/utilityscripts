@@ -43,8 +43,8 @@ def test_variable():
         (Variable(1, symbol="a", units="m", fmt_string=".2f"), "a=1.00m"),
         (Variable(1, symbol="a", units="m", fmt_string=".2e"), "a=1.00e+00m"),
         (Variable(2, fmt_string=None), "2"),
-        (Variable("abc"), "abc"),
-        (Variable("abc", units="m"), "abc m"),
+        (Variable("abc"), "'abc'"),
+        (Variable("abc", units="m"), "'abc' m"),
         (Variable(None, symbol="a"), "a=None"),
         (Variable([]), "[]"),
         (Variable(set()), "{}"),
@@ -52,6 +52,7 @@ def test_variable():
         (Variable([1, 2, 3]), "[1, 2, 3]"),
         (Variable({"a": 1, "b": 2, "c": 3}), "{'a': 1, 'b': 2, 'c': 3}"),
         (Variable({1, 2, 3}), "{1, 2, 3}"),
+        (Variable(["a", "b", "c"]), "['a', 'b', 'c']"),
         (Variable(list(range(0, 6))), "[0, 1, 2, 3, 4, 5]"),
         (
             Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}),
@@ -77,7 +78,7 @@ def test_variable():
         ),
         (Variable(set(range(0, 100))), "{0, 1, 2, 3, 4, ..., 99}"),
         (Variable(set(range(0, 100)), shorten_list=3), "{0, 1, ..., 99}"),
-        (Variable("alpha"), "α"),  # noqa: RUF001
+        (Variable("alpha"), "'α'"),  # noqa: RUF001
         (Variable([["a", "b", "c"], "d"]), "[['a', 'b', 'c'], 'd']"),
         (Variable([[["a", "b"], "c"], "d"]), "[[[...], 'c'], 'd']"),
         (

@@ -3,6 +3,7 @@ A file to store results along with some reporting information.
 """
 
 from enum import StrEnum
+from numbers import Number
 from typing import Any, Iterable
 
 from jinja2 import Environment
@@ -228,16 +229,13 @@ class Variable:
             The type of string to return. A text string or a latex string?
         """
 
-        if isinstance(self.value, Iterable) and not isinstance(self.value, str):
-            return _format_iterable(
-                self.value, max_elements=self.shorten_list, str_type=str_type
-            )
-
-        return _format_string(
+        return _format_any(
             self.value,
             fmt_string=self.fmt_string,
             str_type=str_type,
             greek_symbols=self.greek_symbols,
+            max_elements=self.shorten_list,
+            max_depth=self.max_depth,
         )
 
     def _formatted_symbol(self, *, str_type: StrType) -> str:
@@ -260,7 +258,10 @@ class Variable:
             return ""
 
         return _format_string(
-            self.symbol, greek_symbols=self.greek_symbols, str_type=str_type
+            self.symbol,
+            greek_symbols=self.greek_symbols,
+            str_type=str_type,
+            quote_strings=False,
         )
 
     def _formatted_units(self, str_type: StrType) -> str:
@@ -282,7 +283,7 @@ class Variable:
         if self.units is None:
             return ""
 
-        unit_str = _format_string(self.units, str_type=str_type)
+        unit_str = _format_string(self.units, str_type=str_type, quote_strings=False)
 
         if isinstance(self.value, str):
             # add a space before the units where values are strings.
@@ -406,12 +407,15 @@ class Variable:
         )
 
 
-def _format_string(
+def _format_any(
     value: Any,
     *,
     fmt_string: str | None = None,
     greek_symbols: bool = False,
     str_type: StrType = StrType.TEXT,
+    quote_strings: bool = True,
+    max_elements: int = 6,
+    max_depth: int = 2,
 ) -> str:
     """
     Returns a simple value formatted as required.
@@ -419,8 +423,9 @@ def _format_string(
     Notes
     -----
     - if value is None, 'None' is returned.
-    - If balue is a str and '\' detected it is assumed to be a
+    - If value is a str and '\' detected it is assumed to be a
       latex formatted string and returned unchanged.
+    - If the type is not None, str, Number or Iterable, str() is called on the object.
 
     Parameters
     ----------
@@ -433,6 +438,17 @@ def _format_string(
         Should greek characters be replaced with appropriate alternatives?
     str_type : StrType, optional
         What sort of string is being returned? A text string or a latex string?
+    quote_strings: bool, optional
+        Append '' around strings?
+        Only applies where str_type == StrType.TEXT
+    max_elements : int, optional
+        Maximum number of elements to show in the output string.
+        If the iterable has more elements than this, the string will be
+        truncated with '...' and show the last element.
+        Default is 6.
+    max_depth : int, optional
+        How deep should iterables be formated before their contents are replaced
+        with `...`
 
     Returns
     -------
@@ -443,19 +459,48 @@ def _format_string(
     if value is None:
         return "\\text{None}" if str_type == StrType.LATEX else "None"
 
-    if greek_symbols and value in GREEK_CHAR_MAP:
-        mapping = GREEK_CHAR_MAP[value]
+    if isinstance(value, str):
+        return _format_string(
+            value=value,
+            fmt_string=fmt_string,
+            greek_symbols=greek_symbols,
+            str_type=str_type,
+        )
 
-        if len(mapping) == 1:
-            return mapping[0]
+    if isinstance(value, Iterable):
+        return _format_iterable(
+            value=value,
+            max_elements=max_elements,
+            max_depth=max_depth,
+            str_type=str_type,
+        )
 
-        if str_type == StrType.LATEX:
-            return mapping[1]
+    if isinstance(value, Number):
+        return _format_number(value=value, fmt_string=fmt_string, str_type=str_type)
 
-        return mapping[0]
+    return "'" + str(value) + "'"
 
-    if isinstance(value, str) and "\\" in value:
-        return value
+
+def _format_number(
+    value, *, fmt_string: str | None = None, str_type: StrType = StrType.TEXT
+) -> str:
+    """
+    Returns a value formatted as required.
+
+    Parameters
+    ----------
+    value : Any
+        The value to format into latex format.
+    fmt_string : str | None, optional
+        A format string to use for formatting the value.
+    str_type : StrType, optional
+        What sort of string is being returned? A text string or a latex string?
+
+    Returns
+    -------
+    str
+        The value formatted as a string.
+    """
 
     value_str = f"{value:{fmt_string}}" if fmt_string is not None else f"{value}"
 
@@ -474,11 +519,78 @@ def _format_string(
     if isinstance(value, str) and str_type == StrType.LATEX:
         value_str = "\\text{" + value_str + "}"
 
-    return value_str.replace("%", "\\%")
+    if str_type == StrType.LATEX:
+        value_str = value_str.replace("%", "\\%")
+
+    return value_str
+
+
+def _format_string(
+    value: Any,
+    *,
+    fmt_string: str | None = None,
+    greek_symbols: bool = False,
+    quote_strings: bool = True,
+    str_type: StrType = StrType.TEXT,
+) -> str:
+    """
+    Returns a simple value formatted as required.
+
+    Notes
+    -----
+    - if value is None, 'None' is returned.
+    - If value is a str and '\' detected it is assumed to be a
+      latex formatted string and returned unchanged.
+
+    Parameters
+    ----------
+    value : Any
+        The value to format into latex format.
+    fmt_string : str | None, optional
+        A format string to use for formatting the value.
+        If None, str() is used on the value.
+    greek_symbols : bool, optional
+        Should greek characters be replaced with appropriate alternatives?
+    quote_strings: bool, optional
+        Append '' around strings?
+        Only applies where str_type == StrType.TEXT
+    str_type : StrType, optional
+        What sort of string is being returned? A text string or a latex string?
+
+    Returns
+    -------
+    str
+        The value formatted as a string.
+    """
+
+    if greek_symbols and value in GREEK_CHAR_MAP:
+        mapping = GREEK_CHAR_MAP[value]
+
+        if len(mapping) == 1:
+            return mapping[0]
+
+        value = mapping[1] if str_type == StrType.LATEX else mapping[0]
+
+        if str_type == StrType.LATEX:
+            return value
+
+    if "\\" not in value:
+        value = f"{value:{fmt_string}}" if fmt_string is not None else value
+
+    if str_type == StrType.LATEX:
+        value = "\\text{" + value + "}"
+    else:
+        value = "'" + value + "'" if quote_strings else value
+
+    return value
 
 
 def _format_iterable(
-    value: Iterable, *, max_elements: int | None = 6, str_type: StrType = StrType.TEXT
+    value: Iterable,
+    *,
+    max_elements: int | None = 6,
+    max_depth: int = 2,
+    str_type: StrType = StrType.TEXT,
 ) -> str:
     """
     Generate a formatted string to represent an iterable.
@@ -492,6 +604,9 @@ def _format_iterable(
         If the iterable has more elements than this, the string will be
         truncated with '...' and show the last element.
         Default is 6.
+    max_depth : int, optional
+        How deep should iterables be formated before their contents are replaced
+        with `...`
     str_type : StrType, optional
         What sort of string is being returned? A text string or a latex string?
 
@@ -504,7 +619,7 @@ def _format_iterable(
         For dicts: {1: a, 2: b, 3: c, ..., n: x}
     """
 
-    # TODO: Update to be used for both string & latex.
+    # TODO: Update to be recursive.
 
     if isinstance(value, list):
         left_bracket = "["
@@ -548,7 +663,11 @@ def _format_iterable(
 
 
 def _format_dict(
-    value: dict[Any, Any], *, max_elements: int | None, str_type: StrType = StrType.TEXT
+    value: dict[Any, Any],
+    *,
+    max_elements: int | None,
+    max_depth: int = 2,
+    str_type: StrType = StrType.TEXT,
 ) -> str:
     """
     Generate a formatted string to represent a dictionary.
@@ -561,6 +680,9 @@ def _format_dict(
         Maximum number of elements to show in the output string.
         If the dictionary has more elements than this, the string will be
         truncated with '...' and show the last element.
+    max_depth : int, optional
+        How deep should iterables be formated before their contents are replaced
+        with `...`
     str_type : StrType, optional
         What sort of string is being returned? A text string or a latex string?
 
