@@ -308,8 +308,6 @@ class Variable:
         Returns None if self.disable_latex is True.
         """
 
-        # TODO: need to add list formatting - should be recursive to a limited depth
-
         if self.disable_latex:
             return None
 
@@ -416,6 +414,7 @@ def _format_any(
     quote_strings: bool = True,
     max_elements: int = 6,
     max_depth: int = 2,
+    current_depth: int = 0,
 ) -> str:
     """
     Returns a simple value formatted as required.
@@ -449,6 +448,9 @@ def _format_any(
     max_depth : int, optional
         How deep should iterables be formated before their contents are replaced
         with `...`
+    current_depth : int, optional
+        The current depth of any iterable formatting. Used to control the recursive
+        formatting of iterables.
 
     Returns
     -------
@@ -465,6 +467,7 @@ def _format_any(
             fmt_string=fmt_string,
             greek_symbols=greek_symbols,
             str_type=str_type,
+            quote_strings=quote_strings,
         )
 
     if isinstance(value, Iterable):
@@ -473,6 +476,8 @@ def _format_any(
             max_elements=max_elements,
             max_depth=max_depth,
             str_type=str_type,
+            quote_strings=quote_strings,
+            current_depth=current_depth,
         )
 
     if isinstance(value, Number):
@@ -588,8 +593,11 @@ def _format_string(
 def _format_iterable(
     value: Iterable,
     *,
+    current_depth: int = 0,
+    fmt_string: str | None = None,
     max_elements: int | None = 6,
     max_depth: int = 2,
+    quote_strings: bool = True,
     str_type: StrType = StrType.TEXT,
 ) -> str:
     """
@@ -599,6 +607,11 @@ def _format_iterable(
     ----------
     value : Iterable
         The iterable object to convert to a string.
+    current_depth : int, optional
+        The current depth of the iterable.
+    fmt_string: str | None, optional
+        A format string to use for formatting values in the iterable.
+        If None, str() is used on the value.
     max_elements : int, optional
         Maximum number of elements to show in the output string.
         If the iterable has more elements than this, the string will be
@@ -607,6 +620,9 @@ def _format_iterable(
     max_depth : int, optional
         How deep should iterables be formated before their contents are replaced
         with `...`
+    quote_strings: bool, optional
+        Append '' around strings?
+        Only applies where str_type == StrType.TEXT
     str_type : StrType, optional
         What sort of string is being returned? A text string or a latex string?
 
@@ -619,14 +635,8 @@ def _format_iterable(
         For dicts: {1: a, 2: b, 3: c, ..., n: x}
     """
 
-    # TODO: Update to be recursive.
-
-    if isinstance(value, list):
-        left_bracket = "["
-        right_bracket = "]"
-    else:
-        left_bracket = "{"
-        right_bracket = "}"
+    left_bracket = "[" if isinstance(value, list) else "{"
+    right_bracket = "]" if isinstance(value, list) else "}"
 
     if str_type == StrType.LATEX:
         left_bracket = (
@@ -635,6 +645,9 @@ def _format_iterable(
         right_bracket = (
             "\\right" + ("" if isinstance(value, list) else "\\") + right_bracket
         )
+
+    if current_depth >= max_depth:
+        return left_bracket + "..." + right_bracket
 
     if max_elements is None:
         max_elements = len(value)
@@ -648,7 +661,15 @@ def _format_iterable(
         values_str = _format_dict(value, max_elements=max_elements, str_type=str_type)
     else:
         for i, v in enumerate(value):
-            val_str = f"{v}"
+            val_str = _format_any(
+                v,
+                fmt_string=fmt_string,
+                str_type=str_type,
+                quote_strings=quote_strings,
+                max_elements=max_elements,
+                max_depth=max_depth,
+                current_depth=current_depth + 1,
+            )
 
             if i == 0:
                 values_str = val_str
@@ -667,6 +688,7 @@ def _format_dict(
     *,
     max_elements: int | None,
     max_depth: int = 2,
+    current_depth: int = 0,
     str_type: StrType = StrType.TEXT,
 ) -> str:
     """
@@ -676,6 +698,8 @@ def _format_dict(
     ----------
     value : dict[Any, Any]
         The dictionary to convert to a latex string.
+    current_depth : int, optional
+        The current depth of the iterable.
     max_elements : int | None
         Maximum number of elements to show in the output string.
         If the dictionary has more elements than this, the string will be
@@ -692,6 +716,9 @@ def _format_dict(
         A latex formatted string representing the dictionary in the format:
         {key1: value1, key2: value2, ..., keyN: valueN}
     """
+
+    if current_depth >= max_depth:
+        return "..."
 
     if max_elements is None:
         max_elements = len(value)
