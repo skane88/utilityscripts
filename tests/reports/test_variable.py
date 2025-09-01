@@ -74,25 +74,35 @@ def test_variable():
         ),
         (Variable(list(range(0, 100))), "[0, 1, 2, 3, 4, ..., 99]"),
         (
-            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, shorten_list=4),
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, max_elements=4),
             "{'a': 1, 'b': 2, 'c': 3, ..., 'f': 6}",
         ),
         (
-            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5}, shorten_list=4),
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5}, max_elements=4),
             "{'a': 1, 'b': 2, 'c': 3, ..., 'e': 5}",
         ),
         (
-            Variable({"a": 1, "b": 2, "c": 3, "d": 4}, shorten_list=4),
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4}, max_elements=4),
             "{'a': 1, 'b': 2, 'c': 3, 'd': 4}",
         ),
         (Variable(set(range(0, 100))), "{0, 1, 2, 3, 4, ..., 99}"),
-        (Variable(set(range(0, 100)), shorten_list=3), "{0, 1, ..., 99}"),
+        (Variable(set(range(0, 100)), max_elements=3), "{0, 1, ..., 99}"),
         (Variable("alpha"), "'α'"),  # noqa: RUF001
         (Variable([["a", "b", "c"], "d"]), "[['a', 'b', 'c'], 'd']"),
         (Variable([[["a", "b"], "c"], "d"]), "[[[...], 'c'], 'd']"),
         (
             Variable([[[["a"], "b"], "c"], "d"], max_depth=5),
             "[[[['a'], 'b'], 'c'], 'd']",
+        ),
+        (
+            Variable(list(range(0, 10)), max_elements=None),
+            "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]",
+        ),
+        (
+            Variable(
+                {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, max_elements=None
+            ),
+            "{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}",
         ),
     ],
 )
@@ -158,7 +168,7 @@ def test_result_error():
         (Variable({1, 2, 3}), "$\\left\\{1, 2, 3\\right\\}$"),
         (Variable(list(range(0, 100))), "$\\left[0, 1, 2, 3, 4, ..., 99\\right]$"),
         (
-            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, shorten_list=4),
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, max_elements=4),
             "$\\left\\{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3, ..., \\text{f}: 6\\right\\}$",
         ),
         (Variable(set(range(0, 100))), "$\\left\\{0, 1, 2, 3, 4, ..., 99\\right\\}$"),

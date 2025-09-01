@@ -71,7 +71,7 @@ class Variable:
         units: str | None = None,
         fmt_string: str | None = None,
         disable_latex: bool = False,
-        shorten_list: int | None = 6,
+        max_elements: int | None = 6,
         use_repr_latex: bool = True,
         greek_symbols: bool = True,
         max_depth: int = 2,
@@ -92,7 +92,7 @@ class Variable:
             A valid format string to use in the variable display.
         disable_latex : bool, optional
             Should the latex output options be disabled?
-        shorten_list : int | None, optional
+        max_elements : int | None, optional
             Should lists, sets and dicts be displayed in shortend form?
             If a number, n, is provided lists are shortened to only
             display n elements. The typical output would be:
@@ -116,7 +116,7 @@ class Variable:
         self._units = units
         self._fmt_string = fmt_string
         self._disable_latex = disable_latex
-        self._shorten_list = shorten_list
+        self._max_elements = max_elements
         self._use_repr_latex = use_repr_latex
         self._greek_symbols = greek_symbols
         self._max_depth = max_depth
@@ -173,7 +173,7 @@ class Variable:
         return self._disable_latex
 
     @property
-    def shorten_list(self) -> int | None:
+    def max_elements(self) -> int | None:
         """
         Should lists, sets and dicts be displayed in shortend form?
         If a number, n, is provided lists are shortened to only
@@ -184,7 +184,7 @@ class Variable:
         If None is provided the full list, set or dict is displayed.
         """
 
-        return self._shorten_list
+        return self._max_elements
 
     @property
     def use_repr_latex(self) -> bool:
@@ -234,7 +234,7 @@ class Variable:
             fmt_string=self.fmt_string,
             str_type=str_type,
             greek_symbols=self.greek_symbols,
-            max_elements=self.shorten_list,
+            max_elements=self.max_elements,
             max_depth=self.max_depth,
         )
 
@@ -691,6 +691,10 @@ def _format_dict(
     """
     Generate a formatted string to represent a dictionary.
 
+    Notes
+    -----
+    - Generally should not be called directly,
+
     Parameters
     ----------
     value : dict[Any, Any]
@@ -716,9 +720,6 @@ def _format_dict(
 
     if current_depth >= max_depth:
         return "..."
-
-    if max_elements is None:
-        max_elements = len(value)
 
     values_str = ""
 
