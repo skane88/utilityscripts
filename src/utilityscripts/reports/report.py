@@ -693,7 +693,7 @@ def _format_dict(
 
     Notes
     -----
-    - Generally should not be called directly,
+    - Generally should not be called directly, call _format_iterable as a preference.
 
     Parameters
     ----------
