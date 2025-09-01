@@ -2,7 +2,9 @@
 Test the Result class.
 """
 
+import polars as pl
 import pytest
+import sympy as sym
 
 from utilityscripts.reports.report import ResultError, Variable
 
@@ -23,8 +25,15 @@ def test_variable():
     symbol = "b"
     units = "m"
     fmt_string = ".2f"
+    use_repr_latex = True
 
-    v = Variable(value, symbol=symbol, units=units, fmt_string=fmt_string)
+    v = Variable(
+        value,
+        symbol=symbol,
+        units=units,
+        fmt_string=fmt_string,
+        use_repr_latex=use_repr_latex,
+    )
     assert v.value == value
     assert v.symbol == symbol
     assert v.units == units
@@ -170,3 +179,37 @@ def test_latex_disabled():
 
     assert val.latex_string is None
     assert "text/latex" not in val._repr_mimebundle_()
+
+
+def test_use_repr_latex():
+    a, b = sym.symbols("a, b")
+    eqn = a + b
+
+    v_sym = Variable(eqn)
+
+    assert v_sym.latex_string == eqn._repr_latex_()
+
+
+def test_polars():
+    df = pl.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})  # noqa: PD901
+    v_df = Variable(df)
+
+    actual = v_df._repr_mimebundle_()["text/html"]
+    expected = df._repr_html_()
+
+    assert actual == expected
+
+
+def test_unusual():
+    class Test:
+        def __init__(self, val):
+            self.val = val
+
+        def __str__(self):
+            return f"{self.val}"
+
+    t = Test("a")
+    v = Variable(t)
+
+    assert str(v) == "'a'"
+    assert v.latex_string == "$a$"
