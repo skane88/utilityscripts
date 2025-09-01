@@ -483,7 +483,7 @@ def _format_any(
     if isinstance(value, Number):
         return _format_number(value=value, fmt_string=fmt_string, str_type=str_type)
 
-    return "'" + str(value) + "'"
+    return "'" + str(value) + "'" if str_type == StrType.TEXT else str(value)
 
 
 def _format_number(
