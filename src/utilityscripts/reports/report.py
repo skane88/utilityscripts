@@ -521,9 +521,6 @@ def _format_number(
 
         value_str = f"{mantissa} \\times 10^{{{exponent}}}"
 
-    if isinstance(value, str) and str_type == StrType.LATEX:
-        value_str = "\\text{" + value_str + "}"
-
     if str_type == StrType.LATEX:
         value_str = value_str.replace("%", "\\%")
 
