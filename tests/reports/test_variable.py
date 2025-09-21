@@ -3,6 +3,7 @@ Test the Result class.
 """
 
 import pytest
+import sympy as sym
 
 from utilityscripts.reports.report import ResultError, Variable
 
@@ -19,16 +20,21 @@ def test_variable():
     assert v.units is None
     assert v.fmt_string is None
 
+    assert repr(v)
+
     value = 2
     symbol = "b"
     units = "m"
     fmt_string = ".2f"
 
-    v = Variable(value, symbol=symbol, units=units, fmt_string=fmt_string)
+    v = Variable(
+        value, symbol=symbol, units=units, fmt_string=fmt_string, use_repr_latex=False
+    )
     assert v.value == value
     assert v.symbol == symbol
     assert v.units == units
     assert v.fmt_string == fmt_string
+    assert v.use_repr_latex is False
 
 
 @pytest.mark.parametrize(
@@ -170,3 +176,20 @@ def test_latex_disabled():
 
     assert val.latex_string is None
     assert "text/latex" not in val._repr_mimebundle_()
+
+
+def test_repr_latex():
+    """
+    Test that the latex_string method matches an existing _repr_latex_ method.
+    """
+
+    a = sym.symbols("a")
+    v = Variable(a)
+
+    assert v.latex_string == a._repr_latex_()
+
+    a, b, c = sym.symbols("a b c")
+    eqn = a + b / c
+    v = Variable(eqn)
+
+    assert v.latex_string == eqn._repr_latex_()
