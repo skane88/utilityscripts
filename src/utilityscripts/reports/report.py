@@ -714,12 +714,6 @@ def _format_dict(
         {key1: value1, key2: value2, ..., keyN: valueN}
     """
 
-    if current_depth >= max_depth:
-        return "..."
-
-    if max_elements is None:
-        max_elements = len(value)
-
     values_str = ""
 
     for i, kv in enumerate(value.items()):
