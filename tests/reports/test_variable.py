@@ -65,6 +65,7 @@ def test_variable():
             "{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}",
         ),
         (Variable(list(range(0, 7))), "[0, 1, 2, 3, 4, ..., 6]"),
+        (Variable(list(range(0, 7)), shorten_list=None), "[0, 1, 2, 3, 4, 5, 6]"),
         (
             Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}),
             "{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}",
@@ -73,6 +74,17 @@ def test_variable():
         (
             Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, shorten_list=4),
             "{'a': 1, 'b': 2, 'c': 3, ..., 'f': 6}",
+        ),
+        (
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7, "h": 8}),
+            "{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, ..., 'h': 8}",
+        ),
+        (
+            Variable(
+                {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7, "h": 8},
+                shorten_list=None,
+            ),
+            "{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6, 'g': 7, 'h': 8}",
         ),
         (
             Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5}, shorten_list=4),
@@ -144,6 +156,11 @@ def test_result_error():
         (Variable({}), "$\\left\\{\\right\\}$"),
         (Variable([1, 2, 3]), "$\\left[1, 2, 3\\right]$"),
         (Variable(list(range(0, 6))), "$\\left[0, 1, 2, 3, 4, 5\\right]$"),
+        (Variable(list(range(0, 7))), "$\\left[0, 1, 2, 3, 4, ..., 6\\right]$"),
+        (
+            Variable(list(range(0, 7)), shorten_list=None),
+            "$\\left[0, 1, 2, 3, 4, 5, 6\\right]$",
+        ),
         (
             Variable({"a": 1, "b": 2, "c": 3}),
             "$\\left\\{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3\\right\\}$",
@@ -151,6 +168,17 @@ def test_result_error():
         (
             Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}),
             "$\\left\\{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3, \\text{d}: 4, \\text{e}: 5, \\text{f}: 6\\right\\}$",
+        ),
+        (
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7}),
+            "$\\left\\{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3, \\text{d}: 4, \\text{e}: 5, ..., \\text{g}: 7\\right\\}$",
+        ),
+        (
+            Variable(
+                {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7},
+                shorten_list=None,
+            ),
+            "$\\left\\{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3, \\text{d}: 4, \\text{e}: 5, \\text{f}: 6, \\text{g}: 7\\right\\}$",
         ),
         (Variable({1, 2, 3}), "$\\left\\{1, 2, 3\\right\\}$"),
         (Variable(list(range(0, 100))), "$\\left[0, 1, 2, 3, 4, ..., 99\\right]$"),
