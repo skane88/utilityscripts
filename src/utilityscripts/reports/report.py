@@ -655,7 +655,15 @@ def _format_iterable(
     values_str = ""
 
     if isinstance(value, dict):
-        values_str = _format_dict(value, max_elements=max_elements, str_type=str_type)
+        values_str = _format_dict(
+            value,
+            max_elements=max_elements,
+            str_type=str_type,
+            max_depth=max_depth,
+            current_depth=current_depth,
+            # note current depth is not incremented because we have not yet formatted the val
+            # we are passing off the formatting to _format_dict
+        )
     else:
         for i, v in enumerate(value):
             val_str = _format_any(
@@ -683,9 +691,10 @@ def _format_iterable(
 def _format_dict(
     value: dict[Any, Any],
     *,
+    current_depth: int = 0,
+    fmt_string: str | None = None,
     max_elements: int | None,
     max_depth: int = 2,
-    current_depth: int = 0,
     str_type: StrType = StrType.TEXT,
 ) -> str:
     """
@@ -714,6 +723,9 @@ def _format_dict(
         {key1: value1, key2: value2, ..., keyN: valueN}
     """
 
+    if current_depth >= max_depth:
+        return "{...}"
+
     values_str = ""
 
     for i, kv in enumerate(value.items()):
@@ -728,7 +740,18 @@ def _format_dict(
                 else "'" + key_str + "'"
             )
 
-        val_str = key_str + f": {val}"
+        val_str = (
+            key_str
+            + ": "
+            + _format_any(
+                val,
+                fmt_string=fmt_string,
+                str_type=str_type,
+                max_depth=max_depth,
+                max_elements=max_elements,
+                current_depth=current_depth + 1,
+            )
+        )
 
         if i == 0:
             values_str = val_str
