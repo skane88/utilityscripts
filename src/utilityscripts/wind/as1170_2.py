@@ -1334,6 +1334,22 @@ def a5_2_1_c_pb(
 
 
 def a5_2_3_c_pi(*, c: float, b: float) -> float:
+    """
+    Calculate the internal pressure coefficient for a circular bin or tank.
+
+    Parameters
+    ----------
+    c : float
+        The height of the tank or bin.
+    b : float
+        The diameter of the tank or bin.
+
+    Returns
+    -------
+    float
+        The internal pressure coefficient.
+    """
+
     return -0.9 - 0.35 * log10(c / b)
 
 
