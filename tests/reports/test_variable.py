@@ -111,6 +111,8 @@ def test_variable():
             Variable({"a": {"b": {"c": {"d": 4}}}}, max_depth=5),
             "{'a': {'b': {'c': {'d': 4}}}}",
         ),
+        (Variable({"a": 1, "b": {"c": 3}}), "{'a': 1, 'b': {'c': 3}}"),
+        (Variable({"a": 1, "b": {"c": {"d": 4}}}, max_depth=1), "{'a': 1, 'b': {...}}"),
     ],
 )
 def test_variable_string(val, expected):
