@@ -71,7 +71,7 @@ class Variable:
         units: str | None = None,
         fmt_string: str | None = None,
         disable_latex: bool = False,
-        max_elements: int | None = 6,
+        shorten_list: int | None = 6,
         use_repr_latex: bool = True,
         greek_symbols: bool = True,
         max_depth: int = 2,
@@ -92,7 +92,7 @@ class Variable:
             A valid format string to use in the variable display.
         disable_latex : bool, optional
             Should the latex output options be disabled?
-        max_elements : int | None, optional
+        shorten_list : int | None, optional
             Should lists, sets and dicts be displayed in shortend form?
             If a number, n, is provided lists are shortened to only
             display n elements. The typical output would be:
@@ -116,7 +116,7 @@ class Variable:
         self._units = units
         self._fmt_string = fmt_string
         self._disable_latex = disable_latex
-        self._max_elements = max_elements
+        self._shorten_list = shorten_list
         self._use_repr_latex = use_repr_latex
         self._greek_symbols = greek_symbols
         self._max_depth = max_depth
@@ -173,7 +173,7 @@ class Variable:
         return self._disable_latex
 
     @property
-    def max_elements(self) -> int | None:
+    def shorten_list(self) -> int | None:
         """
         Should lists, sets and dicts be displayed in shortend form?
         If a number, n, is provided lists are shortened to only
@@ -184,7 +184,7 @@ class Variable:
         If None is provided the full list, set or dict is displayed.
         """
 
-        return self._max_elements
+        return self._shorten_list
 
     @property
     def use_repr_latex(self) -> bool:
@@ -234,7 +234,7 @@ class Variable:
             fmt_string=self.fmt_string,
             str_type=str_type,
             greek_symbols=self.greek_symbols,
-            max_elements=self.max_elements,
+            max_elements=self.shorten_list,
             max_depth=self.max_depth,
         )
 
@@ -483,7 +483,7 @@ def _format_any(
     if isinstance(value, Number):
         return _format_number(value=value, fmt_string=fmt_string, str_type=str_type)
 
-    return "'" + str(value) + "'" if str_type == StrType.TEXT else str(value)
+    return "'" + str(value) + "'"
 
 
 def _format_number(
@@ -655,7 +655,15 @@ def _format_iterable(
     values_str = ""
 
     if isinstance(value, dict):
-        values_str = _format_dict(value, max_elements=max_elements, str_type=str_type)
+        values_str = _format_dict(
+            value,
+            max_elements=max_elements,
+            str_type=str_type,
+            max_depth=max_depth,
+            current_depth=current_depth,
+            # note current depth is not incremented because we have not yet formatted the val
+            # we are passing off the formatting to _format_dict
+        )
     else:
         for i, v in enumerate(value):
             val_str = _format_any(
@@ -683,17 +691,14 @@ def _format_iterable(
 def _format_dict(
     value: dict[Any, Any],
     *,
+    current_depth: int = 0,
+    fmt_string: str | None = None,
     max_elements: int | None,
     max_depth: int = 2,
-    current_depth: int = 0,
     str_type: StrType = StrType.TEXT,
 ) -> str:
     """
     Generate a formatted string to represent a dictionary.
-
-    Notes
-    -----
-    - Generally should not be called directly, call _format_iterable as a preference.
 
     Parameters
     ----------
@@ -719,7 +724,7 @@ def _format_dict(
     """
 
     if current_depth >= max_depth:
-        return "..."
+        return "{...}"
 
     values_str = ""
 
@@ -735,7 +740,18 @@ def _format_dict(
                 else "'" + key_str + "'"
             )
 
-        val_str = key_str + f": {val}"
+        val_str = (
+            key_str
+            + ": "
+            + _format_any(
+                val,
+                fmt_string=fmt_string,
+                str_type=str_type,
+                max_depth=max_depth,
+                max_elements=max_elements,
+                current_depth=current_depth + 1,
+            )
+        )
 
         if i == 0:
             values_str = val_str

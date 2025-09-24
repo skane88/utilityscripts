@@ -391,7 +391,7 @@ def plot_w_fi():
 
     data = _get_w_fi_data()
 
-    fig, ax = plt.subplots()
+    _fig, ax = plt.subplots()
 
     ax.set_prop_cycle(AGILITUS_COLORS)
 
@@ -517,7 +517,7 @@ def plot_e_sl_from_cbr():
 
     data = _e_sl_data()
 
-    fig, ax = plt.subplots()
+    _fig, ax = plt.subplots()
 
     ax.set_prop_cycle(AGILITUS_COLORS)
 
@@ -666,7 +666,7 @@ def plot_f_e():
 
     data = _f_e_data()
 
-    fig, ax = plt.subplots()
+    _fig, ax = plt.subplots()
 
     ax.set_prop_cycle(AGILITUS_COLORS)
 
@@ -797,7 +797,7 @@ def plot_f_s():
 
     data = _f_s_data()
 
-    fig, ax = plt.subplots()
+    _fig, ax = plt.subplots()
 
     ax.set_prop_cycle(AGILITUS_COLORS)
 
@@ -923,7 +923,7 @@ def plot_f_h():
 
     data = _f_h_data()
 
-    fig, ax = plt.subplots()
+    _fig, ax = plt.subplots()
 
     ax.set_prop_cycle(AGILITUS_COLORS)
 
@@ -1171,7 +1171,7 @@ def plot_t_12_data(load_location: LoadLocation):
 
     data = _t_12_data()[load_location]
 
-    fig, ax = plt.subplots()
+    _fig, ax = plt.subplots()
 
     ax.set_prop_cycle(AGILITUS_COLORS)
 
@@ -1308,7 +1308,7 @@ def plot_t_3():
 
     data = _t_3_data()
 
-    fig, ax = plt.subplots()
+    _fig, ax = plt.subplots()
 
     ax.set_prop_cycle(AGILITUS_COLORS)
 
@@ -1401,7 +1401,7 @@ def plot_t_4():
 
     data = _t_4_data()
 
-    fig, ax = plt.subplots()
+    _fig, ax = plt.subplots()
 
     ax.set_prop_cycle(AGILITUS_COLORS)
 
@@ -1535,7 +1535,7 @@ def plot_k_s_vs_cbr():
 
     data = _k_s_data()
 
-    fig, ax = plt.subplots()
+    _fig, ax = plt.subplots()
 
     ax.plot(data["cbr"], data["k_s"])
     ax.set_xlabel("CBR (%)")

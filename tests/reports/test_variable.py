@@ -2,7 +2,6 @@
 Test the Result class.
 """
 
-import polars as pl
 import pytest
 import sympy as sym
 
@@ -21,23 +20,21 @@ def test_variable():
     assert v.units is None
     assert v.fmt_string is None
 
+    assert repr(v)
+
     value = 2
     symbol = "b"
     units = "m"
     fmt_string = ".2f"
-    use_repr_latex = True
 
     v = Variable(
-        value,
-        symbol=symbol,
-        units=units,
-        fmt_string=fmt_string,
-        use_repr_latex=use_repr_latex,
+        value, symbol=symbol, units=units, fmt_string=fmt_string, use_repr_latex=False
     )
     assert v.value == value
     assert v.symbol == symbol
     assert v.units == units
     assert v.fmt_string == fmt_string
+    assert v.use_repr_latex is False
 
 
 @pytest.mark.parametrize(
@@ -68,25 +65,37 @@ def test_variable():
             "{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}",
         ),
         (Variable(list(range(0, 7))), "[0, 1, 2, 3, 4, ..., 6]"),
+        (Variable(list(range(0, 7)), shorten_list=None), "[0, 1, 2, 3, 4, 5, 6]"),
         (
             Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}),
             "{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}",
         ),
         (Variable(list(range(0, 100))), "[0, 1, 2, 3, 4, ..., 99]"),
         (
-            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, max_elements=4),
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, shorten_list=4),
             "{'a': 1, 'b': 2, 'c': 3, ..., 'f': 6}",
         ),
         (
-            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5}, max_elements=4),
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7, "h": 8}),
+            "{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, ..., 'h': 8}",
+        ),
+        (
+            Variable(
+                {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7, "h": 8},
+                shorten_list=None,
+            ),
+            "{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6, 'g': 7, 'h': 8}",
+        ),
+        (
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5}, shorten_list=4),
             "{'a': 1, 'b': 2, 'c': 3, ..., 'e': 5}",
         ),
         (
-            Variable({"a": 1, "b": 2, "c": 3, "d": 4}, max_elements=4),
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4}, shorten_list=4),
             "{'a': 1, 'b': 2, 'c': 3, 'd': 4}",
         ),
         (Variable(set(range(0, 100))), "{0, 1, 2, 3, 4, ..., 99}"),
-        (Variable(set(range(0, 100)), max_elements=3), "{0, 1, ..., 99}"),
+        (Variable(set(range(0, 100)), shorten_list=3), "{0, 1, ..., 99}"),
         (Variable("alpha"), "'α'"),  # noqa: RUF001
         (Variable([["a", "b", "c"], "d"]), "[['a', 'b', 'c'], 'd']"),
         (Variable([[["a", "b"], "c"], "d"]), "[[[...], 'c'], 'd']"),
@@ -95,14 +104,12 @@ def test_variable():
             "[[[['a'], 'b'], 'c'], 'd']",
         ),
         (
-            Variable(list(range(0, 10)), max_elements=None),
-            "[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]",
+            Variable({"a": {"b": {"c": {"d": 4}}}}),
+            "{'a': {'b': {...}}}",
         ),
         (
-            Variable(
-                {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, max_elements=None
-            ),
-            "{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'f': 6}",
+            Variable({"a": {"b": {"c": {"d": 4}}}}, max_depth=5),
+            "{'a': {'b': {'c': {'d': 4}}}}",
         ),
     ],
 )
@@ -157,6 +164,11 @@ def test_result_error():
         (Variable({}), "$\\left\\{\\right\\}$"),
         (Variable([1, 2, 3]), "$\\left[1, 2, 3\\right]$"),
         (Variable(list(range(0, 6))), "$\\left[0, 1, 2, 3, 4, 5\\right]$"),
+        (Variable(list(range(0, 7))), "$\\left[0, 1, 2, 3, 4, ..., 6\\right]$"),
+        (
+            Variable(list(range(0, 7)), shorten_list=None),
+            "$\\left[0, 1, 2, 3, 4, 5, 6\\right]$",
+        ),
         (
             Variable({"a": 1, "b": 2, "c": 3}),
             "$\\left\\{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3\\right\\}$",
@@ -165,10 +177,21 @@ def test_result_error():
             Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}),
             "$\\left\\{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3, \\text{d}: 4, \\text{e}: 5, \\text{f}: 6\\right\\}$",
         ),
+        (
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7}),
+            "$\\left\\{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3, \\text{d}: 4, \\text{e}: 5, ..., \\text{g}: 7\\right\\}$",
+        ),
+        (
+            Variable(
+                {"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6, "g": 7},
+                shorten_list=None,
+            ),
+            "$\\left\\{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3, \\text{d}: 4, \\text{e}: 5, \\text{f}: 6, \\text{g}: 7\\right\\}$",
+        ),
         (Variable({1, 2, 3}), "$\\left\\{1, 2, 3\\right\\}$"),
         (Variable(list(range(0, 100))), "$\\left[0, 1, 2, 3, 4, ..., 99\\right]$"),
         (
-            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, max_elements=4),
+            Variable({"a": 1, "b": 2, "c": 3, "d": 4, "e": 5, "f": 6}, shorten_list=4),
             "$\\left\\{\\text{a}: 1, \\text{b}: 2, \\text{c}: 3, ..., \\text{f}: 6\\right\\}$",
         ),
         (Variable(set(range(0, 100))), "$\\left\\{0, 1, 2, 3, 4, ..., 99\\right\\}$"),
@@ -191,35 +214,18 @@ def test_latex_disabled():
     assert "text/latex" not in val._repr_mimebundle_()
 
 
-def test_use_repr_latex():
-    a, b = sym.symbols("a, b")
-    eqn = a + b
+def test_repr_latex():
+    """
+    Test that the latex_string method matches an existing _repr_latex_ method.
+    """
 
-    v_sym = Variable(eqn)
+    a = sym.symbols("a")
+    v = Variable(a)
 
-    assert v_sym.latex_string == eqn._repr_latex_()
+    assert v.latex_string == a._repr_latex_()
 
+    a, b, c = sym.symbols("a b c")
+    eqn = a + b / c
+    v = Variable(eqn)
 
-def test_polars():
-    df = pl.DataFrame({"a": [1, 2, 3], "b": [4, 5, 6]})  # noqa: PD901
-    v_df = Variable(df)
-
-    actual = v_df._repr_mimebundle_()["text/html"]
-    expected = df._repr_html_()
-
-    assert actual == expected
-
-
-def test_unusual():
-    class Test:
-        def __init__(self, val):
-            self.val = val
-
-        def __str__(self):
-            return f"{self.val}"
-
-    t = Test("a")
-    v = Variable(t)
-
-    assert str(v) == "'a'"
-    assert v.latex_string == "$a$"
+    assert v.latex_string == eqn._repr_latex_()

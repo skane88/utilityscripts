@@ -1577,7 +1577,7 @@ def make_i_geometry(
     if weld_size is None:
         return geometry
 
-    xc, yc = geometry.calculate_centroid()
+    xc, _yc = geometry.calculate_centroid()
 
     bottom_right = bottom_right.shift_section(x_offset=t_w / 2, y_offset=t_fb)
     bottom_left = bottom_left.shift_section(x_offset=-t_w / 2, y_offset=t_fb)
