@@ -17,6 +17,7 @@ from utilityscripts.wind.as1170_2 import (
     WindSite,
     a5_2_1_c_pb,
     a5_2_3_c_pi,
+    b2_tb2a_cpn,
     c_fig_rect_prism,
     k_ar,
     s3_2_v_r,
@@ -681,6 +682,29 @@ def test_a5_2_1_c_pb(theta, c, b, use_radians, expected):
 )
 def test_a5_2_3_c_pi(c, b, expected):
     assert isclose(a5_2_3_c_pi(c=c, b=b), expected, abs_tol=1e-2)
+
+
+@pytest.mark.parametrize(
+    "b, c, h, expected",
+    [
+        (6, 5, 6.1, 1.30),  # AWES Handbook example B8
+        (0.1, 1, 6, 1.10),  # example for c/h < 0.2
+        (1, 1, 6, 1.40),
+        (10, 1, 6, 1.70),
+        (100, 1, 6, 2.00),
+        (1000, 1, 6, 2.30),
+        (0.5, 1, 5, 1.30),  # example for c/h = 0.2
+        (2.5, 1, 5, 1.509),
+        (5.0, 1, 5, 1.60),
+        (6.0, 1, 5, 1.60),
+        (0.5, 1, 1, 1.30),  # example for c/h = 1.0
+        (2.5, 1, 1, 1.230),
+        (5.0, 1, 1, 1.20),
+        (6.0, 1, 1, 1.20),
+    ],
+)
+def test_b2_tb2a_cpn(b, c, h, expected):
+    assert isclose(b2_tb2a_cpn(b=b, c=c, h=h), expected, rel_tol=0.01)
 
 
 @pytest.mark.parametrize(

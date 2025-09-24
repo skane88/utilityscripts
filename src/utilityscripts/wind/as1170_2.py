@@ -1353,6 +1353,152 @@ def a5_2_3_c_pi(*, c: float, b: float) -> float:
     return -0.9 - 0.35 * log10(c / b)
 
 
+def b2_tb2a_cpn(*, b: float, c: float, h: float) -> float:
+    """
+    Calculate the design pressure coefficient for a hoarding or freestanding wall
+    with wind at 0deg.
+
+    Notes
+    -----
+    All dimensions must be provided in consistent units.
+
+    Parameters
+    ----------
+    b : float
+        The width of the hoarding or wall perpendicular to the wind.
+    c : float
+        The length of the hoarding or wall parallel to the wind.
+    h : float
+        The height to the top of the freestanding wall.
+
+    Returns
+    -------
+    float
+        The normal pressure coefficient C_pn
+
+    """
+
+    if c / h >= 0.2 and b / c < 0.5:  # noqa: PLR2004
+        raise ValueError("No drag coefficient given for c/h >= 0.2 and b/c <0.5.")
+    if c / h > 1.0:
+        raise ValueError("No drag coefficient given for c/h >= 1.0.")
+
+    # first calculate the pressure coefficients
+    c_pn1 = 1.3 + 0.5 * (0.3 + log10(b / c)) * (0.8 - c / h)
+    c_pn2 = 1.7 - 0.5 * c / h
+    c_pn3 = 1.4 + 0.3 * log10(b / c)
+
+    # next build a table of values. This has to be built programmatically rather than
+    # in a table, as the values are calculated by expressions that differ wildly.
+    b_c = np.asarray(
+        [
+            0,
+            0.4999,
+            0.5,
+            5,
+            5.001,
+            1e9,
+            0,
+            0.4999,
+            0.5,
+            5,
+            5.001,
+            1e9,
+            0,
+            0.4999,
+            0.5,
+            5,
+            5.001,
+            1e9,
+            0,
+            0.4999,
+            0.5,
+            5,
+            5.001,
+            1e9,
+        ]
+    )
+    c_h = np.asarray(
+        [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.1999,
+            0.1999,
+            0.1999,
+            0.1999,
+            0.1999,
+            0.1999,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+        ]
+    )
+    c_pn = np.asarray(
+        [
+            c_pn3,
+            c_pn3,
+            c_pn3,
+            c_pn3,
+            c_pn3,
+            c_pn3,
+            c_pn3,
+            c_pn3,
+            c_pn3,
+            c_pn3,
+            c_pn3,
+            c_pn3,
+            0.0,
+            0.0,
+            c_pn1,
+            c_pn1,
+            c_pn2,
+            c_pn2,
+            0.0,
+            0.0,
+            c_pn1,
+            c_pn1,
+            c_pn2,
+            c_pn2,
+        ]
+    )
+
+    # the shape of the resulting 2d array:
+    shape = (len(np.unique(b_c)), len(np.unique(c_h)), 1)
+
+    b_c_map = {v: i for i, v in enumerate(np.unique(b_c))}
+    c_h_map = {v: i for i, v in enumerate(np.unique(c_h))}
+
+    # create an empty numpy array:
+    array = np.full(shape, np.nan)
+
+    # populate the array:
+    for i, c_pn_i in enumerate(c_pn):
+        b_c_val = b_c[i]
+        c_h_val = c_h[i]
+
+        i = b_c_map[b_c_val]
+        j = c_h_map[c_h_val]
+
+        array[i, j, 0] = c_pn_i
+
+    interp = RegularGridInterpolator((np.unique(b_c), np.unique(c_h)), array)
+
+    return interp((b / c, c / h))
+
+
 def k_ar(*, length: float, width: float) -> float:
     """
     Calculate the aspect ratio correction factor K_ar as per AS1170.2 Appendix C
