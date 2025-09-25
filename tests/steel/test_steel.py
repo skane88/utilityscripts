@@ -20,8 +20,13 @@ from utilityscripts.steel.steel import (
     nearest_standard_plate,
     nearest_standard_weld,
     rhs_section_df,
+    standard_grades,
     steel_grades,
 )
+
+
+def test_standard_grades():
+    assert standard_grades()
 
 
 def test_thickness_reqd():
