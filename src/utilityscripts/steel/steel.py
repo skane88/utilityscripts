@@ -4,7 +4,6 @@ To contain some utilities for steel design
 
 from __future__ import annotations
 
-import copy
 from math import cos, degrees, log, pi, radians, sin
 from pathlib import Path
 
@@ -209,48 +208,6 @@ def standard_grades() -> dict[str, SteelGrade]:
         "SHS": c350,
         "CHS": c350,
     }
-
-
-class SteelSection:
-    def __init__(
-        self, *, section: str, current: bool, steel_grade: None | SteelGrade = None
-    ):
-        """
-
-        :param section: The section name.
-        :param current: Is the section a currently produced section?
-        :param steel_grade: A steel grade to attach to the section, or None.
-        """
-
-        self.section = section
-        self.current = current
-        self._grade = steel_grade
-
-    @property
-    def grade(self):
-        return self._grade
-
-    def set_grade(self, grade: SteelGrade) -> SteelSection:
-        """
-        Add a steel grade to the object.
-
-        :param grade: The SteelGrade to apply.
-        :return: Returns a copy of the object.
-        """
-
-        section_copy = copy.deepcopy(self)
-        section_copy._grade = grade
-
-        return section_copy
-
-    def __repr__(self):
-        grade = "no steel assigned" if self.grade is None else repr(self.grade)
-
-        return (
-            f"{type(self).__name__}: {self.section}, "
-            + f"{grade}."
-            + f" Current section: {self.current}"
-        )
 
 
 def _grade_funcs(
