@@ -7,6 +7,7 @@ from math import isclose
 import pytest
 
 from utilityscripts.steel.as4100 import (
+    ISection,
     RestraintCode,
     WebType,
     s5_6_3_k_t,
@@ -19,6 +20,15 @@ from utilityscripts.steel.as4100 import (
     s9_4_3_m_p,
     s9_6_3_10_v_w,
 )
+from utilityscripts.steel.steel import standard_grades
+
+
+def test_i_section():
+    steel = standard_grades()["UB"]
+
+    assert ISection(
+        section_name="test", steel=steel, b_f=0.15, d=0.36, t_f=0.012, t_w=0.008
+    )
 
 
 @pytest.mark.parametrize(
