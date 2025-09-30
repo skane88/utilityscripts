@@ -1236,3 +1236,34 @@ def s13_1_2_3_l_syt(*, f_c, f_sy, d_b, k_1=1.0, k_3=1.0, k_4=1.0, k_5=1.0):
     l_min = 0.058 * f_sy * k_1 * d_b
 
     return max(l_calc, l_min)
+
+
+def s13_2_2_l_syt_lap(
+    *, l_syt: float, f_sy: float, d_b: float, k_1: float = 1.3, k_7: float = 1.25
+):
+    """
+    Calculate the lap length of a bar in tension as per AS3600 S13.2.2.
+
+    Parameters
+    ----------
+    l_syt: float
+        The basic development length of the bar in tension. In mm.
+    f_sy: float
+        The yield strength of the bar in MPa.
+    d_b: float
+        The bar diameter in mm.
+    k_1: float
+        The parameter for the depth of concrete below the bar. Conservatively 1.3.
+    k_7: float
+        The parameter for the provided area of steel. Conservatively 1.25.
+
+    Returns
+    -------
+    float
+        The required lap length in mm.
+    """
+
+    lap_1 = k_7 * l_syt
+    lap_2 = 0.058 * f_sy * k_1 * d_b
+
+    return max(lap_1, lap_2)
