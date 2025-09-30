@@ -1129,15 +1129,22 @@ def v_uo(*, f_c, u, d_om, beta_h=1.0):
     return f_cv(f_c, beta_h) * u * d_om * 1000  # *1000 to convert to kN.
 
 
-def c_d(*, bar_spacing, cover, bar_type: str = "straight", narrow_element: bool = True):
+def s13_1_2_c_d(
+    *, bar_spacing, cover, bar_type: str = "straight", narrow_element: bool = True
+):
     """
-    Calculate the cover & spacing parameter c_d as per AS3600 S13.1.2
+    Calculate the cover and spacing parameter c_d as per AS3600 S13.1.2
 
-    :param bar_spacing: The spacing between bars.
-    :param cover: The cover to the bars.
+    Parameters
+    ----------
+    bar_spacing: The spacing between bars.
+    cover:
+        The cover to the bars.
         See figure 13.1.2.2 to determine which cover is appropriate.
-    :param bar_type: The type of bar, either "straight", "hooked" or "looped"
-    :param narrow_element: Is the element narrow (e.g. beam web, column)
+    bar_type:
+        The type of bar, either "straight", "hooked" or "looped"
+    narrow_element:
+        Is the element narrow (e.g. beam web, column)
         or wide (e.g. slab, inner bars of a band beam etc.)
     """
 
@@ -1156,23 +1163,30 @@ def c_d(*, bar_spacing, cover, bar_type: str = "straight", narrow_element: bool 
     return cover
 
 
-def k_3(
+def s13_1_2_2_k_3(
     *, d_b, bar_spacing, cover, bar_type: str = "straight", narrow_element: bool = True
 ):
     """
     Calculate parameter k_3 as per AS3600 S13.1.2.2
 
-    :param d_b: bar diamter.
+    Parameters
+    ----------
+    d_b:
+        bar diamter.
         Units should be consistent with bar_spacing and cover.
-    :param bar_spacing: The spacing between bars.
-    :param cover: The cover to the bars.
+    bar_spacing:
+        The spacing between bars.
+    cover:
+        The cover to the bars.
         See figure 13.1.2.2 to determine which cover is appropriate.
-    :param bar_type: The type of bar, either "straight", "hooked" or "looped"
-    :param narrow_element: Is the element narrow (e.g. beam web, column)
+    bar_type:
+        The type of bar, either "straight", "hooked" or "looped"
+    narrow_element:
+        Is the element narrow (e.g. beam web, column)
         or wide (e.g. slab, inner bars of a band beam etc.)
     """
 
-    c_d_calc = c_d(
+    c_d_calc = s13_1_2_c_d(
         bar_spacing=bar_spacing,
         cover=cover,
         bar_type=bar_type,
@@ -1190,18 +1204,30 @@ def k_3(
     )
 
 
-def l_syt(*, f_c, f_sy, d_b, k_1=1.0, k_3=1.0, k_4=1.0, k_5=1.0):
+def s13_1_2_3_l_syt(*, f_c, f_sy, d_b, k_1=1.0, k_3=1.0, k_4=1.0, k_5=1.0):
     """
     Calculate the development length of a bar as per AS3600 S13.1.2.3
 
-    :param f_c: The concrete characteristic compressive strength, f'c. In MPa.
-    :param f_sy: The steel yield strength (in MPa)
-    :param d_b: The diameter of the bar (in mm)
-    :param k_1: The member depth parameter.
-    :param k_3: The bar spacing parameter.
-    :param k_4: Transverse reinforcement parameter.
-    :param k_5: Transverse stress parameter.
-    :return: The development length in mm.
+    Parameters
+    ----------
+    f_c:
+        The concrete characteristic compressive strength, f'c. In MPa.
+    f_sy:
+        The steel yield strength (in MPa)
+    d_b:
+        The diameter of the bar (in mm)
+    k_1:
+        The member depth parameter.
+    k_3:
+        The bar spacing parameter.
+    k_4:
+        Transverse reinforcement parameter.
+    k_5:
+        Transverse stress parameter.
+
+    Returns
+    -------
+    The development length in mm.
     """
 
     k_2 = (132 - d_b) / 100
