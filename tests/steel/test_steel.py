@@ -229,8 +229,9 @@ def test_bolt_grade():
     thicknesses = [0.000, 0.015999, 0.016, 0.100]
     f_yf = [640e6, 640e6, 660e6, 660e6]
     f_uf = [800e6, 800e6, 830e6, 830e6]
+    k_rd = [1.00, 1.00, 1.00, 1.00]
 
-    bg = BoltGrade(grade=grade, diameters=thicknesses, f_yf=f_yf, f_uf=f_uf)
+    bg = BoltGrade(grade=grade, diameters=thicknesses, f_yf=f_yf, f_uf=f_uf, k_rd=k_rd)
 
     thicknesses = np.asarray(thicknesses)
     f_yf = np.asarray(f_yf)
@@ -251,6 +252,9 @@ def test_bolt_grade():
     assert isclose(bg.get_f_uf(0.016), 830e6)
     assert isclose(bg.get_f_uf(0.100), 830e6)
 
+    assert isclose(bg.get_k_rd(0.008), 1.00)
+    assert isclose(bg.get_k_rd(0.050), 1.00)
+
 
 def test_bolt_grades():
     """
@@ -270,3 +274,10 @@ def test_bolt_grades():
     assert isclose(bolt_grades()["10.9"].get_f_uf(0.008), 1040e6)
     assert isclose(bolt_grades()["10.9"].get_f_yf(0.016), 940e6)
     assert isclose(bolt_grades()["10.9"].get_f_uf(0.016), 1040e6)
+
+
+def test_bolt_grades_krd():
+    assert bolt_grades()
+    assert isclose(bolt_grades()["8.8"].get_k_rd(0.008), 1.00)
+    assert isclose(bolt_grades()["4.6"].get_k_rd(0.016), 1.00)
+    assert isclose(bolt_grades()["10.9"].get_k_rd(0.016), 0.83)

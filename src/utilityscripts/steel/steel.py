@@ -1385,6 +1385,7 @@ class BoltGrade:
         diameters: list[float] | np.ndarray,
         f_yf: list[float] | np.ndarray,
         f_uf: list[float] | np.ndarray,
+        k_rd: list[float] | np.ndarray,
     ):
         """
         Initialise the BoltGrade class.
@@ -1401,12 +1402,16 @@ class BoltGrade:
         f_uf : list[float] | np.ndarray
             The ultimate strength of the bolts, in Pa. The length should match the
             length of the diameters array.
+        k_rd : list[float] | np.ndarray
+            The reduction factor required for ultra high strength bolts (10.9+) as per
+            AS4100
         """
 
         self._grade = grade
         self._diameters = np.asarray(diameters)
         self._f_yf = np.asarray(f_yf)
         self._f_uf = np.asarray(f_uf)
+        self._k_rd = np.asarray(k_rd)
 
     @property
     def grade(self) -> str:
@@ -1439,6 +1444,15 @@ class BoltGrade:
         """
 
         return self._f_uf
+
+    @property
+    def k_rd(self) -> np.ndarray:
+        """
+        The reduction factor required for ultra high strength bolts (10.9+) as per
+        AS4100.
+        """
+
+        return self._k_rd
 
     def get_f_yf(self, diameter: float) -> float:
         """
@@ -1474,6 +1488,24 @@ class BoltGrade:
 
         return np.interp(diameter, self._diameters, self._f_uf)
 
+    def get_k_rd(self, diameter: float) -> float:
+        """
+        Get the reduction factor required for ultra high strength bolts (10.9+) as per
+        AS4100
+
+        Parameters
+        ----------
+        diameter : float
+            The diameter of the bolt, in m.
+
+        Returns
+        -------
+        float
+            The reduction factor k_rd.
+        """
+
+        return np.interp(diameter, self._diameters, self._k_rd)
+
     def __repr__(self):
         return f"{type(self).__name__} {self.grade}"
 
@@ -1497,18 +1529,20 @@ def bolt_grades() -> dict[str, BoltGrade]:
 
     for grade in unique_grades.iter_rows():
         bg = bolt_grade_data.filter((pl.col("grade") == grade[0])).select(
-            "d_f", "f_yf", "f_uf"
+            "d_f", "f_yf", "f_uf", "k_rd"
         )
 
         diameters = bg.select("d_f").to_numpy().T[0]
         f_yf = bg.select("f_yf").to_numpy().T[0]
         f_uf = bg.select("f_uf").to_numpy().T[0]
+        k_rd = bg.select("k_rd").to_numpy().T[0]
 
         grades[str(grade[0])] = BoltGrade(
             grade=str(grade[0]),
             diameters=diameters,
             f_yf=f_yf,
             f_uf=f_uf,
+            k_rd=k_rd,
         )
 
     return grades
