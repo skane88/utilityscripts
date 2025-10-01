@@ -7,7 +7,6 @@ from math import isclose
 import pytest
 
 from utilityscripts.steel.as4100 import (
-    ISection,
     RestraintCode,
     WebType,
     s5_6_3_k_t,
@@ -20,6 +19,7 @@ from utilityscripts.steel.as4100 import (
     s9_4_3_m_p,
     s9_6_3_10_v_w,
 )
+from utilityscripts.steel.design import ISection
 from utilityscripts.steel.steel import standard_grades
 
 

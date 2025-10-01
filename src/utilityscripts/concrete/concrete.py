@@ -22,7 +22,7 @@ from shapely import LineString, Polygon, ops
 from shapely.plotting import plot_polygon
 
 from utilityscripts.concrete.as3600 import Concrete, Steel
-from utilityscripts.steel.as4100 import build_circle
+from utilityscripts.steel.design import build_circle
 
 MESH_DATA = {
     "RL1218": {"bar_dia": 11.9, "pitch": 100, "cross_bar_dia": 7.6, "cross_pitch": 200},
