@@ -16,9 +16,9 @@ from shapely import Polygon
 from utilityscripts.steel.steel import SteelGrade
 
 
-class AS4100Section(ABC):
+class SteelSection(ABC):
     """
-    Store a cross-section that provides AS4100 compatible section properties.
+    Store a cross-section that provides section properties compatible with steel codes.
 
     This is an abstract class,
     and requires implementation for each section type, e.g. I, C, SHS etc.
@@ -39,9 +39,9 @@ class AS4100Section(ABC):
         self._steel = steel
         self._geometry = None
 
-    def _copy_with_new(self, **new_attributes) -> AS4100Section:
+    def _copy_with_new(self, **new_attributes) -> SteelSection:
         """
-        Function to copy the AS4100Section instance but update specific attributes.
+        Function to copy the SteelSection instance but update specific attributes.
 
         The returned copy is a deepcopy.
         Note that the function replaces _geometry of the new instance with None.
@@ -54,8 +54,8 @@ class AS4100Section(ABC):
 
         Returns
         -------
-        AS4100Section
-            A new instance of an AS4100Section with updated attributes.
+        SteelSection
+            A new instance of an SteelSection with updated attributes.
         """
 
         new_section = copy.deepcopy(self)
@@ -134,8 +134,9 @@ class AS4100Section(ABC):
 
         Notes
         -----
-        This property should create the geometry if it has not already been created.
-        The returned section should not include any localised holes (e.g. bolt holes).
+        - This property should create the geometry if it has not already been created.
+        - The returned section should not include any localised holes (e.g. bolt holes).
+        - Geometry should be centred on its COG.
 
         Returns
         -------
@@ -243,7 +244,7 @@ class AS4100Section(ABC):
         return self.n_tu(fracture_modifier=fracture_modifier) * phi_steel
 
 
-class ISection(AS4100Section):
+class ISection(SteelSection):
     def __init__(
         self,
         *,
@@ -641,7 +642,7 @@ class ISection(AS4100Section):
 
         return self._holes
 
-    def add_holes(self, holes: list[str, tuple[float, float]]) -> AS4100Section:
+    def add_holes(self, holes: list[str, tuple[float, float]]) -> SteelSection:
         """
         Add holes to the section.
 
@@ -655,8 +656,8 @@ class ISection(AS4100Section):
 
         Returns
         -------
-        AS4100Section
-            A new AS4100Section object with the added holes.
+        SteelSection
+            A new SteelSection object with the added holes.
         """
 
         return self._copy_with_new(**{"_holes": self.holes + holes})
@@ -670,20 +671,20 @@ class ISection(AS4100Section):
         raise NotImplementedError()
 
 
-class AS4100Member:
-    def __init__(self, section: AS4100Section, length, restraints):
+class SteelMember:
+    def __init__(self, section: SteelSection, length, restraints):
         self._section = section
         self._length = length
         self._restraints = restraints
 
     @property
-    def section(self) -> AS4100Section:
+    def section(self) -> SteelSection:
         """
         The cross-section of the member.
 
         Returns
         -------
-        _any
+        SteelSection
             The current assigned cross-section object.
 
         Notes
