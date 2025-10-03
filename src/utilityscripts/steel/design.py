@@ -10,10 +10,15 @@ from abc import ABC, abstractmethod
 from enum import Enum
 
 import numpy as np
+import polars as pl
 from sectionproperties.pre import Geometry
 from shapely import Polygon
 
-from utilityscripts.steel.steel import SteelGrade
+from utilityscripts.steel.steel import (
+    SteelGrade,
+    i_section_df,
+    steel_grades,
+)
 
 
 class SteelSection(ABC):
@@ -184,6 +189,21 @@ class SteelSection(ABC):
         float
         """
         pass
+
+    def plot_geometry(self, *, net: bool = False):
+        """
+        Plot the geometry of the section.
+
+        Parameters
+        ----------
+        net : bool, optional
+            Plot the full section or the net section?
+        """
+
+        if net:
+            self.geometry_net.plot_geometry()
+        else:
+            self.geometry.plot_geometry()
 
     def n_ty(self) -> float:
         """
@@ -568,16 +588,14 @@ class ISection(SteelSection):
         cnr_btm_right = _make_corner(
             corner_point=(self.t_w / 2, self.t_fb),
             corner_size=self.corner_size,
-            right=True,
-            top=False,
+            corner_location=CornerLocation.BOTTOMRIGHT,
             corner_detail=self.corner_detail,
             n_r=self.n_r,
         )
         cnr_top_right = _make_corner(
             corner_point=(self.t_w / 2, self.d - self.t_fb),
             corner_size=self.corner_size,
-            right=True,
-            top=True,
+            corner_location=CornerLocation.TOPRIGHT,
             corner_detail=self.corner_detail,
             n_r=self.n_r,
         )
@@ -593,16 +611,14 @@ class ISection(SteelSection):
         cnr_top_left = _make_corner(
             corner_point=(-self.t_w / 2, self.d - self.t_ft),
             corner_size=self.corner_size,
-            right=False,
-            top=True,
+            corner_location=CornerLocation.TOPLEFT,
             corner_detail=self.corner_detail,
             n_r=self.n_r,
         )
         cnr_bottom_left = _make_corner(
             corner_point=(-self.t_w / 2, self.t_fb),
             corner_size=self.corner_size,
-            right=False,
-            top=False,
+            corner_location=CornerLocation.BOTTOMLEFT,
             corner_detail=self.corner_detail,
             n_r=self.n_r,
         )
@@ -708,12 +724,18 @@ class CornerDetail(Enum):
     RADIUS = "radius"
 
 
+class CornerLocation(Enum):
+    TOPLEFT = "topleft"
+    TOPRIGHT = "topright"
+    BOTTOMLEFT = "bottomleft"
+    BOTTOMRIGHT = "bottomright"
+
+
 def _make_corner(
     *,
     corner_point: tuple[float, float],
     corner_size: float,
-    right: bool,
-    top: bool,
+    corner_location: CornerLocation,
     corner_detail: CornerDetail | None = None,
     n_r: int = 8,
 ):
@@ -749,20 +771,24 @@ def _make_corner(
 
     if corner_detail == CornerDetail.WELD:
         return _make_weld(
-            corner_point=corner_point, corner_size=corner_size, right=right, top=top
+            corner_point=corner_point,
+            corner_size=corner_size,
+            corner_location=corner_location,
         )
 
     return _make_radius(
         corner_point=corner_point,
         corner_size=corner_size,
+        corner_location=corner_location,
         n_r=n_r,
-        right=right,
-        top=top,
     )
 
 
 def _make_weld(
-    *, corner_point: tuple[float, float], corner_size: float, right: bool, top: bool
+    *,
+    corner_point: tuple[float, float],
+    corner_size: float,
+    corner_location: CornerLocation,
 ):
     """
     Create coordinates for a corner weld.
@@ -773,27 +799,26 @@ def _make_weld(
         The original corner point (x, y).
     corner_size : float
         The leg length of the weld.
-    right : bool
-        Is the weld on the RHS of the web?
-    top : bool
-        Is the weld at the top of the section.
+    corner_location : CornerLocation
+        The corner location (e.g. Top Left, Bottom Right).
 
     Returns
     -------
     list[tuple[float, float]]
         A list containing the new corner point coordinates.
     """
-    if right and top:
+
+    if corner_location == CornerLocation.TOPRIGHT:
         return [
             (corner_point[0], corner_point[1] - corner_size),
             (corner_point[0] + corner_size, corner_point[1]),
         ]
-    if right:
+    if corner_location == CornerLocation.BOTTOMRIGHT:
         return [
             (corner_point[0] + corner_size, corner_point[1]),
             (corner_point[0], corner_point[1] + corner_size),
         ]
-    if not right and top:
+    if corner_location == CornerLocation.TOPLEFT:
         return [
             (corner_point[0] - corner_size, corner_point[1]),
             (corner_point[0], corner_point[1] - corner_size),
@@ -803,13 +828,6 @@ def _make_weld(
         (corner_point[0], corner_point[1] + corner_size),
         (corner_point[0] - corner_size, corner_point[1]),
     ]
-
-
-class CornerLocation(Enum):
-    TOPLEFT = "topleft"
-    TOPRIGHT = "topright"
-    BOTTOMLEFT = "bottomleft"
-    BOTTOMRIGHT = "bottomright"
 
 
 def _make_radius(
@@ -830,7 +848,7 @@ def _make_radius(
     corner_size : float
         The size of the radius
     corner_location : CornerLocation
-        The location of the corner.
+        The corner location (e.g. Top Left, Bottom Right).
     n_r : int
         The number of points around the radius
 
@@ -847,7 +865,7 @@ def _make_radius(
                 corner_point[1] - corner_size,
             )
             limit_angles = (90, 180)
-        case CornerLocation.TOPRIGHT:
+        case CornerLocation.BOTTOMRIGHT:
             corner_point = (
                 corner_point[0] + corner_size,
                 corner_point[1] + corner_size,
@@ -941,3 +959,52 @@ def build_circle(
     all_points = np.transpose(np.stack((x_points, y_points)))
 
     return [(p[0], p[1]) for p in all_points.tolist()]
+
+
+def make_section(*, designation: str, grade: str | SteelGrade) -> SteelSection:
+    """
+    Make a SteelSection object based on the standard designation.
+
+    Parameters
+    ----------
+    designation: str
+        The standard designation of the section. E.g. "310UB40.4". M
+        Must match the sections in the standard database.
+    grade: str | SteelGrade
+        The grade of steel to be used. Can be either a standard specification string
+        matching those in the data spreadsheet (e.g. 'AS/NZS3678:250') or a SteelGrade
+        object.
+
+    Returns
+    -------
+    SteelSection
+        A SteelSection object representing the specified section.
+    """
+
+    i_df = i_section_df()
+
+    if designation not in i_df["section"]:
+        raise ValueError(f"Invalid section designation: {designation}")
+
+    row = i_df.filter(pl.col("section") == designation)
+
+    if not isinstance(grade, SteelGrade):
+        grade = steel_grades()[grade]
+
+    corner_detail = (
+        CornerDetail.WELD
+        if row["fabrication_type"][0] == "welded"
+        else CornerDetail.RADIUS
+    )
+    corner_size = row["r1_or_w1"][0]
+
+    return ISection(
+        section_name=row["section"][0],
+        steel=grade,
+        b_f=row["b_f"][0],
+        d=row["d"][0],
+        t_f=row["t_f"][0],
+        t_w=row["t_w"][0],
+        corner_detail=corner_detail,
+        corner_size=corner_size,
+    )
