@@ -29,15 +29,17 @@ class SteelSection(ABC):
     and requires implementation for each section type, e.g. I, C, SHS etc.
     """
 
-    def __init__(self, *, section_name, steel: SteelGrade):
+    def __init__(self, *, section_name, steel: SteelGrade | None = None):
         """
 
         Parameters
         ----------
         section_name : str
             A name to give the section.
-        steel : SteelGrade
-            The steel material the section is made of.
+        steel : SteelGrade | None
+            The steel material the section is made of. Can be None, but if so only
+            the geometric properties of the section will be available and no design
+            can be done.
         """
 
         self._section_name = section_name
@@ -84,16 +86,37 @@ class SteelSection(ABC):
         return self._section_name
 
     @property
-    def steel(self) -> SteelGrade:
+    def steel(self) -> SteelGrade | None:
         """
         The steel material the section is made of.
 
         Returns
         -------
-        SteelGrade
+        SteelGrade | None
+            The steel material the section is made of.
+            May be None if not provided.
         """
 
         return self._steel
+
+    def add_steel(self, steel: SteelGrade | None) -> SteelSection:
+        """
+        Add a steel property to the section.
+
+        Parameters
+        ----------
+        steel : SteelGrade | None
+            The steel material the section is made of. Can be None, but if so only
+            the geometric properties of the section will be available and no design
+            can be done.
+
+        Returns
+        -------
+        SteelSection
+            A new section containing the new steel properties.
+        """
+
+        return self._copy_with_new(**{"_steel": steel})
 
     @property
     @abstractmethod
@@ -961,7 +984,9 @@ def build_circle(
     return [(p[0], p[1]) for p in all_points.tolist()]
 
 
-def make_section(*, designation: str, grade: str | SteelGrade) -> SteelSection:
+def make_section(
+    *, designation: str, grade: str | SteelGrade | None = None
+) -> SteelSection:
     """
     Make a SteelSection object based on the standard designation.
 
@@ -970,10 +995,10 @@ def make_section(*, designation: str, grade: str | SteelGrade) -> SteelSection:
     designation: str
         The standard designation of the section. E.g. "310UB40.4". M
         Must match the sections in the standard database.
-    grade: str | SteelGrade
+    grade: str | SteelGrade | None
         The grade of steel to be used. Can be either a standard specification string
         matching those in the data spreadsheet (e.g. 'AS/NZS3678:250') or a SteelGrade
-        object.
+        object. If None, the SteelSection object has no material properties.
 
     Returns
     -------
@@ -988,7 +1013,7 @@ def make_section(*, designation: str, grade: str | SteelGrade) -> SteelSection:
 
     row = i_df.filter(pl.col("section") == designation)
 
-    if not isinstance(grade, SteelGrade):
+    if grade is not None and not isinstance(grade, SteelGrade):
         grade = steel_grades()[grade]
 
     corner_detail = (
