@@ -292,7 +292,7 @@ class ISection(SteelSection):
         self,
         *,
         section_name,
-        steel: SteelGrade,
+        steel: SteelGrade | None,
         b_f: float | tuple[float, float],
         d: float,
         t_f: float | tuple[float, float],
@@ -308,14 +308,18 @@ class ISection(SteelSection):
         ----------
         section_name : str
             The name of the section.
+        steel : SteelGrade | None
+            The steel material the section is made of. Can be None, but if so only
+            the geometric properties of the section will be available and no design
+            can be done.
         b_f : float | tuple[float, float]
             Width of the flange. For monosymmetric I sections,
-            a tuple of the top & bottom flanges can be provided.
+            a tuple of the top & bottom flanges can be provided as (b_ft, b_fb)
         d : float
             Total depth of the section.
         t_f : float | tuple[float, float]
             Thickness of the flange. For monosymmetric I sections
-            a tuple of the top & bottom flanges can be provided.
+            a tuple of the top & bottom flanges can be provided as (t_ft, t_fb)
         t_w : float
             Thickness of the web.
         corner_detail: CornerDetail | None
