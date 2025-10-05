@@ -11,20 +11,20 @@ from utilityscripts.steel.steel import steel_grades
 
 
 @pytest.mark.parametrize(
-    "b_f, d, t_f, t_w, corner_detail, corner_size",
+    "designation, b_f, d, t_f, t_w, corner_detail, corner_size",
     [
-        (0.1, 0.15, 0.015, 0.01, None, None),
-        (0.1, 0.15, 0.015, 0.01, CornerDetail.RADIUS, 0.010),
-        (0.1, 0.15, 0.015, 0.01, CornerDetail.WELD, 0.005),
+        ("test1", 0.1, 0.15, 0.015, 0.01, None, None),
+        ("test2", 0.1, 0.15, 0.015, 0.01, CornerDetail.RADIUS, 0.010),
+        ("test3", 0.1, 0.15, 0.015, 0.01, CornerDetail.WELD, 0.005),
     ],
 )
-def test_i_section(b_f, d, t_f, t_w, corner_detail, corner_size):
+def test_i_section(designation, b_f, d, t_f, t_w, corner_detail, corner_size):
     """
     Basic test of the ISection class.
     """
 
     i_section = ISection(
-        section_name="testy testy",
+        section_name=designation,
         steel=None,
         b_f=b_f,
         d=d,
@@ -40,7 +40,7 @@ def test_i_section(b_f, d, t_f, t_w, corner_detail, corner_size):
     if not isinstance(t_f, tuple):
         t_f = (t_f, t_f)
 
-    assert i_section.section_name == "testy testy"
+    assert i_section.section_name == designation
     assert i_section.steel is None
     assert i_section.b_f == b_f
     assert i_section.d == d
