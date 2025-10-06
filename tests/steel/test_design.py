@@ -6,7 +6,13 @@ from math import isclose
 
 import pytest
 
-from utilityscripts.steel.design import AS4100, CornerDetail, ISection, make_section
+from utilityscripts.steel.design import (
+    AS4100,
+    CornerDetail,
+    ISection,
+    SteelMember,
+    make_section,
+)
 from utilityscripts.steel.steel import steel_grades
 
 g300 = steel_grades()["AS/NZS3679.1:300"]
@@ -93,6 +99,27 @@ def test_add_steel():
     assert isclose(new_section.area_gross, 0.00521, rel_tol=1e-3)
 
 
+def test_steel_member():
+    """
+    Test that steel member works.
+    """
+
+    length = 2.0
+
+    member = SteelMember(section=None, length=length, restraints=None)
+
+    assert member.section is None
+    assert member.length == length
+    assert member.restraints is None
+
+    _310ub40 = make_section(designation="310UB40.4")
+
+    new_member = member.add_section(_310ub40)
+
+    assert member.section is None
+    assert new_member.section == _310ub40
+
+
 def test_as4100():
     """
     Basic test of the AS4100 class.
@@ -100,4 +127,13 @@ def test_as4100():
 
     design = AS4100()
 
+    assert design.member is None
     assert design.length is None
+
+    length = 2.0
+    member = SteelMember(section=None, length=length, restraints=None)
+
+    new_design = design.add_member(member)
+
+    assert design.member is None
+    assert new_design.member is member
