@@ -788,7 +788,20 @@ class SteelMember:
 
 
 class AS4100:
+    """
+    A class for design to AS4100.
+    """
+
     def __init__(self, *, member: SteelMember | None = None):
+        """
+        A class for design to AS4100.
+
+        Parameters
+        ----------
+        member : SteelMember
+            The steel member object to design.
+        """
+
         self._member = member
 
     def _copy_with_new(self, **new_attributes) -> AS4100:
