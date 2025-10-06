@@ -715,19 +715,43 @@ class ISection(SteelSection):
 
 
 class SteelMember:
-    def __init__(self, section: SteelSection, length, restraints):
+    def __init__(self, *, section: SteelSection | None, length: float, restraints):
         self._section = section
         self._length = length
         self._restraints = restraints
 
+    def _copy_with_new(self, **new_attributes) -> SteelMember:
+        """
+        Function to copy the SteelMember instance but update specific attributes.
+
+        The returned copy is a deepcopy.
+
+        Parameters
+        ----------
+        new_attributes : dict
+            Any attributes to update as key:value pairs.
+
+        Returns
+        -------
+        SteelMember
+            A new instance of a SteelMember with updated attributes.
+        """
+
+        new_member = copy.deepcopy(self)
+
+        for attr, value in new_attributes.items():
+            setattr(new_member, attr, value)
+
+        return new_member
+
     @property
-    def section(self) -> SteelSection:
+    def section(self) -> SteelSection | None:
         """
         The cross-section of the member.
 
         Returns
         -------
-        SteelSection
+        SteelSection | None
             The current assigned cross-section object.
 
         Notes
@@ -736,6 +760,23 @@ class SteelMember:
         multiple different cross-sections along the length of a member.
         """
         return self._section
+
+    def add_section(self, section: SteelSection) -> SteelMember:
+        """
+        Add or replace the section in the member.
+
+        Parameters
+        ----------
+        section : SteelSection
+            The new section to add.
+
+        Returns
+        -------
+        SteelMember
+            A new SteelMember with updated attributes.
+        """
+
+        return self._copy_with_new(**{"_section": section})
 
     @property
     def length(self):
