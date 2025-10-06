@@ -6,19 +6,19 @@ from math import isclose
 
 import pytest
 
-from utilityscripts.steel.design import ISection, make_section, CornerDetail
+from utilityscripts.steel.design import CornerDetail, ISection, make_section
 from utilityscripts.steel.steel import steel_grades
 
 
 @pytest.mark.parametrize(
-    "designation, b_f, d, t_f, t_w, corner_detail, corner_size",
+    "designation, b_f, d, t_f, t_w, corner_detail, corner_size, n_r",
     [
-        ("test1", 0.1, 0.15, 0.015, 0.01, None, None),
-        ("test2", 0.1, 0.15, 0.015, 0.01, CornerDetail.RADIUS, 0.010),
-        ("test3", 0.1, 0.15, 0.015, 0.01, CornerDetail.WELD, 0.005),
+        ("test1", 0.1, 0.15, 0.015, 0.01, None, None, 4),
+        ("test2", 0.1, 0.15, 0.015, 0.01, CornerDetail.RADIUS, 0.010, 8),
+        ("test3", 0.1, 0.15, 0.015, 0.01, CornerDetail.WELD, 0.005, 16),
     ],
 )
-def test_i_section(designation, b_f, d, t_f, t_w, corner_detail, corner_size):
+def test_i_section(designation, b_f, d, t_f, t_w, corner_detail, corner_size, n_r):
     """
     Basic test of the ISection class.
     """
@@ -32,6 +32,7 @@ def test_i_section(designation, b_f, d, t_f, t_w, corner_detail, corner_size):
         t_w=t_w,
         corner_detail=corner_detail,
         corner_size=corner_size,
+        n_r=n_r,
     )
 
     if not isinstance(b_f, tuple):
@@ -56,6 +57,7 @@ def test_i_section(designation, b_f, d, t_f, t_w, corner_detail, corner_size):
         if corner_size is not None
         else i_section.corner_size == 0.000
     )
+    assert i_section.n_r == n_r
 
 
 @pytest.mark.parametrize(
