@@ -6,7 +6,7 @@ from math import isclose
 
 import pytest
 
-from utilityscripts.steel.design import CornerDetail, ISection, make_section
+from utilityscripts.steel.design import AS4100, CornerDetail, ISection, make_section
 from utilityscripts.steel.steel import steel_grades
 
 g300 = steel_grades()["AS/NZS3679.1:300"]
@@ -91,3 +91,13 @@ def test_add_steel():
     assert new_section.steel == g300
 
     assert isclose(new_section.area_gross, 0.00521, rel_tol=1e-3)
+
+
+def test_as4100():
+    """
+    Basic test of the AS4100 class.
+    """
+
+    design = AS4100()
+
+    assert design.length is None
