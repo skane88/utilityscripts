@@ -9,6 +9,8 @@ import pytest
 from utilityscripts.steel.design import CornerDetail, ISection, make_section
 from utilityscripts.steel.steel import steel_grades
 
+g300 = steel_grades()["AS/NZS3679.1:300"]
+
 
 @pytest.mark.parametrize(
     "designation, b_f, d, t_f, t_w, corner_detail, corner_size, n_r",
@@ -64,7 +66,7 @@ def test_i_section(designation, b_f, d, t_f, t_w, corner_detail, corner_size, n_
     "designation, grade, area_expected",
     [
         ("310UB40.4", "AS/NZS3679.1:300", 0.00521),
-        ("310UB40.4", steel_grades()["AS/NZS3679.1:300"], 0.00521),
+        ("310UB40.4", g300, 0.00521),
         ("1000WB215", None, 27.40e-03),
     ],
 )
@@ -82,8 +84,6 @@ def test_add_steel():
     _310ub40 = make_section(designation="310UB40.4")
     assert isclose(_310ub40.area_gross, 0.00521, rel_tol=1e-3)
     assert _310ub40.steel is None
-
-    g300 = steel_grades()["AS/NZS3679.1:300"]
 
     new_section = _310ub40.add_steel(g300)
 
