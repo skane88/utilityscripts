@@ -104,12 +104,10 @@ def test_steel_member():
     Test that steel member works.
     """
 
-    length = 2.0
-
-    member = SteelMember(section=None, length=length, restraints=None)
+    member = SteelMember()
 
     assert member.section is None
-    assert member.length == length
+    assert member.length is None
     assert member.restraints is None
 
     _310ub40 = make_section(designation="310UB40.4")
@@ -118,6 +116,13 @@ def test_steel_member():
 
     assert member.section is None
     assert new_member.section == _310ub40
+
+    length = 2.0
+
+    new_member = member.add_length(length)
+
+    assert member.length is None
+    assert new_member.length == length
 
 
 def test_as4100():

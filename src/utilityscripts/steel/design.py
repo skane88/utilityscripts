@@ -715,7 +715,13 @@ class ISection(SteelSection):
 
 
 class SteelMember:
-    def __init__(self, *, section: SteelSection | None, length: float, restraints):
+    def __init__(
+        self,
+        *,
+        section: SteelSection | None = None,
+        length: float | None = None,
+        restraints=None,
+    ):
         self._section = section
         self._length = length
         self._restraints = restraints
@@ -761,13 +767,13 @@ class SteelMember:
         """
         return self._section
 
-    def add_section(self, section: SteelSection) -> SteelMember:
+    def add_section(self, section: SteelSection | None) -> SteelMember:
         """
         Add or replace the section in the member.
 
         Parameters
         ----------
-        section : SteelSection
+        section : SteelSection | None
             The new section to add.
 
         Returns
@@ -781,6 +787,23 @@ class SteelMember:
     @property
     def length(self):
         return self._length
+
+    def add_length(self, length: float | None) -> SteelMember:
+        """
+        Add or replace the length of the member.
+
+        Parameters
+        ----------
+        length : float | None
+            The new length to add.
+
+        Returns
+        -------
+        SteelMember
+            A new SteelMember with updated attributes.
+        """
+
+        return self._copy_with_new(**{"_length": length})
 
     @property
     def restraints(self):
