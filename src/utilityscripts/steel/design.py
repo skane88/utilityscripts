@@ -787,6 +787,78 @@ class SteelMember:
         return self._restraints
 
 
+class AS4100:
+    def __init__(self, *, member: SteelMember | None = None):
+        self._member = member
+
+    def _copy_with_new(self, **new_attributes) -> AS4100:
+        """
+        Function to copy the instance but update specific attributes.
+
+        The returned copy is a deepcopy.
+
+        Parameters
+        ----------
+        new_attributes : dict
+            Any attributes to update as key:value pairs.
+
+        Returns
+        -------
+        AS4100
+            A new instance of AS4100 with updated attributes.
+        """
+
+        new_design = copy.deepcopy(self)
+
+        for attr, value in new_attributes.items():
+            setattr(new_design, attr, value)
+
+        return new_design
+
+    @property
+    def member(self) -> SteelMember | None:
+        """
+        The member assigned to the object.
+
+        Returns
+        -------
+        SteelMember | None
+            The steel member assigned to the object.
+        """
+
+        return self._member
+
+    def add_member(self, member: SteelMember) -> AS4100:
+        """
+        Add or replace the member in the member.
+
+        Parameters
+        ----------
+        member : SteelMember
+            The member to be added.
+
+        Returns
+        -------
+        AS4100
+            A new AS4100 with updated attributes.
+        """
+
+        return self._copy_with_new(**{"_member": member})
+
+    @property
+    def length(self) -> float | None:
+        """
+        The length of the member assigned to the design.
+
+        Returns
+        -------
+        float | None
+            The length of the member assigned to the design.
+        """
+
+        return None if self.member is None else self.member.length
+
+
 class CornerDetail(Enum):
     WELD = "weld"
     RADIUS = "radius"
