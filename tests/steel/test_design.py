@@ -142,3 +142,15 @@ def test_as4100():
 
     assert design.member is None
     assert new_design.member is member
+
+
+def test_as4100_tension():
+    _310ub40 = make_section(designation="310UB40.4", grade=g300)
+    length = 2.0
+
+    member = SteelMember(section=_310ub40, length=length, restraints=None)
+
+    design = AS4100(member=member)
+
+    assert isclose(design.n_ty(), 1666.6, rel_tol=1e-3)
+    assert isclose(design.phi_n_ty(phi_steel=0.9), 1499.90, rel_tol=1e-3)

@@ -14,6 +14,7 @@ import polars as pl
 from sectionproperties.pre import Geometry
 from shapely import Polygon
 
+from utilityscripts.steel import as4100
 from utilityscripts.steel.steel import (
     SteelGrade,
     i_section_df,
@@ -227,64 +228,6 @@ class SteelSection(ABC):
             self.geometry_net.plot_geometry()
         else:
             self.geometry.plot_geometry()
-
-    def n_ty(self) -> float:
-        """
-        The tension yield capacity.
-
-        Returns
-        -------
-        float
-        """
-        return self.area_gross * self.f_y_min
-
-    def phi_n_ty(self, phi_steel: float = 0.9) -> float:
-        """
-        Calculate the design tension yield capacity (φN_ty).
-
-        Parameters
-        ----------
-        phi_steel : float, optional
-            The capacity reduction factor for steel in tension, default is 0.9.
-
-        Returns
-        -------
-        float
-        """
-        return self.n_ty() * phi_steel
-
-    def n_tu(self, fracture_modifier: float = 0.85):
-        """
-        Calculate the net tensile strength at fracture.
-
-        Parameters
-        ----------
-        fracture_modifier : float, optional
-            A modifier representing the impact of fractures or imperfections.
-            Default value is 0.85.
-
-        Returns
-        -------
-        float
-        """
-        return self.area_net * self.f_u_min * fracture_modifier
-
-    def phi_n_tu(self, fracture_modifier: float = 0.85, phi_steel: float = 0.9):
-        """
-        Calculate the design fracture capacity.
-
-        Parameters
-        ----------
-        fracture_modifier : float
-            Modifier applied to the ultimate capacity factor (default is 0.85).
-        phi_steel : float
-            Capacity reduction factor for steel (default is 0.9).
-
-        Returns
-        -------
-        float
-        """
-        return self.n_tu(fracture_modifier=fracture_modifier) * phi_steel
 
 
 class ISection(SteelSection):
@@ -893,6 +836,70 @@ class AS4100:
         """
 
         return None if self.member is None else self.member.length
+
+    @property
+    def section(self) -> SteelSection:
+        return self.member.section
+
+    def n_ty(self) -> float:
+        """
+        The tension yield capacity. In kN.
+
+        Returns
+        -------
+        float
+        """
+
+        return as4100.s7_2_n_ty(a_g=self.section.area_gross, f_y=self.section.f_y_min)
+
+    def phi_n_ty(self, phi_steel: float = 0.9) -> float:
+        """
+        Calculate the design tension yield capacity (φN_ty).
+
+        Parameters
+        ----------
+        phi_steel : float, optional
+            The capacity reduction factor for steel in tension, default is 0.9.
+
+        Returns
+        -------
+        float
+        """
+        return self.n_ty() * phi_steel
+
+    def n_tu(self, fracture_modifier: float = 0.85):
+        """
+        Calculate the net tensile strength at fracture.
+
+        Parameters
+        ----------
+        fracture_modifier : float, optional
+            A modifier representing the impact of fractures or imperfections.
+            Default value is 0.85.
+
+        Returns
+        -------
+        float
+        """
+        return self.section.area_net * self.section.f_u_min * fracture_modifier
+
+    def phi_n_tu(self, fracture_modifier: float = 0.85, phi_steel: float = 0.9):
+        """
+        Calculate the design fracture capacity.
+
+        Parameters
+        ----------
+        fracture_modifier : float
+            Modifier applied to the ultimate capacity factor (default is 0.85).
+        phi_steel : float
+            Capacity reduction factor for steel (default is 0.9).
+
+        Returns
+        -------
+        float
+        """
+
+        return self.n_tu(fracture_modifier=fracture_modifier) * phi_steel
 
 
 class CornerDetail(Enum):
