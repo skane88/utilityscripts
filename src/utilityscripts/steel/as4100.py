@@ -267,6 +267,21 @@ def s5_15_3_a_s(*, gamma, a_w, alpha_v, v_star, v_u, d_p, s, phi=0.9):
     return a_1 * a_2 * a_3 * a_4
 
 
+def s7_2_n_ty(*, a_g, f_y):
+    """
+    Calculate the tension capacity in yield as per AS4100 S7.2.
+
+    Parameters
+    ----------
+    a_g : float
+        The gross cross sectional area.
+    f_y : float
+        The yield strength of the material.
+    """
+
+    return a_g * f_y
+
+
 def s9_1_9_block(
     *,
     a_gv: float,
