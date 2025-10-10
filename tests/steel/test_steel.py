@@ -163,8 +163,8 @@ def test_steel_grades():
 
     assert sg
 
-    assert sg["AS/NZS3678:250"].get_f_y(0.008) == 280  # noqa: PLR2004
-    assert sg["AS/NZS3678:250"].get_f_u(0.008) == 410  # noqa: PLR2004
+    assert sg["AS/NZS3678:250"].get_f_y(0.008) == 280e6  # noqa: PLR2004
+    assert sg["AS/NZS3678:250"].get_f_u(0.008) == 410e6  # noqa: PLR2004
 
 
 def test_nearest_standard_weld():
