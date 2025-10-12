@@ -231,3 +231,35 @@ def test_repr_latex():
     v = Variable(eqn)
 
     assert v.latex_string == eqn._repr_latex_()
+
+
+@pytest.mark.parametrize(
+    "val, expected_str, expected_latex",
+    [
+        (Variable(1, scale=1000, units="mm"), "1000mm", "$1000\\text{mm}$"),
+        (
+            Variable(1, scale=1000, units="mm", fmt_string=".2f"),
+            "1000.00mm",
+            "$1000.00\\text{mm}$",
+        ),
+        (
+            Variable(1, scale=1000, units="mm", fmt_string=".2e"),
+            "1.00e+03mm",
+            "$1.00 \\times 10^{3}\\text{mm}$",
+        ),
+        (Variable(1, scale=1000, symbol="a"), "a=1000", "$\\text{a} = 1000$"),
+        (
+            Variable(1, scale=1000, symbol="a", units="mm"),
+            "a=1000mm",
+            "$\\text{a} = 1000\\text{mm}$",
+        ),
+        (
+            Variable(1, scale=1000, symbol="a", units="mm", fmt_string=".2f"),
+            "a=1000.00mm",
+            "$\\text{a} = 1000.00\\text{mm}$",
+        ),
+    ],
+)
+def test_scale(val, expected_str, expected_latex):
+    assert str(val) == expected_str
+    assert val.latex_string == expected_latex

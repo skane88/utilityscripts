@@ -69,6 +69,7 @@ class Variable:
         *,
         symbol: str | None = None,
         units: str | None = None,
+        scale: float = 1.0,
         fmt_string: str | None = None,
         disable_latex: bool = False,
         shorten_list: int | None = 6,
@@ -88,6 +89,12 @@ class Variable:
             If the symbol contains a backslash, it is assumed to be in latex format.
         units : str | None, optional
             The units used for the variable.
+        scale : float, optional
+            A scaling factor for displaying the value.
+            Does not apply to the underlying stored value.
+            Can be used to display results in different units - e.g. if
+            the underlying value is in meters but you want the display in mm,
+            Use a scale of 1000.
         fmt_string : str | None, optional
             A valid format string to use in the variable display.
         disable_latex : bool, optional
@@ -114,6 +121,7 @@ class Variable:
         self._value = value
         self._symbol = symbol
         self._units = units
+        self._scale = scale
         self._fmt_string = fmt_string
         self._disable_latex = disable_latex
         self._shorten_list = shorten_list
@@ -155,6 +163,18 @@ class Variable:
         """
 
         return self._units
+
+    @property
+    def scale(self) -> float:
+        """
+        A scaling factor for displaying the value.
+
+        Notes
+        -----
+        This does not affect the underlying value and is for display purposes only.
+        """
+
+        return self._scale
 
     @property
     def fmt_string(self) -> str | None:
@@ -231,6 +251,7 @@ class Variable:
 
         return _format_any(
             self.value,
+            scale=self.scale,
             fmt_string=self.fmt_string,
             str_type=str_type,
             greek_symbols=self.greek_symbols,
@@ -408,6 +429,7 @@ class Variable:
 def _format_any(
     value: Any,
     *,
+    scale: float = 1.0,
     fmt_string: str | None = None,
     greek_symbols: bool = False,
     str_type: StrType = StrType.TEXT,
@@ -430,6 +452,8 @@ def _format_any(
     ----------
     value : Any
         The value to format into latex format.
+    scale : float, optional
+        A scale factor for displaying the value.
     fmt_string : str | None, optional
         A format string to use for formatting the value.
         If None, str() is used on the value.
@@ -472,6 +496,7 @@ def _format_any(
 
     if isinstance(value, Iterable):
         return _format_iterable(
+            scale=scale,
             value=value,
             max_elements=max_elements,
             max_depth=max_depth,
@@ -481,13 +506,19 @@ def _format_any(
         )
 
     if isinstance(value, Number):
-        return _format_number(value=value, fmt_string=fmt_string, str_type=str_type)
+        return _format_number(
+            value=value, scale=scale, fmt_string=fmt_string, str_type=str_type
+        )
 
     return "'" + str(value) + "'"
 
 
 def _format_number(
-    value, *, fmt_string: str | None = None, str_type: StrType = StrType.TEXT
+    value,
+    *,
+    scale: float = 1.0,
+    fmt_string: str | None = None,
+    str_type: StrType = StrType.TEXT,
 ) -> str:
     """
     Returns a value formatted as required.
@@ -496,6 +527,8 @@ def _format_number(
     ----------
     value : Any
         The value to format into latex format.
+    scale : float, optional
+        A scale factor for displaying the value.
     fmt_string : str | None, optional
         A format string to use for formatting the value.
     str_type : StrType, optional
@@ -506,6 +539,9 @@ def _format_number(
     str
         The value formatted as a string.
     """
+
+    if scale != 1.0:
+        value = value * scale
 
     value_str = f"{value:{fmt_string}}" if fmt_string is not None else f"{value}"
 
@@ -590,6 +626,7 @@ def _format_string(
 def _format_iterable(
     value: Iterable,
     *,
+    scale: float = 1.0,
     current_depth: int = 0,
     fmt_string: str | None = None,
     max_elements: int | None = 6,
@@ -604,6 +641,8 @@ def _format_iterable(
     ----------
     value : Iterable
         The iterable object to convert to a string.
+    scale : float, optional
+        A scale factor for displaying the values inside the interable.
     current_depth : int, optional
         The current depth of the iterable.
     fmt_string: str | None, optional
@@ -657,6 +696,7 @@ def _format_iterable(
     if isinstance(value, dict):
         values_str = _format_dict(
             value,
+            scale=scale,
             max_elements=max_elements,
             str_type=str_type,
             max_depth=max_depth,
@@ -668,6 +708,7 @@ def _format_iterable(
         for i, v in enumerate(value):
             val_str = _format_any(
                 v,
+                scale=scale,
                 fmt_string=fmt_string,
                 str_type=str_type,
                 quote_strings=quote_strings,
@@ -691,6 +732,7 @@ def _format_iterable(
 def _format_dict(
     value: dict[Any, Any],
     *,
+    scale: float = 1.0,
     current_depth: int = 0,
     fmt_string: str | None = None,
     max_elements: int | None,
@@ -704,6 +746,8 @@ def _format_dict(
     ----------
     value : dict[Any, Any]
         The dictionary to convert to a latex string.
+    scale : float, optional
+        A scale factor for displaying the values inside the dictionary.
     current_depth : int, optional
         The current depth of the iterable.
     max_elements : int | None
@@ -745,6 +789,7 @@ def _format_dict(
             + ": "
             + _format_any(
                 val,
+                scale=scale,
                 fmt_string=fmt_string,
                 str_type=str_type,
                 max_depth=max_depth,
