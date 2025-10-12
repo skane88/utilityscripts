@@ -53,14 +53,14 @@ class StrType(StrEnum):
 class Variable:
     """
     Class to store a simple variable object. Designed to package together a value,
-    a symbol and some information about units and how to display it.
+    symbol and some information about units and how to display it.
 
     Notes
     -----
-    - Intended to be for reporting purposes only. The units functionality is not and
-    will not replace a units package like pint or unyt.
+    - Intended to be for reporting purposes only.
+    - The unit functionality is not, and will not replace a package like pint or unyt.
     - Where items already define an iPython-like _repr_mimebundle_ this
-    is used to provide latex and other (eg html) representations.
+    is used to provide latex and other (e.g. HTML) representations.
     """
 
     def __init__(
@@ -93,7 +93,7 @@ class Variable:
             A scaling factor for displaying the value.
             Does not apply to the underlying stored value.
             Can be used to display results in different units - e.g. if
-            the underlying value is in meters but you want the display in mm,
+            the underlying value is in meters, but you want the display in mm,
             Use a scale of 1000.
         fmt_string : str | None, optional
             A valid format string to use in the variable display.
@@ -101,18 +101,18 @@ class Variable:
             Should the latex output options be disabled?
         shorten_list : int | None, optional
             Should lists, sets and dicts be displayed in shortend form?
-            If a number, n, is provided lists are shortened to only
+            If a number, n, is provided, lists are shortened to only
             display n elements. The typical output would be:
             [1, 2, 3, ..., x]
             {1, 2, 3, ..., x}
             {1: 1, 2: 2, 3: 3, ..., x=x}
-            If None is provided the full list, set or dict is displayed.
+            If None is provided, the full list, set or dict is displayed.
         use_repr_latex : bool, optional
             Use an existing _repr_latex_ or _repr_mimebundle_()['text/latex'] method
             if one exists?
         greek_symbols : bool, optional
             Convert greek character names into their latex equivalents.
-            Eg 'alpha' to '\\alpha'
+            E.g. 'alpha' to '\\alpha'
         max_depth : int, optional
             How deep should iterables be formated before their contents are replaced
             with `...`
@@ -196,12 +196,12 @@ class Variable:
     def shorten_list(self) -> int | None:
         """
         Should lists, sets and dicts be displayed in shortend form?
-        If a number, n, is provided lists are shortened to only
+        If a number, n, is provided, lists are shortened to only
         display n elements. The typical output would be:
         [1, 2, 3, ..., x]
         {1, 2, 3, ..., x}
         {1: 1, 2: 2, 3: 3, ..., x=x}
-        If None is provided the full list, set or dict is displayed.
+        If None is provided, the full list, set or dict is displayed.
         """
 
         return self._shorten_list
@@ -219,7 +219,7 @@ class Variable:
     def greek_symbols(self) -> bool:
         """
         Convert greek character names into their latex equivalents.
-        Eg 'alpha' to '\\alpha'
+        E.g. 'alpha' to '\\alpha'
         """
 
         return self._greek_symbols
@@ -240,7 +240,7 @@ class Variable:
         Notes
         -----
         - if value is None, 'None' is returned.
-        - If value is a str and '\' detected it is assumed to be a
+        - If value is a str and '\' detected, it is assumed to be a
           latex-formatted string and returned unchanged.
 
         Parameters
@@ -292,7 +292,7 @@ class Variable:
         Notes
         -----
         - if units is None, '' is returned.
-        - If units is a str and '\' is detected it is assumed to be a
+        - If units is a str and '\' is detected, it is assumed to be a
           latex-formatted string and returned unchanged.
 
         Parameters
@@ -444,8 +444,8 @@ def _format_any(
     Notes
     -----
     - if value is None, 'None' is returned.
-    - If value is a str and '\' detected it is assumed to be a
-      latex formatted string and returned unchanged.
+    - If value is a str and '\' detected, it is assumed to be a latex formatted string
+        and returned unchanged.
     - If the type is not None, str, Number or Iterable, str() is called on the object.
 
     Parameters
@@ -577,7 +577,7 @@ def _format_string(
     Notes
     -----
     - if value is None, 'None' is returned.
-    - If value is a str and '\' detected it is assumed to be a
+    - If value is a str and '\' detected, it is assumed to be a
       latex formatted string and returned unchanged.
 
     Parameters
@@ -701,7 +701,7 @@ def _format_iterable(
             str_type=str_type,
             max_depth=max_depth,
             current_depth=current_depth,
-            # note current depth is not incremented because we have not yet formatted the val
+            # note current_depth is not incremented because we have not yet formatted the val
             # we are passing off the formatting to _format_dict
         )
     else:
@@ -997,10 +997,10 @@ class DeprecatedResult(Result):
     -----
     It is intended that native operations on the Result object should act on
     the stored .result attribute as though it were a stand-alone value.
-    e.g. Result * 2 should be equivalent to Result.result * 2 and so-on.
-    Initially the basic arithmetic operations will be implemented and over time
-    additional operations may be added. Be-aware that if the .result attribute
-    does not support an operation then an error may be raised.
+    E.g. Result * 2 should be equivalent to Result.result * 2 and so-on.
+    Initially the basic arithmetic operations will be implemented, and over time
+    additional operations may be added. Be aware that if the .result attribute
+    does not support an operation, then an error may be raised.
     """
 
     def __str__(self):
