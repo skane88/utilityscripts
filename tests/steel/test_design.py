@@ -9,6 +9,7 @@ import pytest
 from utilityscripts.steel.design import (
     AS4100,
     CornerDetail,
+    HoleLocation,
     ISection,
     SteelMember,
     make_section,
@@ -97,6 +98,32 @@ def test_add_steel():
     assert new_section.steel == g300
 
     assert isclose(new_section.area_gross, 0.00521, rel_tol=1e-3)
+
+
+def test_add_holes():
+    _310ub40 = make_section(designation="310UB40.4")
+
+    hole_dia = 0.022
+
+    new_sect = _310ub40.add_holes(holes=[(HoleLocation.WEB, (hole_dia, 0.005))])
+
+    assert len(_310ub40.holes) == 0
+    assert len(new_sect.holes) == 1
+    assert new_sect.holes[0][0] == HoleLocation.WEB
+    assert new_sect.holes[0][1] == (hole_dia, 0.005)
+
+    new_sect = new_sect.add_holes(
+        holes=[
+            (HoleLocation.TOPRIGHT, (hole_dia, 0.035)),
+            (HoleLocation.TOPLEFT, (hole_dia, 0.035)),
+        ]
+    )
+
+    assert len(new_sect.holes) == 3  # noqa: PLR2004
+    assert new_sect.holes[1][0] == HoleLocation.TOPRIGHT
+    assert new_sect.holes[1][1] == (hole_dia, 0.035)
+    assert new_sect.holes[2][0] == HoleLocation.TOPLEFT
+    assert new_sect.holes[2][1] == (hole_dia, 0.035)
 
 
 def test_steel_member():

@@ -8,6 +8,7 @@ import copy
 import math
 from abc import ABC, abstractmethod
 from enum import StrEnum
+from typing import Self
 
 import numpy as np
 import polars as pl
@@ -21,6 +22,14 @@ from utilityscripts.steel.steel import (
     i_section_df,
     steel_grades,
 )
+
+
+class HoleLocation(StrEnum):
+    TOPLEFT = "top-left"
+    TOPRIGHT = "top-right"
+    BOTTOMLEFT = "bottom-left"
+    BOTTOMRIGHT = "bottom-right"
+    WEB = "web"
 
 
 class SteelSection(ABC):
@@ -48,7 +57,7 @@ class SteelSection(ABC):
         self._steel = steel
         self._geometry = None
 
-    def _copy_with_new(self, **new_attributes) -> SteelSection:
+    def _copy_with_new(self, **new_attributes) -> Self:
         """
         Function to copy the SteelSection instance but update specific attributes.
 
@@ -617,35 +626,48 @@ class ISection(SteelSection):
         return self._geometry
 
     @property
-    def holes(self) -> list[str, tuple[float, float]]:
+    def holes(self) -> list[tuple[HoleLocation, tuple[float, float]]]:
         """
         The holes in the section.
 
         Returns :
         -------
-        list[str, tuple[float, float]]
-            A list of holes, where each hole is a tuple of (hole_location, (diameter, offset from CL))
+        list[tuple[HoleLocation, tuple[float, float]]]
+            A list of holes, where each hole is a tuple of:
+            (hole_location, (diameter, offset from CL))
         """
 
         return self._holes
 
-    def add_holes(self, holes: list[str, tuple[float, float]]) -> SteelSection:
+    def add_holes(
+        self, holes: list[tuple[HoleLocation, tuple[float, float]]]
+    ) -> ISection:
         """
         Add holes to the section.
 
         Parameters
         ----------
-        holes : list[str, tuple[float, float]]
-            A list of holes, where each hole is a tuple of (hole_location, (diameter, offset from CL))
-            The hole offset indicates the top or bottom flange or web. Valid locations are:
+        holes : list[tuple[HoleLocation, tuple[float, float]]]
+            A list of holes, where each hole is a tuple of:
+            (hole_location, (diameter, offset from CL))
+            The hole offset indicates the top or bottom flange or web.
+            Valid locations are:
                 "top-left", "top-right", "bottom-left", "bottom-right", "web"
-            The offset from the CL should be +ve for the flanges. For the web it can be either +ve or -ve.
+            The offset from the CL should be +ve for the flanges.
+            For the web it can be either +ve or -ve.
 
         Returns
         -------
-        SteelSection
-            A new SteelSection object with the added holes.
+        ISection
+            A new ISection object with the added holes.
         """
+
+        for loc, dims in holes:
+            if loc != HoleLocation.WEB and dims[1] < 0.0:
+                raise ValueError(
+                    "Expected Centreline of hole to be positive for all holes"
+                    + f" on flanges. Hole located at {dims[1]}."
+                )
 
         return self._copy_with_new(**{"_holes": self.holes + holes})
 
