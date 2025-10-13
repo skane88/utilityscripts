@@ -2338,6 +2338,19 @@ wheels = [
 ]
 
 [[package]]
+name = "steelas"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "pandas" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/0c/49/d9ba488bd2c7da18a42f57939eb5b44339e564f397527093fc74b414dd52/steelas-0.2.0.tar.gz", hash = "sha256:e3fad91e9967a0e9146d322598ce521b5c677e091c6b8d270b96a441993df8aa", size = 143074, upload-time = "2024-04-07T20:56:07.779Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fd/57/e53970683613b1bd6b377c315e63d82ce60021e45687f886ffb8c67d6a0c/steelas-0.2.0-py3-none-any.whl", hash = "sha256:8600df23c00d1645bb83e494933eeeb00d7a1f983bbf60b156e5de9ba5af6865", size = 173657, upload-time = "2024-04-07T20:56:02.21Z" },
+]
+
+[[package]]
 name = "sympy"
 version = "1.13.3"
 source = { registry = "https://pypi.org/simple" }
@@ -2543,6 +2556,7 @@ dependencies = [
     { name = "sectionproperties" },
     { name = "shapely" },
     { name = "simplebeam" },
+    { name = "steelas" },
     { name = "sympy" },
     { name = "toml" },
 ]
@@ -2602,6 +2616,7 @@ requires-dist = [
     { name = "sectionproperties" },
     { name = "shapely" },
     { name = "simplebeam" },
+    { name = "steelas", specifier = ">=0.2.0" },
     { name = "sympy" },
     { name = "toml" },
     { name = "types-shapely", marker = "extra == 'dev'" },
