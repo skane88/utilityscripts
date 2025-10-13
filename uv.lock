@@ -2616,7 +2616,7 @@ requires-dist = [
     { name = "sectionproperties" },
     { name = "shapely" },
     { name = "simplebeam" },
-    { name = "steelas", specifier = ">=0.2.0" },
+    { name = "steelas" },
     { name = "sympy" },
     { name = "toml" },
     { name = "types-shapely", marker = "extra == 'dev'" },
