@@ -7,7 +7,7 @@ from __future__ import annotations
 import copy
 import math
 from abc import ABC, abstractmethod
-from enum import Enum
+from enum import StrEnum
 
 import numpy as np
 import polars as pl
@@ -923,12 +923,20 @@ class AS4100:
         )
 
 
-class CornerDetail(Enum):
+class CornerDetail(StrEnum):
+    """
+    What sort of web-flange interface does the section have?
+    """
+
     WELD = "weld"
     RADIUS = "radius"
 
 
-class CornerLocation(Enum):
+class CornerLocation(StrEnum):
+    """
+    Provides location information for where a corner is located on a section.
+    """
+
     TOPLEFT = "topleft"
     TOPRIGHT = "topright"
     BOTTOMLEFT = "bottomleft"
