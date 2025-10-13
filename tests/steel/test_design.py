@@ -152,5 +152,5 @@ def test_as4100_tension():
 
     design = AS4100(member=member)
 
-    assert isclose(design.n_ty(), 1666600, rel_tol=1e-3)
-    assert isclose(design.phi_n_ty(phi_steel=0.9), 1499900, rel_tol=1e-3)
+    assert isclose(design.n_ty().value, 1666600, rel_tol=1e-3)
+    assert isclose(design.phi_n_ty(phi_steel=0.9).value, 1499900, rel_tol=1e-3)

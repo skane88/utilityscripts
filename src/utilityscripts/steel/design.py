@@ -14,6 +14,7 @@ import polars as pl
 from sectionproperties.pre import Geometry
 from shapely import Polygon
 
+from utilityscripts.reports.report import Variable
 from utilityscripts.steel import as4100
 from utilityscripts.steel.steel import (
     SteelGrade,
@@ -841,7 +842,7 @@ class AS4100:
     def section(self) -> SteelSection:
         return self.member.section
 
-    def n_ty(self) -> float:
+    def n_ty(self) -> Variable:
         """
         The tension yield capacity. In kN.
 
@@ -850,9 +851,14 @@ class AS4100:
         float
         """
 
-        return as4100.s7_2_n_ty(a_g=self.section.area_gross, f_y=self.section.f_y_min)
+        return Variable(
+            as4100.s7_2_n_ty(a_g=self.section.area_gross, f_y=self.section.f_y_min),
+            scale=0.001,
+            units="kN",
+            fmt_string=".2f",
+        )
 
-    def phi_n_ty(self, phi_steel: float = 0.9) -> float:
+    def phi_n_ty(self, phi_steel: float = 0.9) -> Variable:
         """
         Calculate the design tension yield capacity (φN_ty).
 
@@ -865,9 +871,12 @@ class AS4100:
         -------
         float
         """
-        return self.n_ty() * phi_steel
 
-    def n_tu(self, fracture_modifier: float = 0.85):
+        return Variable(
+            self.n_ty().value * phi_steel, scale=0.001, units="kN", fmt_string=".2f"
+        )
+
+    def n_tu(self, fracture_modifier: float = 0.85) -> Variable:
         """
         Calculate the net tensile strength at fracture.
 
@@ -881,9 +890,16 @@ class AS4100:
         -------
         float
         """
-        return self.section.area_net * self.section.f_u_min * fracture_modifier
+        return Variable(
+            self.section.area_net * self.section.f_u_min * fracture_modifier,
+            scale=0.001,
+            units="kN",
+            fmt_string=".2f",
+        )
 
-    def phi_n_tu(self, fracture_modifier: float = 0.85, phi_steel: float = 0.9):
+    def phi_n_tu(
+        self, fracture_modifier: float = 0.85, phi_steel: float = 0.9
+    ) -> Variable:
         """
         Calculate the design fracture capacity.
 
@@ -899,7 +915,12 @@ class AS4100:
         float
         """
 
-        return self.n_tu(fracture_modifier=fracture_modifier) * phi_steel
+        return Variable(
+            self.n_tu(fracture_modifier=fracture_modifier).value * phi_steel,
+            scale=0.001,
+            units="kN",
+            fmt_string=".2f",
+        )
 
 
 class CornerDetail(Enum):
