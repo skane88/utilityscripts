@@ -42,7 +42,7 @@ def _get_phi_2_data() -> pl.DataFrame:
     return pl.read_excel(_DATA_PATH / Path(CRANE_DATA_FILE), sheet_name="phi_2_min")
 
 
-def get_hoist_class(*, delta: float) -> HoistClass:
+def s6_1_2_1_hoist_class(*, delta: float) -> HoistClass:
     """
     Get the hoist class. The hoist class is assigned based on the elastic stiffness
     of the crane. This is approximated by the characteristic deflection, delta.
@@ -50,7 +50,7 @@ def get_hoist_class(*, delta: float) -> HoistClass:
     Parameters
     ----------
     delta : float
-        The characteristic deflection.
+        The characteristic deflection. In m.
 
     Returns
     -------
@@ -65,7 +65,7 @@ def get_hoist_class(*, delta: float) -> HoistClass:
     return HoistClass(beta_2_data["hoist_class"][0])
 
 
-def get_beta_2(*, hoist_class: HoistClass):
+def s6_1_2_1_beta_2(*, hoist_class: HoistClass):
     """
     Get the value of beta_2 for a given hoisting class.
 
@@ -77,7 +77,7 @@ def get_beta_2(*, hoist_class: HoistClass):
     Returns
     -------
     float
-        The value of beta_2.
+        The value of beta_2. In s/m.
     """
 
     beta_2_data = _get_beta_2_data()
@@ -85,7 +85,7 @@ def get_beta_2(*, hoist_class: HoistClass):
     return beta_2_data["beta_2"][0]
 
 
-def get_phi_2_min(*, hoist_class: HoistClass, drive_class: DriveClass):
+def s6_1_2_1_phi_2_min(*, hoist_class: HoistClass, drive_class: DriveClass):
     """
     Get the minimum value of phi_2 for a given hoist class and drive class.
 
@@ -108,14 +108,14 @@ def get_phi_2_min(*, hoist_class: HoistClass, drive_class: DriveClass):
     return phi_2_data["phi_2_min"][0]
 
 
-def phi_2(*, v_h: float, hoist_class: HoistClass, drive_class: DriveClass):
+def s6_1_2_1_phi_2(*, v_h: float, hoist_class: HoistClass, drive_class: DriveClass):
     """
     Calculate the dynamic hoisting factor, phi_2, as per S6.1.2.1 of AS5221.1-2021.
 
     Parameters
     ----------
     v_h : float
-        The hoist speed.
+        The hoist speed. In m/s.
     hoist_class : HoistClass
         The hoist class.
     drive_class : DriveClass
@@ -127,8 +127,8 @@ def phi_2(*, v_h: float, hoist_class: HoistClass, drive_class: DriveClass):
         The dynamic hoisting factor.
     """
 
-    beta_2 = get_beta_2(hoist_class=hoist_class)
-    phi_2_min = get_phi_2_min(hoist_class=hoist_class, drive_class=drive_class)
+    beta_2 = s6_1_2_1_beta_2(hoist_class=hoist_class)
+    phi_2_min = s6_1_2_1_phi_2_min(hoist_class=hoist_class, drive_class=drive_class)
 
     return phi_2_min + beta_2 * v_h
 
@@ -141,7 +141,8 @@ def plot_phi_2(drive_class: DriveClass):
 
     for hoist_class in HoistClass:
         phi_2_values = [
-            phi_2(v_h=v, hoist_class=hoist_class, drive_class=drive_class) for v in v_h
+            s6_1_2_1_phi_2(v_h=v, hoist_class=hoist_class, drive_class=drive_class)
+            for v in v_h
         ]
         plt.plot(v_h, phi_2_values, label=hoist_class)
 
@@ -152,7 +153,7 @@ def plot_phi_2(drive_class: DriveClass):
     plt.show()
 
 
-def as5222_s5_2_a_h(*, m_h: float) -> float:
+def s5_2_a_h(*, m_h: float) -> float:
     """
     Calculate a nominal area for a hoisted load, for use in wind load calcs.
 
@@ -170,7 +171,7 @@ def as5222_s5_2_a_h(*, m_h: float) -> float:
     return 0.0005 * m_h
 
 
-def as5222_s5_2_f_h(*, q_z: float, a_h: float, c_h: float = 2.40) -> float:
+def s5_2_f_h(*, q_z: float, a_h: float, c_h: float = 2.40) -> float:
     """
     Calculate the wind load on a hoisted load.
 

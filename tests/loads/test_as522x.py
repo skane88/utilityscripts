@@ -9,11 +9,12 @@ import pytest
 from utilityscripts.loads.as522x import (
     DriveClass,
     HoistClass,
-    as5222_s5_2_a_h,
-    as5222_s5_2_f_h,
-    get_beta_2,
-    get_hoist_class,
-    get_phi_2_min,
+    s5_2_a_h,
+    s5_2_f_h,
+    s6_1_2_1_beta_2,
+    s6_1_2_1_hoist_class,
+    s6_1_2_1_phi_2,
+    s6_1_2_1_phi_2_min,
 )
 
 
@@ -34,7 +35,7 @@ from utilityscripts.loads.as522x import (
     ],
 )
 def test_get_hoist_class(delta: float, expected: HoistClass):
-    assert get_hoist_class(delta=delta) == expected
+    assert s6_1_2_1_hoist_class(delta=delta) == expected
 
 
 @pytest.mark.parametrize(
@@ -47,7 +48,7 @@ def test_get_hoist_class(delta: float, expected: HoistClass):
     ],
 )
 def test_beta_2(hoist_class: HoistClass, expected: float):
-    assert isclose(get_beta_2(hoist_class=hoist_class), expected)
+    assert isclose(s6_1_2_1_beta_2(hoist_class=hoist_class), expected)
 
 
 @pytest.mark.parametrize(
@@ -77,7 +78,7 @@ def test_beta_2(hoist_class: HoistClass, expected: float):
 )
 def test_phi_2_min(hoist_class: HoistClass, drive_class: DriveClass, expected: float):
     assert isclose(
-        get_phi_2_min(hoist_class=hoist_class, drive_class=drive_class), expected
+        s6_1_2_1_phi_2_min(hoist_class=hoist_class, drive_class=drive_class), expected
     )
 
 
@@ -89,7 +90,19 @@ def test_phi_2_min(hoist_class: HoistClass, drive_class: DriveClass, expected: f
     ],
 )
 def test_as5222_s5_2_a_h(m_h, expected):
-    assert isclose(as5222_s5_2_a_h(m_h=m_h), expected)
+    assert isclose(s5_2_a_h(m_h=m_h), expected)
+
+
+@pytest.mark.parametrize(
+    "v_h, hoist_class, drive_class, expected",
+    [(0.200, HoistClass.HC4, DriveClass.HD1, 1.336)],
+)
+def test_phi_2(v_h, hoist_class, drive_class, expected):
+    assert isclose(
+        s6_1_2_1_phi_2(v_h=v_h, hoist_class=hoist_class, drive_class=drive_class),
+        expected,
+        rel_tol=1e-3,
+    )
 
 
 @pytest.mark.parametrize(
@@ -100,4 +113,4 @@ def test_as5222_s5_2_a_h(m_h, expected):
     ],  # corresponds to a 5m/s windspeed
 )
 def test_as5222_s5_2_f_h(q_z, a_h, c_h, expected):
-    assert isclose(as5222_s5_2_f_h(q_z=q_z, a_h=a_h, c_h=c_h), expected)
+    assert isclose(s5_2_f_h(q_z=q_z, a_h=a_h, c_h=c_h), expected)
