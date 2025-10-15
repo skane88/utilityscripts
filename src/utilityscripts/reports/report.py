@@ -588,7 +588,7 @@ def _format_string(
     Notes
     -----
     - if value is None, 'None' is returned.
-    - If value is a str and '\' detected, it is assumed to be a
+    - If value is a str and '\', '{' or '}' are detected, it is assumed to be a
       latex formatted string and returned unchanged.
 
     Parameters
@@ -612,6 +612,8 @@ def _format_string(
         The value formatted as a string.
     """
 
+    LATEX_CHARS = ["\\", "{", "}"]
+
     if greek_symbols and value in GREEK_CHAR_MAP:
         mapping = GREEK_CHAR_MAP[value]
 
@@ -623,7 +625,7 @@ def _format_string(
         if str_type == StrType.LATEX:
             return value
 
-    if "\\" in value:
+    if any(x in value for x in LATEX_CHARS):
         return value
 
     value = f"{value:{fmt_string}}" if fmt_string is not None else value
