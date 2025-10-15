@@ -922,6 +922,7 @@ class AS4100:
 
         return Variable(
             as4100.s7_2_n_ty(a_g=self.section.area_gross, f_y=self.section.f_y_min),
+            symbol=("N_ty", "N_{ty}"),
             scale=self.unit_system.force_scale,
             units=self.unit_system.force,
             fmt_string=".2f",
@@ -943,6 +944,7 @@ class AS4100:
 
         return Variable(
             self.n_ty().value * phi_steel,
+            symbol=("φN_ty", "\\phi N_{ty}"),
             scale=self.unit_system.force_scale,
             units=self.unit_system.force,
             fmt_string=".2f",
