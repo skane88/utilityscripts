@@ -113,6 +113,7 @@ def test_variable():
         ),
         (Variable({"a": 1, "b": {"c": 3}}), "{'a': 1, 'b': {'c': 3}}"),
         (Variable({"a": 1, "b": {"c": {"d": 4}}}, max_depth=1), "{'a': 1, 'b': {...}}"),
+        (Variable(2, symbol=("a", "\\text{a}")), "a=2"),
     ],
 )
 def test_variable_string(val, expected):
@@ -199,6 +200,7 @@ def test_result_error():
         (Variable(set(range(0, 100))), "$\\left\\{0, 1, 2, 3, 4, ..., 99\\right\\}$"),
         (Variable("alpha"), "$\\alpha$"),
         (Variable("Rho"), "$Ρ$"),  # noqa: RUF001
+        (Variable(2, symbol=("a", "\\phi N")), "$\\phi N = 2$"),
     ],
 )
 def test_latex_string(val, expected):

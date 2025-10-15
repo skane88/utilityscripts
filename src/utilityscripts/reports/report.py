@@ -67,7 +67,7 @@ class Variable:
         self,
         value: Any,
         *,
-        symbol: str | None = None,
+        symbol: str | tuple[str, str] | None = None,
         units: str | None = None,
         scale: float = 1.0,
         fmt_string: str | None = None,
@@ -84,9 +84,12 @@ class Variable:
         ----------
         value : Any
             The value the variable represents.
-        symbol : str | None, optional
+        symbol : str | tuple[str, str] | None, optional
             The symbol used for the variable.
             If the symbol contains a backslash, it is assumed to be in latex format.
+            Can be given as a tuple containing:
+            (symbol for text, symbol for latex).
+            Each part is treated the same as if a single value is given.
         units : str | None, optional
             The units used for the variable.
         scale : float, optional
@@ -145,13 +148,16 @@ class Variable:
         return self._value
 
     @property
-    def symbol(self) -> str | None:
+    def symbol(self) -> str | tuple[str, str] | None:
         """
         The symbol, if any, used for the variable.
 
         Notes
         -----
         - If the symbol contains a backslash, it is assumed to be in latex format.
+        - Can be given as a tuple containing:
+            (symbol for text, symbol for latex).
+            Each part is treated the same as if a single value is given.
         """
 
         return self._symbol
@@ -275,11 +281,16 @@ class Variable:
             The type of string to return. A text string or a latex string?
         """
 
-        if self.symbol is None:
+        symbol = self.symbol
+
+        if symbol is None:
             return ""
 
+        if isinstance(self.symbol, tuple):
+            symbol = self.symbol[0] if str_type == StrType.TEXT else self.symbol[1]
+
         return _format_string(
-            self.symbol,
+            symbol,
             greek_symbols=self.greek_symbols,
             str_type=str_type,
             quote_strings=False,
@@ -612,8 +623,10 @@ def _format_string(
         if str_type == StrType.LATEX:
             return value
 
-    if "\\" not in value:
-        value = f"{value:{fmt_string}}" if fmt_string is not None else value
+    if "\\" in value:
+        return value
+
+    value = f"{value:{fmt_string}}" if fmt_string is not None else value
 
     if str_type == StrType.LATEX:
         value = "\\text{" + value + "}"
