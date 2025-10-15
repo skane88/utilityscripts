@@ -7,6 +7,7 @@ from __future__ import annotations
 import copy
 import math
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Self
 
@@ -21,6 +22,40 @@ from utilityscripts.steel.steel import (
     SteelGrade,
     i_section_df,
     steel_grades,
+)
+
+
+@dataclass
+class UnitSystem:
+    length: str = "m"
+    length_scale: float = 1.0
+    area: str = "m²"
+    area_scale: float = 1.0
+    volume: str = "m³"
+    volume_scale: float = 1.0
+    force: str = "N"
+    force_scale: float = 1.0
+    stress: str = "Pa"
+    stress_scale: float = 1.0
+    moment: str = "Nm"
+    moment_scale: float = 1.0
+
+
+UnitSystem_SI = UnitSystem()
+
+UnitSystem_AS_Steel = UnitSystem(
+    length="mm",
+    length_scale=1000,
+    area="mm²",
+    area_scale=1e6,
+    volume="mm³",
+    volume_scale=1e9,
+    force="kN",
+    force_scale=1e-3,
+    moment="kNm",
+    moment_scale=1e-3,
+    stress="MPa",
+    stress_scale=1e-6,
 )
 
 
@@ -781,7 +816,12 @@ class AS4100:
     A class for design to AS4100.
     """
 
-    def __init__(self, *, member: SteelMember | None = None):
+    def __init__(
+        self,
+        *,
+        member: SteelMember | None = None,
+        unit_system: UnitSystem = UnitSystem_AS_Steel,
+    ):
         """
         A class for design to AS4100.
 
@@ -789,9 +829,12 @@ class AS4100:
         ----------
         member : SteelMember
             The steel member object to design.
+        unit_system : UnitSystem
+            A UnitSystem object to use for formatting output results.
         """
 
         self._member = member
+        self._unit_system = unit_system
 
     def _copy_with_new(self, **new_attributes) -> AS4100:
         """
@@ -848,6 +891,10 @@ class AS4100:
         return self._copy_with_new(**{"_member": member})
 
     @property
+    def unit_system(self):
+        return self._unit_system
+
+    @property
     def length(self) -> float | None:
         """
         The length of the member assigned to the design.
@@ -875,8 +922,8 @@ class AS4100:
 
         return Variable(
             as4100.s7_2_n_ty(a_g=self.section.area_gross, f_y=self.section.f_y_min),
-            scale=0.001,
-            units="kN",
+            scale=self.unit_system.force_scale,
+            units=self.unit_system.force,
             fmt_string=".2f",
         )
 
@@ -895,7 +942,10 @@ class AS4100:
         """
 
         return Variable(
-            self.n_ty().value * phi_steel, scale=0.001, units="kN", fmt_string=".2f"
+            self.n_ty().value * phi_steel,
+            scale=self.unit_system.force_scale,
+            units=self.unit_system.force,
+            fmt_string=".2f",
         )
 
     def n_tu(self, fracture_modifier: float = 0.85) -> Variable:
