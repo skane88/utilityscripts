@@ -265,3 +265,23 @@ def test_repr_latex():
 def test_scale(val, expected_str, expected_latex):
     assert str(val) == expected_str
     assert val.latex_string == expected_latex
+
+
+@pytest.mark.parametrize('val, precision',
+    [
+        (0, 3, 0.),
+        (0.1234,1, 0.1),
+        (0.1234, 3, 0.123),
+        (1234.567, 1, 1000.),
+        (1234.567, 3, 1230.),
+        (1234.567, 5, 1234.6),
+        (-0.1234, 1, -0.1),
+        (-0.1234, 3, -0.123),
+        (-12345.678, 1, -10000.),
+        (-12345.678, 4, -12340.),
+        (-12345.678, 6, -12345.7),
+    ]
+)
+def test_sig_figs(val, precision, expected):
+    
+    assert False
