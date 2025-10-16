@@ -133,7 +133,7 @@ def round_significant(x: Real, s: int = 3):
     x = abs(x)
 
     # get the exponent in powers of 10s
-    max10exp = Decimal(round(x.log10()))
+    max10exp = Decimal(math.floor(x.log10()))
 
     # figure out the power we need to get
     # the correct no. of significant figures
