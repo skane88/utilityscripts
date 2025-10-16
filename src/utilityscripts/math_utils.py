@@ -98,30 +98,46 @@ def round_significant(x, s: int = 3):
 
     https://stackoverflow.com/a/9557559
 
-    :param x: The number to round.
-    :param s: The significance to round to.
+    Notes
+    -----
+    - The function uses python's Decimal class to do mathematics, rounding etc. to try
+        and avoid floating point errors.
+
+    Parameters
+    ----------
+    x : Number
+        The number to round.
+    s : int
+        The significance to round to.
     """
+
+    type_in = type(x)
 
     if x == 0:
         # bail out early on 0.
         return 0
 
+    x = Decimal(x)
+
     # can't take a log of a -ve number, so have to abs x
-    xsign = x / abs(x)
+    xsign = 1 if x > 0 else -1
     x = abs(x)
 
     # get the exponent in powers of 10s
-    max10exp = math.floor(math.log10(x))
+    max10exp = Decimal(round(x.log10()))
 
     # figure out the power we need to get
     # the correct no. of significant figures
     sig10pow = 10 ** (max10exp - s + 1)
 
-    # raie the number to have s digits past the decimal point
-    floated = x * 1.0 / sig10pow
+    # raise the number to have s digits past the decimal point
+    floated = x * Decimal(1.0) / sig10pow
 
     # drop it back down to the original power of 10 & return
-    return round(floated) * sig10pow * xsign
+    rounded = round(floated) * sig10pow * xsign
+
+    # convert back to the original type
+    return type_in(rounded)
 
 
 def sci_not(value: float) -> tuple[float, int]:
