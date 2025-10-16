@@ -612,7 +612,7 @@ def _format_string(
         The value formatted as a string.
     """
 
-    LATEX_CHARS = ["\\", "{", "}"]
+    latex_chars = ["\\", "{", "}"]
 
     if greek_symbols and value in GREEK_CHAR_MAP:
         mapping = GREEK_CHAR_MAP[value]
@@ -625,7 +625,7 @@ def _format_string(
         if str_type == StrType.LATEX:
             return value
 
-    if any(x in value for x in LATEX_CHARS):
+    if any(x in value for x in latex_chars):
         return value
 
     value = f"{value:{fmt_string}}" if fmt_string is not None else value
