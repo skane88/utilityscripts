@@ -5,17 +5,24 @@ Some basic math utilities
 import math
 from decimal import Decimal
 from math import log10
+from numbers import Real
 
 
-def m_round(x, base):
+def m_round(x: Real, base: Real) -> float:
     """
     Round a number to the nearest multiple.
 
-    Based on code at:
-    https://stackoverflow.com/questions/28425705/python-round-a-float-to-nearest-0-05-or-to-multiple-of-another-float
+    Notes
+    -----
+    - Based on code at:
+        https://stackoverflow.com/questions/28425705/python-round-a-float-to-nearest-0-05-or-to-multiple-of-another-float
 
-    :param x: the number to round.
-    :param base: the multiple to round to.
+    Parameters
+    ----------
+    x : Real
+        the number to round.
+    base : Real
+        the multiple to round to.
     """
 
     x, base = Decimal(str(x)), Decimal(str(base))
@@ -23,20 +30,21 @@ def m_round(x, base):
     return float(round(x / base) * base)
 
 
-def m_floor(x, base, *, float_tolerance: float | None = 1e-6):
+def m_floor(x: Real, base: Real, *, float_tolerance: float | None = 1e-6) -> float:
     """
     Floor a number to the nearest multiple.
 
-    Note: due to floating point math, it is necessary to
-    convert the numbers to Decimals first. This
-    will incur a performance overhead so only use this
-    method if there is no better way to do this function.
+    Notes
+    -----
+    - Due to floating point math, it is necessary to convert the numbers to Decimals
+        first. This will incur a performance overhead so only use this method if
+        there is no better way to do this function.
 
     Parameters
     ----------
-    x : float
+    x : Real
         The number to round.
-    base : float
+    base : Real
         The multiple to round to.
     float_tolerance : float, optional
         A tolerance for floating point math. If not None, the function first
@@ -57,20 +65,21 @@ def m_floor(x, base, *, float_tolerance: float | None = 1e-6):
     return float(val)
 
 
-def m_ceil(x, base, *, float_tolerance: float | None = 1e-6):
+def m_ceil(x: Real, base: Real, *, float_tolerance: float | None = 1e-6) -> float:
     """
     Floor a number to the nearest multiple.
 
-    Note: due to floating point math, it is necessary to
-    convert the numbers to Decimals first. This
-    will incur a performance overhead so only use this
-    method if there is no better way to do this function.
+    Notes
+    -----
+    - Due to floating point math, it is necessary to convert the numbers to Decimals
+        first. This will incur a performance overhead so only use this method if there
+        is no better way to do this function.
 
     Parameters
     ----------
-    x : float
+    x : Real
         The number to round.
-    base : float
+    base : Real
         The multiple to round to.
     float_tolerance : float, optional
         A tolerance for floating point math. If not None, the function first
@@ -90,7 +99,7 @@ def m_ceil(x, base, *, float_tolerance: float | None = 1e-6):
     return float(val)
 
 
-def round_significant(x, s: int = 3):
+def round_significant(x: Real, s: int = 3):
     """
     Round a number to a specified significant figure.
 
@@ -105,7 +114,7 @@ def round_significant(x, s: int = 3):
 
     Parameters
     ----------
-    x : Number
+    x : Real
         The number to round.
     s : int
         The significance to round to.
@@ -140,9 +149,19 @@ def round_significant(x, s: int = 3):
     return type_in(rounded)
 
 
-def sci_not(value: float) -> tuple[float, int]:
+def sci_not(value: Real) -> tuple[float, int]:
     """
     Convert a number to a tuple of (mantissa, exponent) in scientific notation.
+
+    Parameters
+    ----------
+    value : Real
+        The value to convert.
+
+    Returns
+    -------
+    tuple[float, int]
+        The parts of the number in scientific notation.
     """
 
     if value == 0:
