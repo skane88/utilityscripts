@@ -59,6 +59,7 @@ dev = [
  "jupyterlab",
  "marimo",
  "pre-commit",
+ "hypothesis",
 ]
 
 [tool.uv]
