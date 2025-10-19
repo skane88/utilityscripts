@@ -5,6 +5,8 @@ File to test the math utilities file
 from math import isclose
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 from utilityscripts.math_utils import (
     m_ceil,
@@ -145,3 +147,18 @@ def test_sci_not(value, expected):
 
     assert result[0] == expected[0]
     assert result[1] == expected[1]
+
+
+@given(
+    st.integers()
+    | st.floats(allow_nan=False, allow_infinity=False)
+    | st.decimals(allow_nan=False, allow_infinity=False)
+    | st.fractions()
+)
+def test_sci_not_hypothesis(value):
+    """
+    Test the sci_not function with hypothesis.
+    """
+
+    result = sci_not(value)
+    assert isclose(value, result[0] * 10 ** result[1], rel_tol=1e-9)

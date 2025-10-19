@@ -4,7 +4,7 @@ Some basic math utilities
 
 import math
 from decimal import Decimal
-from math import log10
+from fractions import Fraction
 from numbers import Real
 
 
@@ -140,7 +140,7 @@ def round_significant(x: Real, s: int = 3):
     sig10pow = 10 ** (max10exp - s + 1)
 
     # raise the number to have s digits past the decimal point
-    floated = x * Decimal(1.0) / sig10pow
+    floated = x * Decimal("1.0") / sig10pow
 
     # drop it back down to the original power of 10 & return
     rounded = round(floated) * sig10pow * xsign
@@ -164,13 +164,26 @@ def sci_not(value: Real) -> tuple[float, int]:
         The parts of the number in scientific notation.
     """
 
+    if isinstance(value, Decimal) and (value.is_nan() or value.is_infinite()):
+        raise ValueError(f"Cannot convert {value} to scientific notation.")
+
+    if math.isnan(value) or math.isinf(value):
+        raise ValueError(f"Cannot convert {value} to scientific notation.")
+
     if value == 0:
         return 0, 0
 
     sign = -1 if value < 0 else 1
+
+    value = (
+        Decimal(value.numerator) / Decimal(value.denominator)
+        if isinstance(value, Fraction)
+        else Decimal(value)
+    )
     value = abs(value)
 
-    exponent = int(log10(value))
-    mantissa = value / 10**exponent
+    exponent = int(math.log10(value))
+    pow_10 = Decimal("10") ** exponent
+    mantissa = value / pow_10
 
-    return sign * mantissa, exponent
+    return float(sign * mantissa), exponent
