@@ -196,9 +196,22 @@ def scientific_number(value: Real) -> tuple[Decimal, int]:
 
     Returns
     -------
-    tuple[float, int]
+    tuple[Decimal, int]
         The parts of the number in scientific notation.
+        Returned as a Decimal for accuracy. The user is responsible for re-formatting
+        as required.
     """
+
+    if isinstance(value, float):
+        if abs(value) > sys.float_info.max:
+            raise ValueError(
+                f"{value} is larger than the maximum float value {sys.float_info.max}."
+            )
+
+        if abs(value) < sys.float_info.min:
+            raise ValueError(
+                f"{value} is smaller than the minimum float value {sys.float_info.min}."
+            )
 
     if isinstance(value, Decimal) and (value.is_nan() or value.is_infinite()):
         raise ValueError(f"Cannot convert {value} to scientific notation.")
@@ -207,17 +220,7 @@ def scientific_number(value: Real) -> tuple[Decimal, int]:
         raise ValueError(f"Cannot convert {value} to scientific notation.")
 
     if value == 0:
-        return 0, 0
-
-    if abs(value) > sys.float_info.max:
-        raise ValueError(
-            f"{value} is larger than the maximum float value {sys.float_info.max}."
-        )
-
-    if abs(value) < sys.float_info.min:
-        raise ValueError(
-            f"{value} is smaller than the minimum float value {sys.float_info.min}."
-        )
+        return Decimal("0"), 0
 
     sign = -1 if value < 0 else 1
 
@@ -248,22 +251,25 @@ def engineering_number(value: Real) -> tuple[Decimal, int]:
 
     Returns
     -------
-    tuple[float, int]
+    tuple[Decimal, int]
         The parts of the number in engineering notation.
+        Returned as a Decimal for accuracy. The user is responsible for re-formatting
+        as required.
     """
 
+    if isinstance(value, float):
+        if abs(value) > sys.float_info.max:
+            raise ValueError(
+                f"{value} is larger than the maximum float value {sys.float_info.max}."
+            )
+
+        if abs(value) < sys.float_info.min:
+            raise ValueError(
+                f"{value} is smaller than the minimum float value {sys.float_info.min}."
+            )
+
     if value == 0:
-        return 0, 0
-
-    if abs(value) > sys.float_info.max:
-        raise ValueError(
-            f"{value} is larger than the maximum float value {sys.float_info.max}."
-        )
-
-    if abs(value) < sys.float_info.min:
-        raise ValueError(
-            f"{value} is smaller than the minimum float value {sys.float_info.min}."
-        )
+        return Decimal("0"), 0
 
     mantissa, exponent = scientific_number(value)
 

@@ -48,7 +48,7 @@ def test_m_round(x, base, expected):
     | st.fractions(),
     st.integers().filter(lambda n: n != 0),
 )
-@settings(max_examples=1000)
+@settings(max_examples=10000)
 def test_m_round_hypothesis(x, base):
     """
     Test m_round with hypothesis.
@@ -88,7 +88,7 @@ def test_m_floor(x, base, float_tolerance, expected):
     | st.fractions(),
     st.integers().filter(lambda n: n != 0),
 )
-@settings(max_examples=1000)
+@settings(max_examples=10000)
 def test_m_floor_hypothesis(x, base):
     """
     Test m_round with hypothesis.
@@ -133,7 +133,7 @@ def test_m_ceil(x, base, float_tolerance, expected):
     | st.fractions(),
     st.integers().filter(lambda n: n != 0),
 )
-@settings(max_examples=1000)
+@settings(max_examples=10000)
 def test_m_ceil_hypothesis(x, base):
     """
     Test m_round with hypothesis.
@@ -215,7 +215,7 @@ def test_sci_num(value, expected):
     | st.decimals(allow_nan=False, allow_infinity=False)
     | st.fractions()
 )
-@settings(max_examples=1000)
+@settings(max_examples=10000)
 def test_sci_num_hypothesis(value):
     """
     Test the sci_not function with hypothesis.
@@ -263,7 +263,7 @@ def test_engineering_number(value, expected):
     | st.decimals(allow_nan=False, allow_infinity=False)
     | st.fractions()
 )
-@settings(max_examples=1000)
+@settings(max_examples=10000)
 def test_eng_num_hypothesis(value):
     """
     Test the engineering_number function with hypothesis.
