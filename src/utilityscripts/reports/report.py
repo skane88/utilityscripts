@@ -2,12 +2,16 @@
 A file to store results along with some reporting information.
 """
 
+import re
+from decimal import Decimal
 from enum import StrEnum
 from numbers import Number
 from typing import Any, Iterable
 
+import humre
 from jinja2 import Environment
 
+from utilityscripts.math_utils import engineering_number, round_significant
 from utilityscripts.reports._greek_chars import GREEK_CHAR_MAP
 
 
@@ -1191,3 +1195,97 @@ class DeprecatedResult(Result):
         result_str += "=" + result_value
 
         return result_str
+
+
+def format_sig_figs(val: Number, fmt_string: str) -> str:
+    format_spec_re = humre.starts_and_ends_with(
+        humre.optional(humre.named_group("sign", r"[ +\-]"))
+        + humre.optional(humre.named_group("zero", "0"))
+        + humre.optional(
+            humre.noncap_group(
+                humre.either(
+                    humre.named_group("width", r"\d+"),
+                    humre.named_group("width_only", r"\d+"),
+                )
+            )
+        )
+        + humre.optional(humre.named_group("grouping", "[,_]"))
+        + humre.noncap_group(
+            r"\." + humre.optional(humre.named_group("precision", r"\d+"))
+        )
+        + humre.optional(humre.named_group("type", r"[eEfFgGjJn%]"))
+        # new format spec "J" added for engineering format.
+    )
+
+    mat = re.compile(format_spec_re).match(fmt_string)
+
+    if mat.group("type") not in ["j", "J"]:
+        return f"{val:{fmt_string}}"
+
+    if mat.group("grouping") is not None:
+        raise ValueError(
+            "Grouping is not supported for engineering format. "
+            "Please remove grouping from the fmt_string."
+        )
+
+    if (mat.group("width") is not None) | (mat.group("width_only") is not None):
+        raise ValueError("Padding is not supported for engineering format.")
+
+    ret_val = ""
+
+    if mat.group("sign") is not None:
+        if mat.group("sign") == "+":
+            ret_val += "-" if val < 0 else "+"
+        else:
+            ret_val += "-" if val < 0 else ""
+
+    sig_figs = int(mat.group("precision"))
+
+    mantissa, exponent = engineering_number(val)
+
+    if abs(exponent) <= 3:  # noqa: PLR2004
+        ret_val += _eng_format_helper_close_to_zero(
+            val=val, exponent=exponent, sig_figs=sig_figs
+        )
+        return ret_val
+
+    ret_val += _eng_format_helper(
+        mantissa=mantissa, exponent=exponent, sig_figs=sig_figs
+    )
+
+    ret_val += "e" if mat.group("type") == "j" else "E"
+
+    return ret_val + f"{exponent:d}"
+
+
+def _eng_format_helper_close_to_zero(*, val: Number, exponent: int, sig_figs: int):
+    mantissa = ""
+    val = round_significant(x=val, s=sig_figs)
+
+    for i, c in enumerate(f"{val:.{sig_figs}f}"):
+        if i >= sig_figs:
+            break
+
+        mantissa += c
+
+        if c == ".":
+            sig_figs += 1
+
+    return mantissa
+
+
+def _eng_format_helper(*, mantissa: Decimal, exponent: int, sig_figs: int) -> str:
+    mantissa = round_significant(x=mantissa, s=sig_figs)
+    mantissa_exponent = mantissa.log10()
+    mantissa_string = ""
+
+    for i, c in enumerate(f"{mantissa:.{sig_figs}f}"):
+        if i >= sig_figs and i > mantissa_exponent:
+            break
+
+        mantissa_string += c
+
+        if c == ".":
+            sig_figs += 1
+
+    return mantissa_string
