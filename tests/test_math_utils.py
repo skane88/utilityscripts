@@ -5,7 +5,7 @@ File to test the math utilities file
 from math import isclose
 
 import pytest
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from utilityscripts.math_utils import (
@@ -31,10 +31,29 @@ from utilityscripts.math_utils import (
         (4.6, 0.2, 4.6),
         (1.39, 0.05, 1.40),
         (4.3, 0.25, 4.25),
+        (0, 1, 0),
     ],
 )
 def test_m_round(x, base, expected):
     assert m_round(x, base) == expected
+
+
+@given(
+    st.integers()
+    | st.floats(allow_nan=False, allow_infinity=False)
+    | st.decimals(allow_nan=False, allow_infinity=False)
+    | st.fractions(),
+    st.integers().filter(lambda n: n != 0),
+)
+@settings(max_examples=1000)
+def test_m_round_hypothesis(x, base):
+    """
+    Test m_round with hypothesis.
+
+    No checks for accuracy but will rule out unusual / spurious input.
+    """
+
+    m_round(x, base)
 
 
 @pytest.mark.parametrize(
@@ -57,6 +76,24 @@ def test_m_round(x, base, expected):
 )
 def test_m_floor(x, base, float_tolerance, expected):
     assert m_floor(x, base, float_tolerance=float_tolerance) == expected
+
+
+@given(
+    st.integers()
+    | st.floats(allow_nan=False, allow_infinity=False)
+    | st.decimals(allow_nan=False, allow_infinity=False)
+    | st.fractions(),
+    st.integers().filter(lambda n: n != 0),
+)
+@settings(max_examples=1000)
+def test_m_floor_hypothesis(x, base):
+    """
+    Test m_round with hypothesis.
+
+    No checks for accuracy but will rule out unusual / spurious input.
+    """
+
+    m_floor(x, base)
 
 
 @pytest.mark.parametrize(
@@ -84,6 +121,24 @@ def test_m_floor(x, base, float_tolerance, expected):
 )
 def test_m_ceil(x, base, float_tolerance, expected):
     assert m_ceil(x, base, float_tolerance=float_tolerance) == expected
+
+
+@given(
+    st.integers()
+    | st.floats(allow_nan=False, allow_infinity=False)
+    | st.decimals(allow_nan=False, allow_infinity=False)
+    | st.fractions(),
+    st.integers().filter(lambda n: n != 0),
+)
+@settings(max_examples=1000)
+def test_m_ceil_hypothesis(x, base):
+    """
+    Test m_round with hypothesis.
+
+    No checks for accuracy but will rule out unusual / spurious input.
+    """
+
+    m_ceil(x, base)
 
 
 @pytest.mark.parametrize(
@@ -155,6 +210,7 @@ def test_sci_not(value, expected):
     | st.decimals(allow_nan=False, allow_infinity=False)
     | st.fractions()
 )
+@settings(max_examples=1000)
 def test_sci_not_hypothesis(value):
     """
     Test the sci_not function with hypothesis.

@@ -25,7 +25,24 @@ def m_round(x: Real, base: Real) -> float:
         the multiple to round to.
     """
 
-    x, base = Decimal(str(x)), Decimal(str(base))
+    if isinstance(x, Decimal) and (x.is_nan() or x.is_infinite()):
+        raise ValueError(f"Cannot round {x}.")
+
+    if math.isnan(x) or math.isinf(x):
+        raise ValueError(f"Cannot round {x}.")
+
+    if base == 0:
+        raise ValueError(f"Cannot round to a multiple of {base}.")
+
+    if x == 0:
+        return 0
+
+    x = (
+        Decimal(x.numerator) / Decimal(x.denominator)
+        if isinstance(x, Fraction)
+        else Decimal(x)
+    )
+    base = Decimal(str(base))
 
     return float(round(x / base) * base)
 
@@ -50,6 +67,15 @@ def m_floor(x: Real, base: Real, *, float_tolerance: float | None = 1e-6) -> flo
         A tolerance for floating point math. If not None, the function first
         rounds to the float_tolerance and then completes the rounding.
     """
+
+    if isinstance(x, Decimal) and (x.is_nan() or x.is_infinite()):
+        raise ValueError(f"Cannot round {x}.")
+
+    if math.isnan(x) or math.isinf(x):
+        raise ValueError(f"Cannot round {x}.")
+
+    if base == 0:
+        raise ValueError(f"Cannot round to a multiple of {base}.")
 
     if float_tolerance is not None:
         x = m_round(x, float_tolerance)
@@ -85,6 +111,15 @@ def m_ceil(x: Real, base: Real, *, float_tolerance: float | None = 1e-6) -> floa
         A tolerance for floating point math. If not None, the function first
         rounds to the float_tolerance and then completes the rounding.
     """
+
+    if isinstance(x, Decimal) and (x.is_nan() or x.is_infinite()):
+        raise ValueError(f"Cannot round {x}.")
+
+    if math.isnan(x) or math.isinf(x):
+        raise ValueError(f"Cannot round {x}.")
+
+    if base == 0:
+        raise ValueError(f"Cannot round to a multiple of {base}.")
 
     if float_tolerance is not None:
         x = m_round(x, float_tolerance)
