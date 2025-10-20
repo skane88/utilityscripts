@@ -3,6 +3,7 @@ Some basic math utilities
 """
 
 import math
+import sys
 from decimal import Decimal
 from fractions import Fraction
 from numbers import Real
@@ -208,6 +209,16 @@ def scientific_number(value: Real) -> tuple[float, int]:
     if value == 0:
         return 0, 0
 
+    if abs(value) > sys.float_info.max:
+        raise ValueError(
+            f"{value} is larger than the maximum float value {sys.float_info.max}."
+        )
+
+    if abs(value) < sys.float_info.min:
+        raise ValueError(
+            f"{value} is smaller than the minimum float value {sys.float_info.min}."
+        )
+
     sign = -1 if value < 0 else 1
 
     value = (
@@ -222,3 +233,47 @@ def scientific_number(value: Real) -> tuple[float, int]:
     mantissa = value / pow_10
 
     return float(sign * mantissa), exponent
+
+
+def engineering_number(value: Real) -> tuple[float, int]:
+    """
+    Convert a number to a tuple of (mantissa, exponent) in engineering notation.
+    Engineering notation is similar to scientific notation but limits the exponent
+    to powers of 3.
+
+    Parameters
+    ----------
+    value : Real
+        The value to convert.
+
+    Returns
+    -------
+    tuple[float, int]
+        The parts of the number in engineering notation.
+    """
+
+    if value == 0:
+        return 0, 0
+
+    if abs(value) > sys.float_info.max:
+        raise ValueError(
+            f"{value} is larger than the maximum float value {sys.float_info.max}."
+        )
+
+    if abs(value) < sys.float_info.min:
+        raise ValueError(
+            f"{value} is smaller than the minimum float value {sys.float_info.min}."
+        )
+
+    mantissa, exponent = scientific_number(value)
+
+    if exponent % 3 == 0:
+        return mantissa, exponent
+
+    mantissa = Decimal(mantissa)
+    offset = exponent % 3
+
+    mantissa = mantissa * Decimal("10") ** offset
+    exponent -= offset
+
+    return float(mantissa), exponent

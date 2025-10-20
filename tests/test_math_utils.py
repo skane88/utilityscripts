@@ -2,6 +2,7 @@
 File to test the math utilities file
 """
 
+import sys
 from math import isclose
 
 import pytest
@@ -9,6 +10,7 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from utilityscripts.math_utils import (
+    engineering_number,
     m_ceil,
     m_floor,
     m_round,
@@ -197,7 +199,7 @@ def test_round_significant(x, s, expected):
         (1000000, (1, 6)),
     ],
 )
-def test_sci_not(value, expected):
+def test_sci_num(value, expected):
     result = scientific_number(value)
 
     assert result[0] == expected[0]
@@ -206,15 +208,66 @@ def test_sci_not(value, expected):
 
 @given(
     st.integers()
-    | st.floats(allow_nan=False, allow_infinity=False)
+    | st.floats(allow_nan=False, allow_infinity=False).filter(
+        lambda n: abs(n) > sys.float_info.min
+    )
     | st.decimals(allow_nan=False, allow_infinity=False)
     | st.fractions()
 )
 @settings(max_examples=1000)
-def test_sci_not_hypothesis(value):
+def test_sci_num_hypothesis(value):
     """
     Test the sci_not function with hypothesis.
     """
 
     result = scientific_number(value)
+    assert isclose(value, result[0] * 10 ** result[1], rel_tol=1e-9)
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (12.3456789, (12.3456789, 0)),
+        (-12.3456789, (-12.3456789, 0)),
+        (-1000000, (-1, 6)),
+        (-100000, (-100, 3)),
+        (-10000, (-10, 3)),
+        (-1000, (-1, 3)),
+        (-100, (-100, 0)),
+        (-10, (-10, 0)),
+        (-1, (-1, 0)),
+        (0, (0, 0)),
+        (1, (1, 0)),
+        (10, (10, 0)),
+        (100, (100, 0)),
+        (1000, (1, 3)),
+        (10000, (10, 3)),
+        (100000, (100, 3)),
+        (1000000, (1, 6)),
+    ],
+)
+def test_engineering_number(value, expected):
+    result = engineering_number(value)
+
+    assert result[0] == expected[0]
+    assert result[1] == expected[1]
+    assert result[1] % 3 == 0
+
+
+@given(
+    st.integers()
+    | st.floats(allow_nan=False, allow_infinity=False).filter(
+        lambda n: abs(n) > sys.float_info.min
+    )
+    | st.decimals(allow_nan=False, allow_infinity=False)
+    | st.fractions()
+)
+@settings(max_examples=1000)
+def test_eng_num_hypothesis(value):
+    """
+    Test the engineering_number function with hypothesis.
+    """
+
+    result = engineering_number(value)
+
     assert isclose(value, result[0] * 10 ** result[1], rel_tol=1e-9)
