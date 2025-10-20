@@ -13,7 +13,7 @@ from utilityscripts.math_utils import (
     m_floor,
     m_round,
     round_significant,
-    sci_not,
+    scientific_number,
 )
 
 
@@ -198,7 +198,7 @@ def test_round_significant(x, s, expected):
     ],
 )
 def test_sci_not(value, expected):
-    result = sci_not(value)
+    result = scientific_number(value)
 
     assert result[0] == expected[0]
     assert result[1] == expected[1]
@@ -216,5 +216,5 @@ def test_sci_not_hypothesis(value):
     Test the sci_not function with hypothesis.
     """
 
-    result = sci_not(value)
+    result = scientific_number(value)
     assert isclose(value, result[0] * 10 ** result[1], rel_tol=1e-9)

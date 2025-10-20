@@ -184,7 +184,7 @@ def round_significant(x: Real, s: int = 3):
     return type_in(rounded)
 
 
-def sci_not(value: Real) -> tuple[float, int]:
+def scientific_number(value: Real) -> tuple[float, int]:
     """
     Convert a number to a tuple of (mantissa, exponent) in scientific notation.
 
