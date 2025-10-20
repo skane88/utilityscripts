@@ -5,7 +5,7 @@ Test the Result class.
 import pytest
 import sympy as sym
 
-from utilityscripts.reports.report import ResultError, Variable
+from utilityscripts.reports.report import ResultError, Variable, format_sig_figs
 
 
 def test_variable():
@@ -267,21 +267,20 @@ def test_scale(val, expected_str, expected_latex):
     assert val.latex_string == expected_latex
 
 
-@pytest.mark.parametrize('val, precision',
+@pytest.mark.parametrize(
+    "val, fmt_string, expected",
     [
-        (0, 3, 0.),
-        (0.1234,1, 0.1),
-        (0.1234, 3, 0.123),
-        (1234.567, 1, 1000.),
-        (1234.567, 3, 1230.),
-        (1234.567, 5, 1234.6),
-        (-0.1234, 1, -0.1),
-        (-0.1234, 3, -0.123),
-        (-12345.678, 1, -10000.),
-        (-12345.678, 4, -12340.),
-        (-12345.678, 6, -12345.7),
-    ]
+        (1, ".3e", f"{1:.3e}"),  # test it backs out and uses the default format
+        (0.00001, ".3j", "10e-6"),
+        (0.0001, ".3j", "100e-6"),
+        (0.001, ".3j", "0.001"),
+        (0.01, ".3j", "0.010"),
+        (0.1, ".3j", "0.100"),
+        (1, ".3j", "1.00"),
+        (100, ".3j", "100"),
+        (1000, ".3j", "1000"),
+        (10000, ".3j", "10e3"),
+    ],
 )
-def test_sig_figs(val, precision, expected):
-    
-    assert False
+def test_format_sig_fig(val, fmt_string, expected):
+    assert format_sig_figs(val, fmt_string) == expected
