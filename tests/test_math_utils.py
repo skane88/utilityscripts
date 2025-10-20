@@ -3,6 +3,7 @@ File to test the math utilities file
 """
 
 import sys
+from decimal import Decimal
 from math import isclose
 
 import pytest
@@ -202,7 +203,7 @@ def test_round_significant(x, s, expected):
 def test_sci_num(value, expected):
     result = scientific_number(value)
 
-    assert result[0] == expected[0]
+    assert isclose(result[0], expected[0], rel_tol=1e-9)
     assert result[1] == expected[1]
 
 
@@ -221,7 +222,7 @@ def test_sci_num_hypothesis(value):
     """
 
     result = scientific_number(value)
-    assert isclose(value, result[0] * 10 ** result[1], rel_tol=1e-9)
+    assert isclose(value, result[0] * Decimal("10") ** result[1], rel_tol=1e-9)
 
 
 @pytest.mark.parametrize(
@@ -249,7 +250,7 @@ def test_sci_num_hypothesis(value):
 def test_engineering_number(value, expected):
     result = engineering_number(value)
 
-    assert result[0] == expected[0]
+    assert isclose(result[0], expected[0], rel_tol=1e-9)
     assert result[1] == expected[1]
     assert result[1] % 3 == 0
 
@@ -270,4 +271,4 @@ def test_eng_num_hypothesis(value):
 
     result = engineering_number(value)
 
-    assert isclose(value, result[0] * 10 ** result[1], rel_tol=1e-9)
+    assert isclose(value, result[0] * Decimal("10") ** result[1], rel_tol=1e-9)

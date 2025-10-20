@@ -185,7 +185,7 @@ def round_significant(x: Real, s: int = 3):
     return type_in(rounded)
 
 
-def scientific_number(value: Real) -> tuple[float, int]:
+def scientific_number(value: Real) -> tuple[Decimal, int]:
     """
     Convert a number to a tuple of (mantissa, exponent) in scientific notation.
 
@@ -232,10 +232,10 @@ def scientific_number(value: Real) -> tuple[float, int]:
     pow_10 = Decimal("10") ** exponent
     mantissa = value / pow_10
 
-    return float(sign * mantissa), exponent
+    return sign * mantissa, exponent
 
 
-def engineering_number(value: Real) -> tuple[float, int]:
+def engineering_number(value: Real) -> tuple[Decimal, int]:
     """
     Convert a number to a tuple of (mantissa, exponent) in engineering notation.
     Engineering notation is similar to scientific notation but limits the exponent
@@ -276,4 +276,4 @@ def engineering_number(value: Real) -> tuple[float, int]:
     mantissa = mantissa * Decimal("10") ** offset
     exponent -= offset
 
-    return float(mantissa), exponent
+    return mantissa, exponent
