@@ -240,6 +240,7 @@ def test_sci_num_hypothesis(value):
 
     result = scientific_number(value)
     assert isclose(value, result[0] * Decimal("10") ** result[1], rel_tol=1e-9)
+    assert 1 <= result[0] < 1000
 
 
 @pytest.mark.parametrize(
@@ -287,6 +288,7 @@ def test_engineering_number(value, expected):
     assert isclose(result[0], expected[0], rel_tol=1e-9)
     assert result[1] == expected[1]
     assert result[1] % 3 == 0
+    assert 1 <= result[0] < 1000
 
 
 @given(
@@ -306,3 +308,5 @@ def test_eng_num_hypothesis(value):
     result = engineering_number(value)
 
     assert isclose(value, result[0] * Decimal("10") ** result[1], rel_tol=1e-9)
+    assert result[1] % 3 == 0
+    assert 1 <= result[0] < 1000
