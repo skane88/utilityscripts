@@ -231,7 +231,8 @@ def scientific_number(value: Real) -> tuple[Decimal, int]:
     )
     value = abs(value)
 
-    exponent = int(math.log10(value))
+    exponent = math.log10(value)
+    exponent = int(exponent - 1) if exponent < 0 else int(exponent)
     pow_10 = Decimal("10") ** exponent
     mantissa = value / pow_10
 

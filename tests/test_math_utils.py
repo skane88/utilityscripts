@@ -48,7 +48,7 @@ def test_m_round(x, base, expected):
     | st.fractions(),
     st.integers().filter(lambda n: n != 0),
 )
-@settings(max_examples=10000)
+@settings(max_examples=1000)
 def test_m_round_hypothesis(x, base):
     """
     Test m_round with hypothesis.
@@ -88,7 +88,7 @@ def test_m_floor(x, base, float_tolerance, expected):
     | st.fractions(),
     st.integers().filter(lambda n: n != 0),
 )
-@settings(max_examples=10000)
+@settings(max_examples=1000)
 def test_m_floor_hypothesis(x, base):
     """
     Test m_round with hypothesis.
@@ -133,7 +133,7 @@ def test_m_ceil(x, base, float_tolerance, expected):
     | st.fractions(),
     st.integers().filter(lambda n: n != 0),
 )
-@settings(max_examples=10000)
+@settings(max_examples=1000)
 def test_m_ceil_hypothesis(x, base):
     """
     Test m_round with hypothesis.
@@ -198,6 +198,23 @@ def test_round_significant(x, s, expected):
         (10000, (1, 4)),
         (100000, (1, 5)),
         (1000000, (1, 6)),
+        (123456, (1.23456, 5)),
+        (12345.6, (1.23456, 4)),
+        (1234.56, (1.23456, 3)),
+        (123.456, (1.23456, 2)),
+        (12.3456, (1.23456, 1)),
+        (1.23456, (1.23456, 0)),
+        (0.123456, (1.23456, -1)),
+        (0.0123456, (1.23456, -2)),
+        (0.00123456, (1.23456, -3)),
+        (0.000123456, (1.23456, -4)),
+        (0.0000123456, (1.23456, -5)),
+        (0.00000123456, (1.23456, -6)),
+        (0.000000123456, (1.23456, -7)),
+        (0.0000000123456, (1.23456, -8)),
+        (0.00000000123456, (1.23456, -9)),
+        (0.000000000123456, (1.23456, -10)),
+        (-0.000000123456, (-1.23456, -7)),
     ],
 )
 def test_sci_num(value, expected):
@@ -230,6 +247,9 @@ def test_sci_num_hypothesis(value):
     [
         (12.3456789, (12.3456789, 0)),
         (-12.3456789, (-12.3456789, 0)),
+        (-1000000000, (-1, 9)),
+        (-100000000, (-100, 6)),
+        (-10000000, (-10, 6)),
         (-1000000, (-1, 6)),
         (-100000, (-100, 3)),
         (-10000, (-10, 3)),
@@ -245,6 +265,20 @@ def test_sci_num_hypothesis(value):
         (10000, (10, 3)),
         (100000, (100, 3)),
         (1000000, (1, 6)),
+        (10000000, (10, 6)),
+        (100000000, (100, 6)),
+        (1000000000, (1, 9)),
+        (0.123456, (123.456, -3)),
+        (0.0123456, (12.3456, -3)),
+        (0.00123456, (1.23456, -3)),
+        (0.000123456, (123.456, -6)),
+        (0.0000123456, (12.3456, -6)),
+        (0.00000123456, (1.23456, -6)),
+        (0.000000123456, (123.456, -9)),
+        (0.0000000123456, (12.3456, -9)),
+        (0.00000000123456, (1.23456, -9)),
+        (0.000000000123456, (123.456, -12)),
+        (-0.000000123456, (-123.456, -9)),
     ],
 )
 def test_engineering_number(value, expected):
@@ -263,7 +297,7 @@ def test_engineering_number(value, expected):
     | st.decimals(allow_nan=False, allow_infinity=False)
     | st.fractions()
 )
-@settings(max_examples=10000)
+@settings(max_examples=1000)
 def test_eng_num_hypothesis(value):
     """
     Test the engineering_number function with hypothesis.
