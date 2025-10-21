@@ -1236,8 +1236,8 @@ def format_sig_figs(val: Number, fmt_string: str) -> str:
     if mat.group("sign") is not None:
         if mat.group("sign") == "+":
             ret_val += "-" if val < 0 else "+"
-        else:
-            ret_val += "-" if val < 0 else ""
+    else:
+        ret_val += "-" if val < 0 else ""
 
     sig_figs = int(mat.group("precision"))
 
@@ -1261,15 +1261,30 @@ def format_sig_figs(val: Number, fmt_string: str) -> str:
 def _eng_format_helper_close_to_zero(*, val: Number, exponent: int, sig_figs: int):
     mantissa = ""
     val = round_significant(x=val, s=sig_figs)
+    val = abs(val)
 
-    for i, c in enumerate(f"{val:.{sig_figs}f}"):
-        if i >= sig_figs:
+    sig_count = 0
+    start_counting = False  # can't start counting until we have a non-zero digit
+    wholes_counted = False  # can't stop until we reach the decimal place.
+
+    for c in f"{val:.{sig_figs + abs(exponent)}f}":
+        if not wholes_counted and c == ".":
+            # check if the decimal place has been reached.
+            # if so, we can stop once sig figs is reached.
+            wholes_counted = True
+
+        if sig_count >= sig_figs and wholes_counted:
             break
 
         mantissa += c
 
-        if c == ".":
-            sig_figs += 1
+        if c.isdigit():
+            if not start_counting and c != "0":
+                # don't start counting sig figs until first non-zero val reached.
+                start_counting = True
+
+            if start_counting:
+                sig_count += 1
 
     return mantissa
 
