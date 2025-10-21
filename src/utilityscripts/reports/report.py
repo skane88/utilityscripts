@@ -1240,18 +1240,18 @@ def format_sig_figs(val: Number, fmt_string: str) -> str:
         ret_val += "-" if val < 0 else ""
 
     sig_figs = int(mat.group("precision"))
+    val = abs(Decimal(val))  # convert to Decimal for precision
+    val = round_significant(val, sig_figs)
 
     mantissa, exponent = engineering_number(val)
 
-    if abs(exponent) <= 3:  # noqa: PLR2004
+    if abs(val.log10()) < 4:  # noqa: PLR2004
         ret_val += _eng_format_helper_close_to_zero(
             val=val, exponent=exponent, sig_figs=sig_figs
         )
         return ret_val
 
-    ret_val += _eng_format_helper(
-        mantissa=mantissa, exponent=exponent, sig_figs=sig_figs
-    )
+    ret_val += _eng_format_helper(val=mantissa, sig_figs=sig_figs)
 
     ret_val += "e" if mat.group("type") == "j" else "E"
 
@@ -1289,18 +1289,31 @@ def _eng_format_helper_close_to_zero(*, val: Number, exponent: int, sig_figs: in
     return mantissa
 
 
-def _eng_format_helper(*, mantissa: Decimal, exponent: int, sig_figs: int) -> str:
-    mantissa = round_significant(x=mantissa, s=sig_figs)
-    mantissa_exponent = mantissa.log10()
-    mantissa_string = ""
+def _eng_format_helper(*, val: Decimal, sig_figs: int) -> str:
+    val = round_significant(x=abs(val), s=sig_figs)
+    mantissa = ""
 
-    for i, c in enumerate(f"{mantissa:.{sig_figs}f}"):
-        if i >= sig_figs and i > mantissa_exponent:
+    sig_count = 0
+    start_counting = False  # can't start counting until we have a non-zero digit
+    wholes_counted = False  # can't stop until we reach the decimal place.
+
+    for c in f"{val:.{sig_figs}f}":
+        if not wholes_counted and c == ".":
+            # check if the decimal place has been reached.
+            # if so, we can stop once sig figs is reached.
+            wholes_counted = True
+
+        if sig_count >= sig_figs and wholes_counted:
             break
 
-        mantissa_string += c
+        mantissa += c
 
-        if c == ".":
-            sig_figs += 1
+        if c.isdigit():
+            if not start_counting and c != "0":
+                # don't start counting sig figs until first non-zero val reached.
+                start_counting = True
 
-    return mantissa_string
+            if start_counting:
+                sig_count += 1
+
+    return mantissa
