@@ -240,7 +240,7 @@ def test_sci_num_hypothesis(value):
 
     result = scientific_number(value)
     assert isclose(value, result[0] * Decimal("10") ** result[1], rel_tol=1e-9)
-    assert 1 <= result[0] < 1000
+    assert 1 <= result[0] < 10
 
 
 @pytest.mark.parametrize(
