@@ -1245,6 +1245,16 @@ def format_sig_figs(val: Number, fmt_string: str) -> str:
 
     mantissa, exponent = engineering_number(val)
 
+    mantissa_test = round_significant(mantissa, sig_figs)
+
+    if mantissa_test >= Decimal("1000"):
+        mantissa = mantissa_test / Decimal("1000")
+        exponent += 3
+
+    if mantissa_test < Decimal("1"):
+        mantissa = mantissa_test * Decimal("1000")
+        exponent -= 3
+
     if abs(val.log10()) < 4:  # noqa: PLR2004
         ret_val += _eng_format_helper_close_to_zero(
             val=val, exponent=exponent, sig_figs=sig_figs

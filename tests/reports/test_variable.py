@@ -392,6 +392,10 @@ def test_scale(val, expected_str, expected_latex):
         (-12345678.9, ".3j", "-12.3e6"),
         (-123456789.0, ".3j", "-123e6"),
         (-1234567890.1, ".3j", "-1.23e9"),
+        (1e-6, ".3j", "1.00e-6"),
+        (1e-9, ".3j", "1.00e-9"),
+        (-1e-6, ".3j", "1.00e-6"),
+        (-1e-9, ".3j", "1.00e-9"),
     ],
 )
 def test_format_sig_fig(val, fmt_string, expected):
