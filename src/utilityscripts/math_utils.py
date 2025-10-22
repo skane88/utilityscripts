@@ -281,7 +281,6 @@ def engineering_number(value: Real) -> tuple[Decimal, int]:
     if exponent % 3 == 0:
         return mantissa, exponent
 
-    mantissa = Decimal(mantissa)
     offset = exponent % 3
 
     mantissa = mantissa * Decimal("10") ** offset
