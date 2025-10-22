@@ -46,6 +46,8 @@ def test_variable():
         (Variable(1, units="m"), "1m"),
         (Variable(1, units="m", fmt_string=".2f"), "1.00m"),
         (Variable(1, units="m", fmt_string=".2e"), "1.00e+00m"),
+        (Variable(1.2345, units="m", fmt_string=".2j"), "1.2m"),
+        (Variable(123456, units="m", fmt_string=".2j"), "120e+03m"),
         (Variable(2, symbol="a"), "a=2"),
         (Variable(1, symbol="a", units="m"), "a=1m"),
         (Variable(1, symbol="a", units="m", fmt_string=".2f"), "a=1.00m"),
