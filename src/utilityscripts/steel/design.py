@@ -39,6 +39,7 @@ class UnitSystem:
     stress_scale: float = 1.0
     moment: str = "Nm"
     moment_scale: float = 1.0
+    preferred_fmt: str = ".4j"
 
 
 UnitSystem_SI = UnitSystem()
@@ -925,7 +926,7 @@ class AS4100:
             symbol=("N_ty", "N_{ty}"),
             scale=self.unit_system.force_scale,
             units=self.unit_system.force,
-            fmt_string=".4j",
+            fmt_string=self.unit_system.preferred_fmt,
         )
 
     def phi_n_ty(self, phi_steel: float = 0.9) -> Variable:
@@ -947,7 +948,7 @@ class AS4100:
             symbol=("φN_ty", "\\phi N_{ty}"),
             scale=self.unit_system.force_scale,
             units=self.unit_system.force,
-            fmt_string=".4j",
+            fmt_string=self.unit_system.preferred_fmt,
         )
 
     def n_tu(self, fracture_modifier: float = 0.85) -> Variable:
@@ -968,7 +969,7 @@ class AS4100:
             self.section.area_net * self.section.f_u_min * fracture_modifier,
             scale=0.001,
             units="kN",
-            fmt_string=".4j",
+            fmt_string=self.unit_system.preferred_fmt,
         )
 
     def phi_n_tu(
@@ -993,7 +994,7 @@ class AS4100:
             self.n_tu(fracture_modifier=fracture_modifier).value * phi_steel,
             scale=0.001,
             units="kN",
-            fmt_string=".4j",
+            fmt_string=self.unit_system.preferred_fmt,
         )
 
 
