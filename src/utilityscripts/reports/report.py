@@ -1289,10 +1289,9 @@ def format_sig_figs(val: Number, fmt_string: str = ".4j") -> str:
         return ret_val
 
     ret_val += _eng_format_helper(val=mantissa, sig_figs=sig_figs)
-
     ret_val += "e" if mat.group("type") == "j" else "E"
 
-    return ret_val + f"{exponent:d}"
+    return ret_val + _eng_format_helper_exponent(exponent=exponent)
 
 
 def _eng_format_helper_close_to_zero(*, val: Number, exponent: int, sig_figs: int):
@@ -1352,3 +1351,11 @@ def _eng_format_helper(*, val: Decimal, sig_figs: int) -> str:
                 sig_count += 1
 
     return mantissa
+
+
+def _eng_format_helper_exponent(exponent: int) -> str:
+    sign = 1 if exponent >= 0 else -1
+    exponent = abs(exponent)
+
+    ret_val = "+" if sign > 0 else "-"
+    return ret_val + f"{exponent:02d}"
