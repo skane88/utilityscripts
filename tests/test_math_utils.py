@@ -242,7 +242,7 @@ def test_sci_num_hypothesis(value):
     result = scientific_number(value)
 
     assert isclose(value, result[0] * Decimal("10") ** result[1], rel_tol=1e-9)
-    assert (1 <= abs(result[0]) < 10) or (result[0] == 0)
+    assert (1 <= abs(result[0]) < 10) or (result[0] == 0)  # noqa: PLR2004
 
 
 @pytest.mark.parametrize(
@@ -290,7 +290,7 @@ def test_engineering_number(value, expected):
     assert isclose(result[0], expected[0], rel_tol=1e-9)
     assert result[1] == expected[1]
     assert result[1] % 3 == 0
-    assert (1 <= abs(result[0]) < 1000) or result[0] == 0
+    assert (1 <= abs(result[0]) < 1000) or result[0] == 0  # noqa: PLR2004
 
 
 @given(
@@ -311,4 +311,4 @@ def test_eng_num_hypothesis(value):
 
     assert isclose(value, result[0] * Decimal("10") ** result[1], rel_tol=1e-9)
     assert result[1] % 3 == 0
-    assert (1 <= abs(result[0]) < 1000) or result[0] == 0
+    assert (1 <= abs(result[0]) < 1000) or result[0] == 0  # noqa: PLR2004
