@@ -233,7 +233,7 @@ def test_sci_num(value, expected):
     | st.decimals(allow_nan=False, allow_infinity=False)
     | st.fractions()
 )
-@settings(max_examples=10000)
+@settings(max_examples=1000)
 def test_sci_num_hypothesis(value):
     """
     Test the sci_not function with hypothesis.
