@@ -1260,7 +1260,6 @@ def format_sig_figs(val: Number, fmt_string: str) -> str:
 
 def _eng_format_helper_close_to_zero(*, val: Number, exponent: int, sig_figs: int):
     mantissa = ""
-    val = round_significant(x=val, s=sig_figs)
     val = abs(val)
 
     sig_count = 0
@@ -1290,7 +1289,6 @@ def _eng_format_helper_close_to_zero(*, val: Number, exponent: int, sig_figs: in
 
 
 def _eng_format_helper(*, val: Decimal, sig_figs: int) -> str:
-    val = round_significant(x=abs(val), s=sig_figs)
     mantissa = ""
 
     sig_count = 0
