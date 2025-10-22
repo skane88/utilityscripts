@@ -1197,7 +1197,31 @@ class DeprecatedResult(Result):
         return result_str
 
 
-def format_sig_figs(val: Number, fmt_string: str) -> str:
+def format_sig_figs(val: Number, fmt_string: str = ".4j") -> str:
+    """
+    Format a number to a given number of significant figures.
+
+    Notes
+    -----
+    - The intent is to closely match python's formatting language, but for the moment
+      not all functionality is implemented, particularly padding options etc.
+
+    Parameters
+    ----------
+    val : Number
+        The number to format.
+    fmt_string : str
+        A format string. Should comply with python's formatting language for numbers,
+        but use 'j' or 'J' for the format type (for en'j'ineering).
+        The number in the precision place specifies the number of significant figures,
+        not the number of decimal places.
+
+    Returns
+    -------
+    str
+        A number formatted according to the format string.
+    """
+
     format_spec_re = humre.starts_and_ends_with(
         humre.optional(humre.named_group("sign", r"[ +\-]"))
         + humre.optional(humre.named_group("zero", "0"))
