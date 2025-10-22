@@ -558,13 +558,16 @@ def _format_number(
     if scale != 1.0:
         value = value * scale
 
-    value_str = f"{value:{fmt_string}}" if fmt_string is not None else f"{value}"
+    value_str = (
+        format_sig_figs(val=value, fmt_string=fmt_string)
+        if fmt_string is not None
+        else f"{value}"
+    )
 
     # next format scientific notation nicely.
     if (
         fmt_string is not None
         and str_type == StrType.LATEX
-        and ("e" in fmt_string.lower() or "g" in fmt_string.lower())
         and "e" in value_str.lower()
     ):
         mantissa, exponent = value_str.lower().split("e")

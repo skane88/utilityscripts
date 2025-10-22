@@ -186,6 +186,9 @@ def test_m_ceil_hypothesis(x, base):
         (0.00987654321, 3, 0.00988),
         (0.000987654321, 3, 0.000988),
         (0.0000987654321, 3, 0.0000988),
+        (1.2345, 4, 1.234),
+        # note: tricky one as 1.2345 in floating point is actually 1.234499999... ever
+        # so slightly less than 1.2345
     ],
 )
 def test_round_significant(x, s, expected):

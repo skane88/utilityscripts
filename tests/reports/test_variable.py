@@ -130,6 +130,10 @@ def test_result_error():
     [
         (Variable(1), "$1$"),
         (Variable(1, fmt_string=".3E"), "$1.000 \\times 10^{0}$"),
+        (Variable(1.2345e6, fmt_string=".2J"), "$1.2 \\times 10^{6}$"),
+        (Variable(1.2345, fmt_string=".4J"), "$1.234$"),
+        # note: tricky one, as 1.2345 in floating point is actually 1.2344999999, which
+        # is ever so slightly less than 1.2345.
         (Variable(1, units="m"), "$1\\text{m}$"),
         (Variable(1, symbol="a"), "$\\text{a} = 1$"),
         (
@@ -394,8 +398,9 @@ def test_scale(val, expected_str, expected_latex):
         (-1234567890.1, ".3j", "-1.23e9"),
         (1e-6, ".3j", "1.00e-6"),
         (1e-9, ".3j", "1.00e-9"),
-        (-1e-6, ".3j", "1.00e-6"),
-        (-1e-9, ".3j", "1.00e-9"),
+        (-1e-6, ".3j", "-1.00e-6"),
+        (-1e-9, ".3j", "-1.00e-9"),
+        (1e6, ".3J", "1.00E6"),  # confirm that a capital J gives a capital E
     ],
 )
 def test_format_sig_fig(val, fmt_string, expected):
