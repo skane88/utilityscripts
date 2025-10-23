@@ -141,7 +141,7 @@ class SteelSection(ABC):
         -------
         SteelGrade | None
             The steel material the section is made of.
-            May be None if not provided.
+            Will be None if not provided.
         """
 
         return self._steel
@@ -586,7 +586,7 @@ class ISection(SteelSection):
         This method does not include any localised holes (e.g. bolt holes).
         """
 
-        geom = self._base_geometry()
+        geom = self._base_geometry().align_center()
         self._geometry = geom
 
     def _base_geometry(self) -> Geometry:
@@ -670,7 +670,7 @@ class ISection(SteelSection):
         -------
         list[tuple[HoleLocation, tuple[float, float]]]
             A list of holes, where each hole is a tuple of:
-            (hole_location, (diameter, offset from CL))
+            (hole_location, (diameter, location))
         """
 
         return self._holes
