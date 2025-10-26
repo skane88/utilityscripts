@@ -3,6 +3,48 @@ Checks related to ASI DG07 - pinned baseplates
 """
 
 
+def chk04_v_cf(
+    *,
+    n_star: float,
+    a_c: float,
+    f_c: float,
+    mu: float = 0.4,
+    phi: float = 0.7,
+    phi_c: float = 0.7,
+) -> float:
+    """
+    Calculate the interface friction shear under a baseplate, limited by adhesive
+    failure of the concrete interface.
+
+    Notes
+    -----
+    - The provisions of DG07 are based on ACI318M-08 and ACI349-06, converted to metric.
+
+    Parameters
+    ----------
+    n_star : float
+        The compression load on the column co-incident with a given shear. In kN.
+    a_c : float
+        The area of the concrete under the baseplate resisting the shear. In mm^2.
+    f_c : float
+        The characteristic compressive strength of the concrete. In MPa.
+    m_u : float
+        The friction coefficient between baseplate and concrete.
+    phi : float
+        The capacity reduction factor for friction. DG07 suggests 0.7.
+    phi_c : float
+        The capacity reduction factor for concrete in shear, from AS3600.
+    """
+
+    v_f = phi * mu * n_star
+
+    max_concrete_shear_cap = 5.50  # in MPa, based on ACI318M-08 11.6.5
+
+    v_cc = phi_c * min(0.2 * f_c * a_c, max_concrete_shear_cap * a_c) * 1e-3
+
+    return min(v_f, v_cc)
+
+
 def chk08_y2_pfc(*, b_fc1: float, d_h: float) -> float:
     """
     Calculate the yield line parameter y_2 for a PFC.
