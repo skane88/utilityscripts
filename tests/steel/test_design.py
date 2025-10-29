@@ -105,25 +105,55 @@ def test_add_holes():
 
     hole_dia = 0.022
 
-    new_sect = _310ub40.add_holes(holes=[(HoleLocation.WEB, (hole_dia, 0.005))])
+    new_sect = _310ub40.add_holes(holes=[(HoleLocation.WEB, (hole_dia, 0.050))])
 
     assert len(_310ub40.holes) == 0
     assert len(new_sect.holes) == 1
     assert new_sect.holes[0][0] == HoleLocation.WEB
-    assert new_sect.holes[0][1] == (hole_dia, 0.005)
+    assert new_sect.holes[0][1] == (hole_dia, 0.050)
 
     new_sect = new_sect.add_holes(
         holes=[
-            (HoleLocation.TOPRIGHT, (hole_dia, 0.035)),
-            (HoleLocation.TOPLEFT, (hole_dia, 0.035)),
+            (HoleLocation.TOPRIGHT, (hole_dia, 0.045)),
+            (HoleLocation.TOPLEFT, (hole_dia, 0.045)),
         ]
     )
 
     assert len(new_sect.holes) == 3  # noqa: PLR2004
     assert new_sect.holes[1][0] == HoleLocation.TOPRIGHT
-    assert new_sect.holes[1][1] == (hole_dia, 0.035)
+    assert new_sect.holes[1][1] == (hole_dia, 0.045)
     assert new_sect.holes[2][0] == HoleLocation.TOPLEFT
-    assert new_sect.holes[2][1] == (hole_dia, 0.035)
+    assert new_sect.holes[2][1] == (hole_dia, 0.045)
+
+
+@pytest.mark.parametrize(
+    "loc, dia, offset, expected_error",
+    [
+        (HoleLocation.WEB, 0.022, 0.005, ValueError),
+        (HoleLocation.TOPRIGHT, 0.022, 0.005, ValueError),
+        (HoleLocation.TOPLEFT, 0.022, 0.005, ValueError),
+        (HoleLocation.BOTTOMRIGHT, 0.022, 0.005, ValueError),
+        (HoleLocation.BOTTOMLEFT, 0.022, 0.005, ValueError),
+        (HoleLocation.WEB, 0.022, 0.300, ValueError),
+        (HoleLocation.TOPRIGHT, 0.022, 0.300, ValueError),
+        (HoleLocation.TOPLEFT, 0.022, 0.300, ValueError),
+        (HoleLocation.BOTTOMRIGHT, 0.022, 0.300, ValueError),
+        (HoleLocation.BOTTOMLEFT, 0.022, 0.300, ValueError),
+    ],
+)
+def test_add_holes_errors(loc, dia, offset, expected_error):
+    with pytest.raises(expected_error):
+        i_section = ISection(
+            section_name="test",
+            steel=None,
+            b_f=0.1,
+            d=0.15,
+            t_f=0.015,
+            t_w=0.01,
+            corner_detail=None,
+        ).add_holes(holes=[(loc, (dia, offset))])
+
+        assert i_section.holes == [(loc, (dia, offset))]
 
 
 def test_steel_member():

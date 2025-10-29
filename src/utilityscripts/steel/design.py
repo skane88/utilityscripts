@@ -726,12 +726,49 @@ class ISection(SteelSection):
             A new ISection object with the added holes.
         """
 
-        for _loc, dims in holes:
-            if dims[1] < 0.0:
+        def test_web_holes(offset: float, dia: float) -> None:
+            if offset > self.d - self.t_ft - dia / 2:
+                raise ValueError(
+                    "Expected Centreline of hole to be within the web. "
+                    + f"Hole with offset {offset} > d - t_ft - dia / 2."
+                )
+            if offset < self.t_fb + dia / 2:
+                raise ValueError(
+                    "Expected Centreline of hole to be within the web. "
+                    + f"Hole with offset {offset} < t_fb + dia / 2."
+                )
+
+        def test_flange_holes(loc: HoleLocation, offset: float, dia: float) -> None:
+            b = (
+                self.b_ft
+                if loc in {HoleLocation.TOPRIGHT, HoleLocation.TOPLEFT}
+                else self.b_fb
+            )
+
+            if offset > b - dia / 2:
+                raise ValueError(
+                    "Expected Centreline of hole to be within the flange. "
+                    + f"Hole in {loc} with offset {offset} > b - dia / 2."
+                )
+            if offset < dia / 2 + self.t_w / 2:
+                raise ValueError(
+                    "Expected Centreline of hole to be within the flange. "
+                    + f"Hole in {loc} with offset {offset} < dia / 2."
+                )
+
+        for loc, dims in holes:
+            dia, offset = dims
+
+            if offset < 0.0:
                 raise ValueError(
                     "Expected Centreline of hole to be positive for all holes. "
-                    + f"Hole located at {dims[1]} has offset {dims[1]} < 0.0"
+                    + f"Hole located at in {loc} has offset {offset} < 0.0"
                 )
+
+            if loc == HoleLocation.WEB:
+                test_web_holes(offset, dia)
+            else:
+                test_flange_holes(loc, offset, dia)
 
         return self._copy_with_new(**{"_holes": self.holes + holes})
 
