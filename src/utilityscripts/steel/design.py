@@ -576,7 +576,7 @@ class ISection(SteelSection):
         """
         return self._n_r
 
-    def _make_geometry(self) -> Geometry:
+    def _make_geometry(self):
         """
         A private method to make the geometry for the section.
         Sets the _geometry property.
@@ -586,17 +586,46 @@ class ISection(SteelSection):
         This method does not include any localised holes (e.g. bolt holes).
         """
 
-        geom = self._base_geometry().align_center()
+        poly = self._base_polygon()
+        geom = Geometry(geom=poly).align_center()
         self._geometry = geom
 
-    def _base_geometry(self) -> Geometry:
+    def _bottom_flange_poly(self) -> Polygon:
+        points = [
+            (self.b_fb / 2, 0),
+            (self.b_fb / 2, self.t_fb),
+            (-self.b_fb / 2, self.t_fb),
+            (-self.b_fb / 2, 0),
+        ]
+        return Polygon(points)
+
+    def _top_flange_poly(self) -> Polygon:
+        points = [
+            (self.b_ft / 2, self.d - self.t_ft),
+            (self.b_ft / 2, self.d),
+            (-self.b_ft / 2, self.d),
+            (-self.b_ft / 2, self.d - self.t_ft),
+        ]
+        return Polygon(points)
+
+    def _web_poly(self) -> Polygon:
+        points = [
+            (self.t_w / 2, self.t_fb),
+            (self.t_w / 2, self.d - self.t_ft),
+            (-self.t_w / 2, self.d - self.t_ft),
+            (-self.t_w / 2, self.t_fb),
+        ]
+
+        return Polygon(points)
+
+    def _base_polygon(self) -> Polygon:
         """
         A private method to make the base geometry for the section.
 
         Returns
         -------
-        Geometry :
-            A geometry object representing the I Section.
+        Polygon :
+            A Polygon object representing the I Section.
         """
 
         points_a = [(self.b_fb / 2, 0), (self.b_fb / 2, self.t_fb)]
@@ -643,8 +672,7 @@ class ISection(SteelSection):
         points_e = [(-self.b_fb / 2, self.t_fb), (-self.b_fb / 2, 0)]
 
         all_points = points_a + points_b + points_c + points_d + points_e
-        poly = Polygon(all_points)
-        return Geometry(geom=poly)
+        return Polygon(all_points)
 
     @property
     def geometry(self) -> Geometry:
@@ -1147,25 +1175,25 @@ def _make_radius(
 
     match corner_location:
         case CornerLocation.TOPRIGHT:
-            corner_point = (
+            radius_centre = (
                 corner_point[0] + corner_size,
                 corner_point[1] - corner_size,
             )
             limit_angles = (90, 180)
         case CornerLocation.BOTTOMRIGHT:
-            corner_point = (
+            radius_centre = (
                 corner_point[0] + corner_size,
                 corner_point[1] + corner_size,
             )
             limit_angles = (180, 270)
         case CornerLocation.TOPLEFT:
-            corner_point = (
+            radius_centre = (
                 corner_point[0] - corner_size,
                 corner_point[1] - corner_size,
             )
             limit_angles = (0, 90)
         case CornerLocation.BOTTOMLEFT:
-            corner_point = (
+            radius_centre = (
                 corner_point[0] - corner_size,
                 corner_point[1] + corner_size,
             )
@@ -1174,14 +1202,16 @@ def _make_radius(
             raise ValueError(f"Invalid corner location: {corner_location}")
 
     radius = build_circle(
-        centroid=corner_point,
+        centroid=radius_centre,
         radius=corner_size,
         no_points=n_r,
         limit_angles=limit_angles,
         use_radians=False,
     )
 
-    return list(reversed(radius))
+    points = list(reversed(radius))  # need to reverse points from clockwise to anti.
+
+    return [corner_point, *points]
 
 
 def build_circle(
