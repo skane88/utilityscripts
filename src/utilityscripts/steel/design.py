@@ -347,6 +347,7 @@ class ISection(SteelSection):
         self._n_r = n_r
 
         self._holes = []
+        self._geometry_net = None
 
     @property
     def f_yw(self) -> float:
@@ -714,7 +715,6 @@ class ISection(SteelSection):
         holes : list[tuple[HoleLocation, tuple[float, float]]]
             A list of holes, where each hole is a tuple of:
             (hole_location, (diameter, offset from CL))
-            The hole offset indicates the top or bottom flange or web.
             Valid locations are:
                 "top-left", "top-right", "bottom-left", "bottom-right", "web"
             The offset from the CL should be +ve for the flanges.
@@ -726,11 +726,11 @@ class ISection(SteelSection):
             A new ISection object with the added holes.
         """
 
-        for loc, dims in holes:
-            if loc != HoleLocation.WEB and dims[1] < 0.0:
+        for _loc, dims in holes:
+            if dims[1] < 0.0:
                 raise ValueError(
-                    "Expected Centreline of hole to be positive for all holes"
-                    + f" on flanges. Hole located at {dims[1]}."
+                    "Expected Centreline of hole to be positive for all holes. "
+                    + f"Hole located at {dims[1]} has offset {dims[1]} < 0.0"
                 )
 
         return self._copy_with_new(**{"_holes": self.holes + holes})
