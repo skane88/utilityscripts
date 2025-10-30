@@ -1129,8 +1129,8 @@ class AS4100:
                 a_n=self.section.area_net, f_u=self.section.f_u_min, k_t=k_t
             ),
             symbol=("N_tu", "N_{tu}"),
-            scale=0.001,
-            units="kN",
+            scale=self.unit_system.force_scale,
+            units=self.unit_system.force,
             fmt_string=self.unit_system.preferred_fmt,
         )
 
@@ -1153,8 +1153,8 @@ class AS4100:
         return Variable(
             self.n_tu(k_t=k_t).value * phi_steel,
             symbol=("φN_tu", "\\phi N_{tu}"),
-            scale=0.001,
-            units="kN",
+            scale=self.unit_system.force_scale,
+            units=self.unit_system.force,
             fmt_string=self.unit_system.preferred_fmt,
         )
 
