@@ -13,7 +13,7 @@ from typing import Self
 
 import numpy as np
 import polars as pl
-from sectionproperties.pre import Geometry
+from sectionproperties.pre import CompoundGeometry, Geometry
 from shapely import Polygon
 
 from utilityscripts.reports.report import Variable
@@ -118,6 +118,7 @@ class SteelSection(ABC):
             setattr(new_section, attr, value)
 
         new_section._geometry = None
+        new_section._geometry_net = None
 
         return new_section
 
@@ -229,6 +230,11 @@ class SteelSection(ABC):
         A sectionproperties Geometry object describing the shape
         along with any holes. This is optional for
         derived classes to implement.
+
+        Notes
+        -----
+        - This property should create the geometry if it has not already been created.
+        - Geometry should be centred on its COG.
 
         Returns
         -------
@@ -772,13 +778,101 @@ class ISection(SteelSection):
 
         return self._copy_with_new(**{"_holes": self.holes + holes})
 
+    def _make_net_geometry(self) -> Geometry:
+        poly = self._base_polygon()
+        tolerance = 0.001
+
+        for loc, dims in self.holes:
+            dia, offset = dims
+            if loc == HoleLocation.WEB:
+                hole = Polygon(
+                    [
+                        (self.t_w / 2 + self.corner_size + tolerance, offset - dia / 2),
+                        (self.t_w / 2 + self.corner_size + tolerance, offset + dia / 2),
+                        (
+                            -self.t_w / 2 - self.corner_size - tolerance,
+                            offset + dia / 2,
+                        ),
+                        (
+                            -self.t_w / 2 - self.corner_size - tolerance,
+                            offset - dia / 2,
+                        ),
+                    ]
+                )
+            elif loc == HoleLocation.TOPRIGHT:
+                hole = Polygon(
+                    [
+                        (
+                            offset + dia / 2,
+                            self.d - self.t_ft - self.corner_size - tolerance,
+                        ),
+                        (offset + dia / 2, self.d + tolerance),
+                        (offset - dia / 2, self.d + tolerance),
+                        (
+                            offset - dia / 2,
+                            self.d - self.t_ft - self.corner_size - tolerance,
+                        ),
+                    ]
+                )
+            elif loc == HoleLocation.TOPLEFT:
+                hole = Polygon(
+                    [
+                        (
+                            -offset + dia / 2,
+                            self.d - self.t_ft - self.corner_size - tolerance,
+                        ),
+                        (-offset + dia / 2, self.d + tolerance),
+                        (-offset - dia / 2, self.d + tolerance),
+                        (
+                            -offset - dia / 2,
+                            self.d - self.t_ft - self.corner_size - tolerance,
+                        ),
+                    ]
+                )
+            elif loc == HoleLocation.BOTTOMRIGHT:
+                hole = Polygon(
+                    [
+                        (offset + dia / 2, -tolerance),
+                        (offset + dia / 2, self.t_fb + self.corner_size + tolerance),
+                        (offset - dia / 2, self.t_fb + self.corner_size + tolerance),
+                        (offset - dia / 2, -tolerance),
+                    ]
+                )
+            elif loc == HoleLocation.BOTTOMLEFT:
+                hole = Polygon(
+                    [
+                        (-offset + dia / 2, -tolerance),
+                        (-offset + dia / 2, self.t_fb + self.corner_size + tolerance),
+                        (-offset - dia / 2, self.t_fb + self.corner_size + tolerance),
+                        (-offset - dia / 2, -tolerance),
+                    ]
+                )
+
+            poly = poly.difference(hole)
+
+        return CompoundGeometry(geoms=poly).align_center()
+
+    @property
+    def geometry_net(self) -> Geometry:
+        """
+        The net geometry of the section after accounting for localised holes.
+        """
+
+        if len(self.holes) == 0:
+            return self.geometry
+
+        if self._geometry_net is None:
+            self._geometry_net = self._make_net_geometry()
+
+        return self._geometry_net
+
     @property
     def area_gross(self) -> float:
         return self.geometry.calculate_area()
 
     @property
     def area_net(self) -> float:
-        raise NotImplementedError()
+        return self.geometry_net.calculate_area()
 
 
 class SteelMember:
@@ -1246,9 +1340,7 @@ def _make_radius(
         use_radians=False,
     )
 
-    points = list(reversed(radius))  # need to reverse points from clockwise to anti.
-
-    return [corner_point, *points]
+    return list(reversed(radius))  # need to reverse points from clockwise to anti.
 
 
 def build_circle(

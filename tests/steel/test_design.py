@@ -156,6 +156,39 @@ def test_add_holes_errors(loc, dia, offset, expected_error):
         assert i_section.holes == [(loc, (dia, offset))]
 
 
+def test_area_net():
+    g300 = steel_grades()["AS/NZS3679.1:300"]
+    _310ub40 = make_section(designation="310UB40.4", grade=g300)
+
+    expected_gross = 0.00521
+
+    assert isclose(_310ub40.area_gross, expected_gross, rel_tol=1e-3)
+    assert isclose(_310ub40.area_net, expected_gross, rel_tol=1e-3)
+
+    dia = 0.022
+
+    _310ub40 = _310ub40.add_holes(holes=[(HoleLocation.WEB, (dia, 0.050))])
+
+    assert isclose(_310ub40.area_gross, expected_gross, rel_tol=1e-3)
+    assert isclose(_310ub40.area_net, expected_gross - dia * _310ub40.t_w, rel_tol=1e-3)
+
+    print(_310ub40.holes)
+
+    _310ub40 = _310ub40.add_holes(holes=[(HoleLocation.TOPRIGHT, (dia, 0.045))])
+
+    print(_310ub40.holes)
+
+    print(_310ub40.area_gross)
+    print(_310ub40.area_net)
+
+    assert isclose(_310ub40.area_gross, expected_gross, rel_tol=1e-3)
+    assert isclose(
+        _310ub40.area_net,
+        expected_gross - (dia * _310ub40.t_ft + dia * _310ub40.t_w),
+        rel_tol=1e-3,
+    )
+
+
 def test_steel_member():
     """
     Test that steel member works.
