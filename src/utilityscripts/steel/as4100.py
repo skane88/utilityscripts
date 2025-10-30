@@ -282,6 +282,23 @@ def s7_2_n_ty(*, a_g, f_y):
     return a_g * f_y
 
 
+def s7_2_n_tu(*, a_n, f_u, k_t):
+    """
+    Calculate the tension capacity in fracture as per AS4100 S7.2.
+
+    Parameters
+    ----------
+    a_n : float
+        The net cross section area.
+    f_u : float
+        The ultimate strength of the material.
+    k_t : float
+        The fracture modifier for the uniformity of the force in the section.
+    """
+
+    return 0.85 * a_n * f_u * k_t
+
+
 def s9_1_9_block(
     *,
     a_gv: float,

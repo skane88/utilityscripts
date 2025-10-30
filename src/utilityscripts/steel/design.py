@@ -1110,13 +1110,13 @@ class AS4100:
             fmt_string=self.unit_system.preferred_fmt,
         )
 
-    def n_tu(self, fracture_modifier: float = 0.85) -> Variable:
+    def n_tu(self, k_t: float = 0.85) -> Variable:
         """
         Calculate the net tensile strength at fracture.
 
         Parameters
         ----------
-        fracture_modifier : float, optional
+        k_t : float, optional
             A modifier representing the impact of fractures or imperfections.
             Default value is 0.85.
 
@@ -1125,21 +1125,22 @@ class AS4100:
         float
         """
         return Variable(
-            self.section.area_net * self.section.f_u_min * fracture_modifier,
+            as4100.s7_2_n_tu(
+                a_n=self.section.area_net, f_u=self.section.f_u_min, k_t=k_t
+            ),
+            symbol=("N_tu", "N_{tu}"),
             scale=0.001,
             units="kN",
             fmt_string=self.unit_system.preferred_fmt,
         )
 
-    def phi_n_tu(
-        self, fracture_modifier: float = 0.85, phi_steel: float = 0.9
-    ) -> Variable:
+    def phi_n_tu(self, k_t: float = 0.85, phi_steel: float = 0.9) -> Variable:
         """
         Calculate the design fracture capacity.
 
         Parameters
         ----------
-        fracture_modifier : float
+        k_t : float
             Modifier applied to the ultimate capacity factor (default is 0.85).
         phi_steel : float
             Capacity reduction factor for steel (default is 0.9).
@@ -1150,7 +1151,8 @@ class AS4100:
         """
 
         return Variable(
-            self.n_tu(fracture_modifier=fracture_modifier).value * phi_steel,
+            self.n_tu(k_t=k_t).value * phi_steel,
+            symbol=("φN_tu", "\\phi N_{tu}"),
             scale=0.001,
             units="kN",
             fmt_string=self.unit_system.preferred_fmt,

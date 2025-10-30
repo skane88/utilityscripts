@@ -16,7 +16,8 @@ from utilityscripts.steel.design import (
 )
 from utilityscripts.steel.steel import steel_grades
 
-g300 = steel_grades()["AS/NZS3679.1:300"]
+as_3679_g300 = steel_grades()["AS/NZS3679.1:300"]
+as_3678_g300 = steel_grades()["AS/NZS3678:300"]
 
 
 @pytest.mark.parametrize(
@@ -73,7 +74,7 @@ def test_i_section(designation, b_f, d, t_f, t_w, corner_detail, corner_size, n_
     "designation, grade, area_expected",
     [
         ("310UB40.4", "AS/NZS3679.1:300", 0.00521),
-        ("310UB40.4", g300, 0.00521),
+        ("310UB40.4", as_3679_g300, 0.00521),
         ("1000WB215", None, 27.40e-03),
     ],
 )
@@ -92,10 +93,10 @@ def test_add_steel():
     assert isclose(_310ub40.area_gross, 0.00521, rel_tol=1e-3)
     assert _310ub40.steel is None
 
-    new_section = _310ub40.add_steel(g300)
+    new_section = _310ub40.add_steel(as_3679_g300)
 
     assert _310ub40.steel is None
-    assert new_section.steel == g300
+    assert new_section.steel == as_3679_g300
 
     assert isclose(new_section.area_gross, 0.00521, rel_tol=1e-3)
 
@@ -234,13 +235,27 @@ def test_as4100():
     assert new_design.member is member
 
 
-def test_as4100_tension():
-    _310ub40 = make_section(designation="310UB40.4", grade=g300)
-    length = 2.0
+@pytest.mark.parametrize(
+    "section, grade, n_ty, phi_n_ty, k_t, n_tu, phi_n_tu",
+    [
+        ("310UB40.4", as_3679_g300, 1_666_600, 1_499_900, 1.00, 1_947_789, 1_753_010),
+        ("150UB14.0", as_3679_g300, 571_200, 514_080, 0.85, 567_456, 510_710),
+        ("700WB173", as_3678_g300, 6_160_000, 5_544_000, 0.85, 6_834_856, 6_151_370),
+        ("800WB122", as_3678_g300, 4_680_000, 4_212_000, 1.00, 5_701_800, 5_131_620),
+    ],
+    ids=["310UB40.4", "150UB14.0", "700WB173", "800WB122"],
+)
+def test_as4100_tension(section, grade, n_ty, phi_n_ty, k_t, n_tu, phi_n_tu):
+    section = make_section(designation=section, grade=grade)
+    length = 2.0  # length is immaterial.
 
-    member = SteelMember(section=_310ub40, length=length, restraints=None)
+    member = SteelMember(section=section, length=length, restraints=None)
 
     design = AS4100(member=member)
 
-    assert isclose(design.n_ty().value, 1666600, rel_tol=1e-3)
-    assert isclose(design.phi_n_ty(phi_steel=0.9).value, 1499900, rel_tol=1e-3)
+    assert isclose(design.n_ty().value, n_ty, rel_tol=5e-3)
+    assert isclose(design.phi_n_ty(phi_steel=0.9).value, phi_n_ty, rel_tol=5e-3)
+    assert isclose(design.n_tu(k_t=k_t).value, n_tu, rel_tol=5e-3)
+    assert isclose(
+        design.phi_n_tu(k_t=k_t, phi_steel=0.9).value, phi_n_tu, rel_tol=5e-3
+    )
