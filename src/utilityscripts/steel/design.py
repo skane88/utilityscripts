@@ -705,7 +705,9 @@ class ISection(SteelSection):
         -------
         list[tuple[HoleLocation, tuple[float, float]]]
             A list of holes, where each hole is a tuple of:
-            (hole_location, (diameter, location))
+            (hole_location, (diameter, location)).
+            Location is measured from the CL (for holes in the flanges),
+            or the top (for holes in the webs)
         """
 
         return self._holes
@@ -720,11 +722,9 @@ class ISection(SteelSection):
         ----------
         holes : list[tuple[HoleLocation, tuple[float, float]]]
             A list of holes, where each hole is a tuple of:
-            (hole_location, (diameter, offset from CL))
-            Valid locations are:
-                "top-left", "top-right", "bottom-left", "bottom-right", "web"
-            The offset from the CL should be +ve for the flanges.
-            For the web it can be either +ve or -ve.
+            (hole_location, (diameter, location))
+            The location is taken from the CL for the flanges and should be +ve.
+            For the web the location is taken from the top flnage.
 
         Returns
         -------
@@ -733,15 +733,15 @@ class ISection(SteelSection):
         """
 
         def test_web_holes(offset: float, dia: float) -> None:
-            if offset > self.d - self.t_ft - dia / 2:
+            if offset > self.d - self.t_fb - dia / 2:
                 raise ValueError(
                     "Expected Centreline of hole to be within the web. "
-                    + f"Hole with offset {offset} > d - t_ft - dia / 2."
+                    + f"Hole with offset {offset} > d - t_fb - dia / 2."
                 )
-            if offset < self.t_fb + dia / 2:
+            if offset < self.t_ft + dia / 2:
                 raise ValueError(
                     "Expected Centreline of hole to be within the web. "
-                    + f"Hole with offset {offset} < t_fb + dia / 2."
+                    + f"Hole with offset {offset} < t_ft + dia / 2."
                 )
 
         def test_flange_holes(loc: HoleLocation, offset: float, dia: float) -> None:
@@ -787,15 +787,21 @@ class ISection(SteelSection):
             if loc == HoleLocation.WEB:
                 hole = Polygon(
                     [
-                        (self.t_w / 2 + self.corner_size + tolerance, offset - dia / 2),
-                        (self.t_w / 2 + self.corner_size + tolerance, offset + dia / 2),
                         (
-                            -self.t_w / 2 - self.corner_size - tolerance,
-                            offset + dia / 2,
+                            self.t_w / 2 + self.corner_size + tolerance,
+                            self.d - (offset + dia / 2),
+                        ),
+                        (
+                            self.t_w / 2 + self.corner_size + tolerance,
+                            self.d - (offset - dia / 2),
                         ),
                         (
                             -self.t_w / 2 - self.corner_size - tolerance,
-                            offset - dia / 2,
+                            self.d - (offset - dia / 2),
+                        ),
+                        (
+                            -self.t_w / 2 - self.corner_size - tolerance,
+                            self.d - (offset + dia / 2),
                         ),
                     ]
                 )
