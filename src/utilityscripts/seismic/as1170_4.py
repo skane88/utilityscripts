@@ -249,6 +249,16 @@ def k_p_z(*, p: float, z: float, min_kpz: bool = True) -> float:
 def plot_spectra(*, t_min: float = 0.0, t_max: float = 5.0, semi_log: bool = False):
     """
     Plot the spectra for all soil types.
+
+    Parameters
+    ----------
+    t_min : float
+        The minimum period to plot. In s.
+    t_max : float
+        The maximum period to plot. In s.
+    semi_log : bool
+        Should the x-axis be semi-logarithmic?
+        Note: if semi_log is True and t_min == 0, t_min is set to 0.01.
     """
 
     if semi_log and t_min == 0:
