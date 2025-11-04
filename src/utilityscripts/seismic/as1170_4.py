@@ -250,6 +250,9 @@ def plot_spectra(*, t_min: float = 0.0, t_max: float = 5.0, semi_log: bool = Fal
     Plot the spectra for all soil types.
     """
 
+    if semi_log and t_min == 0:
+        t_min = 0.01
+
     periods = (
         np.logspace(floor(log10(t_min)), ceil(log10(t_max)), 200)
         if semi_log
