@@ -3,6 +3,7 @@ Earthquake loads to AS1170.4
 """
 
 from enum import StrEnum
+from math import ceil, floor, log10
 from numbers import Number
 from pathlib import Path
 
@@ -244,12 +245,16 @@ def k_p_z(*, p: float, z: float, min_kpz: bool = True) -> float:
     return k_p_z
 
 
-def plot_spectra():
+def plot_spectra(*, t_min: float = 0.0, t_max: float = 5.0, semi_log: bool = False):
     """
     Plot the spectra for all soil types.
     """
 
-    periods = np.linspace(0.0, 5.0, 200)
+    periods = (
+        np.logspace(floor(log10(t_min)), ceil(log10(t_max)), 200)
+        if semi_log
+        else np.linspace(t_min, t_max, 200)
+    )
     cmap = cm.get_cmap("viridis", len(SoilClass))
 
     for i, soil_class in enumerate(SoilClass):
@@ -263,8 +268,14 @@ def plot_spectra():
     plt.grid()
     plt.xlabel("Period T (s)")
     plt.ylabel("Spectral Ordinates Ch(T)")
-    plt.xlim(0.0, 5.0)
     plt.ylim(0.0, 4.0)
+
+    if semi_log:
+        plt.xscale("log")
+        plt.xlim(10 ** floor(log10(t_min)), 10 ** ceil(log10(t_max)))
+    else:
+        plt.xlim(t_min, t_max)
+
     plt.legend()
     plt.show()
 
