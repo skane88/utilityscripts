@@ -6,6 +6,7 @@ from enum import StrEnum
 from math import ceil, floor, log10
 from numbers import Number
 from pathlib import Path
+from warnings import warn
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -251,6 +252,7 @@ def plot_spectra(*, t_min: float = 0.0, t_max: float = 5.0, semi_log: bool = Fal
     """
 
     if semi_log and t_min == 0:
+        warn("Use of t_min==0 will result in errors. t_min set to 0.01")
         t_min = 0.01
 
     periods = (
