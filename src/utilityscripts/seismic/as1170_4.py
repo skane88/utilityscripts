@@ -246,7 +246,13 @@ def k_p_z(*, p: float, z: float, min_kpz: bool = True) -> float:
     return k_p_z
 
 
-def plot_spectra(*, t_min: float = 0.0, t_max: float = 5.0, semi_log: bool = False):
+def plot_spectra(
+    *,
+    t_min: float = 0.0,
+    t_max: float = 5.0,
+    semi_log: bool = False,
+    no_points: int = 201,
+):
     """
     Plot the spectra for all soil types.
 
@@ -259,16 +265,18 @@ def plot_spectra(*, t_min: float = 0.0, t_max: float = 5.0, semi_log: bool = Fal
     semi_log : bool
         Should the x-axis be semi-logarithmic?
         Note: if semi_log is True and t_min == 0, t_min is set to 0.01.
+    no_points : int
+        The no. of points to plot.
     """
 
     if semi_log and t_min == 0:
-        warn("Use of t_min==0 will result in errors. t_min set to 0.01")
+        warn("Use of t_min==0 will result in errors. t_min set to 0.01", stacklevel=2)
         t_min = 0.01
 
     periods = (
-        np.logspace(floor(log10(t_min)), ceil(log10(t_max)), 200)
+        np.logspace(floor(log10(t_min)), ceil(log10(t_max)), no_points)
         if semi_log
-        else np.linspace(t_min, t_max, 200)
+        else np.linspace(t_min, t_max, no_points)
     )
     cmap = cm.get_cmap("viridis", len(SoilClass))
 
