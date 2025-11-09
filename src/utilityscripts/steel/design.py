@@ -1424,7 +1424,7 @@ def make_section(
     Parameters
     ----------
     designation: str
-        The standard designation of the section. E.g. "310UB40.4". M
+        The standard designation of the section. E.g. "310UB40.4".
         Must match the sections in the standard database.
     grade: str | SteelGrade | None
         The grade of steel to be used. Can be either a standard specification string
