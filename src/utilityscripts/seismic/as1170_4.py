@@ -217,6 +217,45 @@ def spectral_shape_factor(
     return min(max_val, ch)
 
 
+def spectral_shape_factor_frequency(
+    *, soil_class: SoilClass, frequency: float, max_frequency: bool = False
+) -> float:
+    """
+    Calculate the spectral shape factor for a given soil type and frequency.
+
+    Parameters
+    ----------
+    soil_class : SoilClass
+        The type of soil
+    frequency : float
+        The frequency of the structure (Hz)
+    max_frequency : bool
+        If True, enforce a maximum frequency of 10Hz, corresponding to
+        AS1170.4's min. period of 0.1s.
+
+    Returns
+    -------
+    float
+        The spectral shape factor
+    """
+
+    if frequency < 0:
+        raise ValueError(
+            f"Frequency must be greater than or equal to 0Hz, got {frequency}."
+        )
+
+    if frequency == 0:
+        return 0
+
+    # Convert frequency to period
+    period = 1.0 / frequency
+
+    # Call the spectral_shape_factor function with the period
+    return spectral_shape_factor(
+        soil_class=soil_class, period=period, min_period=max_frequency
+    )
+
+
 def k_p_z(*, p: float, z: float, min_kpz: bool = True) -> float:
     """
     Calculate the product of the probability factor and the site hazard design factor.

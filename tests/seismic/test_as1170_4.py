@@ -6,6 +6,8 @@ from math import isclose
 
 import numpy as np
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 
 from utilityscripts.seismic.as1170_4 import (
     SoilClass,
@@ -14,6 +16,7 @@ from utilityscripts.seismic.as1170_4 import (
     k_p_z,
     k_p_z_min,
     spectral_shape_factor,
+    spectral_shape_factor_frequency,
 )
 
 
@@ -208,4 +211,30 @@ def test_cd_t(
         cd_t(soil_class=soil, period=period, k_p_z=k_p_z, s_p=s_p, mu=mu),
         expected,
         abs_tol=1e-2,
+    )
+
+
+@given(
+    st.floats(min_value=1e-9, max_value=1e6)
+    | st.integers(min_value=1, max_value=1_000_000),
+    # max frequency of 1e6Hz as EQ frequencies are typically in the 1-10Hz zones.
+    # have ruled at a frequency of 0Hz as this results in an infinite period, and a
+    # / 0 error which is not currently handled.
+    # min float is based on the fact that the data is limited to a period of 1e9s
+    # (32 years), which is insanely long for earthquakes...
+    st.sampled_from(SoilClass),
+    st.booleans(),
+)
+def test_spectral_shape_factor_frequency(frequency, soil_class, max_frequency):
+    period = 1.0 / frequency
+    min_period = max_frequency
+
+    assert isclose(
+        spectral_shape_factor(
+            soil_class=soil_class, period=period, min_period=min_period
+        ),
+        spectral_shape_factor_frequency(
+            soil_class=soil_class, frequency=frequency, max_frequency=max_frequency
+        ),
+        rel_tol=1e-6,
     )
