@@ -342,6 +342,64 @@ def plot_spectra(
     plt.show()
 
 
+def plot_spectra_frequency(
+    *,
+    f_min: float = 0.1,
+    f_max: float = 100.0,
+    semi_log: bool = False,
+    no_points: int = 201,
+):
+    """
+    Plot the spectra for all soil types, but in frequency space
+
+    Parameters
+    ----------
+    f_min : float
+        The minimum frequency to plot. In Hz.
+    f_max : float
+        The maximum frequency to plot. In Hz.
+    semi_log : bool
+        Should the x-axis be semi-logarithmic?
+        Note: if semi_log is True and f_min == 0, f_min is set to 0.001.
+    no_points : int
+        The no. of points to plot.
+    """
+
+    if semi_log and f_min == 0:
+        f_min = 0.001
+        warn("Use of f_min==0 will result in errors. f_min set to 0.001", stacklevel=2)
+
+    frequencies = (
+        np.logspace(floor(log10(f_min)), ceil(log10(f_max)), no_points)
+        if semi_log
+        else np.linspace(f_min, f_max, no_points)
+    )
+
+    cmap = cm.get_cmap("viridis", len(SoilClass))
+
+    for i, soil_class in enumerate(SoilClass):
+        y = [
+            spectral_shape_factor_frequency(soil_class=soil_class, frequency=float(f))
+            for f in frequencies
+        ]
+
+        plt.plot(frequencies, y, label=soil_class, color=cmap(i))
+
+    plt.grid()
+    plt.xlabel("Frequency f (Hz)")
+    plt.ylabel("Spectral Ordinates Ch(T)")
+    plt.ylim(0.0, 4.0)
+
+    if semi_log:
+        plt.xscale("log")
+        plt.xlim(10 ** floor(log10(f_min)), 10 ** ceil(log10(f_max)))
+    else:
+        plt.xlim(f_min, f_max)
+
+    plt.legend()
+    plt.show()
+
+
 def c_t(
     *,
     soil_class: SoilClass,
