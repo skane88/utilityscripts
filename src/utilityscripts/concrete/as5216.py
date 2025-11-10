@@ -2,6 +2,10 @@
 Python file to contain methods for working with AS5216.
 """
 
+from enum import StrEnum
+
+
+
 def phi_ms_tension(*, f_yf, f_uf):
     """
     Calculate the reduction factor for an anchor or channel in tension
@@ -109,3 +113,33 @@ def phi_m_p(phi_inst):
     """
     
     returb phi_m_c(phi_inst = phi_inst)
+
+def Concrete(StrEnum):
+    
+    CRACKED = "cracked"
+    UNCRACKED = "uncracked"
+
+
+def cracked(*, sigma_l, sigma_r: float = 3.0, f_ct: float = 0.0):
+    """
+    Is the concrete considered to be cracked or uncracked?
+    
+    Notes
+    -----
+    - For 2D elements (slabs etc) this needs to be checked in both directions.
+    
+    Parameters
+    ----------
+    sigma_l : float
+        The stress in the concrete due to loads. In MPa.
+    sigma_r : float
+        The stress in the concrete due to restraint, shrinkage etc. In MPa.
+        Recommended to be at least 3.0MPa
+    f_ct : float
+        The characteristic tensile strength of the concrete.
+        Can conservatively be taken to be 0MPa
+    """
+    
+    sigma_total = sigma_l + sigma_r
+    
+    return Concrete.UNCRACKED if sigma_total <= f_ct else Concrete.CRACKED
