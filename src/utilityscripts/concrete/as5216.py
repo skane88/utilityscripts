@@ -62,7 +62,8 @@ def phi_ms_l():
 
 def phi_ms_l_x(phi_inst):
     """
-    The capacity reduction factor for an anchor-channel lip in local failure in the x-direction.
+    The capacity reduction factor for an anchor-channel lip in local failure
+    in the x-direction.
 
     Parameters
     ----------
@@ -70,7 +71,7 @@ def phi_ms_l_x(phi_inst):
         A reduction factor as per Appendix A.
     """
 
-    return phi_ms_l * phi_inst
+    return phi_ms_l() * phi_inst
 
 
 def phi_ms_re():
@@ -169,7 +170,7 @@ def s6_2_3_1_n_rkc(*, n_0_rkc, a_cn, a_0_cn, psi_s_n, psi_re_n, psi_ec_n, psi_m_
     psi_re_n :
         The shell spalling parameter.
     psi_ec_n :
-        The ecccentricity parameter.
+        The eccentricity parameter.
     psi_m_n :
         The axial force parameter.
     """
@@ -179,19 +180,20 @@ def s6_2_3_1_n_rkc(*, n_0_rkc, a_cn, a_0_cn, psi_s_n, psi_re_n, psi_ec_n, psi_m_
 
 def s6_2_3_2_n_0_rkc(*, k_1, f_c, h_ef):
     """
-    The concrete cone failure capcity of a single anchor in reference conditions.
+    The concrete cone failure capacity of a single anchor in reference conditions.
 
     Parameters
     ----------
     k_1 :
-        The tensile loading factor. This varies based on anchor type and concrete type. See Appendix A or s6.2.3.2.
+        The tensile loading factor. This varies based on anchor type and concrete type.
+        See Appendix A or s6.2.3.2.
     f_c :
         The concrete characteristic strength. In MPa.
     h_ef :
         Anchor embedment length.
     """
 
-    return k_1 * (f_c) ** 0.5 * h_ef**1.5
+    return k_1 * f_c**0.5 * h_ef**1.5
 
 
 def s6_2_3_3_c_cr_n(*, h_ef):
@@ -250,11 +252,13 @@ def s6_2_3_4_psi_s_n(*, c, c_cr_n):
 
 def s6_2_3_5_psi_re_n(*, h_ef):
     """
-    The shell spalling factor. This accounts for a potential plane of weakness introduced by layers of reinforcement.
+    The shell spalling factor. This accounts for a potential plane of weakness
+    introduced by layers of reinforcement.
 
     Notes
     -----
-    - AS5216 includes requirements on reinforcement size and spacing. If these are met this factor may be taken as 1.0.
+    - AS5216 includes requirements on reinforcement size and spacing.
+      If these are met this factor may be taken as 1.0.
 
     Parameters
     ----------
@@ -267,14 +271,16 @@ def s6_2_3_5_psi_re_n(*, h_ef):
 
 def s6_2_3_6_psi_ec_n(*, e_n, s_cr_n):
     """
-    The eccentricity factor. This accounts for the effects of eccentricity which result in uneven loads on anchors.
+    The eccentricity factor. This accounts for the effects of eccentricity which
+    result in uneven loads on anchors.
 
     Parameters
     ----------
     e_n :
         Eccentricity of the resultant tensile force on the anchor pattern.
     s_cr_n :
-        The spacing required to allow an anchor to achieve it's reference capacity.
+        The minimum spacing required to allow an anchor to achieve its
+        reference capacity.
     """
 
     return min(1.0, 1 / (1 + 2 * e_n / s_cr_n))
