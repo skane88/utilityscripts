@@ -74,6 +74,14 @@ def phi_ms_l_x(phi_inst):
     return phi_ms_l() * phi_inst
 
 
+def phi_ms_flex():
+    """
+    The capacity reduction factor for flexural failure of a cast in channel.
+    """
+
+    return 1 / 1.15
+
+
 def phi_ms_re():
     """
     The capacity reduction factor for supplementary reinforcement.
@@ -82,7 +90,7 @@ def phi_ms_re():
     return 0.8
 
 
-def phi_m_c(phi_inst):
+def phi_mc(phi_inst):
     """
     The capacity reduction factor for concrete.
 
@@ -107,7 +115,7 @@ def phi_m_sp(phi_inst):
         A reduction factor as per T3.2.4 or Appendix A
     """
 
-    return phi_m_c(phi_inst=phi_inst)
+    return phi_mc(phi_inst=phi_inst)
 
 
 def phi_m_p(phi_inst):
@@ -120,7 +128,7 @@ def phi_m_p(phi_inst):
         A reduction factor as per T3.2.4 or Appendix A
     """
 
-    return phi_m_c(phi_inst=phi_inst)
+    return phi_mc(phi_inst=phi_inst)
 
 
 class Concrete(StrEnum):
