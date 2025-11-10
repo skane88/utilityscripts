@@ -41,7 +41,7 @@ def phi_ms_shear(*, f_yf, f_uf):
     if f_uf <= max_f_uf and f_ratio <= max_f_ratio:
         return min(f_ratio, 0.8)
 
-    return 0.8
+    return 2 / 3
 
 
 def phi_ms_ca():
