@@ -68,7 +68,7 @@ def phi_ms_l_x(phi_inst):
     Parameters
     ----------
     phi_inst :
-        A reduction factor as per Appendix A.
+        A reduction factor for installation issues as per Appendix A.
     """
 
     return phi_ms_l() * phi_inst
@@ -97,7 +97,7 @@ def phi_mc(phi_inst):
     Parameters
     ----------
     phi_inst :
-        A reduction factor as per T3.2.4 or Appendix A
+        A reduction factor for installation issues as per T3.2.4 or Appendix A
     """
 
     phi_c = 1 / 1.5
@@ -112,7 +112,7 @@ def phi_m_sp(phi_inst):
     Parameters
     ----------
     phi_inst :
-        A reduction factor as per T3.2.4 or Appendix A
+        A reduction factor for installation issues as per T3.2.4 or Appendix A
     """
 
     return phi_mc(phi_inst=phi_inst)
@@ -125,7 +125,7 @@ def phi_m_p(phi_inst):
     Parameters
     ----------
     phi_inst :
-        A reduction factor as per T3.2.4 or Appendix A
+        A reduction factor for installation issues as per T3.2.4 or Appendix A
     """
 
     return phi_mc(phi_inst=phi_inst)
