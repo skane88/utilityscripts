@@ -4,6 +4,8 @@ Python file to contain methods for working with AS5216.
 
 from enum import StrEnum
 
+from utilityscripts.reports.report import Variable
+
 
 def phi_ms_tension(*, f_yf, f_uf):
     """
@@ -183,7 +185,12 @@ def s6_2_3_1_n_rkc(*, n_0_rkc, a_cn, a_0_cn, psi_s_n, psi_re_n, psi_ec_n, psi_m_
         The axial force parameter.
     """
 
-    return n_0_rkc * (a_cn / a_0_cn) * psi_s_n * psi_re_n * psi_ec_n * psi_m_n
+    return Variable(
+        n_0_rkc * (a_cn / a_0_cn) * psi_s_n * psi_re_n * psi_ec_n * psi_m_n,
+        symbol=("N_Rk,c", "N_{Rk,c}"),
+        units="kN",
+        fmt_string=".4j",
+    )
 
 
 def s6_2_3_2_n_0_rkc(*, k_1, f_c, h_ef):
@@ -201,7 +208,12 @@ def s6_2_3_2_n_0_rkc(*, k_1, f_c, h_ef):
         Anchor embedment length.
     """
 
-    return k_1 * f_c**0.5 * h_ef**1.5
+    return Variable(
+        k_1 * f_c**0.5 * h_ef**1.5,
+        symbol=("N0_Rk,c", "N^{0}_{Rk,c}"),
+        units="kN",
+        fmt_string=".4j",
+    )
 
 
 def s6_2_3_3_c_cr_n(*, h_ef):
@@ -211,10 +223,12 @@ def s6_2_3_3_c_cr_n(*, h_ef):
     Parameters
     ----------
     h_ef :
-        Embedment depth.
+        Embedment depth. In mm.
     """
 
-    return 1.5 * h_ef
+    return Variable(
+        1.5 * h_ef, symbol=("c_cr,N", "c_{cr,N}"), units="mm", fmt_string=".4j"
+    )
 
 
 def s6_2_3_3_s_cr_n(*, h_ef):
@@ -227,7 +241,12 @@ def s6_2_3_3_s_cr_n(*, h_ef):
         Embedment depth.
     """
 
-    return 2 * s6_2_3_3_c_cr_n(h_ef=h_ef)
+    return Variable(
+        2 * s6_2_3_3_c_cr_n(h_ef=h_ef).value,
+        symbol=("s_cr,N", "s_{cr,N}"),
+        units="mm",
+        fmt_string=".4j",
+    )
 
 
 def s6_2_3_3_a_0_cn(*, h_ef):
@@ -240,7 +259,12 @@ def s6_2_3_3_a_0_cn(*, h_ef):
         Embedment depth.
     """
 
-    return s6_2_3_3_s_cr_n(h_ef=h_ef) ** 2
+    return Variable(
+        s6_2_3_3_s_cr_n(h_ef=h_ef).value ** 2,
+        symbol=("A0_c,N", "A^{0}_{c,N}"),
+        units="mm^2",
+        fmt_string=".4j",
+    )
 
 
 def s6_2_3_4_psi_s_n(*, c, c_cr_n):
