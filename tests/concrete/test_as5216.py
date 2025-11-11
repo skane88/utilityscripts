@@ -7,6 +7,8 @@ from math import isclose
 import pytest
 
 from utilityscripts.concrete.as5216 import (
+    Concrete,
+    cracked,
     phi_m_p,
     phi_m_sp,
     phi_mc,
@@ -78,3 +80,11 @@ def test_phi_m_sp(phi_inst, expected):
 @pytest.mark.parametrize("phi_inst, expected", [(1.0, 1 / 1.5), (0.5, 0.5 / 1.5)])
 def test_phi_m_p(phi_inst, expected):
     assert isclose(phi_m_p(phi_inst), expected, rel_tol=1e-3)
+
+
+@pytest.mark.parametrize(
+    "sigma_l, sigma_r, f_ct, expected",
+    [(5.0, 5.0, 0.0, Concrete.CRACKED), (0.5, 1.5, 3.0, Concrete.UNCRACKED)],
+)
+def test_cracked(sigma_l, sigma_r, f_ct, expected):
+    assert cracked(sigma_l=sigma_l, sigma_r=sigma_r, f_ct=f_ct) == expected
