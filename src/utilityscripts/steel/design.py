@@ -68,6 +68,13 @@ class HoleLocation(StrEnum):
     WEB = "web"
 
 
+class PatternLocation(StrEnum):
+    BOTH = "both"
+    TOP = "top"
+    BOTTOM = "bottom"
+    WEB = "web"
+
+
 class SteelSection(ABC):
     """
     Store a cross-section that provides section properties compatible with steel codes.
@@ -777,6 +784,65 @@ class ISection(SteelSection):
                 test_flange_holes(loc, offset, dia)
 
         return self._copy_with_new(**{"_holes": self.holes + holes})
+
+    def add_pattern(
+        self,
+        *,
+        location: PatternLocation,
+        dia: float,
+        no: int,
+        sg: float,
+        a: float | None = None,
+    ):
+        """
+        Add a pattern of holes to the section.
+
+        Parameters
+        ----------
+        location : PatternLocation
+            Where is the location of the pattern?
+        dia : float
+            The diameter of the holes. In m.
+        no : int
+            The no. of rows of bolts. For holes in the flange, the no. of rows applies
+            to both flanges (e.g. no = 1 will place holes in both the LHS & RHS flange)
+        sg : float
+            The gauge lines of the bolts.
+        a : float, optional
+            The offset of the first bolt hole from the top flange. Only used if
+            location = PatternLocation.WEB
+        """
+
+        if no > 1 and sg <= 0:
+            raise ValueError(f"Expected gauge line to be greater than 0. {sg=}.")
+
+        holes = []
+
+        if location == PatternLocation.WEB:
+            if a is None:
+                raise ValueError(
+                    "Expected 'a' to be specified if location is PatternLocation.WEB."
+                )
+
+            if a < 0:
+                raise ValueError(
+                    "Expected 'a' to be positive if location is PatternLocation.WEB. "
+                    + f"{a=}"
+                )
+
+            holes.extend((HoleLocation.WEB, (dia, a + sg * i)) for i in range(no))
+
+        else:
+            for i in range(no):
+                if location in (PatternLocation.BOTTOM, PatternLocation.BOTH):
+                    holes.append((HoleLocation.BOTTOMLEFT, (dia, (i + 1) * sg * 0.5)))
+                    holes.append((HoleLocation.BOTTOMRIGHT, (dia, (i + 1) * sg * 0.5)))
+
+                if location in (PatternLocation.TOP, PatternLocation.BOTH):
+                    holes.append((HoleLocation.TOPLEFT, (dia, (i + 1) * sg * 0.5)))
+                    holes.append((HoleLocation.TOPRIGHT, (dia, (i + 1) * sg * 0.5)))
+
+        return self.add_holes(holes)
 
     def _make_net_geometry(self) -> Geometry:
         poly = self._base_polygon()
