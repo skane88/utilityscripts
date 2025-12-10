@@ -17,6 +17,7 @@ from rich.prompt import Confirm
 from utilityscripts.ui_funcs import get_folder, get_number_input
 
 register_heif_opener()
+Image.MAX_IMAGE_PIXELS = 1_000_000_000  # allow this to open really big images
 
 VALID_EXTENSIONS = [".jpg", ".jpeg", ".bmp", ".png", ".heic"]
 
