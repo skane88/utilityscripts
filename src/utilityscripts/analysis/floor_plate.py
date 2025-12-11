@@ -21,15 +21,19 @@ def flat_plate_bending_uniform(*, a: float, b: float, t: float, e: float, q: flo
     Parameters
     ----------
     a : float
-        The length (long side) of the plate.
+        The length (long side) of the plate. In m.
     b : float
-        The width (short side) of the plate.
+        The width (short side) of the plate. In m.
     t : float
-        The thickness of the plate.
+        The thickness of the plate. In m.
     e : float
-        The modulus of elasticity of the plate.
+        The modulus of elasticity of the plate. In Pa.
     q : float
-        The uniform load on the plate.
+        The uniform load on the plate. In Pa.
+
+    Returns
+    -------
+    The maximum stress and strain in the plate. In Pa.
 
     References
     ----------
@@ -78,17 +82,17 @@ def flat_plate_bending_point(
     Parameters
     ----------
     a : float
-        The length (long side) of the plate.
+        The length (long side) of the plate. In m.
     b : float
-        The width (short side) of the plate.
+        The width (short side) of the plate. In m.
     t : float
-        The thickness of the plate.
+        The thickness of the plate. In m.
     e : float
-        The modulus of elasticity of the plate.
+        The modulus of elasticity of the plate. In Pa.
     w : float
-        The point load on the plate.
+        The point load on the plate. In N.
     r_o : float
-        The radius of the point load.
+        The radius of the point load. In m.
 
     References
     ----------
@@ -106,8 +110,6 @@ def flat_plate_bending_point(
     beta = np.interp(a / b, a_b_ratio, beta_data)
 
     r_prime_o = (1.6 * r_o**2 + t**2) ** 0.5 - 0.675 * t if r_o < 0.5 * t else r_o
-
-    print(r_prime_o)
 
     sigma_max = ((3 * w) / (2 * pi * t**2)) * (
         (1.3) * log((2 * b) / (pi * r_prime_o)) + beta

@@ -42,6 +42,26 @@ from utilityscripts.analysis.floor_plate import (
             289.435e6,  # sigma_exp - from RFEM
             0.0184,  # y_max_exp - from RFEM
         ),
+        (
+            1.8,  # aluminium floorplate example.
+            0.45,
+            0.006,
+            70e9,  # E - Young's modulus for aluminium
+            0.0565,  # r_o - radius of load
+            2800,  # W - 2.8 kN load
+            110.24e6,  # sigma_exp - from Ansys
+            0.0066072,  # y_max_exp - from RFEM
+        ),
+        (
+            0.45,  # test with dims the other way around
+            1.80,
+            0.006,
+            70e9,  # E - Young's modulus for aluminium
+            0.0565,  # r_o - radius of load
+            2800,  # W - 2.8 kN load
+            110.24e6,  # sigma_exp - from Ansys
+            0.0066072,  # y_max_exp - from RFEM
+        ),
     ],
 )
 def test_flat_plate_bending_point(a, b, t, e, r_o, w, sigma_exp, y_max_exp):
