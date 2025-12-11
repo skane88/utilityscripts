@@ -2563,7 +2563,6 @@ dependencies = [
     { name = "concreteproperties" },
     { name = "fastexcel" },
     { name = "humre" },
-    { name = "hypothesis" },
     { name = "ipython" },
     { name = "matplotlib" },
     { name = "numpy" },
@@ -2587,6 +2586,7 @@ dependencies = [
 [package.optional-dependencies]
 dev = [
     { name = "coverage" },
+    { name = "hypothesis" },
     { name = "isort" },
     { name = "jupyterlab" },
     { name = "marimo" },
@@ -2611,7 +2611,7 @@ requires-dist = [
     { name = "coverage", marker = "extra == 'dev'" },
     { name = "fastexcel" },
     { name = "humre" },
-    { name = "hypothesis", specifier = ">=6.142.1" },
+    { name = "hypothesis", marker = "extra == 'dev'" },
     { name = "ipython" },
     { name = "isort", marker = "extra == 'dev'" },
     { name = "jupyterlab", marker = "extra == 'dev'" },
