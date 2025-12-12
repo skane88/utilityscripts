@@ -425,3 +425,21 @@ def test_format_sig_fig_hypothesis(mantissa, exponent, sig_figs):
     val = mantissa * 10**exponent
     fmt = f".{sig_figs}j"
     assert format_sig_figs(val, fmt) == f"{val:.{sig_figs - 1}e}"
+
+
+@pytest.mark.parametrize("x", [(1), ("a"), (["a", "b", "c"]), ("$3"), ("3$")])
+def test_incl_dollars(x):
+    """
+    Test the incl_dollars option adds or removes '$$' from the string.
+    """
+
+    val_true = Variable(x, incl_dollars=True)
+    val_false = Variable(x, incl_dollars=False)
+
+    assert val_true.latex_string[0] == "$"
+    assert val_true.latex_string[-1] == "$"
+    assert val_false.latex_string[0] != "$"
+    assert val_false.latex_string[-1] != "$"
+
+    assert val_true.latex_string != val_false.latex_string
+    assert val_true.latex_string[1:-1] == val_false.latex_string

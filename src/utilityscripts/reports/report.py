@@ -80,6 +80,7 @@ class Variable:
         use_repr_latex: bool = True,
         greek_symbols: bool = True,
         max_depth: int = 2,
+        incl_dollars: bool = True,
     ):
         """
         Initialise a Variable object.
@@ -123,6 +124,8 @@ class Variable:
         max_depth : int, optional
             How deep should iterables be formated before their contents are replaced
             with `...`
+        incl_dollars: bool, optional
+            Should latex ouptut be wrapped in $? I.e.: '$<content>$'.
         """
 
         self._value = value
@@ -135,6 +138,7 @@ class Variable:
         self._use_repr_latex = use_repr_latex
         self._greek_symbols = greek_symbols
         self._max_depth = max_depth
+        self._incl_dollars = incl_dollars
 
         if (
             self._fmt_string is not None
@@ -243,6 +247,14 @@ class Variable:
 
         return self._max_depth
 
+    @property
+    def incl_dollars(self) -> bool:
+        """
+        Should latex ouptut be wrapped in $? I.e.: '$<content>$'.
+        """
+
+        return self._incl_dollars
+
     def _formatted_value(self, *, str_type: StrType) -> str:
         """
         Returns the value formatted into latex format.
@@ -335,8 +347,9 @@ class Variable:
 
         Notes
         -----
-        - String will be wrapped in $$ - the caller may need to strip them off if the
-        string is to be combined with other latex strings.
+        - String will be wrapped in $$ if self.incl_dollars is True (the default).
+            The caller may need to strip them off if the string is to be combined with
+            other latex strings.
 
         Returns
         -------
@@ -362,13 +375,16 @@ class Variable:
             else ""
         )
 
-        return (
-            "$"
-            + symbol
+        latex_string = (
+            symbol
             + self._formatted_value(str_type=StrType.LATEX)
             + self._formatted_units(str_type=StrType.LATEX)
-            + "$"
         )
+
+        if self.incl_dollars:
+            latex_string = "$" + latex_string + "$"
+
+        return latex_string
 
     def _repr_mimebundle_(self, include=None, exclude=None):
         """
